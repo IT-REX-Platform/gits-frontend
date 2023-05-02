@@ -1,0 +1,16 @@
+version: '3.7'
+
+services:
+  vscode:
+    build: .
+    volumes:
+      - ..:/w/gits-frontend:cached
+    command: /bin/sh -c "while sleep 1000; do :; done"
+  
+  keycloak:
+    image: quay.io/keycloak/keycloak:21.1.1
+    environment:
+      - KEYCLOAK_ADMIN=admin
+      - KEYCLOAK_ADMIN_PASSWORD=admin
+    command: start-dev
+    restart: unless-stopped

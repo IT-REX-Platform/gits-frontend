@@ -1,9 +1,9 @@
 // For format details, see https://aka.ms/devcontainer.json. For config options, see the
 // README at: https://github.com/devcontainers/templates/tree/main/src/typescript-node
 {
-  "build": {
-    "dockerfile": "../Dockerfile"
-  },
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "vscode",
+  "workspaceFolder": "/w/gits-frontend",
 
   "customizations": {
     "vscode": {
@@ -14,10 +14,12 @@
         "eamodio.gitlens"
       ]
     }
-  }
+  },
 
   // Use 'forwardPorts' to make a list of ports inside the container available locally.
-  // "forwardPorts": [],
+  "forwardPorts": [
+    "keycloak:8080"
+  ]
 
   // Use 'postCreateCommand' to run commands after the container is created.
   // "postCreateCommand": "yarn install",

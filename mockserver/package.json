@@ -1,0 +1,21 @@
+{
+  "name": "mockserver",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "esbuild server.ts --bundle --platform=node | node"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@tsconfig/node19": "^2.0.0",
+    "graphql-yoga": "^3.9.1"
+  },
+  "devDependencies": {
+    "@graphql-tools/mock": "^8.7.20",
+    "esbuild": "0.17.18",
+    "typescript": "^5.0.4"
+  }
+}

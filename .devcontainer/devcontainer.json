@@ -11,7 +11,8 @@
         "bradlc.vscode-tailwindcss",
         "esbenp.prettier-vscode",
         "meta.relay",
-        "eamodio.gitlens"
+        "eamodio.gitlens",
+        "dbaeumer.vscode-eslint"
       ]
     }
   }

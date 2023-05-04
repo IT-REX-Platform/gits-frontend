@@ -2,14 +2,14 @@ type Flashcard {
   id: ID!
   question: String!
   answer: String!
-  course: Course
+  course: Course!
 }
 
 type Course {
   id: ID!
   name: String!
   description: String
-  flashcards: [Flashcard]
+  flashcards: [Flashcard!]!
 }
 
 type Query {
@@ -17,7 +17,7 @@ type Query {
   flashcards: [Flashcard]
   flashcardsByCourse(courseId: String!): [Flashcard]
   course(id: String!): Course
-  courses: [Course]
+  courses: [Course!]!
 }
 
 type Mutation {

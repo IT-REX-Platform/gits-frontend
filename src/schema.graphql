@@ -2,22 +2,22 @@ type Flashcard {
   id: ID!
   question: String!
   answer: String!
-  course: Course!
+  course: Course
 }
 
 type Course {
   id: ID!
   name: String!
   description: String
-  flashcards: [Flashcard!]!
+  flashcards: [Flashcard]
 }
 
 type Query {
-  flashcard(id: String!): Flashcard!
+  flashcard(id: String!): Flashcard
   flashcards: [Flashcard]
-  flashcardsByCourse(courseId: String!): [Flashcard!]!
-  course(id: String!): Course!
-  courses: [Course!]!
+  flashcardsByCourse(courseId: String!): [Flashcard]
+  course(id: String!): Course
+  courses: [Course]
 }
 
 type Mutation {
@@ -25,8 +25,8 @@ type Mutation {
     question: String!
     answer: String!
     courseId: String!
-  ): Flashcard!
-  createCourse(name: String!, description: String): Course!
-  deleteFlashcard(id: String!): Flashcard!
-  deleteCourse(id: String!): Course!
+  ): Flashcard
+  createCourse(name: String!, description: String): Course
+  deleteFlashcard(id: String!): Flashcard
+  deleteCourse(id: String!): Course
 }

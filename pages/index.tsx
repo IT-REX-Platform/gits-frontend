@@ -30,6 +30,7 @@ export default function Home() {
           <Link
             className="mx-10 font-bold text-white bg-sky-900 hover:bg-sky-800 p-5 pl-3 rounded-lg flex items-center"
             href={`/course/${course.id}`}
+            key={course.id}
           >
             <div className="w-20 h-20 mr-5">
               <VictoryPie

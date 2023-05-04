@@ -10,6 +10,11 @@
     "relay": "relay-compiler"
   },
   "dependencies": {
+    "@emotion/react": "^11.10.8",
+    "@emotion/styled": "^11.10.8",
+    "@fontsource/roboto": "^4.5.8",
+    "@mui/icons-material": "^5.11.16",
+    "@mui/material": "^5.12.3",
     "@types/node": "18.15.12",
     "@types/react": "18.0.37",
     "@types/react-dom": "18.0.11",
@@ -23,7 +28,8 @@
     "react-relay": "15.0.0",
     "relay-runtime": "15.0.0",
     "tailwindcss": "3.3.1",
-    "typescript": "5.0.4"
+    "typescript": "5.0.4",
+    "victory": "^36.6.10"
   },
   "devDependencies": {
     "@types/react-relay": "14.1.3",

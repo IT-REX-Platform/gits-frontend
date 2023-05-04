@@ -1,1 +1,32 @@
-# add schema here
+type Flashcard {
+  id: ID!
+  question: String!
+  answer: String!
+  course: Course!
+}
+
+type Course {
+  id: ID!
+  name: String!
+  description: String
+  flashcards: [Flashcard!]!
+}
+
+type Query {
+  flashcard(id: String!): Flashcard!
+  flashcards: [Flashcard]
+  flashcardsByCourse(courseId: String!): [Flashcard!]!
+  course(id: String!): Course!
+  courses: [Course!]!
+}
+
+type Mutation {
+  createFlashcard(
+    question: String!
+    answer: String!
+    courseId: String!
+  ): Flashcard!
+  createCourse(name: String!, description: String): Course!
+  deleteFlashcard(id: String!): Flashcard!
+  deleteCourse(id: String!): Course!
+}

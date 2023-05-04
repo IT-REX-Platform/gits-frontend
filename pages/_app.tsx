@@ -1,10 +1,16 @@
-import { RelayEnvironmentProvider } from "react-relay";
-import { initRelayEnvironment } from "../src/RelayEnvironment";
-import { RecordSource } from "relay-runtime";
-import { useMemo, useEffect } from "react";
-import { RelayPageProps } from "../src/relay-types";
 import "@/styles/globals.css";
 import type { AppProps } from "next/app";
+import { Suspense, useEffect, useMemo } from "react";
+import { RelayEnvironmentProvider } from "react-relay";
+import { RecordSource } from "relay-runtime";
+import { initRelayEnvironment } from "../src/RelayEnvironment";
+import { RelayPageProps } from "../src/relay-types";
+
+import { Navbar } from "@/components/Navbar";
+import "@fontsource/roboto/300.css";
+import "@fontsource/roboto/400.css";
+import "@fontsource/roboto/500.css";
+import "@fontsource/roboto/700.css";
 
 export default function App({
   Component,
@@ -24,7 +30,13 @@ export default function App({
 
   return (
     <RelayEnvironmentProvider environment={environment}>
-      <Component {...pageProps} />
+      <Suspense fallback="Loading...">
+        <div className="grid grid-cols-[auto_1fr]">
+          <Navbar />
+
+          <Component {...pageProps} />
+        </div>
+      </Suspense>
     </RelayEnvironmentProvider>
   );
 }

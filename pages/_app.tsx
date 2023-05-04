@@ -31,9 +31,8 @@ export default function App({
   return (
     <RelayEnvironmentProvider environment={environment}>
       <Suspense fallback="Loading...">
-        <div className="grid grid-cols-[auto_1fr]">
+        <div className="grid grid-cols-[auto_1fr] h-[100vh]">
           <Navbar />
-
           <Component {...pageProps} />
         </div>
       </Suspense>

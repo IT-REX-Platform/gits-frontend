@@ -3,8 +3,11 @@ import { graphql, useLazyLoadQuery } from "react-relay";
 
 import logo from "@/assets/logo.svg";
 import {
+  Avatar,
+  Divider,
   Drawer,
   List,
+  ListItemAvatar,
   ListItemButton,
   ListItemIcon,
   ListItemText,
@@ -26,28 +29,28 @@ export function Navbar() {
   );
 
   return (
-    // <nav className="w-64 min-h-screen flex flex-col px-4">
     <Drawer
       variant="persistent"
       anchor="left"
-      sx={{ width: 300, paddingX: 1 }}
+      sx={{ width: 300 }}
       PaperProps={{ sx: { position: "relative" } }}
       open
     >
-      <div className="text-center my-4 text-3xl font-medium tracking-wider">
+      <div className="text-center my-8 text-3xl font-medium tracking-wider">
         <img src={logo.src} className="w-24 m-auto" />
         GITS
       </div>
 
-      <List>
-        <ListItemButton href="/">
+      <Divider />
+      <List sx={{ paddingY: 2 }}>
+        <ListItemButton href="/" sx={{ paddingX: 8 }}>
           <ListItemIcon>
             <Home />
           </ListItemIcon>
           <ListItemText primary="Home" />
         </ListItemButton>
 
-        <ListItemButton href="/">
+        <ListItemButton href="/" sx={{ paddingX: 8 }}>
           <ListItemIcon>
             <CollectionsBookmark />
           </ListItemIcon>
@@ -55,20 +58,22 @@ export function Navbar() {
         </ListItemButton>
       </List>
 
-      <List subheader={<ListSubheader>My courses</ListSubheader>} dense>
+      <Divider />
+      <List subheader={<ListSubheader>Current courses</ListSubheader>} dense>
         {query.courses?.map((course) => (
-          <ListItemButton key={course?.id} href={`/course/${course!.id}`}>
-            <ListItemIcon>
-              <Book />
-            </ListItemIcon>
+          <ListItemButton key={course.id} href={`/course/${course.id}`}>
+            <ListItemAvatar>
+              <Avatar sx={{ backgroundColor: "#2c388aff" }}>
+                <Book />
+              </Avatar>
+            </ListItemAvatar>
             <ListItemText
-              primary={course?.name ?? "Unnamed course"}
+              primary={course.name}
               primaryTypographyProps={{ noWrap: true }}
             />
           </ListItemButton>
         ))}
       </List>
     </Drawer>
-    // </nav>
   );
 }

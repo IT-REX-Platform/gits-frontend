@@ -32,7 +32,6 @@ export default function Home() {
             href={`/course/${course.id}`}
             key={course.id}
           >
-            
             <div>
               <div className="text-xl font-bold">{course.name}</div>
               {course.flashcards.length > 0 && (

@@ -32,14 +32,7 @@ export default function Home() {
             href={`/course/${course.id}`}
             key={course.id}
           >
-            <div className="w-20 h-20 mr-5">
-              <VictoryPie
-                colorScale={["white", "transparent"]}
-                innerRadius={120}
-                cornerRadius={100}
-                data={[{ y: percents[index] }, { y: 100 - percents[index] }]}
-              />
-            </div>
+            
             <div>
               <div className="text-xl font-bold">{course.name}</div>
               {course.flashcards.length > 0 && (
@@ -48,6 +41,14 @@ export default function Home() {
                   {course.flashcards[0].question}
                 </div>
               )}
+            </div>
+            <div className="w-20 h-20 mr-5 inset-y-0 right-0">
+              <VictoryPie
+                colorScale={["white", "transparent"]}
+                innerRadius={120}
+                cornerRadius={100}
+                data={[{ y: percents[index] }, { y: 100 - percents[index] }]}
+              />
             </div>
           </Link>
         ))}

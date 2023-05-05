@@ -13,5 +13,8 @@ node_modules
 .next
 next-env.d.ts
 
+# mockserver
+mockserver
+
 # graphql codegen
 __generated__

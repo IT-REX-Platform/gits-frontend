@@ -16,7 +16,10 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
 ENV NEXT_TELEMETRY_DISABLED 1
-RUN yarn global add pnpm && mkdir -p ./__generated__ && pnpm run build
+RUN yarn global add pnpm \
+    && mkdir -p ./__generated__ \
+    && rm -r ./mockserver \
+    && pnpm run build
 
 
 # Production image, copy all the files and run next

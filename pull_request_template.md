@@ -1,8 +1,9 @@
 ## Description of changes
+
 Please provide a short description of the change or if the change is sufficiently described in the GitHub issue, provide a link to the issue.
 
-  
 ## How has this been tested?
+
 Please describe the test strategy you followed.
 
 - [ ] automated unit test
@@ -11,8 +12,9 @@ Please describe the test strategy you followed.
 - [ ] manual, exploratory test
 
 In case of manual test, please document the test well including a set of user instructions and prerequisites. Each including an action, it's result, and where appropriate a screenshot.
-    
+
 ## Checklist before requesting a review
+
 - [ ] My code follows the [coding guidelines](https://github.com/IT-REX-Platform/wiki/blob/main/dev-manuals/backend/coding-guidelines.md) of this project
 - [ ] I have performed a self-review of my code
 - [ ] I have commented my code, particularly in hard-to-understand areas
@@ -24,6 +26,7 @@ In case of manual test, please document the test well including a set of user in
 - [ ] I have updated the changes in the ticket description
 
 ## Checklist for reviewer
+
 - [ ] The code works and does not throw errors
 - [ ] The code is easy to understand and there are no confusing parts
 - [ ] The code follows the [coding guidelines](https://github.com/IT-REX-Platform/wiki/blob/main/dev-manuals/backend/coding-guidelines.md) of this project

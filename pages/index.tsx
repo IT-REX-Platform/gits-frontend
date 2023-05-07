@@ -1,6 +1,7 @@
 import { pagesQuery } from "@/__generated__/pagesQuery.graphql";
 import { Heading } from "@/components/Heading";
 import { Subheading } from "@/components/Subheading";
+import Searchbar from "@/components/Searchbar";
 import Link from "next/link";
 import { graphql, useLazyLoadQuery } from "react-relay";
 import { VictoryPie, VictoryLabel } from "victory";
@@ -23,7 +24,8 @@ export default function Home() {
   return (
     <main className="">
       <Heading className="mb-5">Welcome back to GITS, Valentin!</Heading>
-      <Subheading>Active Courses</Subheading>
+      <Searchbar></Searchbar>
+      <Subheading>My active Courses</Subheading>
       <div className="flex flex-col gap-3">
         {courses.map((course, index) => (
           <Link
@@ -43,11 +45,11 @@ export default function Home() {
                   labelRadius={1}
                   labelPosition={"startAngle"}
                   data={[{ y: percents[index] }, { y: 100 - percents[index] }]}
-                  style={{labels: {fontSize:100, fill: "white"}}}
-                  labelComponent={<VictoryLabel dy={50}/>}
+                  style={{ labels: { fontSize: 100, fill: "white" } }}
+                  labelComponent={<VictoryLabel dy={50} />}
                 />
               </div>
-              
+
               <VictoryPie
                 colorScale={["green", "transparent"]}
                 innerRadius={120}
@@ -55,9 +57,9 @@ export default function Home() {
                 labels={["V"]}
                 labelRadius={1}
                 labelPosition={"startAngle"}
-                data={[{ y: percents[index] }, { y: 100 - percents[index] }]}                
-                style={{labels: {fontSize:100, fill: "white"}}}
-                labelComponent={<VictoryLabel dy={50}/>}
+                data={[{ y: percents[index] }, { y: 100 - percents[index] }]}
+                style={{ labels: { fontSize: 100, fill: "white" } }}
+                labelComponent={<VictoryLabel dy={50} />}
               />
               <VictoryPie
                 colorScale={["gold", "transparent"]}
@@ -67,8 +69,8 @@ export default function Home() {
                 labelRadius={1}
                 labelPosition={"startAngle"}
                 data={[{ y: percents[index] }, { y: 100 - percents[index] }]}
-                style={{labels: {fontSize:100, fill: "white"}}}
-                labelComponent={<VictoryLabel dy={50}/>}
+                style={{ labels: { fontSize: 100, fill: "white" } }}
+                labelComponent={<VictoryLabel dy={50} />}
               />
               <VictoryPie
                 colorScale={["red", "transparent"]}
@@ -78,14 +80,14 @@ export default function Home() {
                 labelRadius={1}
                 labelPosition={"startAngle"}
                 data={[{ y: percents[index] }, { y: 100 - percents[index] }]}
-                style={{labels: {fontSize:100, fill: "white"}}}
-                labelComponent={<VictoryLabel dy={50}/>}
+                style={{ labels: { fontSize: 100, fill: "white" } }}
+                labelComponent={<VictoryLabel dy={50} />}
               />
             </div>
           </Link>
         ))}
       </div>{" "}
-      <Subheading>All Courses</Subheading>
+      <Subheading>All my Courses</Subheading>
     </main>
   );
 }

@@ -2,6 +2,7 @@ import { pagesQuery } from "@/__generated__/pagesQuery.graphql";
 import { Heading } from "@/components/Heading";
 import { Subheading } from "@/components/Subheading";
 import Searchbar from "@/components/Searchbar";
+import Accordion from "@/components/Accordion";
 import Link from "next/link";
 import { graphql, useLazyLoadQuery } from "react-relay";
 import { VictoryPie, VictoryLabel } from "victory";
@@ -88,6 +89,9 @@ export default function Home() {
         ))}
       </div>{" "}
       <Subheading>All my Courses</Subheading>
+      <div>
+          <Accordion title="Open/Close full list" content="Here could be your full course list!" />
+      </div>
     </main>
   );
 }

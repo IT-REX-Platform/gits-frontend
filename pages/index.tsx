@@ -125,7 +125,10 @@ export default function Home() {
                     labels={["V"]}
                     labelRadius={1}
                     labelPosition={"startAngle"}
-                    data={[{ y: percents[index] }, { y: 100 - percents[index] }]}
+                    data={[
+                      { y: percents[index] },
+                      { y: 100 - percents[index] },
+                    ]}
                     style={{ labels: { fontSize: 100, fill: "white" } }}
                     labelComponent={<VictoryLabel dy={50} />}
                   />
@@ -136,7 +139,10 @@ export default function Home() {
                     labels={["A"]}
                     labelRadius={1}
                     labelPosition={"startAngle"}
-                    data={[{ y: percents[index] }, { y: 100 - percents[index] }]}
+                    data={[
+                      { y: percents[index] },
+                      { y: 100 - percents[index] },
+                    ]}
                     style={{ labels: { fontSize: 100, fill: "white" } }}
                     labelComponent={<VictoryLabel dy={50} />}
                   />
@@ -147,7 +153,10 @@ export default function Home() {
                     labels={["A"]}
                     labelRadius={1}
                     labelPosition={"startAngle"}
-                    data={[{ y: percents[index] }, { y: 100 - percents[index] }]}
+                    data={[
+                      { y: percents[index] },
+                      { y: 100 - percents[index] },
+                    ]}
                     style={{ labels: { fontSize: 100, fill: "white" } }}
                     labelComponent={<VictoryLabel dy={50} />}
                   />

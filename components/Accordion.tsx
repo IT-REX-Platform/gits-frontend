@@ -2,9 +2,7 @@ import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import Button from "@mui/material/Button";
 import { useState } from "react";
 
-export default function Accordion(
-  props: React.HTMLAttributes<HTMLDivElement>
-) {
+export default function Accordion(props: React.HTMLAttributes<HTMLDivElement>) {
   const [isShowing, setIsShowing] = useState(false);
 
   const toggle = () => {

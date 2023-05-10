@@ -88,9 +88,9 @@ export default function Home() {
           </Link>
         ))}
       </div>{" "}
-      <Subheading>All my Courses</Subheading>
-      <div className="grid">
-        <Accordion>
+      <Subheading>
+        All my Courses
+        <Accordion className="mx-10">
           {courses.map((course, index) => (
             <Link
               className="mx-10 font-bold text-white bg-sky-900 hover:bg-sky-800 p-5 pl-3 rounded-lg grid grid-cols-3 items-center"
@@ -154,7 +154,7 @@ export default function Home() {
             </Link>
           ))}
         </Accordion>
-      </div>
+      </Subheading>
     </main>
   );
 }

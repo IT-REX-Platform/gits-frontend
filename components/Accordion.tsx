@@ -1,12 +1,6 @@
-import {
-  JSXElementConstructor,
-  ReactElement,
-  ReactFragment,
-  ReactPortal,
-  useState,
-} from "react";
-import Button from "@mui/material/Button";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
+import Button from "@mui/material/Button";
+import { useState } from "react";
 
 export default function Accordion(
   props: React.HTMLAttributes<HTMLHeadingElement>
@@ -18,9 +12,9 @@ export default function Accordion(
   };
 
   return (
-    <div className="w-fit place-self-center mb-4 leading-4 border-2 border-solid rounded-lg border-cyan-600">
+    <>
       <Button
-        className="w-full text-center relative p-1"
+        className="w-full text-center relative p-1 mt-5"
         onClick={toggle}
         type="button"
         startIcon={<ArrowDropDownIcon />}
@@ -28,8 +22,9 @@ export default function Accordion(
       ></Button>
       <div
         {...props}
-        style={{ display: isShowing ? "block" : "none", padding: "5px" }}
+        style={{ display: isShowing ? "block" : "none" }}
+        className="p-1"
       />
-    </div>
+    </>
   );
 }

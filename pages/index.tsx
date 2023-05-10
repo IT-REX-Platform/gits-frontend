@@ -91,68 +91,70 @@ export default function Home() {
       <Subheading>
         All my Courses
         <Accordion className="mx-10">
-          {courses.map((course, index) => (
-            <Link
-              className="mx-10 font-bold text-white bg-sky-900 hover:bg-sky-800 p-5 pl-3 rounded-lg grid grid-cols-3 items-center"
-              href={`/course/${course.id}`}
-              key={course.id}
-            >
-              <div className="text-xl font-bold">{course.name}</div>
-              <div className="text-sm italic">{course.description}</div>
-              <div className="w-64 h-20 mr-5 grid grid-cols-4 right-0">
-                <div>
+          <div className="flex flex-col gap-3">
+            {courses.map((course, index) => (
+              <Link
+                className="font-bold text-white bg-sky-900 hover:bg-sky-800 p-5 pl-3 rounded-lg grid grid-cols-3 items-center"
+                href={`/course/${course.id}`}
+                key={course.id}
+              >
+                <div className="text-xl font-bold">{course.name}</div>
+                <div className="text-sm italic">{course.description}</div>
+                <div className="w-64 h-20 mr-5 grid grid-cols-4 right-0">
+                  <div>
+                    <VictoryPie
+                      colorScale={["white", "transparent"]}
+                      innerRadius={120}
+                      cornerRadius={100}
+                      labels={["W"]}
+                      labelRadius={1}
+                      labelPosition={"startAngle"}
+                      data={[
+                        { y: percents[index] },
+                        { y: 100 - percents[index] },
+                      ]}
+                      style={{ labels: { fontSize: 100, fill: "white" } }}
+                      labelComponent={<VictoryLabel dy={50} />}
+                    />
+                  </div>
+
                   <VictoryPie
-                    colorScale={["white", "transparent"]}
+                    colorScale={["green", "transparent"]}
                     innerRadius={120}
                     cornerRadius={100}
-                    labels={["W"]}
+                    labels={["V"]}
                     labelRadius={1}
                     labelPosition={"startAngle"}
-                    data={[
-                      { y: percents[index] },
-                      { y: 100 - percents[index] },
-                    ]}
+                    data={[{ y: percents[index] }, { y: 100 - percents[index] }]}
+                    style={{ labels: { fontSize: 100, fill: "white" } }}
+                    labelComponent={<VictoryLabel dy={50} />}
+                  />
+                  <VictoryPie
+                    colorScale={["gold", "transparent"]}
+                    innerRadius={120}
+                    cornerRadius={100}
+                    labels={["A"]}
+                    labelRadius={1}
+                    labelPosition={"startAngle"}
+                    data={[{ y: percents[index] }, { y: 100 - percents[index] }]}
+                    style={{ labels: { fontSize: 100, fill: "white" } }}
+                    labelComponent={<VictoryLabel dy={50} />}
+                  />
+                  <VictoryPie
+                    colorScale={["red", "transparent"]}
+                    innerRadius={120}
+                    cornerRadius={100}
+                    labels={["A"]}
+                    labelRadius={1}
+                    labelPosition={"startAngle"}
+                    data={[{ y: percents[index] }, { y: 100 - percents[index] }]}
                     style={{ labels: { fontSize: 100, fill: "white" } }}
                     labelComponent={<VictoryLabel dy={50} />}
                   />
                 </div>
-
-                <VictoryPie
-                  colorScale={["green", "transparent"]}
-                  innerRadius={120}
-                  cornerRadius={100}
-                  labels={["V"]}
-                  labelRadius={1}
-                  labelPosition={"startAngle"}
-                  data={[{ y: percents[index] }, { y: 100 - percents[index] }]}
-                  style={{ labels: { fontSize: 100, fill: "white" } }}
-                  labelComponent={<VictoryLabel dy={50} />}
-                />
-                <VictoryPie
-                  colorScale={["gold", "transparent"]}
-                  innerRadius={120}
-                  cornerRadius={100}
-                  labels={["A"]}
-                  labelRadius={1}
-                  labelPosition={"startAngle"}
-                  data={[{ y: percents[index] }, { y: 100 - percents[index] }]}
-                  style={{ labels: { fontSize: 100, fill: "white" } }}
-                  labelComponent={<VictoryLabel dy={50} />}
-                />
-                <VictoryPie
-                  colorScale={["red", "transparent"]}
-                  innerRadius={120}
-                  cornerRadius={100}
-                  labels={["A"]}
-                  labelRadius={1}
-                  labelPosition={"startAngle"}
-                  data={[{ y: percents[index] }, { y: 100 - percents[index] }]}
-                  style={{ labels: { fontSize: 100, fill: "white" } }}
-                  labelComponent={<VictoryLabel dy={50} />}
-                />
-              </div>
-            </Link>
-          ))}
+              </Link>
+            ))}
+          </div>
         </Accordion>
       </Subheading>
     </main>

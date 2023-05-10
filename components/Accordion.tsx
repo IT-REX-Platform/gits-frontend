@@ -3,7 +3,7 @@ import Button from "@mui/material/Button";
 import { useState } from "react";
 
 export default function Accordion(
-  props: React.HTMLAttributes<HTMLHeadingElement>
+  props: React.HTMLAttributes<HTMLDivElement>
 ) {
   const [isShowing, setIsShowing] = useState(false);
 

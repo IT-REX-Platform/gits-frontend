@@ -70,11 +70,11 @@ export function Navbar() {
 
       <Divider />
       <List
-        subheader={<ListSubheader>Courses I'm attending</ListSubheader>}
+        subheader={<ListSubheader>Courses I&apos;m attending</ListSubheader>}
         dense
       >
         {query.currentUser.coursesJoined.map((course) => (
-          <Link href={`/course/${course.id}`}>
+          <Link href={`/course/${course.id}`} key={course.id}>
             <ListItemButton key={course.id}>
               <ListItemAvatar>
                 <Avatar sx={{ backgroundColor: "#2c388aff" }}>
@@ -90,11 +90,11 @@ export function Navbar() {
         ))}
       </List>
       <List
-        subheader={<ListSubheader>Courses I'm tutoring</ListSubheader>}
+        subheader={<ListSubheader>Courses I&apos;m tutoring</ListSubheader>}
         dense
       >
         {query.currentUser.coursesOwned.map((course) => (
-          <Link href={`/course/${course.id}`}>
+          <Link href={`/course/${course.id}`} key={course.id}>
             <ListItemButton key={course.id}>
               <ListItemAvatar>
                 <Avatar sx={{ backgroundColor: "#2c388aff" }}>

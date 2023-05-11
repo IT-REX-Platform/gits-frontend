@@ -1,4 +1,4 @@
-## Description of changes
+# Description of changes
 
 Please provide a short description of the change or if the change is sufficiently described in the GitHub issue, provide a link to the issue.
 

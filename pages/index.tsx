@@ -5,6 +5,8 @@ import { Subheading } from "@/components/Subheading";
 import { Add } from "@mui/icons-material";
 import { Button } from "@mui/material";
 import Link from "next/link";
+import { useRouter } from "next/router";
+import { useAuth } from "react-oidc-context";
 import { graphql, useLazyLoadQuery } from "react-relay";
 import { VictoryLabel, VictoryPie } from "victory";
 
@@ -35,22 +37,27 @@ export default function Home() {
   );
   const percents = [55, 88, 15, 27];
 
+  const { user } = useAuth();
+
+  const router = useRouter();
   return (
     <main className="">
-      <Heading className="mb-5">Welcome back to GITS, Valentin!</Heading>
+      <Heading className="mb-5">
+        Welcome back to GITS, {user?.profile.name}!
+      </Heading>
 
       <div className="flex justify-between items-end">
         <Subheading>Courses I&apos;m attending</Subheading>
-        <Link href={"/join"}>
-          <Button
-            color="primary"
-            variant="outlined"
-            className="mr-10 mb-5 w-64"
-            endIcon={<Add />}
-          >
-            Join courses
-          </Button>
-        </Link>
+
+        <Button
+          onClick={() => router.push("/join")}
+          color="primary"
+          variant="outlined"
+          className="mr-10 mb-5 w-64"
+          endIcon={<Add />}
+        >
+          Join courses
+        </Button>
       </div>
 
       <div className="flex flex-col gap-3">

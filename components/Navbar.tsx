@@ -14,7 +14,8 @@ import {
   ListItemText,
   ListSubheader,
 } from "@mui/material";
-import Link from "next/link";
+import { useRouter } from "next/router";
+import { useAuth } from "react-oidc-context";
 
 export function Navbar() {
   const query = useLazyLoadQuery<NavbarQuery>(
@@ -35,6 +36,8 @@ export function Navbar() {
     {}
   );
 
+  const router = useRouter();
+  const auth = useAuth();
   return (
     <Drawer
       variant="persistent"
@@ -50,22 +53,24 @@ export function Navbar() {
 
       <Divider />
       <List sx={{ paddingY: 2 }}>
-        <Link href={"/"}>
-          <ListItemButton>
-            <ListItemIcon>
-              <Home />
-            </ListItemIcon>
-            <ListItemText primary="Home" />
-          </ListItemButton>
-        </Link>
-        <Link href={"/join"}>
-          <ListItemButton>
-            <ListItemIcon>
-              <CollectionsBookmark />
-            </ListItemIcon>
-            <ListItemText primary="Course Catalog" />
-          </ListItemButton>
-        </Link>
+        <ListItemButton onClick={() => router.push("/")}>
+          <ListItemIcon>
+            <Home />
+          </ListItemIcon>
+          <ListItemText primary="Home" />
+        </ListItemButton>
+        <ListItemButton onClick={() => router.push("/join")}>
+          <ListItemIcon>
+            <CollectionsBookmark />
+          </ListItemIcon>
+          <ListItemText primary="Course Catalog" />
+        </ListItemButton>
+        <ListItemButton onClick={() => auth.signoutRedirect()}>
+          <ListItemIcon>
+            <CollectionsBookmark />
+          </ListItemIcon>
+          <ListItemText primary="Logout" />
+        </ListItemButton>
       </List>
 
       <Divider />
@@ -74,19 +79,20 @@ export function Navbar() {
         dense
       >
         {query.currentUser.coursesJoined.map((course) => (
-          <Link href={`/course/${course.id}`} key={course.id}>
-            <ListItemButton key={course.id}>
-              <ListItemAvatar>
-                <Avatar sx={{ backgroundColor: "#2c388aff" }}>
-                  <Book />
-                </Avatar>
-              </ListItemAvatar>
-              <ListItemText
-                primary={course.title}
-                primaryTypographyProps={{ noWrap: true }}
-              />
-            </ListItemButton>
-          </Link>
+          <ListItemButton
+            key={course.id}
+            onClick={() => router.push(`/course/${course.id}`)}
+          >
+            <ListItemAvatar>
+              <Avatar sx={{ backgroundColor: "#2c388aff" }}>
+                <Book />
+              </Avatar>
+            </ListItemAvatar>
+            <ListItemText
+              primary={course.title}
+              primaryTypographyProps={{ noWrap: true }}
+            />
+          </ListItemButton>
         ))}
       </List>
       <List
@@ -94,19 +100,20 @@ export function Navbar() {
         dense
       >
         {query.currentUser.coursesOwned.map((course) => (
-          <Link href={`/course/${course.id}`} key={course.id}>
-            <ListItemButton key={course.id}>
-              <ListItemAvatar>
-                <Avatar sx={{ backgroundColor: "#2c388aff" }}>
-                  <Book />
-                </Avatar>
-              </ListItemAvatar>
-              <ListItemText
-                primary={course.title}
-                primaryTypographyProps={{ noWrap: true }}
-              />
-            </ListItemButton>
-          </Link>
+          <ListItemButton
+            key={course.id}
+            onClick={() => router.push(`/course/${course.id}`)}
+          >
+            <ListItemAvatar>
+              <Avatar sx={{ backgroundColor: "#2c388aff" }}>
+                <Book />
+              </Avatar>
+            </ListItemAvatar>
+            <ListItemText
+              primary={course.title}
+              primaryTypographyProps={{ noWrap: true }}
+            />
+          </ListItemButton>
         ))}
       </List>
     </Drawer>

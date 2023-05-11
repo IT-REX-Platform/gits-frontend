@@ -11,11 +11,22 @@ import "@fontsource/roboto/300.css";
 import "@fontsource/roboto/400.css";
 import "@fontsource/roboto/500.css";
 import "@fontsource/roboto/700.css";
+import { Session, getServerSession } from "next-auth";
+import { SessionProvider } from "next-auth/react";
+import { authOptions } from "./api/auth/[...nextauth]";
+
+export async function getServerSideProps({ req, res }: any) {
+  return {
+    props: {
+      session: await getServerSession(req, res, authOptions),
+    },
+  };
+}
 
 export default function App({
   Component,
   pageProps,
-}: AppProps<RelayPageProps>) {
+}: AppProps<RelayPageProps & { session: Session }>) {
   const environment = useMemo(initRelayEnvironment, []);
 
   useEffect(() => {
@@ -30,12 +41,14 @@ export default function App({
 
   return (
     <RelayEnvironmentProvider environment={environment}>
-      <Suspense fallback="Loading...">
-        <div className="grid grid-cols-[auto_1fr] h-[100vh]">
-          <Navbar />
-          <Component {...pageProps} />
-        </div>
-      </Suspense>
+      <SessionProvider session={pageProps.session}>
+        <Suspense fallback="Loading...">
+          <div className="grid grid-cols-[auto_1fr] h-[100vh]">
+            <Navbar />
+            <Component {...pageProps} />
+          </div>
+        </Suspense>
+      </SessionProvider>
     </RelayEnvironmentProvider>
   );
 }

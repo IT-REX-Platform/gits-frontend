@@ -1,0 +1,81 @@
+@import url("https://fonts.googleapis.com/css2?family=Roboto:wght@100;400;300;700;900&display=swap");
+
+body {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgb(12 74 110);
+  font-family: "Roboto", sans-serif;
+}
+
+.login-pf-page {
+  background-color: white;
+  border-radius: 20px;
+  padding: 30px;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+}
+
+#kc-header-wrapper {
+  background-image: url(http://localhost:3000/_next/static/media/logo.5ef8dae5.svg);
+  width: 100px;
+  height: 100px;
+  background-position: center;
+  background-size: contain;
+  background-repeat: no-repeat;
+  text-indent: 200%;
+  white-space: nowrap;
+  overflow: hidden;
+  margin: 20px;
+}
+
+.card-pf {
+  margin: 0 auto;
+  box-shadow: var(--pf-global--BoxShadow--lg);
+  padding: 20px;
+  border-top: 0.5px solid lightgray;
+}
+
+h1#kc-page-title {
+  margin-top: 10px;
+  font-weight: 900;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 10px;
+}
+.form-group label {
+  font-weight: 300;
+  color: gray;
+  font-size: 0.7em;
+  margin-bottom: 3px;
+}
+
+#username,
+#password {
+  padding: 6px 6px;
+  background-color: #fff;
+  border: 1px solid gray;
+  border-radius: 4px;
+  outline-color: transparent;
+}
+#username:focus,
+#password:focus {
+  padding: 6px 6px;
+  background-color: #fff;
+  border: 1px solid rgb(12 74 110);
+  border-radius: 4px;
+  outline-color: transparent;
+}
+
+input:focus,
+select:focus,
+textarea:focus,
+button:focus {
+  outline: none;
+}

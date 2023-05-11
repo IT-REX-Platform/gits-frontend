@@ -15,6 +15,7 @@ import {
   ListSubheader,
 } from "@mui/material";
 import { useRouter } from "next/router";
+import { useAuth } from "react-oidc-context";
 
 export function Navbar() {
   const query = useLazyLoadQuery<NavbarQuery>(
@@ -36,6 +37,7 @@ export function Navbar() {
   );
 
   const router = useRouter();
+  const auth = useAuth();
   return (
     <Drawer
       variant="persistent"
@@ -62,6 +64,12 @@ export function Navbar() {
             <CollectionsBookmark />
           </ListItemIcon>
           <ListItemText primary="Course Catalog" />
+        </ListItemButton>
+        <ListItemButton onClick={() => auth.signoutRedirect()}>
+          <ListItemIcon>
+            <CollectionsBookmark />
+          </ListItemIcon>
+          <ListItemText primary="Logout" />
         </ListItemButton>
       </List>
 

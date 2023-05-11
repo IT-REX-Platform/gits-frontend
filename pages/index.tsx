@@ -48,16 +48,16 @@ export default function Home() {
 
       <div className="flex justify-between items-end">
         <Subheading>Courses I&apos;m attending</Subheading>
-
-        <Button
-          onClick={() => router.push("/join")}
-          color="primary"
-          variant="outlined"
-          className="mr-10 mb-5 w-64"
-          endIcon={<Add />}
-        >
-          Join courses
-        </Button>
+        <div className="mb-5 mr-10">
+          <Button
+            onClick={() => router.push("/join")}
+            color="primary"
+            variant="outlined"
+            endIcon={<Add />}
+          >
+            Join courses
+          </Button>
+        </div>
       </div>
 
       <div className="flex flex-col gap-3">
@@ -122,14 +122,11 @@ export default function Home() {
 
       <div className="flex justify-between items-end">
         <Subheading>Courses I&apos;m tutoring</Subheading>
-        <Button
-          color="primary"
-          variant="outlined"
-          className="mr-10 mb-5 w-64"
-          endIcon={<Add />}
-        >
-          Create a course
-        </Button>
+        <div className="mb-5 mr-10">
+          <Button color="primary" variant="outlined" endIcon={<Add />}>
+            Create a course
+          </Button>
+        </div>
       </div>
 
       <div className="flex flex-col gap-3">

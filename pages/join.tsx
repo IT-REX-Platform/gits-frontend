@@ -32,10 +32,10 @@ export default function JoinCourse() {
   return (
     <div className="mb-10">
       <Heading className="mb-5">Course Catalog</Heading>
-      <div className="w-full flex">
+      <div className="w-full flex px-10 mb-8">
         <TextField
           id="outlined-basic"
-          className="mx-10 mb-8 grow"
+          className="grow"
           label="Search Courses"
           variant="outlined"
           value={search}

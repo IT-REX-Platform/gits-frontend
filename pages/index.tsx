@@ -3,9 +3,8 @@ import Accordion from "@/components/Accordion";
 import { Heading } from "@/components/Heading";
 import Searchbar from "@/components/Searchbar";
 import { Subheading } from "@/components/Subheading";
-import { signIn, useSession } from "next-auth/react";
 import Link from "next/link";
-import { useEffect } from "react";
+import { useAuth } from "react-oidc-context";
 import { graphql, useLazyLoadQuery } from "react-relay";
 import { VictoryLabel, VictoryPie } from "victory";
 
@@ -24,22 +23,12 @@ export default function Home() {
   );
   const percents = [55, 88, 15, 27];
 
-  const { data: session, status } = useSession();
-
-  useEffect(() => {
-    if (status === "unauthenticated") {
-      signIn("keycloak");
-    }
-  }, [status]);
-
-  if (status !== "authenticated") {
-    return null;
-  }
+  const { user } = useAuth();
 
   return (
     <main className="">
       <Heading className="mb-5">
-        Welcome back to GITS, {session?.user?.name}!
+        Welcome back to GITS, {user?.profile.name}!
       </Heading>
       <Searchbar></Searchbar>
       <Subheading>My active Courses</Subheading>

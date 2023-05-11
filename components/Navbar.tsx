@@ -14,7 +14,7 @@ import {
   ListItemText,
   ListSubheader,
 } from "@mui/material";
-import { signOut } from "next-auth/react";
+import { useAuth } from "react-oidc-context";
 
 export function Navbar() {
   const query = useLazyLoadQuery<NavbarQuery>(
@@ -29,6 +29,7 @@ export function Navbar() {
     {}
   );
 
+  const auth = useAuth();
   return (
     <Drawer
       variant="persistent"
@@ -57,7 +58,12 @@ export function Navbar() {
           </ListItemIcon>
           <ListItemText primary="My courses" />
         </ListItemButton>
-        <ListItemButton onClick={() => signOut()} sx={{ paddingX: 8 }}>
+        <ListItemButton
+          onClick={() => {
+            auth.signoutSilent();
+          }}
+          sx={{ paddingX: 8 }}
+        >
           <ListItemIcon>
             <CollectionsBookmark />
           </ListItemIcon>

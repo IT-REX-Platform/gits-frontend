@@ -21,7 +21,7 @@ import { RecordSource } from "relay-runtime";
 const oidcConfig: AuthProviderProps = {
   redirect_uri: "http://localhost:3000",
   client_id: "gits-frontend",
-  authority: "http://localhost:8080/auth/realms/GITS",
+  authority: "http://localhost:8080/realms/GITS",
 
   onSigninCallback() {
     window.history.replaceState({}, document.title, window.location.pathname);

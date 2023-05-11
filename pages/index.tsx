@@ -40,7 +40,7 @@ export default function Home() {
       <Heading className="mb-5">Welcome back to GITS, Valentin!</Heading>
 
       <div className="flex justify-between items-end">
-        <Subheading>Courses I'm attending</Subheading>
+        <Subheading>Courses I&apos;m attending</Subheading>
         <Link href={"/join"}>
           <Button
             color="primary"
@@ -114,7 +114,7 @@ export default function Home() {
       </div>
 
       <div className="flex justify-between items-end">
-        <Subheading>Courses I'm tutoring</Subheading>
+        <Subheading>Courses I&apos;m tutoring</Subheading>
         <Button
           color="primary"
           variant="outlined"

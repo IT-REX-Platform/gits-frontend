@@ -1,32 +1,201 @@
-type Flashcard {
-  id: ID!
-  question: String!
-  answer: String!
+scalar DateTime
+scalar UUID
+
+# Course of the application
+type Course {
+  # UUID of the course
+  id: UUID!
+  # Title of the course, max 255 characters
+  title: String!
+  # Description of the course, max 3000 characters
+  description: String!
+  # Start date of the course, ISO 8601 format
+  startDate: DateTime!
+  # End date of the course, ISO 8601 format
+  endDate: DateTime!
+  # Published status of the course
+  published: Boolean!
+  # Chapters of the course
+  chapters: [Chapter!]!
+}
+
+input CreateCourseInput {
+  # Title of the course, max 255 characters
+  title: String! @NotBlank @Size(max: 255)
+  # Description of the course, max 3000 characters
+  description: String! @Size(max: 3000)
+  # Start date of the course, ISO 8601 format
+  startDate: DateTime!
+  # End date of the course, ISO 8601 format
+  endDate: DateTime!
+  # Published status of the course
+  published: Boolean!
+}
+
+input UpdateCourseInput {
+  # UUID of the course
+  id: UUID!
+  # Title of the course, max 255 characters
+  title: String! @NotBlank @Size(max: 255)
+  # Description of the course, max 3000 characters
+  description: String! @Size(max: 3000)
+  # Start date of the course, ISO 8601 format
+  startDate: DateTime!
+  # End date of the course, ISO 8601 format
+  endDate: DateTime!
+  # Published status of the course
+  published: Boolean!
+}
+
+# Chapter of a course
+type Chapter {
+  # UUID of the chapter
+  id: UUID!
+  # Title of the chapter, max 255 characters
+  title: String!
+  # Description of the chapter, max 3000 characters
+  description: String!
+  # Number of the chapter, determines the order of the chapters
+  number: Int!
+  # Start date of the chapter, ISO 8601 format
+  startDate: DateTime!
+  # End date of the chapter, ISO 8601 format
+  endDate: DateTime!
+  # The course the chapter belongs to
   course: Course!
 }
 
-type Course {
-  id: ID!
+input CreateChapterInput {
+  # Title of the chapter, max 255 characters
+  title: String! @NotBlank @Size(max: 255)
+  # Description of the chapter, max 3000 characters
+  description: String! @Size(max: 3000)
+  # Number of the chapter, determines the order of the chapters
+  number: Int! @Positive
+  # Start date of the chapter, ISO 8601 format
+  startDate: DateTime!
+  # End date of the chapter, ISO 8601 format
+  endDate: DateTime!
+  # The course the chapter belongs to
+  courseId: UUID!
+}
+
+input UpdateChapterInput {
+  id: UUID!
+  # Title of the chapter, max 255 characters
+  title: String! @NotBlank @Size(max: 255)
+  # Description of the chapter, max 3000 characters
+  description: String! @Size(max: 3000)
+  # Number of the chapter, determines the order of the chapters
+  number: Int! @Positive
+  # Start date of the chapter, ISO 8601 format
+  startDate: DateTime!
+  # End date of the chapter, ISO 8601 format
+  endDate: DateTime!
+}
+
+type User {
+  id: UUID!
+  username: String!
+  email: String!
+  firstName: String!
+  lastName: String!
+
+  coursesJoined: [Course!]!
+  coursesOwned: [Course!]!
+  # role?
+}
+
+interface Content {
+  id: UUID!
   name: String!
-  description: String
-  flashcards: [Flashcard!]!
+  rewardPoints: Int!
+  workedOn: Boolean!
+}
+
+type MediaContent implements Content {
+  id: UUID!
+  name: String!
+  rewardPoints: Int!
+  workedOn: Boolean!
+
+  media: MediaRecord!
+}
+
+type MediaRecord {
+  id: UUID!
+  name: String!
+  type: MediaType!
+}
+
+input CreateMediaRecordInput {
+  name: String!
+  type: MediaType!
+}
+
+input UpdateMediaRecordInput {
+  id: UUID!
+  name: String!
+  type: MediaType!
+}
+
+enum MediaType {
+  VIDEO
+  AUDIO
+  IMAGE
+  PRESENTATION
+  DOCUMENT
+  URL
+}
+
+type SkillLevel {
+  # TODO add assessments
+  id: UUID!
 }
 
 type Query {
-  flashcard(id: String!): Flashcard
-  flashcards: [Flashcard]
-  flashcardsByCourse(courseId: String!): [Flashcard]
-  course(id: String!): Course
-  courses: [Course!]!
+  currentUser: User!
+  courses: [Course!]! # TODO pagination and filters
+  coursesById(ids: [UUID!]!): [Course!]!
+
+  mediaRecordsById(ids: [UUID!]!): [MediaRecord!]!
 }
 
 type Mutation {
-  createFlashcard(
-    question: String!
-    answer: String!
-    courseId: String!
-  ): Flashcard
-  createCourse(name: String!, description: String): Course
-  deleteFlashcard(id: String!): Flashcard
-  deleteCourse(id: String!): Course
+  createCourse(input: CreateCourseInput!): Course!
+  updateCourse(input: UpdateCourseInput!): Course!
+  deleteCourse(id: UUID!): Course!
+
+  createChapter(input: CreateChapterInput!): Chapter!
+  updateChapter(input: UpdateChapterInput!): Chapter!
+  deleteChapter(id: UUID!): Chapter!
+
+  createMediaRecord(input: CreateMediaRecordInput!): MediaRecord!
+  updateMediaRecord(input: UpdateMediaRecordInput!): MediaRecord!
+  deleteMediaRecord(id: UUID!): MediaRecord!
 }
+
+# see also https://github.com/graphql-java/graphql-java-extended-validation/blob/master/README.md
+
+directive @Max(
+  value: Int! = 2147483647
+  message: String = "graphql.validation.Max.message"
+) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+directive @Min(
+  value: Int! = 0
+  message: String = "graphql.validation.Min.message"
+) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+directive @NotBlank(
+  message: String = "graphql.validation.NotBlank.message"
+) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+directive @NotEmpty(
+  message: String = "graphql.validation.NotEmpty.message"
+) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+directive @Positive(
+  message: String = "graphql.validation.Positive.message"
+) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+directive @Size(
+  min: Int = 0
+  max: Int = 2147483647
+  message: String = "graphql.validation.Size.message"
+) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION

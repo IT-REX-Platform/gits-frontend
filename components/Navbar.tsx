@@ -2,6 +2,7 @@ import { NavbarQuery } from "@/__generated__/NavbarQuery.graphql";
 import { graphql, useLazyLoadQuery } from "react-relay";
 
 import logo from "@/assets/logo.svg";
+import { Book, CollectionsBookmark, Home } from "@mui/icons-material";
 import {
   Avatar,
   Divider,
@@ -13,7 +14,7 @@ import {
   ListItemText,
   ListSubheader,
 } from "@mui/material";
-import { Home, CollectionsBookmark, Book } from "@mui/icons-material";
+import { signOut } from "next-auth/react";
 
 export function Navbar() {
   const query = useLazyLoadQuery<NavbarQuery>(
@@ -55,6 +56,12 @@ export function Navbar() {
             <CollectionsBookmark />
           </ListItemIcon>
           <ListItemText primary="My courses" />
+        </ListItemButton>
+        <ListItemButton onClick={() => signOut()} sx={{ paddingX: 8 }}>
+          <ListItemIcon>
+            <CollectionsBookmark />
+          </ListItemIcon>
+          <ListItemText primary="Logout" />
         </ListItemButton>
       </List>
 

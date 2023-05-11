@@ -1,11 +1,13 @@
 import { pagesQuery } from "@/__generated__/pagesQuery.graphql";
-import { Heading } from "@/components/Heading";
-import { Subheading } from "@/components/Subheading";
-import Searchbar from "@/components/Searchbar";
 import Accordion from "@/components/Accordion";
+import { Heading } from "@/components/Heading";
+import Searchbar from "@/components/Searchbar";
+import { Subheading } from "@/components/Subheading";
+import { signIn, useSession } from "next-auth/react";
 import Link from "next/link";
+import { useEffect } from "react";
 import { graphql, useLazyLoadQuery } from "react-relay";
-import { VictoryPie, VictoryLabel } from "victory";
+import { VictoryLabel, VictoryPie } from "victory";
 
 export default function Home() {
   const { courses } = useLazyLoadQuery<pagesQuery>(
@@ -22,9 +24,23 @@ export default function Home() {
   );
   const percents = [55, 88, 15, 27];
 
+  const { data: session, status } = useSession();
+
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      signIn();
+    }
+  }, [status]);
+
+  if (status !== "authenticated") {
+    return null;
+  }
+
   return (
     <main className="">
-      <Heading className="mb-5">Welcome back to GITS, Valentin!</Heading>
+      <Heading className="mb-5">
+        Welcome back to GITS, {session?.user?.name}!
+      </Heading>
       <Searchbar></Searchbar>
       <Subheading>My active Courses</Subheading>
       <div className="flex flex-col gap-3">

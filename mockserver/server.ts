@@ -2,43 +2,89 @@ import { createSchema, createYoga } from "graphql-yoga";
 import { readFileSync } from "node:fs";
 import { createServer } from "node:http";
 
+const courses = [
+  {
+    id: "a",
+    title: "Machine Learning",
+    description: "Long description about Machine Learning course.",
+  },
+  {
+    id: "b",
+    title: "Cloud Computing",
+    description: "Long description about Cloud Computing course.",
+  },
+  {
+    id: "c",
+    title: "Embedded Systems Engineering",
+    description: "Long description about Embedded Systems Engineering course.",
+  },
+  {
+    id: "d",
+    title: "System and Web Security",
+    description: "Long description about System and Web Security course.",
+  },
+  {
+    id: "e",
+    title: "Software Engineering for AI Based Systems",
+    description:
+      "Long description about Software Engineering for AI Based Systems course.",
+  },
+  {
+    id: "f",
+    title: "Digital System Design",
+    description: "Long description about Digital System Design course.",
+  },
+  {
+    id: "g",
+    title: "Theoretische Informatik 3",
+    description: "Long description about Theoretische Informatik 3 course.",
+  },
+  {
+    id: "x",
+    title: "Post Quantum Cryptography",
+    description: "Long description about Post Quantum Cryptography course.",
+  },
+  {
+    id: "h",
+    title: "Datenbanken 2",
+    description: "Long description about Datenbanken 2 course.",
+  },
+  {
+    id: "i",
+    title: "Datenbanken 1",
+    description: "Long description about Datenbanken 1 course.",
+  },
+  {
+    id: "j",
+    title: "Technische Grundlagen der Informatik",
+    description:
+      "Long description about Technische Grundlagen der Informatik course.",
+  },
+  {
+    id: "k",
+    title: "Distributed Systems 2",
+    description: "Long description about Distributed Systems 2 course.",
+  },
+];
+
 export const schema = createSchema({
   typeDefs: readFileSync("../src/schema.graphql").toString(),
   resolvers: {
-    Course: {
-      flashcards() {
-        return [];
-      },
-    },
     Query: {
-      course() {
+      currentUser() {
         return {
-          id: "abc",
-          name: "Machine Learning",
-          description: `Machine learning (ML) is a field devoted to understanding and building methods that let machines "learn" – 
-          that is, methods that leverage data to improve computer performance on some set of tasks.
-          It is seen as a broad subfield of artificial intelligence`,
+          id: "userid",
+          username: "hubbi-b",
+          email: "hubbi@gmx.de",
+          firstName: "Hubert",
+          lastName: "Bertram",
+          coursesJoined: courses.slice(0, 3),
+          coursesOwned: courses.slice(4, 6),
         };
       },
+
       courses() {
-        return [
-          {
-            id: "a",
-            name: "Machine Learning",
-            description: "Long description about Machine Learning course.",
-          },
-          {
-            id: "b",
-            name: "Cloud Computing",
-            description: "Long description about Cloud Computing course.",
-          },
-          {
-            id: "c",
-            name: "Embedded Systems Engineering",
-            description:
-              "Long description about Embedded Systems Engineering course.",
-          },
-        ];
+        return courses;
       },
     },
   },

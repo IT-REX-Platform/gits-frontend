@@ -1,20 +1,33 @@
 import { pagesQuery } from "@/__generated__/pagesQuery.graphql";
+import Accordion from "@/components/Accordion";
 import { Heading } from "@/components/Heading";
 import { Subheading } from "@/components/Subheading";
-import Searchbar from "@/components/Searchbar";
-import Accordion from "@/components/Accordion";
+import { Add } from "@mui/icons-material";
+import { Button } from "@mui/material";
 import Link from "next/link";
 import { graphql, useLazyLoadQuery } from "react-relay";
-import { VictoryPie, VictoryLabel } from "victory";
+import { VictoryLabel, VictoryPie } from "victory";
 
 export default function Home() {
-  const { courses } = useLazyLoadQuery<pagesQuery>(
+  const { allCourses, currentUser } = useLazyLoadQuery<pagesQuery>(
     graphql`
       query pagesQuery {
-        courses {
+        allCourses: courses {
           id
-          name
+          title
           description
+        }
+        currentUser {
+          coursesJoined {
+            id
+            title
+            description
+          }
+          coursesOwned {
+            id
+            title
+            description
+          }
         }
       }
     `,
@@ -25,31 +38,42 @@ export default function Home() {
   return (
     <main className="">
       <Heading className="mb-5">Welcome back to GITS, Valentin!</Heading>
-      <Searchbar></Searchbar>
-      <Subheading>My active Courses</Subheading>
+
+      <div className="flex justify-between items-end">
+        <Subheading>Courses I'm attending</Subheading>
+        <Link href={"/join"}>
+          <Button
+            color="primary"
+            variant="outlined"
+            className="mr-10 mb-5 w-64"
+            endIcon={<Add />}
+          >
+            Join courses
+          </Button>
+        </Link>
+      </div>
+
       <div className="flex flex-col gap-3">
-        {courses.map((course, index) => (
+        {currentUser.coursesJoined.map((course, index) => (
           <Link
             className="mx-10 font-bold text-white bg-sky-900 hover:bg-sky-800 p-5 pl-3 rounded-lg grid grid-cols-3 items-center"
             href={`/course/${course.id}`}
             key={course.id}
           >
-            <div className="text-xl font-bold">{course.name}</div>
+            <div className="text-xl font-bold">{course.title}</div>
             <div className="text-sm italic">{course.description}</div>
             <div className="w-64 h-20 mr-5 grid grid-cols-4 right-0">
-              <div>
-                <VictoryPie
-                  colorScale={["white", "transparent"]}
-                  innerRadius={120}
-                  cornerRadius={100}
-                  labels={["W"]}
-                  labelRadius={1}
-                  labelPosition={"startAngle"}
-                  data={[{ y: percents[index] }, { y: 100 - percents[index] }]}
-                  style={{ labels: { fontSize: 100, fill: "white" } }}
-                  labelComponent={<VictoryLabel dy={50} />}
-                />
-              </div>
+              <VictoryPie
+                colorScale={["white", "transparent"]}
+                innerRadius={120}
+                cornerRadius={100}
+                labels={["W"]}
+                labelRadius={1}
+                labelPosition={"startAngle"}
+                data={[{ y: percents[index] }, { y: 100 - percents[index] }]}
+                style={{ labels: { fontSize: 100, fill: "white" } }}
+                labelComponent={<VictoryLabel dy={50} />}
+              />
 
               <VictoryPie
                 colorScale={["green", "transparent"]}
@@ -87,18 +111,44 @@ export default function Home() {
             </div>
           </Link>
         ))}
-      </div>{" "}
+      </div>
+
+      <div className="flex justify-between items-end">
+        <Subheading>Courses I'm tutoring</Subheading>
+        <Button
+          color="primary"
+          variant="outlined"
+          className="mr-10 mb-5 w-64"
+          endIcon={<Add />}
+        >
+          Create a course
+        </Button>
+      </div>
+
+      <div className="flex flex-col gap-3">
+        {currentUser.coursesOwned.map((course) => (
+          <Link
+            className="mx-10 font-bold text-sky-900 border border-sky-900 hover:bg-sky-100 p-5 pl-3 rounded-lg grid grid-cols-3 items-center"
+            href={`/course/${course.id}`}
+            key={course.id}
+          >
+            <div className="text-xl font-bold">{course.title}</div>
+            <div className="text-sm italic">{course.description}</div>
+          </Link>
+        ))}
+      </div>
+
       <Subheading>
-        All my Courses
+        Completed Courses
         <Accordion className="mx-10">
           <div className="flex flex-col gap-3">
-            {courses.map((course, index) => (
+            {allCourses.map((course, index) => (
               <Link
                 className="font-bold text-white bg-sky-900 hover:bg-sky-800 p-5 pl-3 rounded-lg grid grid-cols-3 items-center"
                 href={`/course/${course.id}`}
                 key={course.id}
               >
-                <div className="text-xl font-bold">{course.name}</div>
+                <div className="text-xl font-bold">{course.title}</div>
                 <div className="text-sm italic">{course.description}</div>
                 <div className="w-64 h-20 mr-5 grid grid-cols-4 right-0">
                   <div>

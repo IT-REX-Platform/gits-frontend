@@ -42,7 +42,7 @@ export function Navbar() {
     <Drawer
       variant="persistent"
       anchor="left"
-      sx={{ width: 300 }}
+      sx={{ width: 300, overflow: "auto" }}
       PaperProps={{ sx: { position: "relative" } }}
       open
     >

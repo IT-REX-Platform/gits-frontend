@@ -86,6 +86,11 @@ export const schema = createSchema({
       courses() {
         return courses;
       },
+
+      coursesByID() {
+        return {
+        }
+      }
     },
   },
 });

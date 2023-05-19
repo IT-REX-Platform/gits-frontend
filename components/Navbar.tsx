@@ -119,7 +119,7 @@ export function Navbar() {
       <List dense>
         <ListItem
           secondaryAction={
-            <Tooltip title="Delete" placement="left">
+            <Tooltip title="Logout" placement="left">
               <IconButton
                 edge="end"
                 aria-label="logout"

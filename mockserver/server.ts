@@ -91,7 +91,7 @@ export const schema = createSchema({
         return courses.find((coursesById) => coursesById.id === args.id);
       }, */
 
-      coursesById(){
+      coursesById() {
         return {
           title: "Title of this course",
           description: "Description of this course",

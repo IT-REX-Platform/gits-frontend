@@ -87,10 +87,16 @@ export const schema = createSchema({
         return courses;
       },
 
-      coursesByID() {
+      /* coursesById(obj, args, context, info) {
+        return courses.find((coursesById) => coursesById.id === args.id);
+      }, */
+
+      coursesById(){
         return {
-        }
-      }
+          title: "Title of this course",
+          description: "Description of this course",
+        };
+      },
     },
   },
 });

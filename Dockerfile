@@ -18,7 +18,7 @@ COPY . .
 ENV NEXT_TELEMETRY_DISABLED 1
 RUN yarn global add pnpm \
     && mkdir -p ./__generated__ \
-    && rm -r ./mockserver \
+    && rm -rf ./mockserver \
     && pnpm run build
 
 

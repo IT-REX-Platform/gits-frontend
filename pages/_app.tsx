@@ -88,9 +88,11 @@ function SigninContent({ pageProps, Component }: AppProps<RelayPageProps>) {
 
   if (auth.isAuthenticated) {
     return (
-      <div className="grid grid-cols-[auto_1fr] h-[100vh]">
+      <div className="grid grid-cols-[auto_1fr] h-[100vh] overflow-hidden">
         <Navbar />
-        <Component {...pageProps} />
+        <div className="overflow-auto">
+          <Component {...pageProps} />
+        </div>
       </div>
     );
   }

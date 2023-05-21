@@ -91,18 +91,18 @@ export default function Details() {
 
   return (
     <div className="grid grid-flow-dense grid-cols-6 grid-rows-6 gap-2">
-      <div className="col-span-full row-span-1 m-5 font-bold text-2xl underline">
+      <div className="col-span-full row-span-1 m-2 font-bold text-2xl underline">
         {course.title}
       </div>
-      <div className="col-span-full row-span-1 m-5 text-xl">
+      <div className="col-span-full row-span-1 m-2 text-xl">
         {course.description}
       </div>
-      <div className="col-span-3 row-span-2 border-solid border-sky-900 border-2 m-5 rounded-lg ">
+      <div className="col-span-3 row-span-2 border-solid border-sky-900 border-2 m-2 p-2 rounded-lg">
         <p className="underline">Chapters</p>
-        <div className="flex flex-col gap-1">
+        <div className="flex flex-col gap-1 overflow-hidden">
           {chapters.map((chapter) => (
             <Link
-              className="font-bold text-white text-center bg-sky-900 hover:bg-transparent hover:text-sky-900 hover:border-solid hover:border-sky-900 hover:border-2 rounded-lg"
+              className="font-bold text-white text-center bg-sky-900 hover:bg-transparent hover:text-sky-900 hover:border-solid hover:border-sky-900 hover:border-2 rounded-lg overflow-y-auto"
               href={`/`}
             >
               <div>{chapter}</div>
@@ -110,7 +110,7 @@ export default function Details() {
           ))}
         </div>
       </div>
-      <div className="col-span-3 row-span-2 border-solid border-sky-900 border-2 m-5 rounded-lg ">
+      <div className="col-span-3 row-span-2 border-solid border-sky-900 border-2 m-2 p-2 rounded-lg ">
         <p className="underline">Skill levels</p>
         <div className="grid grid-cols-2 grid-rows-2">
           <VictoryPie
@@ -163,7 +163,7 @@ export default function Details() {
           />
         </div>
       </div>
-      <div className="col-span-2 row-span-2 border-solid border-sky-900 border-2 m-5 rounded-lg ">
+      <div className="col-span-2 row-span-2 border-solid border-sky-900 border-2 m-2 p-2 rounded-lg ">
         <p className="underline">Flashcards</p>
         <div className="flex flex-col gap-1">
           {flashcards.map((flashcard) => (
@@ -176,7 +176,7 @@ export default function Details() {
           ))}
         </div>
       </div>
-      <div className="col-span-2 row-span-2 border-solid border-sky-900 border-2 m-5 rounded-lg ">
+      <div className="col-span-2 row-span-2 border-solid border-sky-900 border-2 m-2 p-2 rounded-lg ">
         <p className="underline">Quizzes</p>
         <div className="flex flex-col gap-1">
           {quizzes.map((quiz) => (
@@ -189,7 +189,7 @@ export default function Details() {
           ))}
         </div>
       </div>
-      <div className="col-span-2 row-span-2 border-solid border-sky-900 border-2 m-5 rounded-lg ">
+      <div className="col-span-2 row-span-2 border-solid border-sky-900 border-2 m-2 p-2 rounded-lg ">
         <p className="underline">Assignments</p>
         <div className="flex flex-col gap-1">
           {assignemnts.map((assignemnt) => (

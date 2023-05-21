@@ -104,6 +104,7 @@ export default function Details() {
             <Link
               className="font-bold text-white text-center bg-sky-900 hover:bg-transparent hover:text-sky-900 hover:border-solid hover:border-sky-900 hover:border-2 rounded-lg overflow-y-auto"
               href={`/`}
+              key={chapter}
             >
               <div>{chapter}</div>
             </Link>
@@ -170,6 +171,7 @@ export default function Details() {
             <Link
               className="font-bold text-white text-center bg-sky-900 hover:bg-transparent hover:text-sky-900 hover:border-solid hover:border-sky-900 hover:border-2 rounded-lg"
               href={`/`}
+              key={flashcard}
             >
               <div>{flashcard}</div>
             </Link>
@@ -183,6 +185,7 @@ export default function Details() {
             <Link
               className="font-bold text-white text-center bg-sky-900 hover:bg-transparent hover:text-sky-900 hover:border-solid hover:border-sky-900 hover:border-2 rounded-lg"
               href={`/`}
+              key={quiz}
             >
               <div>{quiz}</div>
             </Link>
@@ -196,6 +199,7 @@ export default function Details() {
             <Link
               className="font-bold text-white text-center bg-sky-900 hover:bg-transparent hover:text-sky-900 hover:border-solid hover:border-sky-900 hover:border-2 rounded-lg"
               href={`/`}
+              key={assignemnt}
             >
               <div>{assignemnt}</div>
             </Link>

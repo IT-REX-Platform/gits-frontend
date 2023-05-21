@@ -2,17 +2,20 @@ import { NavbarQuery } from "@/__generated__/NavbarQuery.graphql";
 import { graphql, useLazyLoadQuery } from "react-relay";
 
 import logo from "@/assets/logo.svg";
-import { Book, CollectionsBookmark, Home } from "@mui/icons-material";
+import { Book, CollectionsBookmark, Home, Logout } from "@mui/icons-material";
 import {
   Avatar,
   Divider,
   Drawer,
+  IconButton,
   List,
+  ListItem,
   ListItemAvatar,
   ListItemButton,
   ListItemIcon,
   ListItemText,
   ListSubheader,
+  Tooltip,
 } from "@mui/material";
 import { useRouter } from "next/router";
 import { useAuth } from "react-oidc-context";
@@ -42,7 +45,7 @@ export function Navbar() {
     <Drawer
       variant="persistent"
       anchor="left"
-      sx={{ width: 300 }}
+      sx={{ width: 300, overflow: "auto" }}
       PaperProps={{ sx: { position: "relative" } }}
       open
     >
@@ -64,12 +67,6 @@ export function Navbar() {
             <CollectionsBookmark />
           </ListItemIcon>
           <ListItemText primary="Course Catalog" />
-        </ListItemButton>
-        <ListItemButton onClick={() => auth.signoutRedirect()}>
-          <ListItemIcon>
-            <CollectionsBookmark />
-          </ListItemIcon>
-          <ListItemText primary="Logout" />
         </ListItemButton>
       </List>
 
@@ -96,6 +93,7 @@ export function Navbar() {
         ))}
       </List>
       <List
+        sx={{ flexGrow: "1" }}
         subheader={<ListSubheader>Courses I&apos;m tutoring</ListSubheader>}
         dense
       >
@@ -115,6 +113,28 @@ export function Navbar() {
             />
           </ListItemButton>
         ))}
+      </List>
+
+      <Divider />
+      <List dense>
+        <ListItem
+          secondaryAction={
+            <Tooltip title="Logout" placement="left">
+              <IconButton
+                edge="end"
+                aria-label="logout"
+                onClick={() => auth.signoutRedirect()}
+              >
+                <Logout />
+              </IconButton>
+            </Tooltip>
+          }
+        >
+          <ListItemAvatar>
+            <Avatar src={auth.user?.profile?.picture} />
+          </ListItemAvatar>
+          <ListItemText primary={auth.user?.profile?.name} />
+        </ListItem>
       </List>
     </Drawer>
   );

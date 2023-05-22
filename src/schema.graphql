@@ -18,7 +18,7 @@ type Course {
   # Chapters of the course
   chapters: [Chapter!]!
 
-  role: CourseRole!
+  currentUserRole: CourseRole!
 }
 
 enum CourseRole {

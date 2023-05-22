@@ -69,5 +69,5 @@ jobs:
         with:
           cache-from: type=gha
           cache-to: type=gha,mode=max
-          tags: ghcr.io/IT-REX-Platform/gits-fronted:${{steps.vars.outputs.sha_short}}
+          tags: ghcr.io/it-rex-platform/gits-fronted:${{steps.vars.outputs.sha_short}}
           push: true

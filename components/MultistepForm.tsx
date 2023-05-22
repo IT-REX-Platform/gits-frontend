@@ -7,7 +7,7 @@ export interface StepInfo {
   content: ReactElement;
 }
 
-export default function MultistepForm({
+export function MultistepForm({
   steps,
   submitLabel,
   onSubmit,

@@ -1,19 +1,55 @@
 import { Heading } from "@/components/Heading";
-import MultistepForm, { StepInfo } from "@/components/MultistepForm";
-import { FormControlLabel, Switch, TextField } from "@mui/material";
+import { MultistepForm, StepInfo } from "@/components/MultistepForm";
+import { createCourseMutation } from "@/__generated__/createCourseMutation.graphql";
+import {
+  Backdrop,
+  CircularProgress,
+  FormControlLabel,
+  Switch,
+  TextField,
+} from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers";
 import { Dayjs } from "dayjs";
 import { useState } from "react";
 import { useAuth } from "react-oidc-context";
+import { graphql, useMutation } from "react-relay";
+import { useRouter } from "next/router";
 
 export default function NewCourse() {
   useAuth();
+  const router = useRouter();
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [startDate, setStartDate] = useState<Dayjs | null>(null);
   const [endDate, setEndDate] = useState<Dayjs | null>(null);
   const [publish, setPublish] = useState(false);
+
+  const [createCourse, isCourseInFlight] =
+    useMutation<createCourseMutation>(graphql`
+      mutation createCourseMutation($course: CreateCourseInput!) {
+        createCourse(input: $course) {
+          id
+        }
+      }
+    `);
+
+  function handleSubmit() {
+    createCourse({
+      variables: {
+        course: {
+          title,
+          description,
+          startDate,
+          endDate,
+          published: publish,
+        },
+      },
+      onCompleted(response, errors) {
+        router.push(`/course/${response.createCourse.id}`);
+      },
+    });
+  }
 
   function TableRow({ label, value }: { label: string; value: string }) {
     return (
@@ -44,11 +80,10 @@ export default function NewCourse() {
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             multiline
-            required
           />
         </>
       ),
-      canContinue: title !== "" && description !== "",
+      canContinue: title !== "",
     },
     {
       label: "Start and end",
@@ -103,7 +138,14 @@ export default function NewCourse() {
   return (
     <main className="px-10 flex flex-col gap-3">
       <Heading className="mb-5 pl-0 pr-0">Create new course</Heading>
-      <MultistepForm submitLabel="Create course" steps={steps} />
+      <MultistepForm
+        submitLabel="Create course"
+        steps={steps}
+        onSubmit={handleSubmit}
+      />
+      <Backdrop open={isCourseInFlight} sx={{ zIndex: "modal" }}>
+        <CircularProgress />
+      </Backdrop>
     </main>
   );
 }

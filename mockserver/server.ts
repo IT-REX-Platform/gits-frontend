@@ -6,63 +6,75 @@ const courses = [
   {
     id: "a",
     title: "Machine Learning",
+    role: "Lecturer",
     description: "Long description about Machine Learning course.",
   },
   {
     id: "b",
     title: "Cloud Computing",
+    role: "Lecturer",
     description: "Long description about Cloud Computing course.",
   },
   {
     id: "c",
     title: "Embedded Systems Engineering",
+    role: "Lecturer",
     description: "Long description about Embedded Systems Engineering course.",
   },
   {
     id: "d",
     title: "System and Web Security",
+    role: "Lecturer",
     description: "Long description about System and Web Security course.",
   },
   {
     id: "e",
     title: "Software Engineering for AI Based Systems",
+    role: "Lecturer",
     description:
       "Long description about Software Engineering for AI Based Systems course.",
   },
   {
     id: "f",
     title: "Digital System Design",
+    role: "Lecturer",
     description: "Long description about Digital System Design course.",
   },
   {
     id: "g",
     title: "Theoretische Informatik 3",
+    role: "Lecturer",
     description: "Long description about Theoretische Informatik 3 course.",
   },
   {
     id: "x",
     title: "Post Quantum Cryptography",
+    role: "Lecturer",
     description: "Long description about Post Quantum Cryptography course.",
   },
   {
     id: "h",
     title: "Datenbanken 2",
+    role: "Lecturer",
     description: "Long description about Datenbanken 2 course.",
   },
   {
     id: "i",
     title: "Datenbanken 1",
+    role: "Lecturer",
     description: "Long description about Datenbanken 1 course.",
   },
   {
     id: "j",
     title: "Technische Grundlagen der Informatik",
+    role: "Lecturer",
     description:
       "Long description about Technische Grundlagen der Informatik course.",
   },
   {
     id: "k",
     title: "Distributed Systems 2",
+    role: "Lecturer",
     description: "Long description about Distributed Systems 2 course.",
   },
 ];
@@ -80,6 +92,7 @@ export const schema = createSchema({
           lastName: "Bertram",
           coursesJoined: courses.slice(0, 3),
           coursesOwned: courses.slice(4, 6),
+          role: "Student",
         };
       },
 

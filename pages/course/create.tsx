@@ -121,7 +121,6 @@ export default function NewCourse() {
           </table>
           <FormControlLabel
             label="Publish course"
-            required
             control={
               <Switch
                 checked={publish}

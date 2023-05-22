@@ -17,6 +17,8 @@ import {
 } from "react-oidc-context";
 import { RelayEnvironmentProvider } from "react-relay";
 import { RecordSource } from "relay-runtime";
+import { LocalizationProvider } from "@mui/x-date-pickers";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 
 const oidcConfig: AuthProviderProps = {
   redirect_uri: "http://localhost:3000",
@@ -43,9 +45,11 @@ export default function App(props: AppProps<RelayPageProps>) {
   return (
     <AuthProvider {...oidcConfig}>
       <RelayEnvironmentProvider environment={environment}>
-        <Suspense fallback="Loading...">
-          <SigninContent {...props} />
-        </Suspense>
+        <LocalizationProvider dateAdapter={AdapterDayjs}>
+          <Suspense fallback="Loading...">
+            <SigninContent {...props} />
+          </Suspense>
+        </LocalizationProvider>
       </RelayEnvironmentProvider>
     </AuthProvider>
   );

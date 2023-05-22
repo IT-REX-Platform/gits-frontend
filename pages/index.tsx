@@ -125,7 +125,12 @@ export default function Home() {
         <Subheading>Courses I&apos;m tutoring</Subheading>
         {currentUser.role === "Lecturer" && (
           <div className="mb-5 mr-10">
-            <Button color="primary" variant="outlined" endIcon={<Add />}>
+            <Button
+              color="primary"
+              variant="outlined"
+              href="/course/create"
+              endIcon={<Add />}
+            >
               Create a course
             </Button>
           </div>

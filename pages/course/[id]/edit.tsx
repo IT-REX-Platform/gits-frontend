@@ -14,12 +14,9 @@ import dayjs, { Dayjs } from "dayjs";
 import Error from "next/error";
 import { useRouter } from "next/router";
 import { useState } from "react";
-import { useAuth } from "react-oidc-context";
 import { graphql, useLazyLoadQuery, useMutation } from "react-relay";
 
 export default function EditCoursePage() {
-  useAuth();
-
   const router = useRouter();
   const { coursesById } = useLazyLoadQuery<editCourseQuery>(
     graphql`

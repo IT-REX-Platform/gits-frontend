@@ -2,7 +2,7 @@ import { pagesQuery } from "@/__generated__/pagesQuery.graphql";
 import Accordion from "@/components/Accordion";
 import { Heading } from "@/components/Heading";
 import { Subheading } from "@/components/Subheading";
-import { Add } from "@mui/icons-material";
+import { Add, Edit } from "@mui/icons-material";
 import { Button } from "@mui/material";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -146,6 +146,17 @@ export default function Home() {
           >
             <div className="text-xl font-bold">{course.title}</div>
             <div className="text-sm italic">{course.description}</div>
+
+            <div className="flex justify-end">
+              <Button
+                color="primary"
+                variant="outlined"
+                startIcon={<Edit />}
+                onClick={() => router.push(`/course/${course.id}/edit`)}
+              >
+                Edit course
+              </Button>
+            </div>
           </Link>
         ))}
       </div>

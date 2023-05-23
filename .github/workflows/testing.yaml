@@ -1,33 +1,9 @@
 name: Testing CI
 
 on:
-  - pull_request
+  - push
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: 8.3.1
-
-      - name: Setup node
-        uses: actions/setup-node@v3
-        with:
-          node-version: 19.9.0
-          cache: pnpm
-
-      - name: Install packages
-        run: |
-          pnpm install --frozen-lockfile
-          pnpm install --frozen-lockfile -C mockserver
-
-      - name: Build project
-        run: mkdir ./__generated__ && pnpm run build --no-lint
-
   lint:
     runs-on: ubuntu-latest
     steps:
@@ -75,15 +51,23 @@ jobs:
   docker-build:
     runs-on: ubuntu-latest
     steps:
-      - name: Setup QEMU
-        uses: docker/setup-qemu-action@v2
-
       - name: Setup docker buildx
         uses: docker/setup-buildx-action@v2
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Set outputs
+        id: vars
+        run: echo "sha_short=$(echo ${GITHUB_SHA} | cut -c1-8)" >> $GITHUB_OUTPUT
 
       - name: Build docker container
         uses: docker/build-push-action@v4
         with:
-          push: false
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          tags: ghcr.io/it-rex-platform/gits-fronted:${{steps.vars.outputs.sha_short}}
+          push: true

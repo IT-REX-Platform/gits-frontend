@@ -1,5 +1,5 @@
-import { editCourseQuery } from "@/__generated__/editCourseQuery.graphql";
 import { editCourseMutation } from "@/__generated__/editCourseMutation.graphql";
+import { editCourseQuery } from "@/__generated__/editCourseQuery.graphql";
 import { Form, FormActions, FormSection } from "@/components/Form";
 import { Heading } from "@/components/Heading";
 import {
@@ -40,11 +40,6 @@ export default function EditCoursePage() {
     }
   `);
 
-  // Show 404 error page if id was not found
-  if (coursesById.length == 0) {
-    return <Error statusCode={404} />;
-  }
-
   const course = coursesById[0];
   const [title, setTitle] = useState(course.title);
   const [description, setDescription] = useState(course.description);
@@ -69,6 +64,11 @@ export default function EditCoursePage() {
         },
       },
     });
+  }
+
+  // Show 404 error page if id was not found
+  if (coursesById.length == 0) {
+    return <Error statusCode={404} />;
   }
 
   return (

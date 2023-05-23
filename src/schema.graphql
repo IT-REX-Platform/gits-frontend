@@ -17,6 +17,13 @@ type Course {
   published: Boolean!
   # Chapters of the course
   chapters: [Chapter!]!
+
+  currentUserRole: CourseRole!
+}
+
+enum CourseRole {
+  Lecturer
+  Student
 }
 
 input CreateCourseInput {
@@ -103,7 +110,14 @@ type User {
 
   coursesJoined: [Course!]!
   coursesOwned: [Course!]!
+
+  role: UserRole!
   # role?
+}
+
+enum UserRole {
+  Lecturer
+  Student
 }
 
 interface Content {

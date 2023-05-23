@@ -20,6 +20,7 @@ export default function Home() {
           description
         }
         currentUser {
+          role
           coursesJoined {
             id
             title
@@ -122,11 +123,18 @@ export default function Home() {
 
       <div className="flex justify-between items-end">
         <Subheading>Courses I&apos;m tutoring</Subheading>
-        <div className="mb-5 mr-10">
-          <Button color="primary" variant="outlined" endIcon={<Add />}>
-            Create a course
-          </Button>
-        </div>
+        {currentUser.role === "Lecturer" && (
+          <div className="mb-5 mr-10">
+            <Button
+              color="primary"
+              variant="outlined"
+              endIcon={<Add />}
+              onClick={() => router.push("/course/create")}
+            >
+              Create a course
+            </Button>
+          </div>
+        )}
       </div>
 
       <div className="flex flex-col gap-3">

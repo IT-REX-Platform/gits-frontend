@@ -14,6 +14,15 @@ import { useState } from "react";
 import { graphql, useMutation } from "react-relay";
 import { useRouter } from "next/router";
 
+function TableRow({ label, value }: { label: string; value: string }) {
+  return (
+    <tr>
+      <th className="text-left align-top pr-4">{label}:</th>
+      <td className="w-96">{value}</td>
+    </tr>
+  );
+}
+
 export default function NewCourse() {
   const router = useRouter();
 
@@ -47,15 +56,6 @@ export default function NewCourse() {
         router.push(`/course/${response.createCourse.id}`);
       },
     });
-  }
-
-  function TableRow({ label, value }: { label: string; value: string }) {
-    return (
-      <tr>
-        <th className="text-left align-top pr-4">{label}:</th>
-        <td className="w-96">{value}</td>
-      </tr>
-    );
   }
 
   const steps: StepInfo[] = [

@@ -57,6 +57,8 @@ export default function EditCoursePage() {
   const [endDate, setEndDate] = useState<Dayjs | null>(dayjs(course.endDate));
   const [publish, setPublish] = useState(false);
 
+  const valid = title !== "" && startDate != null && endDate != null;
+
   function handleSubmit() {
     updateCourse({
       variables: {
@@ -120,7 +122,7 @@ export default function EditCoursePage() {
         </FormSection>
 
         <FormActions>
-          <Button variant="contained" onClick={handleSubmit}>
+          <Button disabled={!valid} variant="contained" onClick={handleSubmit}>
             Update course
           </Button>
         </FormActions>

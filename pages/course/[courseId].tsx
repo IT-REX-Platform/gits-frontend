@@ -1,22 +1,16 @@
+import { CourseIdQuery } from "@/__generated__/CourseIdQuery.graphql";
+import Link from "next/link";
 import { useRouter } from "next/router";
 import { graphql, useLazyLoadQuery } from "react-relay";
-import { detailsQuery } from "@/__generated__/detailsQuery.graphql";
-import {
-  ReactElement,
-  JSXElementConstructor,
-  ReactFragment,
-  ReactPortal,
-} from "react";
 import { VictoryLabel, VictoryPie } from "victory";
-import Link from "next/link";
 
 export default function Details() {
   const router = useRouter();
-  const id = router.query.id;
+  const id = router.query.courseId;
 
-  const { coursesById } = useLazyLoadQuery<detailsQuery>(
+  const { coursesById } = useLazyLoadQuery<CourseIdQuery>(
     graphql`
-      query detailsQuery($id: [UUID!]!) {
+      query CourseIdQuery($id: [UUID!]!) {
         coursesById(ids: $id) {
           title
           description
@@ -25,6 +19,7 @@ export default function Details() {
     `,
     { id: [id] }
   );
+
   const course = coursesById[0];
 
   //TODO: change later, when implementing the services into this side

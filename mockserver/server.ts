@@ -101,6 +101,10 @@ export const schema = createSchema({
       courses() {
         return courses;
       },
+
+      coursesById(parent, args: { ids: string[] }) {
+        return courses.filter((course) => args.ids.includes(course.id));
+      },
     },
     Mutation: {
       createCourse(parent, args) {
@@ -113,6 +117,13 @@ export const schema = createSchema({
         nextId += 1;
 
         return newCourse;
+      },
+      updateCourse(parent, args) {
+        const index = courses.findIndex(
+          (course) => course.id === args.input.id
+        );
+        courses[index] = args.input;
+        return courses[index];
       },
     },
   },

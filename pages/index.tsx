@@ -128,8 +128,8 @@ export default function Home() {
             <Button
               color="primary"
               variant="outlined"
-              href="/course/create"
               endIcon={<Add />}
+              onClick={() => router.push("/course/create")}
             >
               Create a course
             </Button>

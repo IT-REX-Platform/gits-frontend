@@ -12,10 +12,9 @@ import Link from "next/link";
 
 export default function Details() {
   const router = useRouter();
-  const data = router.query;
-  const id = data["id"];
+  const id = router.query.id;
 
-  /* const { coursesById } = useLazyLoadQuery<detailsQuery>(
+  const { coursesById } = useLazyLoadQuery<detailsQuery>(
     graphql`
       query detailsQuery($id: [UUID!]!) {
         coursesById(ids: $id) {
@@ -24,22 +23,9 @@ export default function Details() {
         }
       }
     `,
-    {id}
-  ); */
-  //placeholder query until coursesById is correctly implemented
-  const { courses } = useLazyLoadQuery<detailsQuery>(
-    graphql`
-      query detailsQuery {
-        courses {
-          id
-          title
-          description
-        }
-      }
-    `,
-    {}
+    { id: [id] }
   );
-  const course = courses.find((course) => course.id === id)!;
+  const course = coursesById[0];
 
   //TODO: change later, when implementing the services into this side
   const chapters = [

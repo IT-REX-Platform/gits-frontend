@@ -12,8 +12,7 @@ import Link from "next/link";
 
 export default function Details() {
   const router = useRouter();
-  const data = router.query;
-  const id = data["id"];
+  const id = router.query.id;
 
   /* const { coursesById } = useLazyLoadQuery<detailsQuery>(
     graphql`

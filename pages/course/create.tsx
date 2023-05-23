@@ -38,8 +38,8 @@ export default function NewCourse() {
         course: {
           title,
           description,
-          startDate,
-          endDate,
+          startDate: startDate!.format("YYYY-MM-DD"),
+          endDate: endDate!.format("YYYY-MM-DD"),
           published: publish,
         },
       },

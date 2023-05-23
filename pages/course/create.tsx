@@ -11,12 +11,10 @@ import {
 import { DatePicker } from "@mui/x-date-pickers";
 import { Dayjs } from "dayjs";
 import { useState } from "react";
-import { useAuth } from "react-oidc-context";
 import { graphql, useMutation } from "react-relay";
 import { useRouter } from "next/router";
 
 export default function NewCourse() {
-  useAuth();
   const router = useRouter();
 
   const [title, setTitle] = useState("");

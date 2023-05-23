@@ -47,7 +47,7 @@ export default function EditCoursePage() {
         }
       }
     `,
-    { id: [router.query.id] }
+    { id: [router.query.courseId] }
   );
 
   const [tab, setTab] = useState<"General" | "Chapters">("General");

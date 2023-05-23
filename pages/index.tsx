@@ -65,7 +65,7 @@ export default function Home() {
         {currentUser.coursesJoined.map((course, index) => (
           <Link
             className="mx-10 font-bold text-white bg-sky-900 hover:bg-sky-800 p-5 pl-3 rounded-lg grid grid-cols-3 items-center"
-            href={`/course/${course.id}`}
+            href={{ pathname: `/course/${course.id}` }}
             key={course.id}
           >
             <div className="text-xl font-bold">{course.title}</div>
@@ -141,7 +141,7 @@ export default function Home() {
         {currentUser.coursesOwned.map((course) => (
           <Link
             className="mx-10 font-bold text-sky-900 border border-sky-900 hover:bg-sky-100 p-5 pl-3 rounded-lg grid grid-cols-3 items-center"
-            href={`/course/${course.id}`}
+            href={{ pathname: `/course/${course.id}` }}
             key={course.id}
           >
             <div className="text-xl font-bold">{course.title}</div>
@@ -168,7 +168,7 @@ export default function Home() {
             {allCourses.map((course, index) => (
               <Link
                 className="font-bold text-white bg-sky-900 hover:bg-sky-800 p-5 pl-3 rounded-lg grid grid-cols-3 items-center"
-                href={`/course/${course.id}`}
+                href={{ pathname: `/course/${course.id}` }}
                 key={course.id}
               >
                 <div className="text-xl font-bold">{course.title}</div>

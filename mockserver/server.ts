@@ -87,15 +87,8 @@ export const schema = createSchema({
         return courses;
       },
 
-      /* coursesById(obj, args, context, info) {
-        return courses.find((coursesById) => coursesById.id === args.id);
-      }, */
-
-      coursesById() {
-        return {
-          title: "Title of this course",
-          description: "Description of this course",
-        };
+      coursesById(_, args: { ids: string[] }) {
+        return courses.filter((course) => args.ids.includes(course.id));
       },
     },
   },

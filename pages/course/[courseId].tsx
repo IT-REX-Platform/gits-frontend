@@ -1,4 +1,8 @@
 import { CourseIdQuery } from "@/__generated__/CourseIdQuery.graphql";
+import StyleOutlinedIcon from '@mui/icons-material/StyleOutlined';
+import AssignmentIcon from '@mui/icons-material/Assignment';
+import QuizIcon from '@mui/icons-material/Quiz';
+import { Button } from "@mui/material";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { graphql, useLazyLoadQuery } from "react-relay";
@@ -39,62 +43,18 @@ export default function Details() {
   const understanding = 50;
   const analyses = 40;
   const usage = 22;
-  const flashcards = [
-    "Cards 1",
-    "Cards 2",
-    "Cards 3",
-    "Cards 4",
-    "Cards 5",
-    "Cards 6",
-    "Cards 7",
-    "Cards 8",
-    "Cards 9",
-    "Cards 10",
-  ];
-  const quizzes = [
-    "Quiz 1",
-    "Quiz 2",
-    "Quiz 3",
-    "Quiz 4",
-    "Quiz 5",
-    "Quiz 6",
-    "Quiz 7",
-    "Quiz 8",
-    "Quiz 9",
-    "Quiz 10",
-  ];
-  const assignemnts = [
-    "Assignment 1",
-    "Assignment 2",
-    "Assignment 3",
-    "Assignment 4",
-  ];
 
   return (
-    <div className="grid grid-flow-dense grid-cols-6 grid-rows-6 gap-2">
+    <div className="grid grid-flow-dense grid-cols-6 grid-rows-5 gap-2 m-10">
       <div className="col-span-full row-span-1 m-2 font-bold text-2xl underline">
         {course.title}
       </div>
       <div className="col-span-full row-span-1 m-2 text-xl">
         {course.description}
       </div>
-      <div className="col-span-3 row-span-2 border-solid border-sky-900 border-2 m-2 p-2 rounded-lg">
-        <p className="underline">Chapters</p>
-        <div className="flex flex-col gap-1 overflow-hidden">
-          {chapters.map((chapter) => (
-            <Link
-              className="font-bold text-white text-center bg-sky-900 hover:bg-transparent hover:text-sky-900 hover:border-solid hover:border-sky-900 hover:border-2 rounded-lg overflow-y-auto"
-              href={`/`}
-              key={chapter}
-            >
-              <div>{chapter}</div>
-            </Link>
-          ))}
-        </div>
-      </div>
-      <div className="col-span-3 row-span-2 border-solid border-sky-900 border-2 m-2 p-2 rounded-lg ">
+      <div className="col-span-6 row-span-2 border-solid border-sky-900 border-2 m-2 p-2 rounded-lg ">
         <p className="underline">Skill levels</p>
-        <div className="grid grid-cols-2 grid-rows-2">
+        <div className="grid grid-cols-4">
           <VictoryPie
             colorScale={["green", "transparent"]}
             innerRadius={120}
@@ -145,48 +105,47 @@ export default function Details() {
           />
         </div>
       </div>
-      <div className="col-span-2 row-span-2 border-solid border-sky-900 border-2 m-2 p-2 rounded-lg ">
-        <p className="underline">Flashcards</p>
+      <Button
+        onClick={() => router.push("/")}
+        className="col-span-2"
+        color="primary"
+        variant="outlined"
+        endIcon={<StyleOutlinedIcon />}
+      >
+        Flashcards
+      </Button>
+      <Button
+        onClick={() => router.push("/")}
+        className="col-span-2"
+        color="primary"
+        variant="outlined"
+        endIcon={<QuizIcon />}
+      >
+        Quizzes
+      </Button>
+      <Button
+        onClick={() => router.push("/")}
+        className="col-span-2"
+        color="primary"
+        variant="outlined"
+        endIcon={<AssignmentIcon />}
+      >
+        Assignments
+      </Button>
+      <div className="col-span-6 row-span-2 border-solid border-sky-900 border-2 m-2 p-2 rounded-lg">
+        <p className="underline">Chapters</p>
         <div className="flex flex-col gap-1">
-          {flashcards.map((flashcard) => (
+          {chapters.map((chapter) => (
             <Link
-              className="font-bold text-white text-center bg-sky-900 hover:bg-transparent hover:text-sky-900 hover:border-solid hover:border-sky-900 hover:border-2 rounded-lg"
+              className="font-bold text-white text-center bg-sky-900 hover:bg-transparent hover:text-sky-900 border-solid border-sky-900 border-2 rounded-lg "
               href={`/`}
-              key={flashcard}
+              key={chapter}
             >
-              <div>{flashcard}</div>
+              <div>{chapter}</div>
             </Link>
           ))}
         </div>
-      </div>
-      <div className="col-span-2 row-span-2 border-solid border-sky-900 border-2 m-2 p-2 rounded-lg ">
-        <p className="underline">Quizzes</p>
-        <div className="flex flex-col gap-1">
-          {quizzes.map((quiz) => (
-            <Link
-              className="font-bold text-white text-center bg-sky-900 hover:bg-transparent hover:text-sky-900 hover:border-solid hover:border-sky-900 hover:border-2 rounded-lg"
-              href={`/`}
-              key={quiz}
-            >
-              <div>{quiz}</div>
-            </Link>
-          ))}
-        </div>
-      </div>
-      <div className="col-span-2 row-span-2 border-solid border-sky-900 border-2 m-2 p-2 rounded-lg ">
-        <p className="underline">Assignments</p>
-        <div className="flex flex-col gap-1">
-          {assignemnts.map((assignemnt) => (
-            <Link
-              className="font-bold text-white text-center bg-sky-900 hover:bg-transparent hover:text-sky-900 hover:border-solid hover:border-sky-900 hover:border-2 rounded-lg"
-              href={`/`}
-              key={assignemnt}
-            >
-              <div>{assignemnt}</div>
-            </Link>
-          ))}
-        </div>
-      </div>
+      </div>      
     </div>
   );
 }

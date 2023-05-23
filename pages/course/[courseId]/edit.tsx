@@ -30,7 +30,7 @@ export default function EditCoursePage() {
         }
       }
     `,
-    { id: [router.query.id] }
+    { id: [router.query.courseId] }
   );
   const [updateCourse, isUpdating] = useMutation<editCourseMutation>(graphql`
     mutation editCourseMutation($course: UpdateCourseInput!) {
@@ -55,7 +55,7 @@ export default function EditCoursePage() {
     updateCourse({
       variables: {
         course: {
-          id: router.query.id,
+          id: router.query.courseId,
           title,
           description,
           startDate: startDate!.format("YYYY-MM-DD"),

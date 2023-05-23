@@ -79,6 +79,8 @@ const courses = [
   },
 ];
 
+let nextId = 0;
+
 export const schema = createSchema({
   typeDefs: readFileSync("../src/schema.graphql").toString(),
   resolvers: {
@@ -98,6 +100,19 @@ export const schema = createSchema({
 
       courses() {
         return courses;
+      },
+    },
+    Mutation: {
+      createCourse(parent, args) {
+        const newCourse = {
+          id: nextId.toString(),
+          ...args.input,
+        };
+
+        courses.push(newCourse);
+        nextId += 1;
+
+        return newCourse;
       },
     },
   },

@@ -125,7 +125,12 @@ export default function Home() {
         <Subheading>Courses I&apos;m tutoring</Subheading>
         {currentUser.role === "Lecturer" && (
           <div className="mb-5 mr-10">
-            <Button color="primary" variant="outlined" endIcon={<Add />}>
+            <Button
+              color="primary"
+              variant="outlined"
+              endIcon={<Add />}
+              onClick={() => router.push("/course/create")}
+            >
               Create a course
             </Button>
           </div>

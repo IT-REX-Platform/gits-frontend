@@ -40,9 +40,7 @@ export function MultistepForm({
               >
                 {index === steps.length - 1 ? submitLabel : "Continue"}
               </Button>
-              <Button disabled={index === 0} onClick={handleBack}>
-                Back
-              </Button>
+              {index !== 0 && <Button onClick={handleBack}>Back</Button>}
             </div>
           </StepContent>
         </Step>

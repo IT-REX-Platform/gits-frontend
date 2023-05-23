@@ -45,21 +45,19 @@ export default function Details() {
   const usage = 22;
 
   return (
-    <div className="grid grid-flow-dense grid-cols-6 grid-rows-5 gap-2 m-10">
-      <div className="col-span-full row-span-1 m-2 font-bold text-2xl underline">
+    <div className="grid grid-flow-dense grid-cols-6 gap-2 m-10">
+      <div className="col-span-full m-2 font-bold text-2xl underline">
         {course.title}
       </div>
-      <div className="col-span-full row-span-1 m-2 text-xl">
-        {course.description}
-      </div>
-      <div className="col-span-6 row-span-2 border-solid border-sky-900 border-2 m-2 p-2 rounded-lg ">
+      <div className="col-span-full m-2 text-xl">{course.description}</div>
+      <div className="col-span-6 border-solid border-sky-900 border-2 m-2 p-2 rounded-lg ">
         <p className="underline">Skill levels</p>
         <div className="grid grid-cols-4">
           <VictoryPie
             colorScale={["green", "transparent"]}
             innerRadius={120}
             cornerRadius={100}
-            labels={["Wissen"]}
+            labels={["Know"]}
             labelRadius={1}
             labelPosition={"startAngle"}
             data={[{ y: knowledge }, { y: 100 - knowledge }]}
@@ -71,7 +69,7 @@ export default function Details() {
             colorScale={["yellow", "transparent"]}
             innerRadius={120}
             cornerRadius={100}
-            labels={["Verstand"]}
+            labels={["Grasp"]}
             labelRadius={1}
             labelPosition={"startAngle"}
             data={[{ y: understanding }, { y: 100 - understanding }]}
@@ -83,7 +81,7 @@ export default function Details() {
             colorScale={["red", "transparent"]}
             innerRadius={120}
             cornerRadius={100}
-            labels={["Analyse"]}
+            labels={["Analysis"]}
             labelRadius={1}
             labelPosition={"startAngle"}
             data={[{ y: analyses }, { y: 100 - analyses }]}
@@ -95,7 +93,7 @@ export default function Details() {
             colorScale={["red", "transparent"]}
             innerRadius={120}
             cornerRadius={100}
-            labels={["Anwend."]}
+            labels={["Use"]}
             labelRadius={1}
             labelPosition={"startAngle"}
             data={[{ y: usage }, { y: 100 - usage }]}
@@ -105,34 +103,36 @@ export default function Details() {
           />
         </div>
       </div>
-      <Button
-        onClick={() => router.push("/")}
-        className="col-span-2"
-        color="primary"
-        variant="outlined"
-        endIcon={<StyleOutlinedIcon />}
-      >
-        Flashcards
-      </Button>
-      <Button
-        onClick={() => router.push("/")}
-        className="col-span-2"
-        color="primary"
-        variant="outlined"
-        endIcon={<QuizIcon />}
-      >
-        Quizzes
-      </Button>
-      <Button
-        onClick={() => router.push("/")}
-        className="col-span-2"
-        color="primary"
-        variant="outlined"
-        endIcon={<AssignmentIcon />}
-      >
-        Assignments
-      </Button>
-      <div className="col-span-6 row-span-2 border-solid border-sky-900 border-2 m-2 p-2 rounded-lg">
+      <div className="col-span-6">
+        <div className="grid grid-flow-dense grid-cols-3 p-2">
+          <Button
+            onClick={() => router.push("/")}
+            color="primary"
+            variant="outlined"
+            endIcon={<StyleOutlinedIcon />}
+          >
+            Flashcards
+          </Button>
+          <Button
+            onClick={() => router.push("/")}
+            color="primary"
+            variant="outlined"
+            endIcon={<QuizIcon />}
+          >
+            Quizzes
+          </Button>
+          <Button
+            onClick={() => router.push("/")}
+            color="primary"
+            variant="outlined"
+            endIcon={<AssignmentIcon />}
+          >
+            Assignments
+          </Button>
+        </div>
+      </div>
+
+      <div className="col-span-6 border-solid border-sky-900 border-2 m-2 p-2 rounded-lg">
         <p className="underline">Chapters</p>
         <div className="flex flex-col gap-1">
           {chapters.map((chapter) => (

@@ -46,7 +46,10 @@ export default function Details() {
     const element = chapters.at(index);
     const start = new Date(element?.startDate);
     const end = new Date(element?.endDate);
-    if (start.toISOString() <= currentDate.toISOString() && end.toISOString() >= currentDate.toISOString()) {
+    if (
+      start.toISOString() <= currentDate.toISOString() &&
+      end.toISOString() >= currentDate.toISOString()
+    ) {
       viewablechapters.push(element);
     }
   }
@@ -147,7 +150,9 @@ export default function Details() {
               className="text-center font-bold border-solid border-sky-900 border-2 rounded-lg text-white bg-sky-900 hover:bg-white hover:text-sky-900"
               href={{ pathname: `/chapter/${chapter!.id}` }}
             >
-              <p>{chapter?.number} {chapter?.title}</p>
+              <p>
+                {chapter?.number} {chapter?.title}
+              </p>
             </Link>
           ))}
         </div>

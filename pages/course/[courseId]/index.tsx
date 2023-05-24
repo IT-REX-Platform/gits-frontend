@@ -149,6 +149,7 @@ export default function Details() {
             <Link
               className="text-center font-bold border-solid border-sky-900 border-2 rounded-lg text-white bg-sky-900 hover:bg-white hover:text-sky-900"
               href={{ pathname: `/chapter/${chapter!.id}` }}
+              key={chapter!.id}
             >
               <p>
                 {chapter?.number} {chapter?.title}

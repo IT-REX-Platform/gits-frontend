@@ -11,6 +11,7 @@ import { VictoryLabel, VictoryPie } from "victory";
 export default function Details() {
   const router = useRouter();
   const id = router.query.courseId;
+  const currentDate = new Date();
 
   const { coursesById } = useLazyLoadQuery<CourseIdQuery>(
     graphql`
@@ -18,6 +19,13 @@ export default function Details() {
         coursesById(ids: $id) {
           title
           description
+          chapters {
+            id
+            title
+            number
+            startDate
+            endDate
+          }
         }
       }
     `,
@@ -27,22 +35,24 @@ export default function Details() {
   const course = coursesById[0];
 
   //TODO: change later, when implementing the services into this side
-  const chapters = [
-    "Chapter 1",
-    "Chapter 2",
-    "Chapter 3",
-    "Chapter 4",
-    "Chapter 5",
-    "Chapter 6",
-    "Chapter 7",
-    "Chapter 8",
-    "Chapter 9",
-    "Chapter 10",
-  ];
+  const chapters = course.chapters;
   const knowledge = 88;
   const understanding = 50;
   const analyses = 40;
   const usage = 22;
+  let viewablechapters = [];
+
+  for (let index = 0; index < chapters.length; index++) {
+    const element = chapters.at(index);
+    const start = new Date(element?.startDate);
+    const end = new Date(element?.endDate);
+    if (
+      start.toISOString() <= currentDate.toISOString() &&
+      end.toISOString() >= currentDate.toISOString()
+    ) {
+      viewablechapters.push(element);
+    }
+  }
 
   return (
     <div className="grid grid-flow-dense grid-cols-6 gap-2 m-10">
@@ -135,13 +145,15 @@ export default function Details() {
       <div className="col-span-6 border-solid border-sky-900 border-2 m-2 p-2 rounded-lg">
         <p className="underline">Chapters</p>
         <div className="flex flex-col gap-1">
-          {chapters.map((chapter) => (
+          {viewablechapters.map((chapter) => (
             <Link
-              className="font-bold text-white text-center bg-sky-900 hover:bg-transparent hover:text-sky-900 border-solid border-sky-900 border-2 rounded-lg "
-              href={`/`}
-              key={chapter}
+              className="text-center font-bold border-solid border-sky-900 border-2 rounded-lg text-white bg-sky-900 hover:bg-white hover:text-sky-900"
+              href={{ pathname: `/chapter/${chapter!.id}` }}
+              key={chapter!.id}
             >
-              <div>{chapter}</div>
+              <p>
+                {chapter?.number} {chapter?.title}
+              </p>
             </Link>
           ))}
         </div>

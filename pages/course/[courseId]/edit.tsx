@@ -118,8 +118,13 @@ function EditGeneral({ _course }: { _course: editCourseGeneralFragment$key }) {
   const [endDate, setEndDate] = useState<Dayjs | null>(dayjs(course.endDate));
   const [publish, setPublish] = useState(course.published);
 
-  const valid = true; // title !== "" && startDate != null && endDate != null;
   const [error, setError] = useState<any>(null);
+  const valid =
+    title !== "" &&
+    startDate != null &&
+    startDate.isValid() &&
+    endDate != null &&
+    endDate.isValid();
 
   function handleSubmit() {
     updateCourse({

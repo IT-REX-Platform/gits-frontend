@@ -115,7 +115,7 @@ function EditGeneral({ _course }: { _course: editCourseGeneralFragment$key }) {
     dayjs(course.startDate)
   );
   const [endDate, setEndDate] = useState<Dayjs | null>(dayjs(course.endDate));
-  const [publish, setPublish] = useState(false);
+  const [publish, setPublish] = useState(course.published);
 
   const valid = title !== "" && startDate != null && endDate != null;
 
@@ -134,6 +134,14 @@ function EditGeneral({ _course }: { _course: editCourseGeneralFragment$key }) {
     });
   }
 
+  function handleReset() {
+    setTitle(course.title);
+    setDescription(course.description);
+    setStartDate(dayjs(course.startDate));
+    setEndDate(dayjs(course.endDate));
+    setPublish(course.published);
+  }
+
   return (
     <>
       <Form>
@@ -143,6 +151,7 @@ function EditGeneral({ _course }: { _course: editCourseGeneralFragment$key }) {
             label="Title"
             variant="outlined"
             value={title}
+            error={title === ""}
             onChange={(e) => setTitle(e.target.value)}
             required
           />
@@ -162,6 +171,12 @@ function EditGeneral({ _course }: { _course: editCourseGeneralFragment$key }) {
             value={startDate}
             maxDate={endDate ?? undefined}
             onChange={setStartDate}
+            slotProps={{
+              textField: {
+                required: true,
+                error: startDate == null || !startDate.isValid(),
+              },
+            }}
           />
           <DatePicker
             label="End date"
@@ -169,6 +184,12 @@ function EditGeneral({ _course }: { _course: editCourseGeneralFragment$key }) {
             minDate={startDate ?? undefined}
             defaultCalendarMonth={startDate ?? undefined}
             onChange={setEndDate}
+            slotProps={{
+              textField: {
+                required: true,
+                error: endDate == null || !endDate.isValid(),
+              },
+            }}
           />
         </FormSection>
 
@@ -181,8 +202,9 @@ function EditGeneral({ _course }: { _course: editCourseGeneralFragment$key }) {
 
         <FormActions>
           <Button disabled={!valid} variant="contained" onClick={handleSubmit}>
-            Update course
+            Update
           </Button>
+          <Button onClick={handleReset}>Reset</Button>
         </FormActions>
       </Form>
       <Backdrop open={isUpdating} sx={{ zIndex: "modal" }}>

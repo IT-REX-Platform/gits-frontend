@@ -12,6 +12,9 @@
     "check-format": "prettier --check .",
     "prepare": "husky install"
   },
+  "lint-staged": {
+    "*.{tsx,tsx,css,json}": "prettier --write"
+  },
   "dependencies": {
     "@emotion/react": "^11.10.8",
     "@emotion/styled": "^11.10.8",
@@ -44,6 +47,7 @@
     "concurrently": "^8.0.1",
     "eslint-config-prettier": "^8.8.0",
     "husky": "^8.0.3",
+    "lint-staged": "^13.2.2",
     "prettier": "^2.8.8",
     "relay-compiler": "15.0.0"
   }

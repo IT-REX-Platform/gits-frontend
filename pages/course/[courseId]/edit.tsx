@@ -11,6 +11,7 @@ import { Heading } from "@/components/Heading";
 import { Add, Edit } from "@mui/icons-material";
 
 import {
+  Alert,
   Dialog,
   DialogActions,
   DialogContent,
@@ -26,7 +27,7 @@ import {
 } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers";
 import dayjs, { Dayjs } from "dayjs";
-import Error from "next/error";
+import NextError from "next/error";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import {
@@ -54,7 +55,7 @@ export default function EditCoursePage() {
 
   // Show 404 error page if id was not found
   if (coursesById.length == 0) {
-    return <Error statusCode={404} />;
+    return <NextError statusCode={404} />;
   }
 
   return (
@@ -117,7 +118,8 @@ function EditGeneral({ _course }: { _course: editCourseGeneralFragment$key }) {
   const [endDate, setEndDate] = useState<Dayjs | null>(dayjs(course.endDate));
   const [publish, setPublish] = useState(course.published);
 
-  const valid = title !== "" && startDate != null && endDate != null;
+  const valid = true; // title !== "" && startDate != null && endDate != null;
+  const [error, setError] = useState<any>(null);
 
   function handleSubmit() {
     updateCourse({
@@ -131,6 +133,9 @@ function EditGeneral({ _course }: { _course: editCourseGeneralFragment$key }) {
           published: publish,
         },
       },
+      onError(error) {
+        setError(error);
+      },
     });
   }
 
@@ -140,10 +145,20 @@ function EditGeneral({ _course }: { _course: editCourseGeneralFragment$key }) {
     setStartDate(dayjs(course.startDate));
     setEndDate(dayjs(course.endDate));
     setPublish(course.published);
+    setError(null);
   }
 
   return (
     <>
+      {error?.source.errors.map((err: any) => (
+        <Alert
+          severity="error"
+          sx={{ minWidth: 400, maxWidth: 800, width: "fit-content" }}
+          onClose={() => setError(null)}
+        >
+          {err.message}
+        </Alert>
+      ))}
       <Form>
         <FormSection title="Course details">
           <TextField

@@ -155,8 +155,9 @@ function EditGeneral({ _course }: { _course: editCourseGeneralFragment$key }) {
 
   return (
     <>
-      {error?.source.errors.map((err: any) => (
+      {error?.source.errors.map((err: any, i: number) => (
         <Alert
+          key={i}
           severity="error"
           sx={{ minWidth: 400, maxWidth: 800, width: "fit-content" }}
           onClose={() => setError(null)}
@@ -387,8 +388,8 @@ function EditChapterModal({
       <Dialog maxWidth="md" open={openModal} onClose={handleCloseModal}>
         <DialogTitle>Edit Chapter</DialogTitle>
         <DialogContent>
-          {error?.source.errors.map((err: any) => (
-            <Alert severity="error" onClose={() => setError(null)}>
+          {error?.source.errors.map((err: any, i: number) => (
+            <Alert key={i} severity="error" onClose={() => setError(null)}>
               {err.message}
             </Alert>
           ))}
@@ -534,8 +535,8 @@ function AddChapterModal({
       <Dialog maxWidth="md" open={open} onClose={onClose}>
         <DialogTitle>Add a Chapter</DialogTitle>
         <DialogContent>
-          {error?.source.errors.map((err: any) => (
-            <Alert severity="error" onClose={() => setError(null)}>
+          {error?.source.errors.map((err: any, i: number) => (
+            <Alert key={i} severity="error" onClose={() => setError(null)}>
               {err.message}
             </Alert>
           ))}

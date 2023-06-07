@@ -11,6 +11,7 @@ import { Heading } from "@/components/Heading";
 import { Add, Edit } from "@mui/icons-material";
 
 import {
+  Alert,
   Dialog,
   DialogActions,
   DialogContent,
@@ -26,7 +27,7 @@ import {
 } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers";
 import dayjs, { Dayjs } from "dayjs";
-import Error from "next/error";
+import NextError from "next/error";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import {
@@ -54,7 +55,7 @@ export default function EditCoursePage() {
 
   // Show 404 error page if id was not found
   if (coursesById.length == 0) {
-    return <Error statusCode={404} />;
+    return <NextError statusCode={404} />;
   }
 
   return (
@@ -115,9 +116,15 @@ function EditGeneral({ _course }: { _course: editCourseGeneralFragment$key }) {
     dayjs(course.startDate)
   );
   const [endDate, setEndDate] = useState<Dayjs | null>(dayjs(course.endDate));
-  const [publish, setPublish] = useState(false);
+  const [publish, setPublish] = useState(course.published);
 
-  const valid = title !== "" && startDate != null && endDate != null;
+  const [error, setError] = useState<any>(null);
+  const valid =
+    title !== "" &&
+    startDate != null &&
+    startDate.isValid() &&
+    endDate != null &&
+    endDate.isValid();
 
   function handleSubmit() {
     updateCourse({
@@ -131,11 +138,33 @@ function EditGeneral({ _course }: { _course: editCourseGeneralFragment$key }) {
           published: publish,
         },
       },
+      onError(error) {
+        setError(error);
+      },
     });
+  }
+
+  function handleReset() {
+    setTitle(course.title);
+    setDescription(course.description);
+    setStartDate(dayjs(course.startDate));
+    setEndDate(dayjs(course.endDate));
+    setPublish(course.published);
+    setError(null);
   }
 
   return (
     <>
+      {error?.source.errors.map((err: any, i: number) => (
+        <Alert
+          key={i}
+          severity="error"
+          sx={{ minWidth: 400, maxWidth: 800, width: "fit-content" }}
+          onClose={() => setError(null)}
+        >
+          {err.message}
+        </Alert>
+      ))}
       <Form>
         <FormSection title="Course details">
           <TextField
@@ -143,6 +172,7 @@ function EditGeneral({ _course }: { _course: editCourseGeneralFragment$key }) {
             label="Title"
             variant="outlined"
             value={title}
+            error={title === ""}
             onChange={(e) => setTitle(e.target.value)}
             required
           />
@@ -162,6 +192,12 @@ function EditGeneral({ _course }: { _course: editCourseGeneralFragment$key }) {
             value={startDate}
             maxDate={endDate ?? undefined}
             onChange={setStartDate}
+            slotProps={{
+              textField: {
+                required: true,
+                error: startDate == null || !startDate.isValid(),
+              },
+            }}
           />
           <DatePicker
             label="End date"
@@ -169,6 +205,12 @@ function EditGeneral({ _course }: { _course: editCourseGeneralFragment$key }) {
             minDate={startDate ?? undefined}
             defaultCalendarMonth={startDate ?? undefined}
             onChange={setEndDate}
+            slotProps={{
+              textField: {
+                required: true,
+                error: endDate == null || !endDate.isValid(),
+              },
+            }}
           />
         </FormSection>
 
@@ -181,8 +223,9 @@ function EditGeneral({ _course }: { _course: editCourseGeneralFragment$key }) {
 
         <FormActions>
           <Button disabled={!valid} variant="contained" onClick={handleSubmit}>
-            Update course
+            Update
           </Button>
+          <Button onClick={handleReset}>Reset</Button>
         </FormActions>
       </Form>
       <Backdrop open={isUpdating} sx={{ zIndex: "modal" }}>
@@ -246,11 +289,9 @@ function EditChapters({
         </Button>
       </div>
 
-      <AddChapterModal
-        _course={course}
-        open={openModal}
-        onClose={handleCloseModal}
-      />
+      {openModal && (
+        <AddChapterModal open _course={course} onClose={handleCloseModal} />
+      )}
     </>
   );
 }
@@ -261,14 +302,6 @@ function EditChapterModal({
   _chapter: editCourseEditChapterModalFragment$key;
 }) {
   const [openModal, setOpenModal] = useState(false);
-
-  const handleOpenModal = () => {
-    setOpenModal(true);
-  };
-
-  const handleCloseModal = () => {
-    setOpenModal(false);
-  };
 
   const chapter = useFragment(
     graphql`
@@ -287,6 +320,18 @@ function EditChapterModal({
     _chapter
   );
 
+  const handleOpenModal = () => {
+    setOpenModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setOpenModal(false);
+    setTitle(chapter.title);
+    setDescription(chapter.description);
+    setStartDate(dayjs(chapter.startDate));
+    setEndDate(dayjs(chapter.endDate));
+  };
+
   const [title, setTitle] = useState(chapter.title);
   const [description, setDescription] = useState(chapter.description);
   const [startDate, setStartDate] = useState<Dayjs | null>(
@@ -294,7 +339,13 @@ function EditChapterModal({
   );
   const [endDate, setEndDate] = useState<Dayjs | null>(dayjs(chapter.endDate));
 
-  const valid = title !== "" && startDate != null && endDate != null;
+  const [error, setError] = useState<any>(null);
+  const valid =
+    title !== "" &&
+    startDate != null &&
+    startDate.isValid() &&
+    endDate != null &&
+    endDate.isValid();
 
   const [updateChapter, isUpdating] =
     useMutation<editCourseEditChaptersMutation>(graphql`
@@ -323,6 +374,9 @@ function EditChapterModal({
       onCompleted() {
         handleCloseModal();
       },
+      onError(error) {
+        setError(error);
+      },
     });
   }
 
@@ -334,6 +388,11 @@ function EditChapterModal({
       <Dialog maxWidth="md" open={openModal} onClose={handleCloseModal}>
         <DialogTitle>Edit Chapter</DialogTitle>
         <DialogContent>
+          {error?.source.errors.map((err: any, i: number) => (
+            <Alert key={i} severity="error" onClose={() => setError(null)}>
+              {err.message}
+            </Alert>
+          ))}
           <Form>
             <FormSection title="General">
               <TextField
@@ -341,6 +400,7 @@ function EditChapterModal({
                 label="Title"
                 variant="outlined"
                 value={title}
+                error={title === ""}
                 onChange={(e) => setTitle(e.target.value)}
                 required
               />
@@ -360,6 +420,12 @@ function EditChapterModal({
                 value={startDate}
                 maxDate={endDate ?? undefined}
                 onChange={setStartDate}
+                slotProps={{
+                  textField: {
+                    required: true,
+                    error: startDate == null || !startDate.isValid(),
+                  },
+                }}
               />
               <DatePicker
                 label="End date"
@@ -367,6 +433,12 @@ function EditChapterModal({
                 minDate={startDate ?? undefined}
                 defaultCalendarMonth={startDate ?? undefined}
                 onChange={setEndDate}
+                slotProps={{
+                  textField: {
+                    required: true,
+                    error: endDate == null || !endDate.isValid(),
+                  },
+                }}
               />
             </FormSection>
           </Form>
@@ -415,7 +487,13 @@ function AddChapterModal({
   const [startDate, setStartDate] = useState<Dayjs | null>(dayjs());
   const [endDate, setEndDate] = useState<Dayjs | null>(dayjs());
 
-  const valid = title !== "" && startDate != null && endDate != null;
+  const [error, setError] = useState<any>(null);
+  const valid =
+    title !== "" &&
+    startDate != null &&
+    startDate.isValid() &&
+    endDate != null &&
+    endDate.isValid();
 
   const [addChapter, isUpdating] =
     useMutation<editCourseChaptersMutation>(graphql`
@@ -446,6 +524,9 @@ function AddChapterModal({
       onCompleted() {
         onClose();
       },
+      onError(error) {
+        setError(error);
+      },
     });
   }
 
@@ -454,6 +535,11 @@ function AddChapterModal({
       <Dialog maxWidth="md" open={open} onClose={onClose}>
         <DialogTitle>Add a Chapter</DialogTitle>
         <DialogContent>
+          {error?.source.errors.map((err: any, i: number) => (
+            <Alert key={i} severity="error" onClose={() => setError(null)}>
+              {err.message}
+            </Alert>
+          ))}
           <Form>
             <FormSection title="General">
               <TextField
@@ -480,6 +566,12 @@ function AddChapterModal({
                 value={startDate}
                 maxDate={endDate ?? undefined}
                 onChange={setStartDate}
+                slotProps={{
+                  textField: {
+                    required: true,
+                    error: startDate?.isValid() === false,
+                  },
+                }}
               />
               <DatePicker
                 label="End date"
@@ -487,6 +579,12 @@ function AddChapterModal({
                 minDate={startDate ?? undefined}
                 defaultCalendarMonth={startDate ?? undefined}
                 onChange={setEndDate}
+                slotProps={{
+                  textField: {
+                    required: true,
+                    error: endDate?.isValid() === false,
+                  },
+                }}
               />
             </FormSection>
           </Form>

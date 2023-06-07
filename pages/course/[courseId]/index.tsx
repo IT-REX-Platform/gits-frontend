@@ -3,6 +3,7 @@ import AssignmentIcon from "@mui/icons-material/Assignment";
 import QuizIcon from "@mui/icons-material/Quiz";
 import StyleOutlinedIcon from "@mui/icons-material/StyleOutlined";
 import { Button } from "@mui/material";
+import Error from "next/error";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { graphql, useLazyLoadQuery } from "react-relay";
@@ -32,27 +33,27 @@ export default function Details() {
     { id: [id] }
   );
 
-  const course = coursesById[0];
+  // Show 404 error page if id was not found
+  if (coursesById.length == 0) {
+    return <Error statusCode={404} title="Course could not be found." />;
+  }
 
   //TODO: change later, when implementing the services into this side
-  const chapters = course.chapters;
+  const course = coursesById[0];
   const knowledge = 88;
   const understanding = 50;
   const analyses = 40;
   const usage = 22;
-  let viewablechapters = [];
 
-  for (let index = 0; index < chapters.length; index++) {
-    const element = chapters.at(index);
-    const start = new Date(element?.startDate);
-    const end = new Date(element?.endDate);
-    if (
+  const viewablechapters = course.chapters.filter((chapter) => {
+    const start = new Date(chapter?.startDate);
+    const end = new Date(chapter?.endDate);
+
+    return (
       start.toISOString() <= currentDate.toISOString() &&
       end.toISOString() >= currentDate.toISOString()
-    ) {
-      viewablechapters.push(element);
-    }
-  }
+    );
+  });
 
   return (
     <div className="grid grid-flow-dense grid-cols-6 gap-2 m-10">

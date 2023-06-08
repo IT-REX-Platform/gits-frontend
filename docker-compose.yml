@@ -16,4 +16,8 @@ services:
     environment:
       - KEYCLOAK_ADMIN=admin
       - KEYCLOAK_ADMIN_PASSWORD=admin
-    command: start-dev
+    command: start-dev --import-realm
+    volumes:
+      - type: bind
+        source: ./../gits-frontend/keycloak-realm
+        target: /opt/keycloak/data/import

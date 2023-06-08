@@ -1,215 +1,672 @@
-scalar DateTime
-scalar UUID
+directive @ContainerNotEmpty(message: String = "graphql.validation.ContainerNotEmpty.message") on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
 
-# Course of the application
-type Course {
-  # UUID of the course
-  id: UUID!
-  # Title of the course, max 255 characters
-  title: String!
-  # Description of the course, max 3000 characters
-  description: String!
-  # Start date of the course, ISO 8601 format
-  startDate: DateTime!
-  # End date of the course, ISO 8601 format
-  endDate: DateTime!
-  # Published status of the course
-  published: Boolean!
-  # Chapters of the course
-  chapters: [Chapter!]!
+directive @ContainerSize(max: Int = 2147483647, message: String = "graphql.validation.ContainerSize.message", min: Int = 0) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
 
-  currentUserRole: CourseRole!
-}
+""" see also https://github.com/graphql-java/graphql-java-extended-validation/blob/master/README.md
+"""
+directive @DecimalMax(inclusive: Boolean! = true, message: String = "graphql.validation.DecimalMax.message", value: String!) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
 
-enum CourseRole {
-  Lecturer
-  Student
-}
+directive @DecimalMin(inclusive: Boolean! = true, message: String = "graphql.validation.DecimalMin.message", value: String!) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
 
-input CreateCourseInput {
-  # Title of the course, max 255 characters
-  title: String! @NotBlank @Size(max: 255)
-  # Description of the course, max 3000 characters
-  description: String! @Size(max: 3000)
-  # Start date of the course, ISO 8601 format
-  startDate: DateTime!
-  # End date of the course, ISO 8601 format
-  endDate: DateTime!
-  # Published status of the course
-  published: Boolean!
-}
+directive @Max(message: String = "graphql.validation.Max.message", value: Int! = 2147483647) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
 
-input UpdateCourseInput {
-  # UUID of the course
-  id: UUID!
-  # Title of the course, max 255 characters
-  title: String! @NotBlank @Size(max: 255)
-  # Description of the course, max 3000 characters
-  description: String! @Size(max: 3000)
-  # Start date of the course, ISO 8601 format
-  startDate: DateTime!
-  # End date of the course, ISO 8601 format
-  endDate: DateTime!
-  # Published status of the course
-  published: Boolean!
-}
+directive @Min(message: String = "graphql.validation.Min.message", value: Int! = 0) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
 
-# Chapter of a course
+directive @Negative(message: String = "graphql.validation.Negative.message") on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+
+directive @NegativeOrZero(message: String = "graphql.validation.NegativeOrZero.message") on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+
+directive @NotBlank(message: String = "graphql.validation.NotBlank.message") on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+
+directive @NotEmpty(message: String = "graphql.validation.NotEmpty.message") on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+
+directive @Pattern(message: String = "graphql.validation.Pattern.message", regexp: String! = ".*") on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+
+directive @Positive(message: String = "graphql.validation.Positive.message") on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+
+directive @PositiveOrZero(message: String = "graphql.validation.PositiveOrZero.message") on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+
+directive @Range(max: Int = 2147483647, message: String = "graphql.validation.Range.message", min: Int = 0) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+
+directive @Size(max: Int = 2147483647, message: String = "graphql.validation.Size.message", min: Int = 0) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+
+directive @resolveTo(additionalArgs: ResolveToSourceArgs, filterBy: String, keyField: String, keysArg: String, pubsubTopic: String, requiredSelectionSet: String, result: String, resultType: String, sourceArgs: ResolveToSourceArgs, sourceFieldName: String!, sourceName: String!, sourceSelectionSet: String, sourceTypeName: String!) on FIELD_DEFINITION
+
+"""A chapter is a part of a course."""
 type Chapter {
-  # UUID of the chapter
-  id: UUID!
-  # Title of the chapter, max 255 characters
-  title: String!
-  # Description of the chapter, max 3000 characters
-  description: String!
-  # Number of the chapter, determines the order of the chapters
-  number: Int!
-  # Start date of the chapter, ISO 8601 format
-  startDate: DateTime!
-  # End date of the chapter, ISO 8601 format
-  endDate: DateTime!
-  # The course the chapter belongs to
+  contents: [Content!]!
+
+  """The course the chapter belongs to."""
   course: Course!
+
+  """Description of the chapter, maximum length is 3000 characters."""
+  description: String!
+
+  """End date of the chapter, ISO 8601 format."""
+  endDate: DateTime!
+
+  """UUID of the chapter, generated automatically"""
+  id: UUID!
+
+  """Number of the chapter, determines the order of the chapters."""
+  number: Int!
+
+  """Start date of the chapter, ISO 8601 format."""
+  startDate: DateTime!
+
+  """Title of the chapter, maximum length is 255 characters."""
+  title: String!
 }
 
+input ChapterFilter {
+  and: [ChapterFilter!]
+  description: StringFilter
+  endDate: DateTimeFilter
+  not: ChapterFilter
+  number: IntFilter
+  or: [ChapterFilter!]
+  startDate: DateTimeFilter
+  title: StringFilter
+}
+
+"""
+Return type of the chapters query, contains a list of chapters and pagination info.
+"""
+type ChapterPayload {
+  elements: [Chapter!]!
+  pagination: PaginationInfo!
+}
+
+""" schema file of the microservice"""
+type Content {
+  """ ID of the chapter this content is associated with"""
+  chapterId: UUID!
+
+  """ ID of the content"""
+  id: UUID!
+  mediaRecords: [MediaRecord!]!
+
+  """ name of the content"""
+  name: String!
+
+  """ Number of reward points a student receives for completing this content
+  """
+  rewardPoints: Int!
+
+  """ Tags this content is tagged with"""
+  tags: [Tag]!
+
+  """ purpose unclear"""
+  workedOn: Boolean!
+}
+
+"""
+Courses are the main entity of the application. They are the top level of the
+hierarchy and contain chapters.
+"""
+type Course {
+  """Chapters of the course. Can be filtered and sorted."""
+  chapters(
+    filter: ChapterFilter
+    pagination: Pagination
+
+    """
+    The fields to sort by. The default sort order is by chapter number.
+    Throws an error if no field with the given name exists.
+    """
+    sortBy: [String!]! = []
+
+    """The sort direction for each field. If not specified, defaults to ASC."""
+    sortDirection: [SortDirection!]! = [ASC]
+  ): ChapterPayload!
+
+  """Detailed description of the course. Maximal length is 3000 characters."""
+  description: String!
+
+  """
+  End date of the course, ISO 8601 format.
+  Users can no longer access the course and work on course content after the end date.
+  Must be after the start date.
+  """
+  endDate: DateTime!
+
+  """
+  UUID of the course. Generated automatically when creating a new course.
+  """
+  id: UUID!
+
+  """
+  Published state of the course. If the course is published, it is visible to users.
+  """
+  published: Boolean!
+
+  """
+  Start date of the course, ISO 8601 format.
+  Users can only access the course and work on course content after the start date.
+  Must be before the end date.
+  """
+  startDate: DateTime!
+
+  """
+  Title of the course. Maximal length is 255 characters, must not be blank.
+  """
+  title: String!
+}
+
+"""
+Input type for filtering courses. All fields are optional.
+If multiple filters are specified, they are combined with AND (except for the or field).
+"""
+input CourseFilter {
+  and: [CourseFilter!]
+  description: StringFilter
+  endDate: DateTimeFilter
+  not: CourseFilter
+  or: [CourseFilter!]
+  published: Boolean
+  startDate: DateTimeFilter
+  title: StringFilter
+}
+
+"""
+Return type for the course query. Contains the course and the pagination info.
+"""
+type CoursePayload {
+  elements: [Course!]!
+  pagination: PaginationInfo!
+}
+
+"""
+Resources are all types of content present in a course. Each resource can be available or unavailable in a course.
+"""
+type CourseResourceAssociation {
+  """A list of course IDs a resource is presently available in"""
+  availableCourses: [UUID!]!
+
+  """UUID of the resource."""
+  id: UUID!
+
+  """A list of course IDs a resource is presently unavailable in"""
+  unAvailableCourses: [UUID!]!
+}
+
+"""Input type for creating chapters."""
 input CreateChapterInput {
-  # Title of the chapter, max 255 characters
-  title: String! @NotBlank @Size(max: 255)
-  # Description of the chapter, max 3000 characters
-  description: String! @Size(max: 3000)
-  # Number of the chapter, determines the order of the chapters
-  number: Int! @Positive
-  # Start date of the chapter, ISO 8601 format
-  startDate: DateTime!
-  # End date of the chapter, ISO 8601 format
-  endDate: DateTime!
-  # The course the chapter belongs to
+  """
+  ID of the course the chapter belongs to.
+  Must be a UUID of an existing course.
+  """
   courseId: UUID!
-}
 
-input UpdateChapterInput {
-  id: UUID!
-  # Title of the chapter, max 255 characters
-  title: String! @NotBlank @Size(max: 255)
-  # Description of the chapter, max 3000 characters
-  description: String! @Size(max: 3000)
-  # Number of the chapter, determines the order of the chapters
-  number: Int! @Positive
-  # Start date of the chapter, ISO 8601 format
-  startDate: DateTime!
-  # End date of the chapter, ISO 8601 format
+  """Description of the chapter, maximum length is 3000 characters."""
+  description: String!
+
+  """
+  End date of the chapter, ISO 8601 format.
+  Must be after the start date.
+  """
   endDate: DateTime!
+
+  """
+  Number of the chapter, determines the order of the chapters, must be positive.
+  """
+  number: Int!
+
+  """
+  Start date of the chapter, ISO 8601 format.
+  Must be before the end date.
+  """
+  startDate: DateTime!
+
+  """
+  Title of the chapter, maximum length is 255 characters, must not be blank.
+  """
+  title: String!
 }
 
-type User {
-  id: UUID!
-  username: String!
-  email: String!
-  firstName: String!
-  lastName: String!
+input CreateContentInput {
+  """ chapter id the content will be associated with"""
+  chapterId: UUID!
 
-  coursesJoined: [Course!]!
-  coursesOwned: [Course!]!
-
-  role: UserRole!
-  # role?
-}
-
-enum UserRole {
-  Lecturer
-  Student
-}
-
-interface Content {
-  id: UUID!
+  """ name of the content, max 255 characters, cannot be empty"""
   name: String!
+
+  """ Number of reward points a student receives for completing this content
+  """
   rewardPoints: Int!
+
+  """ purpose unclear"""
   workedOn: Boolean!
 }
 
-type MediaContent implements Content {
-  id: UUID!
-  name: String!
-  rewardPoints: Int!
-  workedOn: Boolean!
+"""
+Input type for creating a new course. See also on the course type for detailed field descriptions.
+"""
+input CreateCourseInput {
+  """Description of the course, max 3000 characters."""
+  description: String!
 
-  media: MediaRecord!
-}
+  """
+  End date of the course, ISO 8601 format.
+  Must be after the start date.
+  """
+  endDate: DateTime!
 
-type MediaRecord {
-  id: UUID!
-  name: String!
-  type: MediaType!
+  """Published status of the course."""
+  published: Boolean!
+
+  """
+  Start date of the course, ISO 8601 format.
+  Must be before the end date.
+  """
+  startDate: DateTime!
+
+  """Title of the course, max 255 characters, must not be blank."""
+  title: String!
 }
 
 input CreateMediaRecordInput {
+  """ IDs of the MediaContents this media record is associated with"""
+  contentIds: [UUID!]!
+
+  """ Name of the media record. Cannot be blank, maximum length 255 characters.
+  """
   name: String!
+
+  """ Type of the media record."""
   type: MediaType!
 }
 
-input UpdateMediaRecordInput {
+""" Input type used to create a new tag"""
+input CreateTagInput {
+  """ name of the tag, max 255 characters"""
+  name: String!
+}
+
+input CreateUrlInput {
+  """ id of the media record of the file for which a url should be generated
+  """
   id: UUID!
+}
+
+"""An RFC-3339 compliant Full Date Scalar"""
+scalar Date
+
+"""A slightly refined version of RFC-3339 compliant DateTime Scalar"""
+scalar DateTime
+
+"""
+Filter for date values.
+If multiple filters are specified, they are combined with AND.
+"""
+input DateTimeFilter {
+  """If specified, filters for dates after the specified value."""
+  after: DateTime
+
+  """If specified, filters for dates before the specified value."""
+  before: DateTime
+}
+
+type DownloadUrl {
+  """ pre-signed Url from which the file can be downloaded"""
+  url: String
+}
+
+"""
+Filter for integer values.
+If multiple filters are specified, they are combined with AND.
+"""
+input IntFilter {
+  """An integer value to match exactly."""
+  equals: Int
+
+  """If specified, filters for values greater than to the specified value."""
+  greaterThan: Int
+
+  """If specified, filters for values less than to the specified value."""
+  lessThan: Int
+}
+
+"""
+24-hour clock time value string in the format `hh:mm:ss` or `hh:mm:ss.sss`.
+"""
+scalar LocalTime
+
+" schema file of the microservice\n defines data types, queries and mutations\n this can be done in a separate files as long as they are in this folder and\n end with .graphqls"
+type MediaRecord {
+  """ IDs of the MediaContents this media record is associated with"""
+  contentIds: [UUID!]!
+
+  """ ID of the media record"""
+  id: UUID!
+
+  """ Name of the media record"""
   name: String!
+
+  """ Type of the media record"""
   type: MediaType!
 }
 
+""" The type of the media record"""
 enum MediaType {
-  VIDEO
   AUDIO
+  DOCUMENT
   IMAGE
   PRESENTATION
-  DOCUMENT
   URL
-}
-
-type SkillLevel {
-  # TODO add assessments
-  id: UUID!
-}
-
-type Query {
-  currentUser: User!
-  courses: [Course!]! # TODO pagination and filters
-  coursesById(ids: [UUID!]!): [Course!]!
-
-  mediaRecordsById(ids: [UUID!]!): [MediaRecord!]!
+  VIDEO
 }
 
 type Mutation {
-  createCourse(input: CreateCourseInput!): Course!
-  updateCourse(input: UpdateCourseInput!): Course!
-  deleteCourse(id: UUID!): Course!
-
+  """
+  Creates a new chapter with the given input and returns the created chapter.
+  The course id must be a course id of an existing course.
+  """
   createChapter(input: CreateChapterInput!): Chapter!
-  updateChapter(input: UpdateChapterInput!): Chapter!
-  deleteChapter(id: UUID!): Chapter!
 
+  """ Create a new Content"""
+  createContent(input: CreateContentInput!): Content!
+
+  """
+  Creates a new course with the given input and returns the created course.
+  """
+  createCourse(input: CreateCourseInput!): Course!
+
+  """ Creates a new media record"""
   createMediaRecord(input: CreateMediaRecordInput!): MediaRecord!
+
+  """ Creates a new download URL for the given media record"""
+  createStorageDownloadUrl(input: CreateUrlInput): DownloadUrl
+
+  """ Creates a new upload URL for the given media record"""
+  createStorageUploadUrl(input: CreateUrlInput): UploadUrl
+
+  """ Create a new Tag"""
+  createTag(input: CreateTagInput!): Tag!
+
+  """
+  Deletes an existing chapter, throws an error if no chapter with the given id exists.
+  """
+  deleteChapter(id: UUID!): UUID!
+
+  """ Delete an existing Content, throws an error if no Content with the given id exists
+  """
+  deleteContent(id: UUID!): UUID!
+
+  """
+  Deletes an existing course, throws an error if no course with the given id exists.
+  """
+  deleteCourse(id: UUID!): UUID!
+
+  """ Deletes the media record with the given UUID"""
+  deleteMediaRecord(id: UUID!): UUID!
+
+  """ Delete an existing Tag, throws an error if no Tag with the given id exists
+  """
+  deleteTag(id: UUID!): UUID!
+
+  """
+  Updates an existing chapter with the given input and returns the updated chapter.
+  The chapter id must be a chapter id of an existing chapter.
+  """
+  updateChapter(input: UpdateChapterInput!): Chapter!
+
+  """ Update an existing Content"""
+  updateContent(input: UpdateContentInput!): Content!
+
+  """
+  Updates an existing course with the given input and returns the updated course.
+  The course id must be a course id of an existing course.
+  """
+  updateCourse(input: UpdateCourseInput!): Course!
+
+  """ Updates an existing media record with the given UUID"""
   updateMediaRecord(input: UpdateMediaRecordInput!): MediaRecord!
-  deleteMediaRecord(id: UUID!): MediaRecord!
+
+  """ Update an existing Tag"""
+  updateTag(input: UpdateTagInput!): Tag!
 }
 
-# see also https://github.com/graphql-java/graphql-java-extended-validation/blob/master/README.md
+"""Specifies the page size and page number for paginated results."""
+input Pagination {
+  """
+  The page number, starting at 0.
+  If not specified, the default value is 0.
+  For values greater than 0, the page size must be specified.
+  If this value is larger than the number of pages, an empty page is returned.
+  """
+  page: Int! = 0
 
-directive @Max(
-  value: Int! = 2147483647
-  message: String = "graphql.validation.Max.message"
-) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
-directive @Min(
-  value: Int! = 0
-  message: String = "graphql.validation.Min.message"
-) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
-directive @NotBlank(
-  message: String = "graphql.validation.NotBlank.message"
-) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
-directive @NotEmpty(
-  message: String = "graphql.validation.NotEmpty.message"
-) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
-directive @Positive(
-  message: String = "graphql.validation.Positive.message"
-) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
-directive @Size(
-  min: Int = 0
-  max: Int = 2147483647
-  message: String = "graphql.validation.Size.message"
-) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+  """The number of elements per page."""
+  size: Int!
+}
+
+"""Return type for information about paginated results."""
+type PaginationInfo {
+  """Whether there is a next page."""
+  hasNext: Boolean!
+
+  """The current page number."""
+  page: Int!
+
+  """The number of elements per page."""
+  size: Int!
+
+  """The total number of elements across all pages."""
+  totalElements: Int!
+
+  """The total number of pages."""
+  totalPages: Int!
+}
+
+type Query {
+  """
+  Get the list of chapters for a course. Can be filtered, sorted and paginated.
+  Throws an error if the course does not exist.
+  The default sort order is by chapter number.
+  """
+  chapters(
+    courseId: UUID!
+    filter: ChapterFilter
+    pagination: Pagination
+
+    """
+    The fields to sort by. The default sort order is by chapter number.
+    Throws an error if no field with the given name exists.
+    """
+    sortBy: [String!]! = []
+
+    """The sort direction for each field. If not specified, defaults to ASC."""
+    sortDirection: [SortDirection!]! = [ASC]
+  ): ChapterPayload!
+
+  """ get all contents"""
+  contents: [Content]
+
+  " get contents by chapter ids. Returns a list containing sublists, where each sublist contains all contents\n associated with that chapter"
+  contentsByChapterIds(chapterIds: [UUID!]!): [[Content!]!]!
+
+  """ get contents by ids"""
+  contentsById(ids: [UUID!]!): [Content!]!
+
+  """Get a list of courses. Can be filtered, sorted and paginated."""
+  courses(
+    filter: CourseFilter
+    pagination: Pagination
+
+    """
+    The fields to sort by.
+    Throws an error if no field with the given name exists.
+    """
+    sortBy: [String!]
+
+    """The sort direction for each field. If not specified, defaults to ASC."""
+    sortDirection: [SortDirection!]! = [ASC]
+  ): CoursePayload!
+
+  """Returns the courses with the given ids."""
+  coursesById(ids: [UUID!]!): [Course!]!
+
+  """ Returns all media records"""
+  mediaRecords: [MediaRecord!]!
+
+  " Returns the media records associated the given content IDs as a list of lists where each sublist contains\n the media records associated with the content ID at the same index in the input list"
+  mediaRecordsByContentIds(contentIds: [UUID!]!): [[MediaRecord!]!]!
+
+  """ Returns the media records with the given IDs"""
+  mediaRecordsById(ids: [UUID!]!): [MediaRecord!]!
+
+  """
+  Returns a set of Resource Objects for the given resource ids, containing a list of all course IDs for a resource and its availability in the course.
+  """
+  resourceById(ids: [UUID!]!): [CourseResourceAssociation!]!
+
+  """ get all tags"""
+  tags: [Tag]
+}
+
+scalar ResolveToSourceArgs
+
+"""Specifies the sort direction, either ascending or descending."""
+enum SortDirection {
+  ASC
+  DESC
+}
+
+"""
+Filter for string values.
+If multiple filters are specified, they are combined with AND.
+"""
+input StringFilter {
+  """
+  A string value that must be contained in the field that is being filtered.
+  """
+  contains: String
+
+  """A string value to match exactly."""
+  equals: String
+
+  """If true, the filter is case-insensitive."""
+  ignoreCase: Boolean! = false
+}
+
+type Tag {
+  """ ID of the tag"""
+  id: UUID!
+
+  """ Name of the tag"""
+  name: String!
+}
+
+"""An RFC-3339 compliant Full Time Scalar"""
+scalar Time
+
+"""A universally unique identifier compliant UUID Scalar"""
+scalar UUID
+
+"""
+Input type for updating chapters.
+The ID field specifies which chapter should be updated, all other fields specify the new values.
+"""
+input UpdateChapterInput {
+  """Description of the chapter, maximum length is 3000 characters."""
+  description: String!
+
+  """
+  End date of the chapter, ISO 8601 format.
+  Must be after the start date.
+  """
+  endDate: DateTime!
+
+  """UUID of the chapter that should be updated."""
+  id: UUID!
+
+  """
+  Number of the chapter, determines the order of the chapters, must be positive.
+  """
+  number: Int!
+
+  """
+  Start date of the chapter, ISO 8601 format.
+  Must be before the end date.
+  """
+  startDate: DateTime!
+
+  """
+  Title of the chapter, maximum length is 255 characters, must not be blank.
+  """
+  title: String!
+}
+
+input UpdateContentInput {
+  """ ID of the content that should be updated"""
+  id: UUID!
+
+  """ new name of the content, max 255 characters"""
+  name: String!
+
+  """ new reward points of the content"""
+  rewardPoints: Int!
+
+  """ new value for "workedOn" field of the content"""
+  workedOn: Boolean!
+}
+
+"""
+Input type for updating an existing course. See also on the course type for detailed field descriptions.
+The id specifies the course that should be updated, the other fields specify the new values.
+"""
+input UpdateCourseInput {
+  """The new description of the course, max 3000 characters."""
+  description: String!
+
+  """The new end date of the course, ISO 8601 format."""
+  endDate: DateTime!
+
+  """
+  UUID of the course that should be updated.
+  Must be an id of an existing course, otherwise an error is returned.
+  """
+  id: UUID!
+
+  """The new published status of the course."""
+  published: Boolean!
+
+  """The new start date of the course, ISO 8601 format."""
+  startDate: DateTime!
+
+  """The new title of the course, max 255 characters, must not be blank."""
+  title: String!
+}
+
+input UpdateMediaRecordInput {
+  """ IDs of the MediaContents this media record is associated with"""
+  contentIds: [UUID!]!
+
+  """ ID of the media record which should be updated"""
+  id: UUID!
+
+  """ New name of the media record. Cannot be blank, maximum length 255 characters.
+  """
+  name: String!
+
+  """ New type of the media record."""
+  type: MediaType!
+}
+
+""" Input type used to update an existing tag"""
+input UpdateTagInput {
+  """ ID of the tag to update"""
+  id: UUID!
+
+  """ New name of the tag"""
+  name: String!
+}
+
+type UploadUrl {
+  """ pre-signed Url to which the file can be uploaded"""
+  url: String
+}
+
+"""A Url scalar"""
+scalar Url

@@ -67,5 +67,5 @@ jobs:
         with:
           cache-from: type=gha
           cache-to: type=gha,mode=max
-          tags: ghcr.io/it-rex-platform/gits-frontend:main
+          tags: ghcr.io/it-rex-platform/frontend:latest
           push: true

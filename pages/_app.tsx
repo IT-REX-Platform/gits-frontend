@@ -9,6 +9,8 @@ import "@fontsource/roboto/300.css";
 import "@fontsource/roboto/400.css";
 import "@fontsource/roboto/500.css";
 import "@fontsource/roboto/700.css";
+import { LocalizationProvider } from "@mui/x-date-pickers";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import {
   AuthProvider,
   AuthProviderProps,
@@ -17,13 +19,11 @@ import {
 } from "react-oidc-context";
 import { RelayEnvironmentProvider } from "react-relay";
 import { RecordSource } from "relay-runtime";
-import { LocalizationProvider } from "@mui/x-date-pickers";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 
 const oidcConfig: AuthProviderProps = {
-  redirect_uri: "http://localhost:3000",
+  redirect_uri: "http://localhost:3005",
   client_id: "gits-frontend",
-  authority: "http://localhost:8080/realms/GITS",
+  authority: "http://localhost:9009/realms/GITS",
 
   onSigninCallback() {
     window.history.replaceState({}, document.title, window.location.pathname);

@@ -68,9 +68,13 @@ export default function Home() {
             href={{ pathname: `/course/${course.id}` }}
             key={course.id}
           >
-            <div className="text-xl font-bold">{course.title}</div>
-            <div className="text-sm italic">{course.description}</div>
-            <div className="w-64 h-20 mr-5 grid grid-cols-4 right-0">
+            <div className="text-sm min-[830px]:text-xl min-[830px]:font-bold">
+              {course.title}
+            </div>
+            <div className="text-xs min-[830px]:text-sm italic">
+              {course.description}
+            </div>
+            <div className="w-28 min-[830px]:w-40 lg:w-52 xl:w-64 h-20 mr-5 grid grid-cols-4 right-0">
               <VictoryPie
                 colorScale={["white", "transparent"]}
                 innerRadius={120}
@@ -171,9 +175,13 @@ export default function Home() {
                 href={{ pathname: `/course/${course.id}` }}
                 key={course.id}
               >
-                <div className="text-xl font-bold">{course.title}</div>
-                <div className="text-sm italic">{course.description}</div>
-                <div className="w-64 h-20 mr-5 grid grid-cols-4 right-0">
+                <div className="text-sm min-[830px]:text-xl min-[830px]:font-bold">
+                  {course.title}
+                </div>
+                <div className="text-xs min-[830px]:text-sm italic">
+                  {course.description}
+                </div>
+                <div className="w-28 min-[830px]:w-40 lg:w-52 xl:w-64 h-20 mr-5 grid grid-cols-4 right-0">
                   <div>
                     <VictoryPie
                       colorScale={["white", "transparent"]}

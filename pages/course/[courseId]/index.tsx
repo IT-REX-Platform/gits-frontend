@@ -2,7 +2,7 @@ import { CourseIdQuery } from "@/__generated__/CourseIdQuery.graphql";
 import AssignmentIcon from "@mui/icons-material/Assignment";
 import QuizIcon from "@mui/icons-material/Quiz";
 import StyleOutlinedIcon from "@mui/icons-material/StyleOutlined";
-import { Button } from "@mui/material";
+import { Button, Hidden } from "@mui/material";
 import Error from "next/error";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -62,7 +62,7 @@ export default function Details() {
       </div>
       <div className="col-span-full m-2 text-xl">{course.description}</div>
       <div className="col-span-6 border-solid border-sky-900 border-2 m-2 p-2 rounded-lg ">
-        <p className="underline">Skill levels</p>
+        <p className="max-[1000px]:hidden underline">Skill levels</p>
         <div className="grid grid-cols-4">
           <VictoryPie
             colorScale={["green", "transparent"]}
@@ -120,7 +120,7 @@ export default function Details() {
             onClick={() => router.push("/")}
             color="primary"
             variant="outlined"
-            endIcon={<StyleOutlinedIcon />}
+            endIcon={<StyleOutlinedIcon sx={{ display: { sm: "none" } }} />}
           >
             Flashcards
           </Button>
@@ -128,7 +128,7 @@ export default function Details() {
             onClick={() => router.push("/")}
             color="primary"
             variant="outlined"
-            endIcon={<QuizIcon />}
+            endIcon={<QuizIcon sx={{ display: { sm: "none" } }} />}
           >
             Quizzes
           </Button>
@@ -136,7 +136,7 @@ export default function Details() {
             onClick={() => router.push("/")}
             color="primary"
             variant="outlined"
-            endIcon={<AssignmentIcon />}
+            endIcon={<AssignmentIcon sx={{ display: { sm: "none" } }} />}
           >
             Assignments
           </Button>

@@ -45,12 +45,13 @@ export function Navbar() {
     <Drawer
       variant="persistent"
       anchor="left"
-      sx={{ width: 300, overflow: "auto" }}
+      //sx={{ width: 300, overflow: "auto" }}
+      className="w-36 md:w-52 lg:w-72 overflow-auto"
       PaperProps={{ sx: { position: "relative" } }}
       open
     >
-      <div className="text-center my-8 text-3xl font-medium tracking-wider">
-        <img src={logo.src} className="w-24 m-auto" />
+      <div className="text-center my-8 text-xl lg:text-3xl font-medium tracking-wider">
+        <img src={logo.src} className="w-12 lg:w-24 m-auto" />
         GITS
       </div>
 
@@ -60,19 +61,23 @@ export function Navbar() {
           <ListItemIcon>
             <Home />
           </ListItemIcon>
-          <ListItemText primary="Home" />
+          <ListItemText primary="Home" className="hidden lg:block" />
         </ListItemButton>
         <ListItemButton onClick={() => router.push("/join")}>
           <ListItemIcon>
             <CollectionsBookmark />
           </ListItemIcon>
-          <ListItemText primary="Course Catalog" />
+          <ListItemText primary="Course Catalog" className="hidden lg:block" />
         </ListItemButton>
       </List>
 
       <Divider />
       <List
-        subheader={<ListSubheader>Courses I&apos;m attending</ListSubheader>}
+        subheader={
+          <ListSubheader className="text-xs md:text-base">
+            Courses I&apos;m attending
+          </ListSubheader>
+        }
         dense
       >
         {query.currentUser.coursesJoined.map((course) => (
@@ -88,6 +93,7 @@ export function Navbar() {
             <ListItemText
               primary={course.title}
               primaryTypographyProps={{ noWrap: true }}
+              className="hidden lg:block"
             />
           </ListItemButton>
         ))}
@@ -110,6 +116,7 @@ export function Navbar() {
             <ListItemText
               primary={course.title}
               primaryTypographyProps={{ noWrap: true }}
+              className="hidden lg:block"
             />
           </ListItemButton>
         ))}

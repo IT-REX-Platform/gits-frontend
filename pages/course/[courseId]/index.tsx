@@ -47,11 +47,11 @@ export default function Details() {
 
   const viewablechapters = course.chapters.filter((chapter) => {
     const start = new Date(chapter?.startDate);
-    const end = new Date(chapter?.endDate);
+    //const end = new Date(chapter?.endDate);
 
     return (
-      start.toISOString() <= currentDate.toISOString() &&
-      end.toISOString() >= currentDate.toISOString()
+      start.toISOString() <= currentDate.toISOString()
+      //end.toISOString() >= currentDate.toISOString()
     );
   });
 
@@ -120,7 +120,11 @@ export default function Details() {
             onClick={() => router.push("/")}
             color="primary"
             variant="outlined"
-            endIcon={<StyleOutlinedIcon sx={{ display: { sm: "none" } }} />}
+            endIcon={
+              <StyleOutlinedIcon
+                sx={{ display: { xs: "none", md: "block" } }}
+              />
+            }
           >
             Flashcards
           </Button>
@@ -128,7 +132,7 @@ export default function Details() {
             onClick={() => router.push("/")}
             color="primary"
             variant="outlined"
-            endIcon={<QuizIcon sx={{ display: { sm: "none" } }} />}
+            endIcon={<QuizIcon sx={{ display: { xs: "none", md: "block" } }} />}
           >
             Quizzes
           </Button>
@@ -136,7 +140,9 @@ export default function Details() {
             onClick={() => router.push("/")}
             color="primary"
             variant="outlined"
-            endIcon={<AssignmentIcon sx={{ display: { sm: "none" } }} />}
+            endIcon={
+              <AssignmentIcon sx={{ display: { xs: "none", md: "block" } }} />
+            }
           >
             Assignments
           </Button>

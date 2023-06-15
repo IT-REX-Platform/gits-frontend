@@ -50,8 +50,12 @@ export default function JoinCourse() {
             href={`/course/${course.id}`}
             key={course.id}
           >
-            <div className="text-base lg:text-xl font-bold">{course.title}</div>
-            <div className="text-sm italic">{course.description}</div>
+            <div className="text-sm min-[830px]:text-xl min-[830px]:font-bold">
+              {course.title}
+            </div>
+            <div className="text-xs min-[830px]:text-sm italic">
+              {course.description}
+            </div>
 
             <Button
               color="primary"

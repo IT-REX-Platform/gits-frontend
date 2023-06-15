@@ -148,8 +148,12 @@ export default function Home() {
             href={{ pathname: `/course/${course.id}` }}
             key={course.id}
           >
-            <div className="text-xl font-bold">{course.title}</div>
-            <div className="text-sm italic">{course.description}</div>
+            <div className="text-sm min-[830px]:text-xl min-[830px]:font-bold">
+              {course.title}
+            </div>
+            <div className="text-xs min-[830px]:text-sm italic">
+              {course.description}
+            </div>
 
             <div className="flex justify-end">
               <Button

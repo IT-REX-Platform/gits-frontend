@@ -61,20 +61,30 @@ export function Navbar() {
           <ListItemIcon>
             <Home />
           </ListItemIcon>
-          <ListItemText primary="Home" className="hidden lg:block" />
+          <ListItemText
+            primary="Home"
+            primaryTypographyProps={{
+              sx: { fontSize: { xs: 10, md: "default" } },
+            }}
+          />
         </ListItemButton>
         <ListItemButton onClick={() => router.push("/join")}>
           <ListItemIcon>
             <CollectionsBookmark />
           </ListItemIcon>
-          <ListItemText primary="Course Catalog" className="hidden lg:block" />
+          <ListItemText
+            primary="Course Catalog"
+            primaryTypographyProps={{
+              sx: { fontSize: { xs: 10, md: "default" } },
+            }}
+          />
         </ListItemButton>
       </List>
 
       <Divider />
       <List
         subheader={
-          <ListSubheader className="text-xs md:text-base">
+          <ListSubheader sx={{ fontSize: { xs: 10, md: "default" } }}>
             Courses I&apos;m attending
           </ListSubheader>
         }
@@ -92,15 +102,21 @@ export function Navbar() {
             </ListItemAvatar>
             <ListItemText
               primary={course.title}
-              primaryTypographyProps={{ noWrap: true }}
-              className="hidden lg:block"
+              primaryTypographyProps={{
+                noWrap: true,
+                sx: { fontSize: { xs: 10, md: "default" } },
+              }}
             />
           </ListItemButton>
         ))}
       </List>
       <List
         sx={{ flexGrow: "1" }}
-        subheader={<ListSubheader>Courses I&apos;m tutoring</ListSubheader>}
+        subheader={
+          <ListSubheader sx={{ fontSize: { xs: 10, md: "default" } }}>
+            Courses I&apos;m tutoring
+          </ListSubheader>
+        }
         dense
       >
         {query.currentUser.coursesOwned.map((course) => (
@@ -115,8 +131,10 @@ export function Navbar() {
             </ListItemAvatar>
             <ListItemText
               primary={course.title}
-              primaryTypographyProps={{ noWrap: true }}
-              className="hidden lg:block"
+              primaryTypographyProps={{
+                noWrap: true,
+                sx: { fontSize: { xs: 10, md: "default" } },
+              }}
             />
           </ListItemButton>
         ))}
@@ -140,7 +158,12 @@ export function Navbar() {
           <ListItemAvatar>
             <Avatar src={auth.user?.profile?.picture} />
           </ListItemAvatar>
-          <ListItemText primary={auth.user?.profile?.name} />
+          <ListItemText
+            primary={auth.user?.profile?.name}
+            primaryTypographyProps={{
+              sx: { display: { xs: "none", md: "block" } },
+            }}
+          />
         </ListItem>
       </List>
     </Drawer>

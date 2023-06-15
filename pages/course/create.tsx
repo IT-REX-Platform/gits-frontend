@@ -64,7 +64,7 @@ export default function NewCourse() {
       content: (
         <>
           <TextField
-            className="w-96"
+            className="w-80 lg:w-96"
             label="Title"
             variant="outlined"
             value={title}
@@ -72,7 +72,7 @@ export default function NewCourse() {
             required
           />
           <TextField
-            className="w-96"
+            className="w-80 lg:w-96"
             label="Description"
             variant="outlined"
             value={description}

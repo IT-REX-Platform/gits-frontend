@@ -74,7 +74,7 @@ export default function Home() {
             <div className="text-xs min-[830px]:text-sm italic">
               {course.description}
             </div>
-            <div className="w-28 min-[830px]:w-40 lg:w-52 xl:w-64 h-20 mr-5 grid grid-cols-4 right-0">
+            <div className="w-28 min-[830px]:w-40 lg:w-52 xl:w-64 h-20 mr-5 hidden min-[830px]:grid grid-cols-4 right-0 ">
               <VictoryPie
                 colorScale={["white", "transparent"]}
                 innerRadius={120}
@@ -185,7 +185,7 @@ export default function Home() {
                 <div className="text-xs min-[830px]:text-sm italic">
                   {course.description}
                 </div>
-                <div className="w-28 min-[830px]:w-40 lg:w-52 xl:w-64 h-20 mr-5 grid grid-cols-4 right-0">
+                <div className="w-28 min-[830px]:w-40 lg:w-52 xl:w-64 h-20 mr-5 hidden min-[830px]:grid grid-cols-4 right-0">
                   <div>
                     <VictoryPie
                       colorScale={["white", "transparent"]}

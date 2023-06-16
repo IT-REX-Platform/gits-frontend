@@ -2,7 +2,7 @@ import { CourseIdQuery } from "@/__generated__/CourseIdQuery.graphql";
 import AssignmentIcon from "@mui/icons-material/Assignment";
 import QuizIcon from "@mui/icons-material/Quiz";
 import StyleOutlinedIcon from "@mui/icons-material/StyleOutlined";
-import { Button, Hidden } from "@mui/material";
+import { Button } from "@mui/material";
 import Error from "next/error";
 import Link from "next/link";
 import { useRouter } from "next/router";

@@ -3,8 +3,11 @@ import { graphql, useLazyLoadQuery } from "react-relay";
 
 import logo from "@/assets/logo.svg";
 import { Book, CollectionsBookmark, Home, Logout } from "@mui/icons-material";
+import MenuIcon from "@mui/icons-material/Menu";
 import {
   Avatar,
+  Box,
+  CssBaseline,
   Divider,
   Drawer,
   IconButton,
@@ -15,12 +18,24 @@ import {
   ListItemIcon,
   ListItemText,
   ListSubheader,
+  Toolbar,
   Tooltip,
 } from "@mui/material";
 import { useRouter } from "next/router";
 import { useAuth } from "react-oidc-context";
+import React from "react";
 
-export function Navbar() {
+const drawerWidth = 240;
+
+interface Props {
+  /**
+   * Injected by the documentation to work in an iframe.
+   * You won't need it on your project.
+   */
+  window?: () => Window;
+}
+
+export function Navbar(props: Props) {
   const query = useLazyLoadQuery<NavbarQuery>(
     graphql`
       query NavbarQuery {
@@ -41,20 +56,29 @@ export function Navbar() {
 
   const router = useRouter();
   const auth = useAuth();
-  return (
-    <Drawer
-      variant="persistent"
-      anchor="left"
-      //sx={{ width: 300, overflow: "auto" }}
-      className="w-36 md:w-52 lg:w-72 overflow-auto"
-      PaperProps={{ sx: { position: "relative" } }}
-      open
-    >
-      <div className="text-center my-8 text-xl lg:text-3xl font-medium tracking-wider">
-        <img src={logo.src} className="w-12 lg:w-24 m-auto" />
+
+  const { window } = props;
+  const [open, setOpen] = React.useState(false);
+
+  const handleDrawerToggle = () => {
+    setOpen(!open);
+  };
+
+  const drawer = (
+    <div>
+      <IconButton
+        color="inherit"
+        aria-label="open drawer"
+        onClick={handleDrawerToggle}
+        edge="start"
+        sx={{ mr: 2, display: { lg: "none" } }}
+      >
+        <MenuIcon />
+      </IconButton>
+      <div className="text-center my-8 text-3xl font-medium tracking-wider">
+        <img src={logo.src} className="w-24 m-auto" />
         GITS
       </div>
-
       <Divider />
       <List sx={{ paddingY: 2 }}>
         <ListItemButton onClick={() => router.push("/")}>
@@ -80,7 +104,6 @@ export function Navbar() {
           />
         </ListItemButton>
       </List>
-
       <Divider />
       <List
         subheader={
@@ -139,9 +162,8 @@ export function Navbar() {
           </ListItemButton>
         ))}
       </List>
-
       <Divider />
-      <List dense>
+      <List sx={{ bottom: "0px", position: "absolute" }} dense>
         <ListItem
           secondaryAction={
             <Tooltip title="Logout" placement="left">
@@ -158,14 +180,67 @@ export function Navbar() {
           <ListItemAvatar>
             <Avatar src={auth.user?.profile?.picture} />
           </ListItemAvatar>
-          <ListItemText
-            primary={auth.user?.profile?.name}
-            primaryTypographyProps={{
-              sx: { display: { xs: "none", md: "block" } },
-            }}
-          />
+          <ListItemText primary={auth.user?.profile?.name} />
         </ListItem>
       </List>
-    </Drawer>
+    </div>
+  );
+
+  const container =
+    window !== undefined ? () => window().document.body : undefined;
+
+  return (
+    <Box sx={{ display: "flex" }}>
+      <CssBaseline />
+      <Toolbar>
+        <IconButton
+          color="inherit"
+          aria-label="open drawer"
+          onClick={handleDrawerToggle}
+          edge="start"
+          sx={{ mr: 2, display: { lg: "none" } }}
+        >
+          <MenuIcon />
+        </IconButton>
+      </Toolbar>
+      <Box
+        component="nav"
+        sx={{ width: { sm: drawerWidth }, flexShrink: { sm: 0 } }}
+        aria-label="mailbox folders"
+      >
+        <Drawer
+          container={container}
+          variant="temporary"
+          anchor="left"
+          //sx={{ width: 300, overflow: "auto" }}
+          //className="w-36 md:w-52 lg:w-72 overflow-auto"
+          //PaperProps={{ sx: { position: "relative" } }}
+          open={open}
+          onClose={handleDrawerToggle}
+          ModalProps={{
+            keepMounted: true, // Better open performance on mobile.
+          }}
+          sx={{
+            display: { xs: "block" },
+          }}
+        >
+          {drawer}
+        </Drawer>
+
+        <Drawer
+          variant="permanent"
+          sx={{
+            display: { xs: "none", sm: "block" },
+            "& .MuiDrawer-paper": {
+              boxSizing: "border-box",
+              width: drawerWidth,
+            },
+          }}
+          open
+        >
+          {drawer}
+        </Drawer>
+      </Box>
+    </Box>
   );
 }

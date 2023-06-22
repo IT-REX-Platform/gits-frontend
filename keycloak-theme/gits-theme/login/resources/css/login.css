@@ -20,7 +20,7 @@ body {
 }
 
 #kc-header-wrapper {
-  background-image: url(http://localhost:3000/_next/static/media/logo.5ef8dae5.svg);
+  background-image: url(/_next/static/media/logo.5ef8dae5.svg);
   width: 100px;
   height: 100px;
   background-position: center;

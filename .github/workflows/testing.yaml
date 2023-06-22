@@ -87,6 +87,7 @@ jobs:
       - name: Build docker container
         uses: docker/build-push-action@v4
         with:
+          file: Dockerfile.keycloak
           cache-from: type=gha
           cache-to: type=gha,mode=max
           tags: ghcr.io/it-rex-platform/keycloak:latest

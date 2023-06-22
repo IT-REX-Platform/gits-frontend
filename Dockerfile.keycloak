@@ -1,0 +1,2 @@
+FROM docker.io/bitnami/keycloak:21.1.1-debian-11-r17
+COPY keycloak-theme/gits-theme /opt/bitnami/keycloak/themes/gits-theme

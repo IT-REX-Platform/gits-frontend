@@ -67,7 +67,7 @@ export function Navbar(props: Props) {
         aria-label="open drawer"
         onClick={handleDrawerToggle}
         edge="start"
-        sx={{ mr: 2, display: { lg: "none" } }}
+        sx={{ mr: 2, display: { sm: "none" } }}
       >
         <MenuIcon />
       </IconButton>
@@ -196,7 +196,7 @@ export function Navbar(props: Props) {
           aria-label="open drawer"
           onClick={handleDrawerToggle}
           edge="start"
-          sx={{ mr: 2, display: { lg: "none" } }}
+          sx={{ mr: 2, display: { sm: "none" } }}
         >
           <MenuIcon />
         </IconButton>
@@ -210,9 +210,6 @@ export function Navbar(props: Props) {
           container={container}
           variant="temporary"
           anchor="left"
-          //sx={{ width: 300, overflow: "auto" }}
-          //className="w-36 md:w-52 lg:w-72 overflow-auto"
-          //PaperProps={{ sx: { position: "relative" } }}
           open={open}
           onClose={handleDrawerToggle}
           ModalProps={{

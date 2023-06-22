@@ -35,7 +35,9 @@ function StudentPage({ _query }: { _query: pagesStudentFragment$key }) {
   return (
     <div>
       <div className="flex justify-between items-end">
-        <Subheading>Courses I&apos;m attending</Subheading>
+        <Subheading className="text-xl lg:text-3xl">
+          Courses I&apos;m attending
+        </Subheading>
         <div className="mb-5 mr-10">
           <Button
             onClick={() => router.push("/join")}
@@ -112,7 +114,7 @@ function StudentPage({ _query }: { _query: pagesStudentFragment$key }) {
         ))}
       </div>
 
-      <Subheading>
+      <Subheading className="text-xl lg:text-3xl">
         Completed Courses
         <Accordion className="mx-10">
           <div className="flex flex-col gap-3">
@@ -281,7 +283,9 @@ export default function Home() {
   return (
     <main>
       <Heading className="mb-5 flex justify-between">
-        <div>Welcome back to GITS, {user?.profile.name}!</div>{" "}
+        <div className="text-xl lg:text-3xl">
+          Welcome back to GITS, {user?.profile.name}!
+        </div>{" "}
         <Button
           size="small"
           className="px-4"

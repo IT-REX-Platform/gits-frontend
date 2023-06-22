@@ -39,12 +39,8 @@ export function Navbar(props: Props) {
   const query = useLazyLoadQuery<NavbarQuery>(
     graphql`
       query NavbarQuery {
-        currentUser {
-          coursesJoined {
-            id
-            title
-          }
-          coursesOwned {
+        courses {
+          elements {
             id
             title
           }
@@ -113,7 +109,8 @@ export function Navbar(props: Props) {
         }
         dense
       >
-        {query.currentUser.coursesJoined.map((course) => (
+        {/* MOCK */}
+        {query.courses.elements.map((course) => (
           <ListItemButton
             key={course.id}
             onClick={() => router.push(`/course/${course.id}`)}
@@ -142,7 +139,8 @@ export function Navbar(props: Props) {
         }
         dense
       >
-        {query.currentUser.coursesOwned.map((course) => (
+        {/* MOCK */}
+        {query.courses.elements.map((course) => (
           <ListItemButton
             key={course.id}
             onClick={() => router.push(`/course/${course.id}`)}

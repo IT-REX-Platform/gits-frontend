@@ -2,9 +2,12 @@ version: "3.7"
 
 services:
   gits-frontend:
-    build: .
+    build:
+      context: ./../gits-frontend
+      dockerfile: Dockerfile
+
     ports:
-      - "3001:3000"
+      - "3005:3000"
 
   keycloak:
     image: quay.io/keycloak/keycloak:21.1.1
@@ -13,4 +16,8 @@ services:
     environment:
       - KEYCLOAK_ADMIN=admin
       - KEYCLOAK_ADMIN_PASSWORD=admin
-    command: start-dev
+    command: start-dev --import-realm
+    volumes:
+      - type: bind
+        source: ./../gits-frontend/keycloak-realm
+        target: /opt/keycloak/data/import

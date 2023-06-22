@@ -11,9 +11,11 @@ export default function JoinCourse() {
     graphql`
       query joinQuery {
         courses {
-          id
-          title
-          description
+          elements {
+            id
+            title
+            description
+          }
         }
       }
     `,
@@ -22,7 +24,7 @@ export default function JoinCourse() {
 
   const [search, setSearch] = useState("");
 
-  const filteredCourses = courses.filter(
+  const filteredCourses = courses.elements.filter(
     (x) =>
       !search ||
       x.title.toLowerCase().includes(search.toLowerCase()) ||

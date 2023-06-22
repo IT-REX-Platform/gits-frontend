@@ -1,158 +1,463 @@
-scalar DateTime
-scalar UUID
+# Exposes a URL that specifies the behaviour of this scalar.
+directive @specifiedBy(
+  # The URL that specifies the behaviour of this scalar.
+  url: String!
+) on SCALAR
 
-# Course of the application
-type Course {
-  # UUID of the course
+#  see also https://github.com/graphql-java/graphql-java-extended-validation/blob/master/README.md
+directive @DecimalMax(
+  value: String!
+  inclusive: Boolean! = true
+  message: String = "graphql.validation.DecimalMax.message"
+) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+
+directive @DecimalMin(
+  value: String!
+  inclusive: Boolean! = true
+  message: String = "graphql.validation.DecimalMin.message"
+) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+
+directive @Max(
+  value: Int! = 2147483647
+  message: String = "graphql.validation.Max.message"
+) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+
+directive @Min(
+  value: Int! = 0
+  message: String = "graphql.validation.Min.message"
+) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+
+directive @Negative(
+  message: String = "graphql.validation.Negative.message"
+) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+
+directive @NegativeOrZero(
+  message: String = "graphql.validation.NegativeOrZero.message"
+) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+
+directive @NotBlank(
+  message: String = "graphql.validation.NotBlank.message"
+) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+
+directive @NotEmpty(
+  message: String = "graphql.validation.NotEmpty.message"
+) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+
+directive @ContainerNotEmpty(
+  message: String = "graphql.validation.ContainerNotEmpty.message"
+) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+
+directive @Pattern(
+  regexp: String! = ".*"
+  message: String = "graphql.validation.Pattern.message"
+) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+
+directive @Positive(
+  message: String = "graphql.validation.Positive.message"
+) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+
+directive @PositiveOrZero(
+  message: String = "graphql.validation.PositiveOrZero.message"
+) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+
+directive @Range(
+  min: Int = 0
+  max: Int = 2147483647
+  message: String = "graphql.validation.Range.message"
+) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+
+directive @Size(
+  min: Int = 0
+  max: Int = 2147483647
+  message: String = "graphql.validation.Size.message"
+) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+
+directive @ContainerSize(
+  min: Int = 0
+  max: Int = 2147483647
+  message: String = "graphql.validation.ContainerSize.message"
+) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+
+directive @resolveTo(
+  requiredSelectionSet: String
+  sourceName: String!
+  sourceTypeName: String!
+  sourceFieldName: String!
+  sourceSelectionSet: String
+  sourceArgs: ResolveToSourceArgs
+  keyField: String
+  keysArg: String
+  pubsubTopic: String
+  filterBy: String
+  additionalArgs: ResolveToSourceArgs
+  result: String
+  resultType: String
+) on FIELD_DEFINITION
+
+interface Assessment {
+  # Assessment metadata
+  assessmentMetadata: AssessmentMetadata!
+
+  # ID of the content
   id: UUID!
-  # Title of the course, max 255 characters
-  title: String!
-  # Description of the course, max 3000 characters
-  description: String!
-  # Start date of the course, ISO 8601 format
-  startDate: DateTime!
-  # End date of the course, ISO 8601 format
-  endDate: DateTime!
-  # Published status of the course
-  published: Boolean!
-  # Chapters of the course
-  chapters: [Chapter!]!
 
-  currentUserRole: CourseRole!
+  # Metadata of the content
+  metadata: ContentMetadata!
 }
 
-enum CourseRole {
-  Lecturer
-  Student
+type AssessmentMetadata {
+  # Number of skill points a student receives for completing this content
+  skillPoints: Int!
+
+  # Type of the assessment
+  skillType: SkillType!
 }
 
-input CreateCourseInput {
-  # Title of the course, max 255 characters
-  title: String! @NotBlank @Size(max: 255)
-  # Description of the course, max 3000 characters
-  description: String! @Size(max: 3000)
-  # Start date of the course, ISO 8601 format
-  startDate: DateTime!
-  # End date of the course, ISO 8601 format
-  endDate: DateTime!
-  # Published status of the course
-  published: Boolean!
+input AssessmentMetadataInput {
+  # Number of skill points a student receives for completing this content
+  skillPoints: Int!
+
+  # Type of the assessment
+  skillType: SkillType!
 }
 
-input UpdateCourseInput {
-  # UUID of the course
-  id: UUID!
-  # Title of the course, max 255 characters
-  title: String! @NotBlank @Size(max: 255)
-  # Description of the course, max 3000 characters
-  description: String! @Size(max: 3000)
-  # Start date of the course, ISO 8601 format
-  startDate: DateTime!
-  # End date of the course, ISO 8601 format
-  endDate: DateTime!
-  # Published status of the course
-  published: Boolean!
-}
-
-# Chapter of a course
+# A chapter is a part of a course.
 type Chapter {
-  # UUID of the chapter
+  # UUID of the chapter, generated automatically
   id: UUID!
-  # Title of the chapter, max 255 characters
+
+  # Title of the chapter, maximum length is 255 characters.
   title: String!
-  # Description of the chapter, max 3000 characters
+
+  # Description of the chapter, maximum length is 3000 characters.
   description: String!
-  # Number of the chapter, determines the order of the chapters
+
+  # Number of the chapter, determines the order of the chapters.
   number: Int!
-  # Start date of the chapter, ISO 8601 format
+
+  # Start date of the chapter, ISO 8601 format.
   startDate: DateTime!
-  # End date of the chapter, ISO 8601 format
+
+  # End date of the chapter, ISO 8601 format.
   endDate: DateTime!
-  # The course the chapter belongs to
+
+  # Suggested Start date to start the chapter, ISO 8601 format.
+  # Must be after Start Date and before the End dates.
+  suggestedStartDate: DateTime
+
+  # Suggested End date of the chapter, ISO 8601 format.
+  # Must be after the Start Dates and before the End dates.
+  suggestedEndDate: DateTime
+
+  # The course the chapter belongs to.
   course: Course!
+  contents: [Content!]!
 }
 
-input CreateChapterInput {
-  # Title of the chapter, max 255 characters
-  title: String! @NotBlank @Size(max: 255)
-  # Description of the chapter, max 3000 characters
-  description: String! @Size(max: 3000)
-  # Number of the chapter, determines the order of the chapters
-  number: Int! @Positive
-  # Start date of the chapter, ISO 8601 format
-  startDate: DateTime!
-  # End date of the chapter, ISO 8601 format
-  endDate: DateTime!
-  # The course the chapter belongs to
-  courseId: UUID!
+input ChapterFilter {
+  title: StringFilter
+  description: StringFilter
+  number: IntFilter
+  startDate: DateTimeFilter
+  endDate: DateTimeFilter
+  suggestedStartDate: DateTimeFilter
+  suggestedEndDate: DateTimeFilter
+  and: [ChapterFilter!]
+  or: [ChapterFilter!]
+  not: ChapterFilter
 }
 
-input UpdateChapterInput {
-  id: UUID!
-  # Title of the chapter, max 255 characters
-  title: String! @NotBlank @Size(max: 255)
-  # Description of the chapter, max 3000 characters
-  description: String! @Size(max: 3000)
-  # Number of the chapter, determines the order of the chapters
-  number: Int! @Positive
-  # Start date of the chapter, ISO 8601 format
-  startDate: DateTime!
-  # End date of the chapter, ISO 8601 format
-  endDate: DateTime!
-}
-
-type User {
-  id: UUID!
-  username: String!
-  email: String!
-  firstName: String!
-  lastName: String!
-
-  coursesJoined: [Course!]!
-  coursesOwned: [Course!]!
-
-  role: UserRole!
-  # role?
-}
-
-enum UserRole {
-  Lecturer
-  Student
+# Return type of the chapters query, contains a list of chapters and pagination info.
+type ChapterPayload {
+  elements: [Chapter!]!
+  pagination: PaginationInfo!
 }
 
 interface Content {
+  # ID of the content
   id: UUID!
-  name: String!
-  rewardPoints: Int!
-  workedOn: Boolean!
+
+  # Metadata of the content
+  metadata: ContentMetadata!
 }
 
-type MediaContent implements Content {
-  id: UUID!
+type ContentMetadata {
+  # Name of the content
   name: String!
-  rewardPoints: Int!
-  workedOn: Boolean!
 
-  media: MediaRecord!
+  # Content type
+  type: ContentType!
+
+  # Number of reward points a student receives for completing this content
+  rewardPoints: Int!
+
+  # ID of the chapter this content is associated with
+  chapterId: UUID!
+
+  # TagNames this content is tagged with
+  tagNames: [String!]!
 }
 
-type MediaRecord {
+type ContentPayload {
+  # the contents
+  elements: [Content!]!
+
+  # pagination info
+  pageInfo: PaginationInfo!
+}
+
+# Type of the content
+enum ContentType {
+  MEDIA
+  FLASHCARDS
+}
+
+# Courses are the main entity of the application. They are the top level of the
+# hierarchy and contain chapters.
+type Course {
+  # UUID of the course. Generated automatically when creating a new course.
   id: UUID!
+
+  # Title of the course. Maximal length is 255 characters, must not be blank.
+  title: String!
+
+  # Detailed description of the course. Maximal length is 3000 characters.
+  description: String!
+
+  # Start date of the course, ISO 8601 format.
+  # Users can only access the course and work on course content after the start date.
+  # Must be before the end date.
+  startDate: DateTime!
+
+  # End date of the course, ISO 8601 format.
+  # Users can no longer access the course and work on course content after the end date.
+  # Must be after the start date.
+  endDate: DateTime!
+
+  # Published state of the course. If the course is published, it is visible to users.
+  published: Boolean!
+
+  # Chapters of the course. Can be filtered and sorted.
+  chapters(
+    filter: ChapterFilter
+
+    # The fields to sort by. The default sort order is by chapter number.
+    # Throws an error if no field with the given name exists.
+    sortBy: [String!]! = []
+
+    # The sort direction for each field. If not specified, defaults to ASC.
+    sortDirection: [SortDirection!]! = [ASC]
+    pagination: Pagination
+  ): ChapterPayload!
+}
+
+# Input type for filtering courses. All fields are optional.
+# If multiple filters are specified, they are combined with AND (except for the or field).
+input CourseFilter {
+  title: StringFilter
+  description: StringFilter
+  startDate: DateTimeFilter
+  endDate: DateTimeFilter
+  published: Boolean
+  and: [CourseFilter!]
+  or: [CourseFilter!]
+  not: CourseFilter
+}
+
+# Return type for the course query. Contains the course and the pagination info.
+type CoursePayload {
+  elements: [Course!]!
+  pagination: PaginationInfo!
+}
+
+# Resources are all types of content present in a course. Each resource can be available or unavailable in a course.
+type CourseResourceAssociation {
+  # UUID of the resource.
+  id: UUID!
+
+  # A list of course IDs a resource is presently available in
+  availableCourses: [UUID!]!
+
+  # A list of course IDs a resource is presently unavailable in
+  unAvailableCourses: [UUID!]!
+}
+
+input CreateAssessmentInput {
+  # Metadata for the new Content
+  metadata: CreateContentMetadataInput!
+
+  # Assessment metadata
+  assessmentMetadata: AssessmentMetadataInput!
+}
+
+# Input type for creating chapters.
+input CreateChapterInput {
+  # Title of the chapter, maximum length is 255 characters, must not be blank.
+  title: String!
+
+  # Description of the chapter, maximum length is 3000 characters.
+  description: String!
+
+  # Number of the chapter, determines the order of the chapters, must be positive.
+  number: Int!
+
+  # Start date of the chapter, ISO 8601 format.
+  # Must be before the end date.
+  startDate: DateTime!
+
+  # End date of the chapter, ISO 8601 format.
+  # Must be after the start date.
+  endDate: DateTime!
+
+  # Suggested Start date to start the chapter, ISO 8601 format.
+  # Must be after Start Date and before the End dates.
+  suggestedStartDate: DateTime
+
+  # Suggested End date of the chapter, ISO 8601 format.
+  # Must be after the Start Dates and before the End dates.
+  suggestedEndDate: DateTime
+
+  # ID of the course the chapter belongs to.
+  # Must be a UUID of an existing course.
+  courseId: UUID!
+}
+
+input CreateContentMetadataInput {
+  # Name of the content
   name: String!
-  type: MediaType!
+
+  # Type of the content
+  type: ContentType!
+
+  # Number of reward points a student receives for completing this content
+  rewardPoints: Int!
+
+  # ID of the chapter this content is associated with
+  chapterId: UUID!
+
+  # TagNames this content is tagged with
+  tagNames: [String!]! = []
+}
+
+# Input type for creating a new course. See also on the course type for detailed field descriptions.
+input CreateCourseInput {
+  # Title of the course, max 255 characters, must not be blank.
+  title: String!
+
+  # Description of the course, max 3000 characters.
+  description: String!
+
+  # Start date of the course, ISO 8601 format.
+  # Must be before the end date.
+  startDate: DateTime!
+
+  # End date of the course, ISO 8601 format.
+  # Must be after the start date.
+  endDate: DateTime!
+
+  # Published status of the course.
+  published: Boolean!
+}
+
+# Input for creating new media content. Media specific fields are stored in the Media Service.
+input CreateMediaContentInput {
+  # Metadata for the new Content
+  metadata: CreateContentMetadataInput!
 }
 
 input CreateMediaRecordInput {
+  #  Name of the media record. Cannot be blank, maximum length 255 characters.
   name: String!
+
+  #  Type of the media record.
   type: MediaType!
+
+  #  IDs of the MediaContents this media record is associated with
+  contentIds: [UUID!]!
 }
 
-input UpdateMediaRecordInput {
+input CreateUrlInput {
+  #  id of the media record of the file for which a url should be generated
   id: UUID!
-  name: String!
-  type: MediaType!
 }
 
+# An RFC-3339 compliant Full Date Scalar
+scalar Date
+
+# A slightly refined version of RFC-3339 compliant DateTime Scalar
+scalar DateTime
+
+# Filter for date values.
+# If multiple filters are specified, they are combined with AND.
+input DateTimeFilter {
+  # If specified, filters for dates after the specified value.
+  after: DateTime
+
+  # If specified, filters for dates before the specified value.
+  before: DateTime
+}
+
+type DownloadUrl {
+  #  pre-signed Url from which the file can be downloaded
+  url: String
+}
+
+# A set of flashcards, flashcard related fields are stored in the flashcard service.
+type FlashcardSetAssessment implements Assessment & Content {
+  # Assessment metadata
+  assessmentMetadata: AssessmentMetadata!
+
+  # ID of the content
+  id: UUID!
+
+  # Metadata of the content
+  metadata: ContentMetadata!
+}
+
+# Filter for integer values.
+# If multiple filters are specified, they are combined with AND.
+input IntFilter {
+  # An integer value to match exactly.
+  equals: Int
+
+  # If specified, filters for values greater than to the specified value.
+  greaterThan: Int
+
+  # If specified, filters for values less than to the specified value.
+  lessThan: Int
+}
+
+# 24-hour clock time value string in the format `hh:mm:ss` or `hh:mm:ss.sss`.
+scalar LocalTime
+
+type MediaContent implements Content {
+  # ID of the content
+  id: UUID!
+
+  # Metadata of the content
+  metadata: ContentMetadata!
+  mediaRecords: [MediaRecord!]!
+}
+
+#  schema file of the microservice
+#  defines data types, queries and mutations
+#  this can be done in a separate files as long as they are in this folder and
+#  end with .graphqls
+type MediaRecord {
+  #  ID of the media record
+  id: UUID!
+
+  #  Name of the media record
+  name: String!
+
+  #  Type of the media record
+  type: MediaType!
+
+  #  IDs of the MediaContents this media record is associated with
+  contentIds: [UUID!]!
+}
+
+#  The type of the media record
 enum MediaType {
   VIDEO
   AUDIO
@@ -162,54 +467,294 @@ enum MediaType {
   URL
 }
 
-type SkillLevel {
-  # TODO add assessments
-  id: UUID!
+type Mutation {
+  # Creates a new course with the given input and returns the created course.
+  createCourse(input: CreateCourseInput!): Course!
+
+  # Creates a new chapter with the given input and returns the created chapter.
+  # The course id must be a course id of an existing course.
+  createChapter(input: CreateChapterInput!): Chapter!
+
+  # Updates an existing course with the given input and returns the updated course.
+  # The course id must be a course id of an existing course.
+  updateCourse(input: UpdateCourseInput!): Course!
+
+  # Updates an existing chapter with the given input and returns the updated chapter.
+  # The chapter id must be a chapter id of an existing chapter.
+  updateChapter(input: UpdateChapterInput!): Chapter!
+
+  # Deletes an existing course, throws an error if no course with the given id exists.
+  deleteCourse(id: UUID!): UUID!
+
+  # Deletes an existing chapter, throws an error if no chapter with the given id exists.
+  deleteChapter(id: UUID!): UUID!
+
+  # Create new media content
+  createMediaContent(input: CreateMediaContentInput!): MediaContent!
+
+  # Update an existing Content
+  updateMediaContent(input: UpdateMediaContentInput!): MediaContent!
+
+  # Create a new Assessment
+  createAssessment(input: CreateAssessmentInput!): Assessment!
+
+  # Update an existing Assessment
+  updateAssessment(input: UpdateAssessmentInput!): Assessment!
+
+  # Delete an existing Content, throws an error if no Content with the given id exists
+  deleteContent(id: UUID!): UUID!
+
+  # Add a tag to an existing content
+  addTagToContent(contentId: UUID!, tagName: String): Content!
+
+  # Remove a tag from an existing content
+  removeTagFromContent(contentId: UUID!, tagName: String): Content!
+
+  #  Creates a new media record
+  createMediaRecord(input: CreateMediaRecordInput!): MediaRecord!
+
+  #  Updates an existing media record with the given UUID
+  updateMediaRecord(input: UpdateMediaRecordInput!): MediaRecord!
+
+  #  Deletes the media record with the given UUID
+  deleteMediaRecord(id: UUID!): UUID!
+
+  #  Creates a new upload URL for the given media record
+  createStorageUploadUrl(input: CreateUrlInput): UploadUrl
+
+  #  Creates a new download URL for the given media record
+  createStorageDownloadUrl(input: CreateUrlInput): DownloadUrl
+}
+
+# Specifies the page size and page number for paginated results.
+input Pagination {
+  # The page number, starting at 0.
+  # If not specified, the default value is 0.
+  # For values greater than 0, the page size must be specified.
+  # If this value is larger than the number of pages, an empty page is returned.
+  page: Int! = 0
+
+  # The number of elements per page.
+  size: Int!
+}
+
+# Return type for information about paginated results.
+type PaginationInfo {
+  # The current page number.
+  page: Int!
+
+  # The number of elements per page.
+  size: Int!
+
+  # The total number of elements across all pages.
+  totalElements: Int!
+
+  # The total number of pages.
+  totalPages: Int!
+
+  # Whether there is a next page.
+  hasNext: Boolean!
 }
 
 type Query {
-  currentUser: User!
-  courses: [Course!]! # TODO pagination and filters
+  # Get a list of courses. Can be filtered, sorted and paginated.
+  courses(
+    filter: CourseFilter
+
+    # The fields to sort by.
+    # Throws an error if no field with the given name exists.
+    sortBy: [String!]
+
+    # The sort direction for each field. If not specified, defaults to ASC.
+    sortDirection: [SortDirection!]! = [ASC]
+    pagination: Pagination
+  ): CoursePayload!
+
+  # Returns the courses with the given ids.
   coursesById(ids: [UUID!]!): [Course!]!
 
+  # Returns a set of Resource Objects for the given resource ids, containing a
+  # list of all course IDs for a resource and its availability in the course.
+  resourceById(ids: [UUID!]!): [CourseResourceAssociation!]!
+
+  # Get the list of chapters for a course. Can be filtered, sorted and paginated.
+  # Throws an error if the course does not exist.
+  # The default sort order is by chapter number.
+  chapters(
+    courseId: UUID!
+    filter: ChapterFilter
+
+    # The fields to sort by. The default sort order is by chapter number.
+    # Throws an error if no field with the given name exists.
+    sortBy: [String!]! = []
+
+    # The sort direction for each field. If not specified, defaults to ASC.
+    sortDirection: [SortDirection!]! = [ASC]
+    pagination: Pagination
+  ): ChapterPayload!
+
+  # get all contents
+  contents: ContentPayload!
+
+  # get contents by ids
+  contentsByIds(ids: [UUID!]!): ContentPayload!
+
+  # get contents by chapter ids. Returns a list containing sublists, where each sublist contains all contents
+  # associated with that chapter
+  contentsByChapterIds(chapterIds: [UUID!]!): [ContentPayload!]!
+
+  #  Returns the media records with the given IDs
   mediaRecordsById(ids: [UUID!]!): [MediaRecord!]!
+
+  #  Returns all media records
+  mediaRecords: [MediaRecord!]!
+
+  #  Returns the media records associated the given content IDs as a list of lists where each sublist contains
+  #  the media records associated with the content ID at the same index in the input list
+  mediaRecordsByContentIds(contentIds: [UUID!]!): [[MediaRecord!]!]!
 }
 
-type Mutation {
-  createCourse(input: CreateCourseInput!): Course!
-  updateCourse(input: UpdateCourseInput!): Course!
-  deleteCourse(id: UUID!): Course!
+scalar ResolveToSourceArgs
 
-  createChapter(input: CreateChapterInput!): Chapter!
-  updateChapter(input: UpdateChapterInput!): Chapter!
-  deleteChapter(id: UUID!): Chapter!
-
-  createMediaRecord(input: CreateMediaRecordInput!): MediaRecord!
-  updateMediaRecord(input: UpdateMediaRecordInput!): MediaRecord!
-  deleteMediaRecord(id: UUID!): MediaRecord!
+# Type of the assessment
+enum SkillType {
+  REMEMBER
+  UNDERSTAND
+  APPLY
+  ANALYSE
 }
 
-# see also https://github.com/graphql-java/graphql-java-extended-validation/blob/master/README.md
+# Specifies the sort direction, either ascending or descending.
+enum SortDirection {
+  ASC
+  DESC
+}
 
-directive @Max(
-  value: Int! = 2147483647
-  message: String = "graphql.validation.Max.message"
-) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
-directive @Min(
-  value: Int! = 0
-  message: String = "graphql.validation.Min.message"
-) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
-directive @NotBlank(
-  message: String = "graphql.validation.NotBlank.message"
-) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
-directive @NotEmpty(
-  message: String = "graphql.validation.NotEmpty.message"
-) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
-directive @Positive(
-  message: String = "graphql.validation.Positive.message"
-) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
-directive @Size(
-  min: Int = 0
-  max: Int = 2147483647
-  message: String = "graphql.validation.Size.message"
-) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+# Filter for string values.
+# If multiple filters are specified, they are combined with AND.
+input StringFilter {
+  # A string value to match exactly.
+  equals: String
+
+  # A string value that must be contained in the field that is being filtered.
+  contains: String
+
+  # If true, the filter is case-insensitive.
+  ignoreCase: Boolean! = false
+}
+
+# An RFC-3339 compliant Full Time Scalar
+scalar Time
+
+input UpdateAssessmentInput {
+  # ID of the Content to update
+  id: UUID!
+
+  # Metadata for the new Content
+  metadata: UpdateContentMetadataInput!
+
+  # Assessment metadata
+  assessmentMetadata: AssessmentMetadataInput!
+}
+
+# Input type for updating chapters.
+# The ID field specifies which chapter should be updated, all other fields specify the new values.
+input UpdateChapterInput {
+  # UUID of the chapter that should be updated.
+  id: UUID!
+
+  # Title of the chapter, maximum length is 255 characters, must not be blank.
+  title: String!
+
+  # Description of the chapter, maximum length is 3000 characters.
+  description: String!
+
+  # Number of the chapter, determines the order of the chapters, must be positive.
+  number: Int!
+
+  # Start date of the chapter, ISO 8601 format.
+  # Must be before the end date.
+  startDate: DateTime!
+
+  # End date of the chapter, ISO 8601 format.
+  # Must be after the start date.
+  endDate: DateTime!
+
+  # Suggested Start date to start the chapter, ISO 8601 format.
+  # Must be after Start Date and before the End dates.
+  suggestedStartDate: DateTime
+
+  # Suggested End date of the chapter, ISO 8601 format.
+  # Must be after the Start Dates and before the End dates.
+  suggestedEndDate: DateTime
+}
+
+input UpdateContentMetadataInput {
+  # Name of the content
+  name: String!
+
+  # Number of reward points a student receives for completing this content
+  rewardPoints: Int!
+
+  # ID of the chapter this content is associated with
+  chapterId: UUID!
+
+  # TagNames this content is tagged with
+  tagNames: [String!]! = []
+}
+
+# Input type for updating an existing course. See also on the course type for detailed field descriptions.
+# The id specifies the course that should be updated, the other fields specify the new values.
+input UpdateCourseInput {
+  # UUID of the course that should be updated.
+  # Must be an id of an existing course, otherwise an error is returned.
+  id: UUID!
+
+  # The new title of the course, max 255 characters, must not be blank.
+  title: String!
+
+  # The new description of the course, max 3000 characters.
+  description: String!
+
+  # The new start date of the course, ISO 8601 format.
+  startDate: DateTime!
+
+  # The new end date of the course, ISO 8601 format.
+  endDate: DateTime!
+
+  # The new published status of the course.
+  published: Boolean!
+}
+
+input UpdateMediaContentInput {
+  # ID of the Content to update
+  id: UUID!
+
+  # Metadata for the new Content
+  metadata: UpdateContentMetadataInput!
+}
+
+input UpdateMediaRecordInput {
+  #  ID of the media record which should be updated
+  id: UUID!
+
+  #  New name of the media record. Cannot be blank, maximum length 255 characters.
+  name: String!
+
+  #  New type of the media record.
+  type: MediaType!
+
+  #  IDs of the MediaContents this media record is associated with
+  contentIds: [UUID!]!
+}
+
+type UploadUrl {
+  #  pre-signed Url to which the file can be uploaded
+  url: String
+}
+
+# A Url scalar
+scalar Url
+
+# A universally unique identifier compliant UUID Scalar
+scalar UUID

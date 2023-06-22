@@ -21,11 +21,13 @@ export default function Details() {
           title
           description
           chapters {
-            id
-            title
-            number
-            startDate
-            endDate
+            elements {
+              id
+              title
+              number
+              startDate
+              endDate
+            }
           }
         }
       }
@@ -45,7 +47,7 @@ export default function Details() {
   const analyses = 40;
   const usage = 22;
 
-  const viewablechapters = course.chapters.filter((chapter) => {
+  const viewablechapters = course.chapters.elements.filter((chapter) => {
     const start = new Date(chapter?.startDate);
     //const end = new Date(chapter?.endDate);
 

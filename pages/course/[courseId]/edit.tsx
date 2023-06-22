@@ -133,8 +133,8 @@ function EditGeneral({ _course }: { _course: editCourseGeneralFragment$key }) {
           id: course.id,
           title,
           description,
-          startDate: startDate!.format("YYYY-MM-DD"),
-          endDate: endDate!.format("YYYY-MM-DD"),
+          startDate: startDate!.toISOString(),
+          endDate: endDate!.toISOString(),
           published: publish,
         },
       },
@@ -245,12 +245,14 @@ function EditChapters({
       fragment editCourseChaptersFragment on Course {
         id
         chapters {
-          id
-          number
-          startDate
-          endDate
-          title
-          ...editCourseEditChapterModalFragment
+          elements {
+            id
+            number
+            startDate
+            endDate
+            title
+            ...editCourseEditChapterModalFragment
+          }
         }
         ...editCourseAddChapterModalFragment
       }
@@ -270,7 +272,7 @@ function EditChapters({
 
   return (
     <>
-      {course.chapters.map((chapter) => (
+      {course.chapters.elements.map((chapter) => (
         <div key={chapter.id} className="border-b">
           <div className="text-lg font-semibold px-4 pt-5 flex justify-between">
             {chapter.number}. {chapter.title}
@@ -366,8 +368,8 @@ function EditChapterModal({
           id: chapter.id,
           title,
           description,
-          startDate: startDate!.format("YYYY-MM-DD"),
-          endDate: endDate!.format("YYYY-MM-DD"),
+          startDate: startDate!.toISOString(),
+          endDate: endDate!.toISOString(),
           number: chapter.number,
         },
       },
@@ -474,8 +476,10 @@ function AddChapterModal({
       fragment editCourseAddChapterModalFragment on Course {
         id
         chapters {
-          id
-          number
+          elements {
+            id
+            title
+          }
         }
       }
     `,
@@ -508,7 +512,7 @@ function AddChapterModal({
     `);
 
   function handleSubmit() {
-    const nextCourseNumber = course.chapters.length + 1;
+    const nextCourseNumber = course.chapters.elements.length + 1;
 
     addChapter({
       variables: {
@@ -516,8 +520,8 @@ function AddChapterModal({
           courseId: course.id,
           title,
           description,
-          startDate: startDate!.format("YYYY-MM-DD"),
-          endDate: endDate!.format("YYYY-MM-DD"),
+          startDate: startDate!.toISOString(),
+          endDate: endDate!.toISOString(),
           number: nextCourseNumber,
         },
       },

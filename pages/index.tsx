@@ -11,27 +11,29 @@ import { graphql, useLazyLoadQuery } from "react-relay";
 import { VictoryLabel, VictoryPie } from "victory";
 
 export default function Home() {
-  const { allCourses, currentUser } = useLazyLoadQuery<pagesQuery>(
+  const { allCourses } = useLazyLoadQuery<pagesQuery>(
     graphql`
       query pagesQuery {
         allCourses: courses {
-          id
-          title
-          description
-        }
-        currentUser {
-          role
-          coursesJoined {
-            id
-            title
-            description
-          }
-          coursesOwned {
+          elements {
             id
             title
             description
           }
         }
+        # currentUser {
+        #   role
+        #   coursesJoined {
+        #     id
+        #     title
+        #     description
+        #   }
+        #   coursesOwned {
+        #     id
+        #     title
+        #     description
+        #   }
+        # }
       }
     `,
     {}
@@ -62,7 +64,8 @@ export default function Home() {
       </div>
 
       <div className="flex flex-col gap-3">
-        {currentUser.coursesJoined.map((course, index) => (
+        {/* MOCK */}
+        {allCourses.elements.map((course, index) => (
           <Link
             className="mx-10 font-bold text-white bg-sky-900 hover:bg-sky-800 p-5 pl-3 rounded-lg grid grid-cols-3 items-center"
             href={{ pathname: `/course/${course.id}` }}
@@ -123,22 +126,25 @@ export default function Home() {
 
       <div className="flex justify-between items-end">
         <Subheading>Courses I&apos;m tutoring</Subheading>
-        {currentUser.role === "Lecturer" && (
-          <div className="mb-5 mr-10">
-            <Button
-              color="primary"
-              variant="outlined"
-              endIcon={<Add />}
-              onClick={() => router.push("/course/create")}
-            >
-              Create a course
-            </Button>
-          </div>
-        )}
+        {
+          /*currentUser.role === "Lecturer"*/ true && (
+            <div className="mb-5 mr-10">
+              <Button
+                color="primary"
+                variant="outlined"
+                endIcon={<Add />}
+                onClick={() => router.push("/course/create")}
+              >
+                Create a course
+              </Button>
+            </div>
+          )
+        }
       </div>
 
       <div className="flex flex-col gap-3">
-        {currentUser.coursesOwned.map((course) => (
+        {/* MOCK */}
+        {allCourses.elements.map((course) => (
           <Link
             className="mx-10 font-bold text-sky-900 border border-sky-900 hover:bg-sky-100 p-5 pl-3 rounded-lg grid grid-cols-3 items-center"
             href={{ pathname: `/course/${course.id}` }}
@@ -165,7 +171,8 @@ export default function Home() {
         Completed Courses
         <Accordion className="mx-10">
           <div className="flex flex-col gap-3">
-            {allCourses.map((course, index) => (
+            {/* MOCK */}
+            {allCourses.elements.map((course, index) => (
               <Link
                 className="font-bold text-white bg-sky-900 hover:bg-sky-800 p-5 pl-3 rounded-lg grid grid-cols-3 items-center"
                 href={{ pathname: `/course/${course.id}` }}

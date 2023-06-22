@@ -1,6 +1,6 @@
+import { createCourseMutation } from "@/__generated__/createCourseMutation.graphql";
 import { Heading } from "@/components/Heading";
 import { MultistepForm, StepInfo } from "@/components/MultistepForm";
-import { createCourseMutation } from "@/__generated__/createCourseMutation.graphql";
 import {
   Backdrop,
   CircularProgress,
@@ -10,9 +10,9 @@ import {
 } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers";
 import { Dayjs } from "dayjs";
+import { useRouter } from "next/router";
 import { useState } from "react";
 import { graphql, useMutation } from "react-relay";
-import { useRouter } from "next/router";
 
 function TableRow({ label, value }: { label: string; value: string }) {
   return (
@@ -47,8 +47,8 @@ export default function NewCourse() {
         course: {
           title,
           description,
-          startDate: startDate!.format("YYYY-MM-DD"),
-          endDate: endDate!.format("YYYY-MM-DD"),
+          startDate: startDate!.toISOString(),
+          endDate: endDate!.toISOString(),
           published: publish,
         },
       },

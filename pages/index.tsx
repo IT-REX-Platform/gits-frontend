@@ -35,7 +35,9 @@ function StudentPage({ _query }: { _query: pagesStudentFragment$key }) {
   return (
     <div>
       <div className="flex justify-between items-end">
-        <Subheading>Courses I&apos;m attending</Subheading>
+        <Subheading className="text-xl lg:text-3xl">
+          Courses I&apos;m attending
+        </Subheading>
         <div className="mb-5 mr-10">
           <Button
             onClick={() => router.push("/join")}
@@ -55,9 +57,13 @@ function StudentPage({ _query }: { _query: pagesStudentFragment$key }) {
             href={{ pathname: `/course/${course.id}` }}
             key={course.id}
           >
-            <div className="text-xl font-bold">{course.title}</div>
-            <div className="text-sm italic">{course.description}</div>
-            <div className="w-64 h-20 mr-5 grid grid-cols-4 right-0">
+            <div className="text-sm min-[830px]:text-xl min-[830px]:font-bold">
+              {course.title}
+            </div>
+            <div className="text-xs min-[830px]:text-sm italic">
+              {course.description}
+            </div>
+            <div className="w-28 min-[830px]:w-40 lg:w-52 xl:w-64 h-20 mr-5 hidden min-[830px]:grid grid-cols-4 right-0 ">
               <VictoryPie
                 colorScale={["white", "transparent"]}
                 innerRadius={120}
@@ -108,7 +114,7 @@ function StudentPage({ _query }: { _query: pagesStudentFragment$key }) {
         ))}
       </div>
 
-      <Subheading>
+      <Subheading className="text-xl lg:text-3xl">
         Completed Courses
         <Accordion className="mx-10">
           <div className="flex flex-col gap-3">
@@ -119,9 +125,13 @@ function StudentPage({ _query }: { _query: pagesStudentFragment$key }) {
                 href={{ pathname: `/course/${course.id}` }}
                 key={course.id}
               >
-                <div className="text-xl font-bold">{course.title}</div>
-                <div className="text-sm italic">{course.description}</div>
-                <div className="w-64 h-20 mr-5 grid grid-cols-4 right-0">
+                <div className="text-sm min-[830px]:text-xl min-[830px]:font-bold">
+                  {course.title}
+                </div>
+                <div className="text-xs min-[830px]:text-sm italic">
+                  {course.description}
+                </div>
+                <div className="w-28 min-[830px]:w-40 lg:w-52 xl:w-64 h-20 mr-5 hidden min-[830px]:grid grid-cols-4 right-0">
                   <div>
                     <VictoryPie
                       colorScale={["white", "transparent"]}
@@ -273,7 +283,9 @@ export default function Home() {
   return (
     <main>
       <Heading className="mb-5 flex justify-between">
-        <div>Welcome back to GITS, {user?.profile.name}!</div>{" "}
+        <div className="text-xl lg:text-3xl">
+          Welcome back to GITS, {user?.profile.name}!
+        </div>{" "}
         <Button
           size="small"
           className="px-4"

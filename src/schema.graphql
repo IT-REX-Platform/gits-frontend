@@ -468,20 +468,26 @@ enum MediaType {
 }
 
 type Mutation {
-  #  Creates a new media record
-  createMediaRecord(input: CreateMediaRecordInput!): MediaRecord!
+  # Creates a new course with the given input and returns the created course.
+  createCourse(input: CreateCourseInput!): Course!
 
-  #  Updates an existing media record with the given UUID
-  updateMediaRecord(input: UpdateMediaRecordInput!): MediaRecord!
+  # Creates a new chapter with the given input and returns the created chapter.
+  # The course id must be a course id of an existing course.
+  createChapter(input: CreateChapterInput!): Chapter!
 
-  #  Deletes the media record with the given UUID
-  deleteMediaRecord(id: UUID!): UUID!
+  # Updates an existing course with the given input and returns the updated course.
+  # The course id must be a course id of an existing course.
+  updateCourse(input: UpdateCourseInput!): Course!
 
-  #  Creates a new upload URL for the given media record
-  createStorageUploadUrl(input: CreateUrlInput): UploadUrl
+  # Updates an existing chapter with the given input and returns the updated chapter.
+  # The chapter id must be a chapter id of an existing chapter.
+  updateChapter(input: UpdateChapterInput!): Chapter!
 
-  #  Creates a new download URL for the given media record
-  createStorageDownloadUrl(input: CreateUrlInput): DownloadUrl
+  # Deletes an existing course, throws an error if no course with the given id exists.
+  deleteCourse(id: UUID!): UUID!
+
+  # Deletes an existing chapter, throws an error if no chapter with the given id exists.
+  deleteChapter(id: UUID!): UUID!
 
   # Create new media content
   createMediaContent(input: CreateMediaContentInput!): MediaContent!
@@ -504,26 +510,20 @@ type Mutation {
   # Remove a tag from an existing content
   removeTagFromContent(contentId: UUID!, tagName: String): Content!
 
-  # Creates a new course with the given input and returns the created course.
-  createCourse(input: CreateCourseInput!): Course!
+  #  Creates a new media record
+  createMediaRecord(input: CreateMediaRecordInput!): MediaRecord!
 
-  # Creates a new chapter with the given input and returns the created chapter.
-  # The course id must be a course id of an existing course.
-  createChapter(input: CreateChapterInput!): Chapter!
+  #  Updates an existing media record with the given UUID
+  updateMediaRecord(input: UpdateMediaRecordInput!): MediaRecord!
 
-  # Updates an existing course with the given input and returns the updated course.
-  # The course id must be a course id of an existing course.
-  updateCourse(input: UpdateCourseInput!): Course!
+  #  Deletes the media record with the given UUID
+  deleteMediaRecord(id: UUID!): UUID!
 
-  # Updates an existing chapter with the given input and returns the updated chapter.
-  # The chapter id must be a chapter id of an existing chapter.
-  updateChapter(input: UpdateChapterInput!): Chapter!
+  #  Creates a new upload URL for the given media record
+  createStorageUploadUrl(input: CreateUrlInput): UploadUrl
 
-  # Deletes an existing course, throws an error if no course with the given id exists.
-  deleteCourse(id: UUID!): UUID!
-
-  # Deletes an existing chapter, throws an error if no chapter with the given id exists.
-  deleteChapter(id: UUID!): UUID!
+  #  Creates a new download URL for the given media record
+  createStorageDownloadUrl(input: CreateUrlInput): DownloadUrl
 }
 
 # Specifies the page size and page number for paginated results.
@@ -557,26 +557,6 @@ type PaginationInfo {
 }
 
 type Query {
-  #  Returns the media records with the given IDs
-  mediaRecordsById(ids: [UUID!]!): [MediaRecord!]!
-
-  #  Returns all media records
-  mediaRecords: [MediaRecord!]!
-
-  #  Returns the media records associated the given content IDs as a list of lists where each sublist contains
-  #  the media records associated with the content ID at the same index in the input list
-  mediaRecordsByContentIds(contentIds: [UUID!]!): [[MediaRecord!]!]!
-
-  # get all contents
-  contents: ContentPayload!
-
-  # get contents by ids
-  contentsByIds(ids: [UUID!]!): ContentPayload!
-
-  # get contents by chapter ids. Returns a list containing sublists, where each sublist contains all contents
-  # associated with that chapter
-  contentsByChapterIds(chapterIds: [UUID!]!): [ContentPayload!]!
-
   # Get a list of courses. Can be filtered, sorted and paginated.
   courses(
     filter: CourseFilter
@@ -612,6 +592,26 @@ type Query {
     sortDirection: [SortDirection!]! = [ASC]
     pagination: Pagination
   ): ChapterPayload!
+
+  # get all contents
+  contents: ContentPayload!
+
+  # get contents by ids
+  contentsByIds(ids: [UUID!]!): ContentPayload!
+
+  # get contents by chapter ids. Returns a list containing sublists, where each sublist contains all contents
+  # associated with that chapter
+  contentsByChapterIds(chapterIds: [UUID!]!): [ContentPayload!]!
+
+  #  Returns the media records with the given IDs
+  mediaRecordsById(ids: [UUID!]!): [MediaRecord!]!
+
+  #  Returns all media records
+  mediaRecords: [MediaRecord!]!
+
+  #  Returns the media records associated the given content IDs as a list of lists where each sublist contains
+  #  the media records associated with the content ID at the same index in the input list
+  mediaRecordsByContentIds(contentIds: [UUID!]!): [[MediaRecord!]!]!
 }
 
 scalar ResolveToSourceArgs

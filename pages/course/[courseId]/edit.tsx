@@ -313,6 +313,8 @@ function EditChapterModal({
         description
         startDate
         endDate
+        suggestedStartDate
+        suggestedEndDate
         course {
           id
         }
@@ -332,6 +334,8 @@ function EditChapterModal({
     setDescription(chapter.description);
     setStartDate(dayjs(chapter.startDate));
     setEndDate(dayjs(chapter.endDate));
+    setSuggestedStartDate(dayjs(chapter.suggestedStartDate));
+    setSuggestedEndDate(dayjs(chapter.suggestedEndDate));
   };
 
   const [title, setTitle] = useState(chapter.title);
@@ -340,6 +344,12 @@ function EditChapterModal({
     dayjs(chapter.startDate)
   );
   const [endDate, setEndDate] = useState<Dayjs | null>(dayjs(chapter.endDate));
+  const [suggestedStartDate, setSuggestedStartDate] = useState<Dayjs | null>(
+    dayjs(chapter.suggestedStartDate)
+  );
+  const [suggestedEndDate, setSuggestedEndDate] = useState<Dayjs | null>(
+    dayjs(chapter.suggestedEndDate)
+  );
 
   const [error, setError] = useState<any>(null);
   const valid =
@@ -370,6 +380,8 @@ function EditChapterModal({
           description,
           startDate: startDate!.toISOString(),
           endDate: endDate!.toISOString(),
+          suggestedStartDate: suggestedStartDate!.toISOString(),
+          suggestedEndDate: suggestedEndDate!.toISOString(),
           number: chapter.number,
         },
       },
@@ -443,6 +455,36 @@ function EditChapterModal({
                 }}
               />
             </FormSection>
+            <FormSection title="Suggested start and end">
+              <DatePicker
+                label="Suggested start date"
+                value={suggestedStartDate}
+                maxDate={suggestedEndDate ?? undefined}
+                onChange={setSuggestedStartDate}
+                slotProps={{
+                  textField: {
+                    required: true,
+                    error:
+                      suggestedStartDate == null ||
+                      !suggestedStartDate.isValid(),
+                  },
+                }}
+              />
+              <DatePicker
+                label="Suggested end date"
+                value={suggestedEndDate}
+                minDate={suggestedStartDate ?? undefined}
+                defaultCalendarMonth={suggestedStartDate ?? undefined}
+                onChange={setSuggestedEndDate}
+                slotProps={{
+                  textField: {
+                    required: true,
+                    error:
+                      suggestedEndDate == null || !suggestedEndDate.isValid(),
+                  },
+                }}
+              />
+            </FormSection>
           </Form>
           <Backdrop open={isUpdating} sx={{ zIndex: "modal" }}>
             <CircularProgress />
@@ -490,6 +532,12 @@ function AddChapterModal({
   const [description, setDescription] = useState("");
   const [startDate, setStartDate] = useState<Dayjs | null>(dayjs());
   const [endDate, setEndDate] = useState<Dayjs | null>(dayjs());
+  const [suggestedStartDate, setSuggestedStartDate] = useState<Dayjs | null>(
+    dayjs()
+  );
+  const [suggestedEndDate, setSuggestedEndDate] = useState<Dayjs | null>(
+    dayjs()
+  );
 
   const [error, setError] = useState<any>(null);
   const valid =
@@ -522,6 +570,8 @@ function AddChapterModal({
           description,
           startDate: startDate!.toISOString(),
           endDate: endDate!.toISOString(),
+          suggestedEndDate: suggestedEndDate?.toISOString(),
+          suggestedStartDate: suggestedStartDate?.toISOString(),
           number: nextCourseNumber,
         },
       },
@@ -587,6 +637,34 @@ function AddChapterModal({
                   textField: {
                     required: true,
                     error: endDate?.isValid() === false,
+                  },
+                }}
+              />
+            </FormSection>
+
+            <FormSection title="Suggested start and end">
+              <DatePicker
+                label="Suggested start date"
+                value={suggestedStartDate}
+                maxDate={endDate ?? undefined}
+                onChange={setSuggestedStartDate}
+                slotProps={{
+                  textField: {
+                    required: true,
+                    error: suggestedStartDate?.isValid() === false,
+                  },
+                }}
+              />
+              <DatePicker
+                label="Suggested end date"
+                value={suggestedEndDate}
+                minDate={suggestedStartDate ?? undefined}
+                defaultCalendarMonth={suggestedStartDate ?? undefined}
+                onChange={setSuggestedEndDate}
+                slotProps={{
+                  textField: {
+                    required: true,
+                    error: suggestedEndDate?.isValid() === false,
                   },
                 }}
               />

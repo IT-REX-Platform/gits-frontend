@@ -21,9 +21,9 @@ import { RelayEnvironmentProvider } from "react-relay";
 import { RecordSource } from "relay-runtime";
 
 const oidcConfig: AuthProviderProps = {
-  redirect_uri: "http://localhost:3005",
-  client_id: "gits-frontend",
-  authority: "http://localhost:9009/realms/GITS",
+  redirect_uri: process.env.OAUTH_REDIRECT_URL ?? "http://localhost:3005",
+  client_id: process.env.OAUTH_CLIENT_ID ?? "gits-frontend",
+  authority: process.env.OAUTH_AUTHORITY ?? "http://localhost:9009/realms/GITS",
 
   onSigninCallback() {
     window.history.replaceState({}, document.title, window.location.pathname);

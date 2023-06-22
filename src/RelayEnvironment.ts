@@ -6,7 +6,8 @@ import {
   Store,
 } from "relay-runtime";
 
-const HTTP_ENDPOINT = "http://localhost:8080/graphql";
+const HTTP_ENDPOINT =
+  process.env.BACKEND_URL ?? "http://localhost:8080/graphql";
 
 function createRelayEnvironment(token: string | undefined) {
   const fetchFn: FetchFunction = async (request, variables) => {

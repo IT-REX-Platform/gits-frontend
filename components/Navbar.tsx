@@ -1,9 +1,17 @@
 import { NavbarQuery } from "@/__generated__/NavbarQuery.graphql";
-import { graphql, useLazyLoadQuery } from "react-relay";
-
+import { NavbarStudentFragment$key } from "@/__generated__/NavbarStudentFragment.graphql";
+import { NavbarLecturerFragment$key } from "@/__generated__/NavbarLecturerFragment.graphql";
+import { graphql, useFragment, useLazyLoadQuery } from "react-relay";
 import logo from "@/assets/logo.svg";
-import { Book, CollectionsBookmark, Home, Logout } from "@mui/icons-material";
+import {
+  Book,
+  CollectionsBookmark,
+  Dashboard,
+  Home,
+  Logout,
+} from "@mui/icons-material";
 import MenuIcon from "@mui/icons-material/Menu";
+import DashboardIcon from "@mui/icons-material/Dashboard";
 import {
   Avatar,
   Box,
@@ -23,9 +31,9 @@ import {
 } from "@mui/material";
 import { useRouter } from "next/router";
 import { useAuth } from "react-oidc-context";
-import React from "react";
+import React, { useState } from "react";
 
-const drawerWidth = 240;
+const drawerWidth = 300;
 
 interface Props {
   /**
@@ -35,11 +43,17 @@ interface Props {
   window?: () => Window;
 }
 
-export function Navbar(props: Props) {
-  const query = useLazyLoadQuery<NavbarQuery>(
+function StudentNavbar({
+  _query,
+  props,
+}: {
+  _query: NavbarStudentFragment$key;
+  props: Props;
+}) {
+  const { allCourses } = useFragment(
     graphql`
-      query NavbarQuery {
-        courses {
+      fragment NavbarStudentFragment on Query {
+        allCourses: courses {
           elements {
             id
             title
@@ -47,7 +61,7 @@ export function Navbar(props: Props) {
         }
       }
     `,
-    {}
+    _query
   );
 
   const router = useRouter();
@@ -61,7 +75,7 @@ export function Navbar(props: Props) {
   };
 
   const drawer = (
-    <div>
+    <div className="bg-slate-300">
       <IconButton
         color="inherit"
         aria-label="open drawer"
@@ -75,112 +89,92 @@ export function Navbar(props: Props) {
         <img src={logo.src} className="w-24 m-auto" />
         GITS
       </div>
-      <Divider />
-      <List sx={{ paddingY: 2 }}>
-        <ListItemButton onClick={() => router.push("/")}>
-          <ListItemIcon>
-            <Home />
-          </ListItemIcon>
-          <ListItemText
-            primary="Home"
-            primaryTypographyProps={{
-              sx: { fontSize: { xs: 10, md: "default" } },
-            }}
-          />
-        </ListItemButton>
-        <ListItemButton onClick={() => router.push("/join")}>
-          <ListItemIcon>
-            <CollectionsBookmark />
-          </ListItemIcon>
-          <ListItemText
-            primary="Course Catalog"
-            primaryTypographyProps={{
-              sx: { fontSize: { xs: 10, md: "default" } },
-            }}
-          />
-        </ListItemButton>
-      </List>
-      <Divider />
-      <List
-        subheader={
-          <ListSubheader sx={{ fontSize: { xs: 10, md: "default" } }}>
-            Courses I&apos;m attending
-          </ListSubheader>
-        }
-        dense
-      >
-        {/* MOCK */}
-        {query.courses.elements.map((course) => (
-          <ListItemButton
-            key={course.id}
-            onClick={() => router.push(`/course/${course.id}`)}
-          >
-            <ListItemAvatar>
-              <Avatar sx={{ backgroundColor: "#2c388aff" }}>
-                <Book />
-              </Avatar>
-            </ListItemAvatar>
+      <div className="bg-white m-3 rounded-lg">
+        <List>
+          <ListItemButton onClick={() => router.push("/")}>
+            <ListItemIcon>
+              <Dashboard />
+            </ListItemIcon>
             <ListItemText
-              primary={course.title}
+              primary="Dashboard"
               primaryTypographyProps={{
-                noWrap: true,
                 sx: { fontSize: { xs: 10, md: "default" } },
               }}
             />
           </ListItemButton>
-        ))}
-      </List>
-      <List
-        sx={{ flexGrow: "1" }}
-        subheader={
-          <ListSubheader sx={{ fontSize: { xs: 10, md: "default" } }}>
-            Courses I&apos;m tutoring
-          </ListSubheader>
-        }
-        dense
-      >
-        {/* MOCK */}
-        {query.courses.elements.map((course) => (
-          <ListItemButton
-            key={course.id}
-            onClick={() => router.push(`/course/${course.id}`)}
-          >
-            <ListItemAvatar>
-              <Avatar sx={{ backgroundColor: "#2c388aff" }}>
-                <Book />
-              </Avatar>
-            </ListItemAvatar>
+          <Divider />
+          <ListItemButton onClick={() => router.push("/join")}>
+            <ListItemIcon>
+              <CollectionsBookmark />
+            </ListItemIcon>
             <ListItemText
-              primary={course.title}
+              primary="Course Catalog"
               primaryTypographyProps={{
-                noWrap: true,
                 sx: { fontSize: { xs: 10, md: "default" } },
               }}
             />
           </ListItemButton>
-        ))}
-      </List>
-      <Divider />
-      <List sx={{ bottom: "0px", position: "absolute" }} dense>
-        <ListItem
-          secondaryAction={
-            <Tooltip title="Logout" placement="left">
-              <IconButton
-                edge="end"
-                aria-label="logout"
-                onClick={() => auth.signoutRedirect()}
-              >
-                <Logout />
-              </IconButton>
-            </Tooltip>
+        </List>
+      </div>
+      <div className="bg-white m-3 rounded-lg">
+        <List
+          subheader={
+            <ListSubheader
+              sx={{ fontSize: { xs: 10, md: "default" } }}
+              className="rounded-lg"
+            >
+              Courses I&apos;m attending
+            </ListSubheader>
           }
+          dense
         >
-          <ListItemAvatar>
-            <Avatar src={auth.user?.profile?.picture} />
-          </ListItemAvatar>
-          <ListItemText primary={auth.user?.profile?.name} />
-        </ListItem>
-      </List>
+          <Divider />
+          {/* MOCK */}
+          {allCourses.elements.map((course) => (
+            <ListItemButton
+              key={course.id}
+              onClick={() => router.push(`/course/${course.id}`)}
+            >
+              <ListItemAvatar>
+                <Avatar sx={{ backgroundColor: "#2c388aff" }}>
+                  <Book />
+                </Avatar>
+              </ListItemAvatar>
+              <ListItemText
+                primary={course.title}
+                primaryTypographyProps={{
+                  noWrap: true,
+                  sx: { fontSize: { xs: 10, md: "default" } },
+                }}
+              />
+              <Divider />
+            </ListItemButton>
+          ))}
+        </List>
+      </div>
+
+      <div className="bg-white m-3 rounded-lg">
+        <List dense>
+          <ListItem
+            secondaryAction={
+              <Tooltip title="Logout" placement="left">
+                <IconButton
+                  edge="end"
+                  aria-label="logout"
+                  onClick={() => auth.signoutRedirect()}
+                >
+                  <Logout />
+                </IconButton>
+              </Tooltip>
+            }
+          >
+            <ListItemAvatar>
+              <Avatar src={auth.user?.profile?.picture} />
+            </ListItemAvatar>
+            <ListItemText primary={auth.user?.profile?.name} />
+          </ListItem>
+        </List>
+      </div>
     </div>
   );
 
@@ -237,5 +231,216 @@ export function Navbar(props: Props) {
         </Drawer>
       </Box>
     </Box>
+  );
+}
+
+function LecturerNavbar({
+  _query,
+  props,
+}: {
+  _query: NavbarLecturerFragment$key;
+  props: Props;
+}) {
+  const { allCourses } = useFragment(
+    graphql`
+      fragment NavbarLecturerFragment on Query {
+        allCourses: courses {
+          elements {
+            id
+            title
+          }
+        }
+      }
+    `,
+    _query
+  );
+
+  const router = useRouter();
+  const auth = useAuth();
+
+  const { window } = props;
+  const [open, setOpen] = React.useState(false);
+
+  const handleDrawerToggle = () => {
+    setOpen(!open);
+  };
+
+  const drawer = (
+    <div className="bg-slate-300">
+      <IconButton
+        color="inherit"
+        aria-label="open drawer"
+        onClick={handleDrawerToggle}
+        edge="start"
+        sx={{ mr: 2, display: { sm: "none" } }}
+      >
+        <MenuIcon />
+      </IconButton>
+      <div className="text-center my-8 text-3xl font-medium tracking-wider">
+        <img src={logo.src} className="w-24 m-auto" />
+        GITS
+      </div>
+      <div className="bg-white m-3 rounded-lg">
+        <List>
+          <ListItemButton onClick={() => router.push("/")}>
+            <ListItemIcon>
+              <Dashboard />
+            </ListItemIcon>
+            <ListItemText
+              primary="Dashboard"
+              primaryTypographyProps={{
+                sx: { fontSize: { xs: 10, md: "default" } },
+              }}
+            />
+          </ListItemButton>
+          <Divider />
+          <ListItemButton onClick={() => router.push("/join")}>
+            <ListItemIcon>
+              <CollectionsBookmark />
+            </ListItemIcon>
+            <ListItemText
+              primary="Course Catalog"
+              primaryTypographyProps={{
+                sx: { fontSize: { xs: 10, md: "default" } },
+              }}
+            />
+          </ListItemButton>
+        </List>
+      </div>
+      <List
+        sx={{ flexGrow: "1" }}
+        subheader={
+          <ListSubheader
+            sx={{ fontSize: { xs: 10, md: "default" } }}
+            className="m-3 rounded-lg"
+          >
+            Courses I&apos;m tutoring
+          </ListSubheader>
+        }
+        dense
+      >
+        {/* MOCK */}
+        {allCourses.elements.map((course) => (
+          <ListItemButton
+            key={course.id}
+            onClick={() => router.push(`/course/${course.id}`)}
+          >
+            <ListItemAvatar>
+              <Avatar sx={{ backgroundColor: "#2c388aff" }}>
+                <Book />
+              </Avatar>
+            </ListItemAvatar>
+            <ListItemText
+              primary={course.title}
+              primaryTypographyProps={{
+                noWrap: true,
+                sx: { fontSize: { xs: 10, md: "default" } },
+              }}
+            />
+          </ListItemButton>
+        ))}
+      </List>
+      <div className="bg-white m-3 rounded-lg">
+        <List dense>
+          <ListItem
+            secondaryAction={
+              <Tooltip title="Logout" placement="left">
+                <IconButton
+                  edge="end"
+                  aria-label="logout"
+                  onClick={() => auth.signoutRedirect()}
+                >
+                  <Logout />
+                </IconButton>
+              </Tooltip>
+            }
+          >
+            <ListItemAvatar>
+              <Avatar src={auth.user?.profile?.picture} />
+            </ListItemAvatar>
+            <ListItemText primary={auth.user?.profile?.name} />
+          </ListItem>
+        </List>
+      </div>
+    </div>
+  );
+
+  const container =
+    window !== undefined ? () => window().document.body : undefined;
+
+  return (
+    <Box sx={{ display: "flex" }}>
+      <CssBaseline />
+      <Toolbar>
+        <IconButton
+          color="inherit"
+          aria-label="open drawer"
+          onClick={handleDrawerToggle}
+          edge="start"
+          sx={{ mr: 2, display: { sm: "none" } }}
+        >
+          <MenuIcon />
+        </IconButton>
+      </Toolbar>
+      <Box
+        component="nav"
+        sx={{ width: { sm: drawerWidth }, flexShrink: { sm: 0 } }}
+        aria-label="mailbox folders"
+      >
+        <Drawer
+          container={container}
+          variant="temporary"
+          anchor="left"
+          open={open}
+          onClose={handleDrawerToggle}
+          ModalProps={{
+            keepMounted: true, // Better open performance on mobile.
+          }}
+          sx={{
+            display: { xs: "block" },
+          }}
+        >
+          {drawer}
+        </Drawer>
+
+        <Drawer
+          variant="permanent"
+          sx={{
+            display: { xs: "none", sm: "block" },
+            "& .MuiDrawer-paper": {
+              boxSizing: "border-box",
+              width: drawerWidth,
+            },
+          }}
+          open
+        >
+          {drawer}
+        </Drawer>
+      </Box>
+    </Box>
+  );
+}
+
+export function Navbar(props: Props) {
+  const [navbar, setNavbar] = useState("student");
+
+  const query = useLazyLoadQuery<NavbarQuery>(
+    graphql`
+      query NavbarQuery {
+        ...NavbarStudentFragment
+        ...NavbarLecturerFragment
+      }
+    `,
+    {}
+  );
+
+  return (
+    <main>
+      {navbar === "student" ? (
+        <StudentNavbar _query={query} props={props} />
+      ) : (
+        <LecturerNavbar _query={query} props={props} />
+      )}
+    </main>
   );
 }

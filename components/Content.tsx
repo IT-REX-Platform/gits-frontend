@@ -1,6 +1,11 @@
 import { ReactElement } from "react";
-import { CircularProgress, Typography } from "@mui/material";
-import { ArrowRight, Download } from "@mui/icons-material";
+import colors from "tailwindcss/colors";
+import { CircularProgress, Typography, useTheme } from "@mui/material";
+import {
+  ArrowRight,
+  Download,
+  QuestionAnswerRounded,
+} from "@mui/icons-material";
 
 export function VideoContent({
   progress,
@@ -26,7 +31,39 @@ export function VideoContent({
       }
       iconFrame={
         <ProgressFrame
-          color={disabled ? "bg-gray-100" : "bg-sky-200"}
+          color={disabled ? colors.gray[100] : colors.sky[200]}
+          progress={disabled ? 0 : progress}
+        />
+      }
+    />
+  );
+}
+
+export function FlashcardContent({
+  progress,
+  subtitle,
+  disabled = false,
+}: {
+  progress: number;
+  subtitle: string;
+  disabled?: boolean;
+}) {
+  return (
+    <Content
+      title="Repeat flashcards"
+      subtitle={subtitle}
+      disabled={disabled}
+      icon={
+        <QuestionAnswerRounded
+          sx={{
+            fontSize: "2rem",
+            color: disabled ? "text.disabled" : "text.secondary",
+          }}
+        />
+      }
+      iconFrame={
+        <ProgressFrame
+          color={disabled ? colors.gray[100] : colors.green[200]}
           progress={disabled ? 0 : progress}
         />
       }
@@ -110,6 +147,7 @@ export function ProgressFrame({
   color: string;
   progress: number;
 }) {
+  const theme = useTheme();
   return (
     <>
       <div className={`absolute w-16 h-16 rounded-full bg-white`}></div>
@@ -123,12 +161,15 @@ export function ProgressFrame({
       <CircularProgress
         className="absolute"
         variant="determinate"
-        color="success"
         value={progress}
         thickness={3}
         size="4rem"
+        sx={{ color: progress < 100 ? theme.palette.success.main : color }}
       />
-      <div className={`absolute w-12 h-12 rounded-full ${color}`}></div>
+      <div
+        className={`absolute w-12 h-12 rounded-full`}
+        style={{ backgroundColor: color }}
+      ></div>
     </>
   );
 }

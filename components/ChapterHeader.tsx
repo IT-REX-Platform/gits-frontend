@@ -1,6 +1,24 @@
 import { CircularProgress, Typography, useTheme } from "@mui/material";
 
-export function ChapterHeader({ progress }: { progress: number }) {
+type SkillLevel = "green" | "yellow" | "red";
+type SkillLevels = {
+  remember: SkillLevel;
+  understand: SkillLevel;
+  apply: SkillLevel;
+  analyze: SkillLevel;
+};
+
+export function ChapterHeader({
+  progress,
+  title,
+  subtitle,
+  skill_levels,
+}: {
+  progress: number;
+  title: string;
+  subtitle: string;
+  skill_levels: SkillLevels;
+}) {
   return (
     <div className="flex items-center">
       <div className="mr-10">
@@ -8,14 +26,14 @@ export function ChapterHeader({ progress }: { progress: number }) {
       </div>
       <div className="px-16 py-4 flex bg-slate-200 rounded-full justify-between items-center flex-grow">
         <div className="pt-2 pr-8">
-          <Typography variant="h2">Chapter 4: Messaging</Typography>
-          <Typography variant="subtitle1">19. Juni - 25. Juni</Typography>
+          <Typography variant="h2">{title}</Typography>
+          <Typography variant="subtitle1">{subtitle}</Typography>
         </div>
         <div className="grid grid-rows-4 lg:grid-rows-2 xl:grid-rows-1 grid-flow-col auto-cols-auto gap-x-6 gap-y-1 lg:gap-y-2">
-          <SkillLevel label="Remember" color="green" />
-          <SkillLevel label="Understand" color="green" />
-          <SkillLevel label="Apply" color="yellow" />
-          <SkillLevel label="Analyze" color="red" />
+          <SkillLevel label="Remember" color={skill_levels.remember} />
+          <SkillLevel label="Understand" color={skill_levels.understand} />
+          <SkillLevel label="Apply" color={skill_levels.apply} />
+          <SkillLevel label="Analyze" color={skill_levels.analyze} />
         </div>
       </div>
     </div>

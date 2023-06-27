@@ -1,11 +1,7 @@
 import { useTheme } from "@mui/material";
 import { ReactElement } from "react";
 
-export function ChapterContent({
-  children,
-}: {
-  children: ReactElement[] | ReactElement;
-}) {
+export function ChapterContent({ children }: { children: any }) {
   const theme = useTheme();
   return <div>{children}</div>;
 }

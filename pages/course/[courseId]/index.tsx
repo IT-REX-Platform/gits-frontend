@@ -1,22 +1,34 @@
-import { CourseIdQuery } from "@/__generated__/CourseIdQuery.graphql";
-import AssignmentIcon from "@mui/icons-material/Assignment";
-import QuizIcon from "@mui/icons-material/Quiz";
-import StyleOutlinedIcon from "@mui/icons-material/StyleOutlined";
-import { Button } from "@mui/material";
+import { CourseIdStudentQuery } from "@/__generated__/CourseIdStudentQuery.graphql";
 import Error from "next/error";
-import Link from "next/link";
 import { useRouter } from "next/router";
 import { graphql, useLazyLoadQuery } from "react-relay";
-import { VictoryLabel, VictoryPie } from "victory";
+import { Typography } from "@mui/material";
 
-export default function Details() {
+import {
+  FlashcardContent,
+  MaterialContent,
+  VideoContent,
+} from "@/components/Content";
+import { ChapterHeader } from "@/components/ChapterHeader";
+import {
+  ChapterContent,
+  ChapterContentItem,
+} from "@/components/ChapterContent";
+import dayjs from "dayjs";
+
+export default function CoursePage() {
+  return <StudentCoursePage />;
+}
+
+function StudentCoursePage() {
+  // Get course id from url
   const router = useRouter();
   const id = router.query.courseId;
-  const currentDate = new Date();
 
-  const { coursesById } = useLazyLoadQuery<CourseIdQuery>(
+  // Fetch course data
+  const { coursesById } = useLazyLoadQuery<CourseIdStudentQuery>(
     graphql`
-      query CourseIdQuery($id: [UUID!]!) {
+      query CourseIdStudentQuery($id: [UUID!]!) {
         coursesById(ids: $id) {
           title
           description
@@ -25,8 +37,15 @@ export default function Details() {
               id
               title
               number
-              startDate
-              endDate
+              suggestedStartDate
+              suggestedEndDate
+              contents {
+                id
+                metadata {
+                  name
+                  type
+                }
+              }
             }
           }
         }
@@ -40,133 +59,50 @@ export default function Details() {
     return <Error statusCode={404} title="Course could not be found." />;
   }
 
-  //TODO: change later, when implementing the services into this side
+  // Extract course
   const course = coursesById[0];
-  const knowledge = 88;
-  const understanding = 50;
-  const analyses = 40;
-  const usage = 22;
-
-  const viewablechapters = course.chapters.elements.filter((chapter) => {
-    const start = new Date(chapter?.startDate);
-    //const end = new Date(chapter?.endDate);
-
-    return (
-      start.toISOString() <= currentDate.toISOString()
-      //end.toISOString() >= currentDate.toISOString()
-    );
-  });
 
   return (
-    <div className="grid grid-flow-dense grid-cols-6 gap-2 m-10">
-      <div className="col-span-full m-2 font-bold text-2xl underline">
+    <main className="px-8 py-11">
+      <Typography variant="h1" gutterBottom>
         {course.title}
-      </div>
-      <div className="col-span-full m-2 text-xl">{course.description}</div>
-      <div className="col-span-6 border-solid border-sky-900 border-2 m-2 p-2 rounded-lg ">
-        <p className="max-[1000px]:hidden underline">Skill levels</p>
-        <div className="grid grid-cols-4">
-          <VictoryPie
-            colorScale={["green", "transparent"]}
-            innerRadius={120}
-            cornerRadius={100}
-            labels={["Know"]}
-            labelRadius={1}
-            labelPosition={"startAngle"}
-            data={[{ y: knowledge }, { y: 100 - knowledge }]}
-            width={1250}
-            style={{ labels: { fontSize: 50, fill: "black" } }}
-            labelComponent={<VictoryLabel dy={5} />}
-          />
-          <VictoryPie
-            colorScale={["yellow", "transparent"]}
-            innerRadius={120}
-            cornerRadius={100}
-            labels={["Grasp"]}
-            labelRadius={1}
-            labelPosition={"startAngle"}
-            data={[{ y: understanding }, { y: 100 - understanding }]}
-            width={1250}
-            style={{ labels: { fontSize: 50, fill: "black" } }}
-            labelComponent={<VictoryLabel dy={5} />}
-          />
-          <VictoryPie
-            colorScale={["red", "transparent"]}
-            innerRadius={120}
-            cornerRadius={100}
-            labels={["Analysis"]}
-            labelRadius={1}
-            labelPosition={"startAngle"}
-            data={[{ y: analyses }, { y: 100 - analyses }]}
-            width={1250}
-            style={{ labels: { fontSize: 50, fill: "black" } }}
-            labelComponent={<VictoryLabel dy={5} />}
-          />
-          <VictoryPie
-            colorScale={["red", "transparent"]}
-            innerRadius={120}
-            cornerRadius={100}
-            labels={["Use"]}
-            labelRadius={1}
-            labelPosition={"startAngle"}
-            data={[{ y: usage }, { y: 100 - usage }]}
-            width={1250}
-            style={{ labels: { fontSize: 50, fill: "black" } }}
-            labelComponent={<VictoryLabel dy={5} />}
-          />
-        </div>
-      </div>
-      <div className="col-span-6">
-        <div className="grid grid-flow-dense grid-cols-3 p-2">
-          <Button
-            onClick={() => router.push("/")}
-            color="primary"
-            variant="outlined"
-            endIcon={
-              <StyleOutlinedIcon
-                sx={{ display: { xs: "none", md: "block" } }}
-              />
-            }
-          >
-            Flashcards
-          </Button>
-          <Button
-            onClick={() => router.push("/")}
-            color="primary"
-            variant="outlined"
-            endIcon={<QuizIcon sx={{ display: { xs: "none", md: "block" } }} />}
-          >
-            Quizzes
-          </Button>
-          <Button
-            onClick={() => router.push("/")}
-            color="primary"
-            variant="outlined"
-            endIcon={
-              <AssignmentIcon sx={{ display: { xs: "none", md: "block" } }} />
-            }
-          >
-            Assignments
-          </Button>
-        </div>
-      </div>
+      </Typography>
+      <Typography variant="body1">{course.description}</Typography>
+      <div className="mb-8"></div>
 
-      <div className="col-span-6 border-solid border-sky-900 border-2 m-2 p-2 rounded-lg">
-        <p className="underline">Chapters</p>
-        <div className="flex flex-col gap-1">
-          {viewablechapters.map((chapter) => (
-            <Link
-              className="text-center font-bold border-solid border-sky-900 border-2 rounded-lg text-white bg-sky-900 hover:bg-white hover:text-sky-900"
-              href={{ pathname: `/chapter/${chapter!.id}` }}
-              key={chapter!.id}
-            >
-              <p>
-                {chapter?.number} {chapter?.title}
-              </p>
-            </Link>
-          ))}
-        </div>
-      </div>
-    </div>
+      <VideoContent subtitle="Publish Subscribe Messaging" progress={60} />
+      <FlashcardContent subtitle="Publish Subscribe Messaging" progress={60} />
+      <MaterialContent subtitle="Publish Subscribe Messaging" />
+
+      {course.chapters.elements.map((chapter) => (
+        <section className="mt-24">
+          <ChapterHeader
+            title={chapter.title}
+            subtitle={`${dayjs(chapter.suggestedStartDate).format(
+              "D. MMMM"
+            )} – ${dayjs(chapter.suggestedEndDate).format("D. MMMM")}`}
+            progress={70}
+            skill_levels={{
+              remember: "green",
+              understand: "green",
+              apply: "yellow",
+              analyze: "red",
+            }}
+          />
+          <ChapterContent>
+            {chapter.contents.length > 0 && (
+              <ChapterContentItem first last>
+                {chapter.contents.map((content) => (
+                  <VideoContent
+                    subtitle={content.metadata.name}
+                    progress={100}
+                  />
+                ))}
+              </ChapterContentItem>
+            )}
+          </ChapterContent>
+        </section>
+      ))}
+    </main>
   );
 }

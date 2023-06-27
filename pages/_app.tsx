@@ -19,6 +19,7 @@ import {
 } from "react-oidc-context";
 import { RelayEnvironmentProvider } from "react-relay";
 import { RecordSource } from "relay-runtime";
+import { ThemeProvider, colors, createTheme } from "@mui/material";
 
 const oidcConfig: AuthProviderProps = {
   redirect_uri:
@@ -32,6 +33,22 @@ const oidcConfig: AuthProviderProps = {
     window.history.replaceState({}, document.title, window.location.pathname);
   },
 };
+
+const theme = createTheme({
+  palette: {
+    success: colors.green,
+  },
+  typography: {
+    h1: {
+      fontSize: "2rem",
+      fontWeight: "400",
+    },
+    h2: {
+      fontSize: "1.5rem",
+      fontWeight: "400",
+    },
+  },
+});
 
 export default function App(props: AppProps<RelayPageProps>) {
   return (
@@ -97,12 +114,14 @@ function SigninContent({ pageProps, Component }: AppProps<RelayPageProps>) {
   if (auth.isAuthenticated) {
     return (
       <RelayEnvironmentProvider environment={environment}>
-        <div className="grid grid-cols-[auto_1fr] h-[100vh] overflow-hidden">
-          <Navbar />
-          <div className="overflow-auto">
-            <Component {...pageProps} />
+        <ThemeProvider theme={theme}>
+          <div className="grid grid-cols-[auto_1fr] h-[100vh] overflow-hidden">
+            <Navbar />
+            <div className="overflow-auto">
+              <Component {...pageProps} />
+            </div>
           </div>
-        </div>
+        </ThemeProvider>
       </RelayEnvironmentProvider>
     );
   }

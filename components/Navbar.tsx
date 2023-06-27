@@ -75,7 +75,7 @@ function StudentNavbar({
   };
 
   const drawer = (
-    <div className="bg-slate-300">
+    <div className="bg-slate-300 h-full">
       <IconButton
         color="inherit"
         aria-label="open drawer"
@@ -266,7 +266,7 @@ function LecturerNavbar({
   };
 
   const drawer = (
-    <div className="bg-slate-300">
+    <div className="bg-slate-300 h-full">
       <IconButton
         color="inherit"
         aria-label="open drawer"
@@ -384,7 +384,11 @@ function LecturerNavbar({
       </Toolbar>
       <Box
         component="nav"
-        sx={{ width: { sm: drawerWidth }, flexShrink: { sm: 0 } }}
+        sx={{
+          width: { sm: drawerWidth },
+          flexShrink: { sm: 0 },
+          height: "100%",
+        }}
         aria-label="mailbox folders"
       >
         <Drawer

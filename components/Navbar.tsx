@@ -135,32 +135,31 @@ function StudentNavbar({
           dense
         >
           {/* MOCK */}
-          {allCourses.elements.map((course) => (
-            <div
-              className={
-                currentPath === `/course/${course.id}` ? "bg-cyan-400" : ""
-              }
-            >
-              <Divider />
-              <ListItemButton
-                key={course.id}
-                onClick={() => router.push(`/course/${course.id}`)}
-              >
-                <ListItemAvatar>
-                  <Avatar sx={{ backgroundColor: "#2c388aff" }}>
-                    <Book />
-                  </Avatar>
-                </ListItemAvatar>
-                <ListItemText
-                  primary={course.title}
-                  primaryTypographyProps={{
-                    noWrap: true,
-                    sx: { fontSize: { xs: 10, md: "default" } },
-                  }}
-                />
-              </ListItemButton>
-            </div>
-          ))}
+          {allCourses.elements.map((course) => {
+            const courseLink = `/course/${course.id}`;
+            return (
+              <div className={currentPath === courseLink ? "bg-cyan-400" : ""}>
+                <Divider />
+                <ListItemButton
+                  key={course.id}
+                  onClick={() => router.push(courseLink)}
+                >
+                  <ListItemAvatar>
+                    <Avatar sx={{ backgroundColor: "#2c388aff" }}>
+                      <Book />
+                    </Avatar>
+                  </ListItemAvatar>
+                  <ListItemText
+                    primary={course.title}
+                    primaryTypographyProps={{
+                      noWrap: true,
+                      sx: { fontSize: { xs: 10, md: "default" } },
+                    }}
+                  />
+                </ListItemButton>
+              </div>
+            );
+          })}
         </List>
       </div>
 
@@ -268,7 +267,7 @@ function LecturerNavbar({
 
   const router = useRouter();
   const auth = useAuth();
-  const currentPath = router.pathname;
+  const currentPath = usePathname();
 
   const { window } = props;
   const [open, setOpen] = React.useState(false);
@@ -337,32 +336,31 @@ function LecturerNavbar({
           dense
         >
           {/* MOCK */}
-          {allCourses.elements.map((course) => (
-            <div
-              className={
-                currentPath === `/course/${course.id}` ? "bg-cyan-400" : ""
-              }
-            >
-              <Divider />
-              <ListItemButton
-                key={course.id}
-                onClick={() => router.push(`/course/${course.id}`)}
-              >
-                <ListItemAvatar>
-                  <Avatar sx={{ backgroundColor: "#2c388aff" }}>
-                    <Book />
-                  </Avatar>
-                </ListItemAvatar>
-                <ListItemText
-                  primary={course.title}
-                  primaryTypographyProps={{
-                    noWrap: true,
-                    sx: { fontSize: { xs: 10, md: "default" } },
-                  }}
-                />
-              </ListItemButton>
-            </div>
-          ))}
+          {allCourses.elements.map((course) => {
+            const courseLink = `/course/${course.id}`;
+            return (
+              <div className={currentPath === courseLink ? "bg-cyan-400" : ""}>
+                <Divider />
+                <ListItemButton
+                  key={course.id}
+                  onClick={() => router.push(courseLink)}
+                >
+                  <ListItemAvatar>
+                    <Avatar sx={{ backgroundColor: "#2c388aff" }}>
+                      <Book />
+                    </Avatar>
+                  </ListItemAvatar>
+                  <ListItemText
+                    primary={course.title}
+                    primaryTypographyProps={{
+                      noWrap: true,
+                      sx: { fontSize: { xs: 10, md: "default" } },
+                    }}
+                  />
+                </ListItemButton>
+              </div>
+            );
+          })}
         </List>
       </div>
 

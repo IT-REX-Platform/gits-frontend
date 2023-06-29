@@ -67,6 +67,7 @@ function StudentNavbar({
 
   const router = useRouter();
   const auth = useAuth();
+  const currentPath = router.pathname;
 
   const { window } = props;
   const [open, setOpen] = React.useState(false);
@@ -92,29 +93,33 @@ function StudentNavbar({
       </div>
       <div className="bg-white m-3 rounded-lg">
         <List>
-          <ListItemButton onClick={() => router.push("/")}>
-            <ListItemIcon>
-              <Dashboard />
-            </ListItemIcon>
-            <ListItemText
-              primary="Dashboard"
-              primaryTypographyProps={{
-                sx: { fontSize: { xs: 10, md: "default" } },
-              }}
-            />
-          </ListItemButton>
+          <div className={currentPath === "/" ? "bg-cyan-400" : ""}>
+            <ListItemButton onClick={() => router.push("/")}>
+              <ListItemIcon>
+                <Dashboard />
+              </ListItemIcon>
+              <ListItemText
+                primary="Dashboard"
+                primaryTypographyProps={{
+                  sx: { fontSize: { xs: 10, md: "default" } },
+                }}
+              />
+            </ListItemButton>
+          </div>
           <Divider />
-          <ListItemButton onClick={() => router.push("/join")}>
-            <ListItemIcon>
-              <CollectionsBookmark />
-            </ListItemIcon>
-            <ListItemText
-              primary="Course Catalog"
-              primaryTypographyProps={{
-                sx: { fontSize: { xs: 10, md: "default" } },
-              }}
-            />
-          </ListItemButton>
+          <div className={currentPath === "/join" ? "bg-cyan-400" : ""}>
+            <ListItemButton onClick={() => router.push("/join")}>
+              <ListItemIcon>
+                <CollectionsBookmark />
+              </ListItemIcon>
+              <ListItemText
+                primary="Course Catalog"
+                primaryTypographyProps={{
+                  sx: { fontSize: { xs: 10, md: "default" } },
+                }}
+              />
+            </ListItemButton>
+          </div>
         </List>
       </div>
       <div className="bg-white m-3 rounded-lg">
@@ -131,7 +136,11 @@ function StudentNavbar({
         >
           {/* MOCK */}
           {allCourses.elements.map((course) => (
-            <>
+            <div
+              className={
+                currentPath === `/course/${course.id}` ? "bg-cyan-400" : ""
+              }
+            >
               <Divider />
               <ListItemButton
                 key={course.id}
@@ -150,7 +159,7 @@ function StudentNavbar({
                   }}
                 />
               </ListItemButton>
-            </>
+            </div>
           ))}
         </List>
       </div>
@@ -259,6 +268,7 @@ function LecturerNavbar({
 
   const router = useRouter();
   const auth = useAuth();
+  const currentPath = router.pathname;
 
   const { window } = props;
   const [open, setOpen] = React.useState(false);
@@ -284,29 +294,33 @@ function LecturerNavbar({
       </div>
       <div className="bg-white m-3 rounded-lg">
         <List>
-          <ListItemButton onClick={() => router.push("/")}>
-            <ListItemIcon>
-              <Dashboard />
-            </ListItemIcon>
-            <ListItemText
-              primary="Dashboard"
-              primaryTypographyProps={{
-                sx: { fontSize: { xs: 10, md: "default" } },
-              }}
-            />
-          </ListItemButton>
+          <div className={currentPath === "/" ? "bg-cyan-400" : ""}>
+            <ListItemButton onClick={() => router.push("/")}>
+              <ListItemIcon>
+                <Dashboard />
+              </ListItemIcon>
+              <ListItemText
+                primary="Dashboard"
+                primaryTypographyProps={{
+                  sx: { fontSize: { xs: 10, md: "default" } },
+                }}
+              />
+            </ListItemButton>
+          </div>
           <Divider />
-          <ListItemButton onClick={() => router.push("/join")}>
-            <ListItemIcon>
-              <CollectionsBookmark />
-            </ListItemIcon>
-            <ListItemText
-              primary="Course Catalog"
-              primaryTypographyProps={{
-                sx: { fontSize: { xs: 10, md: "default" } },
-              }}
-            />
-          </ListItemButton>
+          <div className={currentPath === "/join" ? "bg-cyan-400" : ""}>
+            <ListItemButton onClick={() => router.push("/join")}>
+              <ListItemIcon>
+                <CollectionsBookmark />
+              </ListItemIcon>
+              <ListItemText
+                primary="Course Catalog"
+                primaryTypographyProps={{
+                  sx: { fontSize: { xs: 10, md: "default" } },
+                }}
+              />
+            </ListItemButton>
+          </div>
         </List>
       </div>
       <div className="bg-white m-3 rounded-lg">
@@ -324,7 +338,11 @@ function LecturerNavbar({
         >
           {/* MOCK */}
           {allCourses.elements.map((course) => (
-            <>
+            <div
+              className={
+                currentPath === `/course/${course.id}` ? "bg-cyan-400" : ""
+              }
+            >
               <Divider />
               <ListItemButton
                 key={course.id}
@@ -343,7 +361,7 @@ function LecturerNavbar({
                   }}
                 />
               </ListItemButton>
-            </>
+            </div>
           ))}
         </List>
       </div>

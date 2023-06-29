@@ -30,6 +30,7 @@ import {
   Tooltip,
 } from "@mui/material";
 import { useRouter } from "next/router";
+import { usePathname } from "next/navigation";
 import { useAuth } from "react-oidc-context";
 import React, { useState } from "react";
 
@@ -128,27 +129,28 @@ function StudentNavbar({
           }
           dense
         >
-          <Divider />
           {/* MOCK */}
           {allCourses.elements.map((course) => (
-            <ListItemButton
-              key={course.id}
-              onClick={() => router.push(`/course/${course.id}`)}
-            >
-              <ListItemAvatar>
-                <Avatar sx={{ backgroundColor: "#2c388aff" }}>
-                  <Book />
-                </Avatar>
-              </ListItemAvatar>
-              <ListItemText
-                primary={course.title}
-                primaryTypographyProps={{
-                  noWrap: true,
-                  sx: { fontSize: { xs: 10, md: "default" } },
-                }}
-              />
+            <>
               <Divider />
-            </ListItemButton>
+              <ListItemButton
+                key={course.id}
+                onClick={() => router.push(`/course/${course.id}`)}
+              >
+                <ListItemAvatar>
+                  <Avatar sx={{ backgroundColor: "#2c388aff" }}>
+                    <Book />
+                  </Avatar>
+                </ListItemAvatar>
+                <ListItemText
+                  primary={course.title}
+                  primaryTypographyProps={{
+                    noWrap: true,
+                    sx: { fontSize: { xs: 10, md: "default" } },
+                  }}
+                />
+              </ListItemButton>
+            </>
           ))}
         </List>
       </div>
@@ -307,39 +309,45 @@ function LecturerNavbar({
           </ListItemButton>
         </List>
       </div>
-      <List
-        sx={{ flexGrow: "1" }}
-        subheader={
-          <ListSubheader
-            sx={{ fontSize: { xs: 10, md: "default" } }}
-            className="m-3 rounded-lg"
-          >
-            Courses I&apos;m tutoring
-          </ListSubheader>
-        }
-        dense
-      >
-        {/* MOCK */}
-        {allCourses.elements.map((course) => (
-          <ListItemButton
-            key={course.id}
-            onClick={() => router.push(`/course/${course.id}`)}
-          >
-            <ListItemAvatar>
-              <Avatar sx={{ backgroundColor: "#2c388aff" }}>
-                <Book />
-              </Avatar>
-            </ListItemAvatar>
-            <ListItemText
-              primary={course.title}
-              primaryTypographyProps={{
-                noWrap: true,
-                sx: { fontSize: { xs: 10, md: "default" } },
-              }}
-            />
-          </ListItemButton>
-        ))}
-      </List>
+      <div className="bg-white m-3 rounded-lg">
+        <List
+          sx={{ flexGrow: "1" }}
+          subheader={
+            <ListSubheader
+              sx={{ fontSize: { xs: 10, md: "default" } }}
+              className="rounded-lg"
+            >
+              Courses I&apos;m tutoring
+            </ListSubheader>
+          }
+          dense
+        >
+          {/* MOCK */}
+          {allCourses.elements.map((course) => (
+            <>
+              <Divider />
+              <ListItemButton
+                key={course.id}
+                onClick={() => router.push(`/course/${course.id}`)}
+              >
+                <ListItemAvatar>
+                  <Avatar sx={{ backgroundColor: "#2c388aff" }}>
+                    <Book />
+                  </Avatar>
+                </ListItemAvatar>
+                <ListItemText
+                  primary={course.title}
+                  primaryTypographyProps={{
+                    noWrap: true,
+                    sx: { fontSize: { xs: 10, md: "default" } },
+                  }}
+                />
+              </ListItemButton>
+            </>
+          ))}
+        </List>
+      </div>
+
       <div className="bg-white m-3 rounded-lg">
         <List dense>
           <ListItem
@@ -427,6 +435,7 @@ function LecturerNavbar({
 
 export function Navbar(props: Props) {
   const [navbar, setNavbar] = useState("student");
+  const pathname = usePathname();
 
   const query = useLazyLoadQuery<NavbarQuery>(
     graphql`
@@ -440,7 +449,7 @@ export function Navbar(props: Props) {
 
   return (
     <main>
-      {navbar === "student" ? (
+      {pathname.includes("student") ? (
         <StudentNavbar _query={query} props={props} />
       ) : (
         <LecturerNavbar _query={query} props={props} />

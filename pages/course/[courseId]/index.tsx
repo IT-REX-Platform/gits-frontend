@@ -15,6 +15,7 @@ import {
   ChapterContentItem,
 } from "@/components/ChapterContent";
 import dayjs from "dayjs";
+import { RewardScores } from "@/components/RewardScores";
 
 export default function CoursePage() {
   return <StudentCoursePage />;
@@ -68,6 +69,10 @@ function StudentCoursePage() {
         {course.title}
       </Typography>
       <Typography variant="body1">{course.description}</Typography>
+
+      <div className="w-fit my-12 pl-12 pr-16 py-6 border-x-8 border-y-4 border-slate-200 rounded-3xl">
+        <RewardScores health={60} fitness={20} growth={100} power={75} />
+      </div>
 
       <section className="mt-16">
         <Typography variant="h2">Up next</Typography>

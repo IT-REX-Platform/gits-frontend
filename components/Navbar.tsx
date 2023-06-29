@@ -138,12 +138,12 @@ function StudentNavbar({
           {allCourses.elements.map((course) => {
             const courseLink = `/course/${course.id}`;
             return (
-              <div className={currentPath === courseLink ? "bg-cyan-400" : ""}>
+              <div
+                className={currentPath === courseLink ? "bg-cyan-400" : ""}
+                key={course.id}
+              >
                 <Divider />
-                <ListItemButton
-                  key={course.id}
-                  onClick={() => router.push(courseLink)}
-                >
+                <ListItemButton onClick={() => router.push(courseLink)}>
                   <ListItemAvatar>
                     <Avatar sx={{ backgroundColor: "#2c388aff" }}>
                       <Book />
@@ -339,12 +339,12 @@ function LecturerNavbar({
           {allCourses.elements.map((course) => {
             const courseLink = `/course/${course.id}`;
             return (
-              <div className={currentPath === courseLink ? "bg-cyan-400" : ""}>
+              <div
+                className={currentPath === courseLink ? "bg-cyan-400" : ""}
+                key={course.id}
+              >
                 <Divider />
-                <ListItemButton
-                  key={course.id}
-                  onClick={() => router.push(courseLink)}
-                >
+                <ListItemButton onClick={() => router.push(courseLink)}>
                   <ListItemAvatar>
                     <Avatar sx={{ backgroundColor: "#2c388aff" }}>
                       <Book />

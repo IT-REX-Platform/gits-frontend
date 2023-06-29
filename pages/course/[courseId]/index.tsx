@@ -74,11 +74,15 @@ function StudentCoursePage() {
         <div className="mt-8 flex gap-8 grid gap-x-12 gap-y-4 grid-cols-[max-content] xl:grid-cols-[repeat(2,max-content)] 2xl:grid-cols-[repeat(3,max-content)]">
           <VideoContent subtitle="Publish-Subscribe Messaging" progress={0} />
           <VideoContent subtitle="Publish-Subscribe Messaging" progress={40} />
+          <FlashcardContent
+            subtitle="Publish-Subscribe Messaging"
+            progress={40}
+          />
         </div>
       </section>
 
       {course.chapters.elements.map((chapter) => (
-        <section className="mt-24">
+        <section key={chapter.id} className="mt-24">
           <ChapterHeader
             title={chapter.title}
             subtitle={`${dayjs(chapter.suggestedStartDate).format(
@@ -104,6 +108,7 @@ function StudentCoursePage() {
               <ChapterContentItem first last>
                 {chapter.contents.map((content) => (
                   <VideoContent
+                    key={content.id}
                     subtitle={content.metadata.name}
                     progress={100}
                   />

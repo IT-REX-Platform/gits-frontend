@@ -1,4 +1,4 @@
-import { ReactElement } from "react";
+import { ComponentProps, MouseEventHandler, ReactElement } from "react";
 import colors from "tailwindcss/colors";
 import { CircularProgress, Typography, useTheme } from "@mui/material";
 import {
@@ -11,10 +11,12 @@ export function VideoContent({
   progress,
   subtitle,
   disabled = false,
+  onClick = undefined,
 }: {
   progress: number;
   subtitle: string;
   disabled?: boolean;
+  onClick?: MouseEventHandler<HTMLButtonElement> | undefined;
 }) {
   return (
     <Content
@@ -22,6 +24,7 @@ export function VideoContent({
       subtitle={subtitle}
       disabled={disabled}
       className="hover:bg-sky-100 rounded-full"
+      onClick={onClick}
       icon={
         <ArrowRight
           sx={{
@@ -44,10 +47,12 @@ export function FlashcardContent({
   progress,
   subtitle,
   disabled = false,
+  onClick = undefined,
 }: {
   progress: number;
   subtitle: string;
   disabled?: boolean;
+  onClick?: MouseEventHandler<HTMLButtonElement> | undefined;
 }) {
   return (
     <Content
@@ -55,6 +60,7 @@ export function FlashcardContent({
       subtitle={subtitle}
       disabled={disabled}
       className="hover:bg-emerald-100 rounded-full"
+      onClick={onClick}
       icon={
         <QuestionAnswerRounded
           sx={{
@@ -76,9 +82,11 @@ export function FlashcardContent({
 export function MaterialContent({
   subtitle,
   disabled = false,
+  onClick = undefined,
 }: {
   subtitle: string;
   disabled?: boolean;
+  onClick?: MouseEventHandler<HTMLButtonElement> | undefined;
 }) {
   return (
     <Content
@@ -86,6 +94,7 @@ export function MaterialContent({
       subtitle={subtitle}
       disabled={disabled}
       className="hover:bg-amber-100 rounded-xl"
+      onClick={onClick}
       icon={
         <Download
           sx={{ color: disabled ? "text.disabled" : "text.secondary" }}
@@ -105,6 +114,7 @@ export function Content({
   iconFrame,
   disabled = false,
   className = "",
+  onClick = undefined,
 }: {
   title: string;
   subtitle: string;
@@ -112,6 +122,7 @@ export function Content({
   iconFrame: ReactElement;
   disabled?: boolean;
   className?: string;
+  onClick?: MouseEventHandler<HTMLButtonElement> | undefined;
 }) {
   return (
     <button
@@ -119,6 +130,7 @@ export function Content({
       className={`group flex items-center text-left gap-4 pr-12 hover:disabled:bg-gray-50 ${
         !disabled ? "cursor-pointer" : "cursor-default"
       } ${className}`}
+      onClick={onClick}
     >
       <div className="w-16 h-16 relative flex justify-center items-center group-hover:group-enabled:scale-105">
         {iconFrame}

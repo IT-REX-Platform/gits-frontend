@@ -68,11 +68,14 @@ function StudentCoursePage() {
         {course.title}
       </Typography>
       <Typography variant="body1">{course.description}</Typography>
-      <div className="mb-8"></div>
 
-      <VideoContent subtitle="Publish Subscribe Messaging" progress={60} />
-      <FlashcardContent subtitle="Publish Subscribe Messaging" progress={60} />
-      <MaterialContent subtitle="Publish Subscribe Messaging" />
+      <section className="mt-16">
+        <Typography variant="h2">Up next</Typography>
+        <div className="mt-8 flex gap-8 grid gap-x-12 gap-y-4 grid-cols-[max-content] xl:grid-cols-[repeat(2,max-content)] 2xl:grid-cols-[repeat(3,max-content)]">
+          <VideoContent subtitle="Publish-Subscribe Messaging" progress={0} />
+          <VideoContent subtitle="Publish-Subscribe Messaging" progress={40} />
+        </div>
+      </section>
 
       {course.chapters.elements.map((chapter) => (
         <section className="mt-24">
@@ -90,6 +93,13 @@ function StudentCoursePage() {
             }}
           />
           <ChapterContent>
+            <ChapterContentItem finished first>
+              <VideoContent subtitle="Some content" progress={100} />
+              <FlashcardContent subtitle="Some content" progress={100} />
+            </ChapterContentItem>
+            <ChapterContentItem last>
+              <MaterialContent subtitle="Some content" />
+            </ChapterContentItem>
             {chapter.contents.length > 0 && (
               <ChapterContentItem first last>
                 {chapter.contents.map((content) => (

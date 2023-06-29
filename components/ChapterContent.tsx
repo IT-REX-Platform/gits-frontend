@@ -42,7 +42,7 @@ export function ChapterContentItem({
           }}
         ></div>
       </div>
-      <div className="py-5 grid grid-flow-row auto-cols-max gap-x-12 gap-y-4 grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3">
+      <div className="py-5 grid gap-x-12 gap-y-4 grid-cols-[max-content] xl:grid-cols-[repeat(2,max-content)] 2xl:grid-cols-[repeat(3,max-content)]">
         {children}
       </div>
     </div>

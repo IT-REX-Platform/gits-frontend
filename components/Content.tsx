@@ -21,6 +21,7 @@ export function VideoContent({
       title="Watch video"
       subtitle={subtitle}
       disabled={disabled}
+      className="hover:bg-sky-100 rounded-full"
       icon={
         <ArrowRight
           sx={{
@@ -53,6 +54,7 @@ export function FlashcardContent({
       title="Repeat flashcards"
       subtitle={subtitle}
       disabled={disabled}
+      className="hover:bg-emerald-100 rounded-full"
       icon={
         <QuestionAnswerRounded
           sx={{
@@ -63,7 +65,7 @@ export function FlashcardContent({
       }
       iconFrame={
         <ProgressFrame
-          color={disabled ? colors.gray[100] : colors.green[200]}
+          color={disabled ? colors.gray[100] : colors.emerald[200]}
           progress={disabled ? 0 : progress}
         />
       }
@@ -83,6 +85,7 @@ export function MaterialContent({
       title="Download content"
       subtitle={subtitle}
       disabled={disabled}
+      className="hover:bg-amber-100 rounded-xl"
       icon={
         <Download
           sx={{ color: disabled ? "text.disabled" : "text.secondary" }}
@@ -101,24 +104,27 @@ export function Content({
   icon,
   iconFrame,
   disabled = false,
+  className = "",
 }: {
   title: string;
   subtitle: string;
   icon: ReactElement;
   iconFrame: ReactElement;
   disabled?: boolean;
+  className?: string;
 }) {
   return (
-    <div
-      className={`flex items-center gap-4 pr-8 ${
+    <button
+      disabled={disabled}
+      className={`group flex items-center text-left gap-4 pr-12 hover:disabled:bg-gray-50 ${
         !disabled ? "cursor-pointer" : "cursor-default"
-      }`}
+      } ${className}`}
     >
-      <div className="w-16 h-16 relative flex justify-center items-center">
+      <div className="w-16 h-16 relative flex justify-center items-center group-hover:group-enabled:scale-105">
         {iconFrame}
         <div className="absolute">{icon}</div>
       </div>
-      <div>
+      <div className="group-hover:group-enabled:translate-x-0.5">
         <Typography
           variant="subtitle1"
           fontSize="1.25rem"
@@ -136,7 +142,7 @@ export function Content({
           {subtitle}
         </Typography>
       </div>
-    </div>
+    </button>
   );
 }
 
@@ -147,16 +153,17 @@ export function ProgressFrame({
   color: string;
   progress: number;
 }) {
-  const theme = useTheme();
   return (
     <>
-      <div className={`absolute w-16 h-16 rounded-full bg-white`}></div>
+      <div
+        className={`absolute w-16 h-16 rounded-full bg-white box-content group-hover:border-4 group-hover:border-white`}
+      ></div>
       <CircularProgress
         variant="determinate"
         value={100}
         size="4rem"
         thickness={3}
-        sx={{ color: "grey.200" }}
+        sx={{ color: "grey.100" }}
       />
       <CircularProgress
         className="absolute"
@@ -164,7 +171,7 @@ export function ProgressFrame({
         value={progress}
         thickness={3}
         size="4rem"
-        sx={{ color: progress < 100 ? theme.palette.success.main : color }}
+        sx={{ color }}
       />
       <div
         className={`absolute w-12 h-12 rounded-full`}

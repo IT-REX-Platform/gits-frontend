@@ -1,15 +1,11 @@
 import { NavbarQuery } from "@/__generated__/NavbarQuery.graphql";
-import { graphql, useLazyLoadQuery } from "react-relay";
-
+import { NavbarStudentFragment$key } from "@/__generated__/NavbarStudentFragment.graphql";
+import { NavbarLecturerFragment$key } from "@/__generated__/NavbarLecturerFragment.graphql";
+import { graphql, useFragment, useLazyLoadQuery } from "react-relay";
 import logo from "@/assets/logo.svg";
-import { Book, CollectionsBookmark, Home, Logout } from "@mui/icons-material";
-import MenuIcon from "@mui/icons-material/Menu";
+import { CollectionsBookmark, Dashboard, Logout } from "@mui/icons-material";
 import {
   Avatar,
-  Box,
-  CssBaseline,
-  Divider,
-  Drawer,
   IconButton,
   List,
   ListItem,
@@ -18,150 +14,91 @@ import {
   ListItemIcon,
   ListItemText,
   ListSubheader,
-  Toolbar,
   Tooltip,
 } from "@mui/material";
 import { useRouter } from "next/router";
+import { usePathname } from "next/navigation";
 import { useAuth } from "react-oidc-context";
-import React from "react";
+import React, { ReactElement } from "react";
 
-const drawerWidth = 240;
+function NavbarBase({ children }: { children: any }) {
+  const currentPath = window.location.pathname;
 
-interface Props {
-  /**
-   * Injected by the documentation to work in an iframe.
-   * You won't need it on your project.
-   */
-  window?: () => Window;
+  return (
+    <div className="bg-slate-200 h-full px-8 flex flex-col gap-6 w-96 overflow-auto">
+      <div className="text-center my-8 text-3xl font-medium tracking-wider sticky">
+        <img src={logo.src} className="w-24 m-auto" />
+      </div>
+      <NavbarSection>
+        <NavbarLink
+          title="Dashboard"
+          icon={<Dashboard />}
+          href="/"
+          isActive={currentPath === "/"}
+        />
+        <NavbarLink
+          title="Course Catalog"
+          icon={<CollectionsBookmark />}
+          href="/join"
+          isActive={currentPath === "/join"}
+        />
+      </NavbarSection>
+      {children}
+      <UserInfo />
+    </div>
+  );
 }
 
-export function Navbar(props: Props) {
-  const query = useLazyLoadQuery<NavbarQuery>(
-    graphql`
-      query NavbarQuery {
-        courses {
-          elements {
-            id
-            title
-          }
+function NavbarSection({ children, title }: { children: any; title?: string }) {
+  return (
+    <div className="bg-white rounded-lg">
+      <List
+        subheader={
+          title ? (
+            <ListSubheader className="rounded-lg">{title}</ListSubheader>
+          ) : undefined
         }
-      }
-    `,
-    {}
+      >
+        {children}
+      </List>
+    </div>
   );
+}
 
+function NavbarLink({
+  icon,
+  title,
+  href,
+  isActive = false,
+}: {
+  icon?: ReactElement;
+  title: string;
+  href: string;
+  isActive?: boolean;
+}) {
   const router = useRouter();
+  return (
+    <div
+      className={`relative ${
+        isActive ? "bg-gradient-to-r from-gray-100 to-transparent" : ""
+      }`}
+    >
+      {isActive && (
+        <div className="absolute w-2 inset-y-0 -left-2 bg-sky-800 rounded-l"></div>
+      )}
+      <ListItemButton onClick={() => router.push(href)}>
+        {icon && <ListItemIcon>{icon}</ListItemIcon>}
+        <ListItemText primary={title} />
+      </ListItemButton>
+    </div>
+  );
+}
+
+function UserInfo() {
   const auth = useAuth();
-
-  const { window } = props;
-  const [open, setOpen] = React.useState(false);
-
-  const handleDrawerToggle = () => {
-    setOpen(!open);
-  };
-
-  const drawer = (
-    <div>
-      <IconButton
-        color="inherit"
-        aria-label="open drawer"
-        onClick={handleDrawerToggle}
-        edge="start"
-        sx={{ mr: 2, display: { sm: "none" } }}
-      >
-        <MenuIcon />
-      </IconButton>
-      <div className="text-center my-8 text-3xl font-medium tracking-wider">
-        <img src={logo.src} className="w-24 m-auto" />
-        GITS
-      </div>
-      <Divider />
-      <List sx={{ paddingY: 2 }}>
-        <ListItemButton onClick={() => router.push("/")}>
-          <ListItemIcon>
-            <Home />
-          </ListItemIcon>
-          <ListItemText
-            primary="Home"
-            primaryTypographyProps={{
-              sx: { fontSize: { xs: 10, md: "default" } },
-            }}
-          />
-        </ListItemButton>
-        <ListItemButton onClick={() => router.push("/join")}>
-          <ListItemIcon>
-            <CollectionsBookmark />
-          </ListItemIcon>
-          <ListItemText
-            primary="Course Catalog"
-            primaryTypographyProps={{
-              sx: { fontSize: { xs: 10, md: "default" } },
-            }}
-          />
-        </ListItemButton>
-      </List>
-      <Divider />
-      <List
-        subheader={
-          <ListSubheader sx={{ fontSize: { xs: 10, md: "default" } }}>
-            Courses I&apos;m attending
-          </ListSubheader>
-        }
-        dense
-      >
-        {/* MOCK */}
-        {query.courses.elements.map((course) => (
-          <ListItemButton
-            key={course.id}
-            onClick={() => router.push(`/course/${course.id}`)}
-          >
-            <ListItemAvatar>
-              <Avatar sx={{ backgroundColor: "#2c388aff" }}>
-                <Book />
-              </Avatar>
-            </ListItemAvatar>
-            <ListItemText
-              primary={course.title}
-              primaryTypographyProps={{
-                noWrap: true,
-                sx: { fontSize: { xs: 10, md: "default" } },
-              }}
-            />
-          </ListItemButton>
-        ))}
-      </List>
-      <List
-        sx={{ flexGrow: "1" }}
-        subheader={
-          <ListSubheader sx={{ fontSize: { xs: 10, md: "default" } }}>
-            Courses I&apos;m tutoring
-          </ListSubheader>
-        }
-        dense
-      >
-        {/* MOCK */}
-        {query.courses.elements.map((course) => (
-          <ListItemButton
-            key={course.id}
-            onClick={() => router.push(`/course/${course.id}`)}
-          >
-            <ListItemAvatar>
-              <Avatar sx={{ backgroundColor: "#2c388aff" }}>
-                <Book />
-              </Avatar>
-            </ListItemAvatar>
-            <ListItemText
-              primary={course.title}
-              primaryTypographyProps={{
-                noWrap: true,
-                sx: { fontSize: { xs: 10, md: "default" } },
-              }}
-            />
-          </ListItemButton>
-        ))}
-      </List>
-      <Divider />
-      <List sx={{ bottom: "0px", position: "absolute" }} dense>
+  return (
+    <div className="sticky bottom-0 py-6 -mt-6 bg-gradient-to-t from-slate-200 from-75% to-transparent">
+      <NavbarSection>
         <ListItem
           secondaryAction={
             <Tooltip title="Logout" placement="left">
@@ -180,62 +117,90 @@ export function Navbar(props: Props) {
           </ListItemAvatar>
           <ListItemText primary={auth.user?.profile?.name} />
         </ListItem>
-      </List>
+      </NavbarSection>
     </div>
   );
+}
 
-  const container =
-    window !== undefined ? () => window().document.body : undefined;
+function StudentNavbar({ _query }: { _query: NavbarStudentFragment$key }) {
+  const { allCourses } = useFragment(
+    graphql`
+      fragment NavbarStudentFragment on Query {
+        allCourses: courses {
+          elements {
+            id
+            title
+          }
+        }
+      }
+    `,
+    _query
+  );
 
+  const currentPath = window.location.pathname;
   return (
-    <Box sx={{ display: "flex" }}>
-      <CssBaseline />
-      <Toolbar>
-        <IconButton
-          color="inherit"
-          aria-label="open drawer"
-          onClick={handleDrawerToggle}
-          edge="start"
-          sx={{ mr: 2, display: { sm: "none" } }}
-        >
-          <MenuIcon />
-        </IconButton>
-      </Toolbar>
-      <Box
-        component="nav"
-        sx={{ width: { sm: drawerWidth }, flexShrink: { sm: 0 } }}
-        aria-label="mailbox folders"
-      >
-        <Drawer
-          container={container}
-          variant="temporary"
-          anchor="left"
-          open={open}
-          onClose={handleDrawerToggle}
-          ModalProps={{
-            keepMounted: true, // Better open performance on mobile.
-          }}
-          sx={{
-            display: { xs: "block" },
-          }}
-        >
-          {drawer}
-        </Drawer>
+    <NavbarBase>
+      <NavbarSection title="Courses I'm attending">
+        {allCourses.elements.map((course) => (
+          <NavbarLink
+            key={course.id}
+            title={course.title}
+            href={`/course/${course.id}`}
+            isActive={currentPath.startsWith(`/course/${course.id}`)}
+          />
+        ))}
+      </NavbarSection>
+    </NavbarBase>
+  );
+}
 
-        <Drawer
-          variant="permanent"
-          sx={{
-            display: { xs: "none", sm: "block" },
-            "& .MuiDrawer-paper": {
-              boxSizing: "border-box",
-              width: drawerWidth,
-            },
-          }}
-          open
-        >
-          {drawer}
-        </Drawer>
-      </Box>
-    </Box>
+function LecturerNavbar({ _query }: { _query: NavbarLecturerFragment$key }) {
+  const { allCourses } = useFragment(
+    graphql`
+      fragment NavbarLecturerFragment on Query {
+        allCourses: courses {
+          elements {
+            id
+            title
+          }
+        }
+      }
+    `,
+    _query
+  );
+
+  const currentPath = window.location.pathname;
+  return (
+    <NavbarBase>
+      <NavbarSection title="Courses I'm tutoring">
+        {allCourses.elements.map((course) => (
+          <NavbarLink
+            key={course.id}
+            title={course.title}
+            href={`/course/${course.id}`}
+            isActive={currentPath.startsWith(`/course/${course.id}`)}
+          />
+        ))}
+      </NavbarSection>
+    </NavbarBase>
+  );
+}
+
+export function Navbar() {
+  const query = useLazyLoadQuery<NavbarQuery>(
+    graphql`
+      query NavbarQuery {
+        ...NavbarStudentFragment
+        ...NavbarLecturerFragment
+      }
+    `,
+    {}
+  );
+
+  const pathname = usePathname();
+  return pathname.includes("student") ? (
+    <StudentNavbar _query={query} />
+  ) : (
+    <LecturerNavbar _query={query} />
   );
 }

@@ -37,6 +37,7 @@ function NavbarBase({
         <NavbarLink
           title="Dashboard"
           icon={<Dashboard />}
+          exact
           href={student ? "/student" : "/lecturer"}
         />
         <NavbarLink
@@ -71,14 +72,17 @@ function NavbarLink({
   icon,
   title,
   href,
+  exact,
 }: {
   icon?: ReactElement;
   title: string;
   href: string;
+  exact?: boolean;
 }) {
   const router = useRouter();
   const currentPath = usePathname();
-  const isActive = currentPath.startsWith(href);
+
+  const isActive = exact ? currentPath == href : currentPath.startsWith(href);
   return (
     <div
       className={`relative ${
@@ -190,7 +194,7 @@ export function LecturerNavbar() {
           <NavbarLink
             key={course.id}
             title={course.title}
-            href={`/course/${course.id}`}
+            href={`/lecturer/course/${course.id}`}
           />
         ))}
       </NavbarSection>

@@ -1,4 +1,6 @@
-import { createCourseMutation } from "@/__generated__/createCourseMutation.graphql";
+"use client";
+
+import { pageCreateCourseMutation } from "@/__generated__/pageCreateCourseMutation.graphql";
 import { Heading } from "@/components/Heading";
 import { MultistepForm, StepInfo } from "@/components/MultistepForm";
 import {
@@ -33,8 +35,8 @@ export default function NewCourse() {
   const [publish, setPublish] = useState(false);
 
   const [createCourse, isCourseInFlight] =
-    useMutation<createCourseMutation>(graphql`
-      mutation createCourseMutation($course: CreateCourseInput!) {
+    useMutation<pageCreateCourseMutation>(graphql`
+      mutation pageCreateCourseMutation($course: CreateCourseInput!) {
         createCourse(input: $course) {
           id
         }

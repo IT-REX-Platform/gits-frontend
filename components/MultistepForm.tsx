@@ -1,3 +1,4 @@
+"use client";
 import { Button, Step, StepContent, StepLabel, Stepper } from "@mui/material";
 import { ReactElement, useState } from "react";
 

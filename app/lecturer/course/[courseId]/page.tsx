@@ -1,11 +1,13 @@
-import { editCourseAddChapterModalFragment$key } from "@/__generated__/editCourseAddChapterModalFragment.graphql";
-import { editCourseChaptersFragment$key } from "@/__generated__/editCourseChaptersFragment.graphql";
-import { editCourseChaptersMutation } from "@/__generated__/editCourseChaptersMutation.graphql";
-import { editCourseEditChapterModalFragment$key } from "@/__generated__/editCourseEditChapterModalFragment.graphql";
-import { editCourseEditChaptersMutation } from "@/__generated__/editCourseEditChaptersMutation.graphql";
-import { editCourseGeneralFragment$key } from "@/__generated__/editCourseGeneralFragment.graphql";
-import { editCourseMutation } from "@/__generated__/editCourseMutation.graphql";
-import { editCourseQuery } from "@/__generated__/editCourseQuery.graphql";
+"use client";
+
+import { pageEditCourseAddChapterModalFragment$key } from "@/__generated__/pageEditCourseAddChapterModalFragment.graphql";
+import { pageEditCourseChaptersFragment$key } from "@/__generated__/pageEditCourseChaptersFragment.graphql";
+import { pageEditCourseChaptersMutation } from "@/__generated__/pageEditCourseChaptersMutation.graphql";
+import { pageEditCourseEditChapterModalFragment$key } from "@/__generated__/pageEditCourseEditChapterModalFragment.graphql";
+import { pageEditCourseEditChaptersMutation } from "@/__generated__/pageEditCourseEditChaptersMutation.graphql";
+import { pageEditCourseGeneralFragment$key } from "@/__generated__/pageEditCourseGeneralFragment.graphql";
+import { pageEditCourseMutation } from "@/__generated__/pageEditCourseMutation.graphql";
+import { pageEditCourseQuery } from "@/__generated__/pageEditCourseQuery.graphql";
 import { Form, FormActions, FormSection } from "@/components/Form";
 import { Heading } from "@/components/Heading";
 import { Add, Edit } from "@mui/icons-material";
@@ -28,7 +30,7 @@ import {
 import { DatePicker } from "@mui/x-date-pickers";
 import dayjs, { Dayjs } from "dayjs";
 import NextError from "next/error";
-import { useRouter } from "next/router";
+import { useParams } from "next/navigation";
 import { useState } from "react";
 import {
   graphql,
@@ -38,17 +40,17 @@ import {
 } from "react-relay";
 
 export default function EditCoursePage() {
-  const router = useRouter();
-  const { coursesById } = useLazyLoadQuery<editCourseQuery>(
+  const params = useParams();
+  const { coursesById } = useLazyLoadQuery<pageEditCourseQuery>(
     graphql`
-      query editCourseQuery($id: [UUID!]!) {
+      query pageEditCourseQuery($id: [UUID!]!) {
         coursesById(ids: $id) {
-          ...editCourseGeneralFragment
-          ...editCourseChaptersFragment
+          ...pageEditCourseGeneralFragment
+          ...pageEditCourseChaptersFragment
         }
       }
     `,
-    { id: [router.query.courseId] }
+    { id: [params.courseId] }
   );
 
   const [tab, setTab] = useState<"General" | "Chapters">("General");
@@ -87,10 +89,14 @@ export default function EditCoursePage() {
   );
 }
 
-function EditGeneral({ _course }: { _course: editCourseGeneralFragment$key }) {
+function EditGeneral({
+  _course,
+}: {
+  _course: pageEditCourseGeneralFragment$key;
+}) {
   const course = useFragment(
     graphql`
-      fragment editCourseGeneralFragment on Course {
+      fragment pageEditCourseGeneralFragment on Course {
         id
         title
         description
@@ -102,13 +108,14 @@ function EditGeneral({ _course }: { _course: editCourseGeneralFragment$key }) {
     _course
   );
 
-  const [updateCourse, isUpdating] = useMutation<editCourseMutation>(graphql`
-    mutation editCourseMutation($course: UpdateCourseInput!) {
-      updateCourse(input: $course) {
-        id
+  const [updateCourse, isUpdating] =
+    useMutation<pageEditCourseMutation>(graphql`
+      mutation pageEditCourseMutation($course: UpdateCourseInput!) {
+        updateCourse(input: $course) {
+          id
+        }
       }
-    }
-  `);
+    `);
 
   const [title, setTitle] = useState(course.title);
   const [description, setDescription] = useState(course.description);
@@ -238,11 +245,11 @@ function EditGeneral({ _course }: { _course: editCourseGeneralFragment$key }) {
 function EditChapters({
   _course,
 }: {
-  _course: editCourseChaptersFragment$key;
+  _course: pageEditCourseChaptersFragment$key;
 }) {
   const course = useFragment(
     graphql`
-      fragment editCourseChaptersFragment on Course {
+      fragment pageEditCourseChaptersFragment on Course {
         id
         chapters {
           elements {
@@ -251,10 +258,10 @@ function EditChapters({
             startDate
             endDate
             title
-            ...editCourseEditChapterModalFragment
+            ...pageEditCourseEditChapterModalFragment
           }
         }
-        ...editCourseAddChapterModalFragment
+        ...pageEditCourseAddChapterModalFragment
       }
     `,
     _course
@@ -301,13 +308,13 @@ function EditChapters({
 function EditChapterModal({
   _chapter,
 }: {
-  _chapter: editCourseEditChapterModalFragment$key;
+  _chapter: pageEditCourseEditChapterModalFragment$key;
 }) {
   const [openModal, setOpenModal] = useState(false);
 
   const chapter = useFragment(
     graphql`
-      fragment editCourseEditChapterModalFragment on Chapter {
+      fragment pageEditCourseEditChapterModalFragment on Chapter {
         id
         title
         description
@@ -360,12 +367,14 @@ function EditChapterModal({
     endDate.isValid();
 
   const [updateChapter, isUpdating] =
-    useMutation<editCourseEditChaptersMutation>(graphql`
-      mutation editCourseEditChaptersMutation($chapter: UpdateChapterInput!) {
+    useMutation<pageEditCourseEditChaptersMutation>(graphql`
+      mutation pageEditCourseEditChaptersMutation(
+        $chapter: UpdateChapterInput!
+      ) {
         updateChapter(input: $chapter) {
           id
           course {
-            ...editCourseChaptersFragment
+            ...pageEditCourseChaptersFragment
           }
         }
       }
@@ -511,11 +520,11 @@ function AddChapterModal({
 }: {
   open: boolean;
   onClose: () => void;
-  _course: editCourseAddChapterModalFragment$key;
+  _course: pageEditCourseAddChapterModalFragment$key;
 }) {
   const course = useFragment(
     graphql`
-      fragment editCourseAddChapterModalFragment on Course {
+      fragment pageEditCourseAddChapterModalFragment on Course {
         id
         chapters {
           elements {
@@ -548,12 +557,12 @@ function AddChapterModal({
     endDate.isValid();
 
   const [addChapter, isUpdating] =
-    useMutation<editCourseChaptersMutation>(graphql`
-      mutation editCourseChaptersMutation($chapter: CreateChapterInput!) {
+    useMutation<pageEditCourseChaptersMutation>(graphql`
+      mutation pageEditCourseChaptersMutation($chapter: CreateChapterInput!) {
         createChapter(input: $chapter) {
           id
           course {
-            ...editCourseChaptersFragment
+            ...pageEditCourseChaptersFragment
           }
         }
       }

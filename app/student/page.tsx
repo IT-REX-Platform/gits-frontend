@@ -124,7 +124,7 @@ export default function StudentPage() {
             <Divider />
 
             <CardActions>
-              <Link href={{ pathname: `/course/${course.id}` }}>
+              <Link href={{ pathname: `/student/course/${course.id}` }}>
                 <Button size="small">Continue</Button>
               </Link>
             </CardActions>

@@ -1,22 +1,24 @@
-import { CourseIdQuery } from "@/__generated__/CourseIdQuery.graphql";
+"use client";
+import { pageCourseIdQuery } from "@/__generated__/pageCourseIdQuery.graphql";
 import AssignmentIcon from "@mui/icons-material/Assignment";
 import QuizIcon from "@mui/icons-material/Quiz";
 import StyleOutlinedIcon from "@mui/icons-material/StyleOutlined";
 import { Button } from "@mui/material";
 import Error from "next/error";
 import Link from "next/link";
-import { useRouter } from "next/router";
+import { useParams, useRouter } from "next/navigation";
 import { graphql, useLazyLoadQuery } from "react-relay";
 import { VictoryLabel, VictoryPie } from "victory";
 
 export default function Details() {
+  const params = useParams();
   const router = useRouter();
-  const id = router.query.courseId;
+  const id = params.courseId;
   const currentDate = new Date();
 
-  const { coursesById } = useLazyLoadQuery<CourseIdQuery>(
+  const { coursesById } = useLazyLoadQuery<pageCourseIdQuery>(
     graphql`
-      query CourseIdQuery($id: [UUID!]!) {
+      query pageCourseIdQuery($id: [UUID!]!) {
         coursesById(ids: $id) {
           title
           description

@@ -73,6 +73,7 @@ function SigninContent({ pageProps, Component }: AppProps<RelayPageProps>) {
       auth.signinRedirect();
     }
   }, [
+    auth,
     auth.isAuthenticated,
     auth.activeNavigator,
     auth.isLoading,

@@ -1,4 +1,6 @@
-import { lecturerIndexQuery } from "@/__generated__/lecturerIndexQuery.graphql";
+"use client";
+
+import { pageStudentQuery } from "@/__generated__/pageStudentQuery.graphql";
 import {
   ArrowForwardIos,
   Check,
@@ -19,15 +21,13 @@ import {
   Typography,
 } from "@mui/material";
 import Link from "next/link";
-import { useRouter } from "next/router";
 import { useLazyLoadQuery } from "react-relay";
 import { graphql } from "relay-runtime";
 
-export default function LecturerPage() {
-  const router = useRouter();
-  const { allCourses } = useLazyLoadQuery<lecturerIndexQuery>(
+export default function StudentPage() {
+  const { allCourses } = useLazyLoadQuery<pageStudentQuery>(
     graphql`
-      query lecturerIndexQuery {
+      query pageStudentQuery {
         allCourses: courses {
           elements {
             id
@@ -41,7 +41,7 @@ export default function LecturerPage() {
   );
 
   return (
-    <div className="pt-10">
+    <div className="p-10">
       <Typography gutterBottom variant="h4" component="div">
         Dashboard
       </Typography>
@@ -49,7 +49,7 @@ export default function LecturerPage() {
         My Courses
       </Typography>
 
-      <div className="grid grid-cols-2 lg:grid-cols-3 gap-5 mt-4 mr-10">
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-5 mt-4">
         {/* MOCK */}
         {allCourses.elements.map((course) => (
           <Card variant="outlined" className="h-full" key={course.id}>
@@ -88,7 +88,7 @@ export default function LecturerPage() {
                   <Visibility />
                 </ListItemIcon>
                 <ListItemText
-                  primary="Get quiz results"
+                  primary="Watch the next video"
                   secondary="Chapter 4: Interfaces"
                 />
                 <ListItemIcon>
@@ -100,7 +100,7 @@ export default function LecturerPage() {
                   <Check />
                 </ListItemIcon>
                 <ListItemText
-                  primary="Grade Assignments"
+                  primary="Solve the Quiz"
                   secondary="Chapter 4: Interfaces"
                 />
                 <ListItemIcon>
@@ -113,7 +113,7 @@ export default function LecturerPage() {
                   <Refresh />
                 </ListItemIcon>
                 <ListItemText
-                  primary="Check Student Progress"
+                  primary="Refresh your Knowledge"
                   secondary="Chapter 1-3"
                 />
                 <ListItemIcon>
@@ -125,7 +125,7 @@ export default function LecturerPage() {
 
             <CardActions>
               <Link href={{ pathname: `/course/${course.id}` }}>
-                <Button size="small">Show Details</Button>
+                <Button size="small">Continue</Button>
               </Link>
             </CardActions>
           </Card>

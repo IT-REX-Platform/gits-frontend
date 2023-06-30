@@ -1,4 +1,6 @@
-import { studentIndexQuery } from "@/__generated__/studentIndexQuery.graphql";
+"use client";
+
+import { pageLecturerDashboardQuery } from "@/__generated__/pageLecturerDashboardQuery.graphql";
 import {
   ArrowForwardIos,
   Check,
@@ -22,10 +24,10 @@ import Link from "next/link";
 import { useLazyLoadQuery } from "react-relay";
 import { graphql } from "relay-runtime";
 
-export default function StudentPage() {
-  const { allCourses } = useLazyLoadQuery<studentIndexQuery>(
+export default function LecturerPage() {
+  const { allCourses } = useLazyLoadQuery<pageLecturerDashboardQuery>(
     graphql`
-      query studentIndexQuery {
+      query pageLecturerDashboardQuery {
         allCourses: courses {
           elements {
             id
@@ -39,7 +41,7 @@ export default function StudentPage() {
   );
 
   return (
-    <div className="pt-10">
+    <div className="p-10">
       <Typography gutterBottom variant="h4" component="div">
         Dashboard
       </Typography>
@@ -47,7 +49,7 @@ export default function StudentPage() {
         My Courses
       </Typography>
 
-      <div className="grid grid-cols-2 lg:grid-cols-3 gap-5 mt-4 mr-10">
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-5 mt-4">
         {/* MOCK */}
         {allCourses.elements.map((course) => (
           <Card variant="outlined" className="h-full" key={course.id}>
@@ -86,7 +88,7 @@ export default function StudentPage() {
                   <Visibility />
                 </ListItemIcon>
                 <ListItemText
-                  primary="Watch the next video"
+                  primary="Get quiz results"
                   secondary="Chapter 4: Interfaces"
                 />
                 <ListItemIcon>
@@ -98,7 +100,7 @@ export default function StudentPage() {
                   <Check />
                 </ListItemIcon>
                 <ListItemText
-                  primary="Solve the Quiz"
+                  primary="Grade Assignments"
                   secondary="Chapter 4: Interfaces"
                 />
                 <ListItemIcon>
@@ -111,7 +113,7 @@ export default function StudentPage() {
                   <Refresh />
                 </ListItemIcon>
                 <ListItemText
-                  primary="Refresh your Knowledge"
+                  primary="Check Student Progress"
                   secondary="Chapter 1-3"
                 />
                 <ListItemIcon>
@@ -123,7 +125,7 @@ export default function StudentPage() {
 
             <CardActions>
               <Link href={{ pathname: `/course/${course.id}` }}>
-                <Button size="small">Continue</Button>
+                <Button size="small">Show Details</Button>
               </Link>
             </CardActions>
           </Card>

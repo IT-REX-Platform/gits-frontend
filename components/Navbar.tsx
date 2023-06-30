@@ -44,7 +44,7 @@ function NavbarBase({
         <NavbarLink
           title="Course Catalog"
           icon={<CollectionsBookmark />}
-          href="/student/join"
+          href="/student/course/join"
           isActive={currentPath === "/join"}
         />
       </NavbarSection>

@@ -197,7 +197,7 @@ export function Navbar() {
     {}
   );
 
-  const pathname = usePathname();
+  const pathname = window.location.pathname;
   return pathname.includes("student") ? (
     <StudentNavbar _query={query} />
   ) : (

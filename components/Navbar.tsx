@@ -28,7 +28,6 @@ function NavbarBase({
   children: React.ReactElement;
   student: boolean;
 }) {
-  const currentPath = usePathname();
   return (
     <div className="bg-slate-200 h-full px-8 flex flex-col gap-6 w-96 overflow-auto">
       <div className="text-center my-8 text-3xl font-medium tracking-wider sticky">
@@ -39,13 +38,11 @@ function NavbarBase({
           title="Dashboard"
           icon={<Dashboard />}
           href={student ? "/student" : "/lecturer"}
-          isActive={currentPath === "/"}
         />
         <NavbarLink
           title="Course Catalog"
           icon={<CollectionsBookmark />}
           href="/student/course/join"
-          isActive={currentPath === "/join"}
         />
       </NavbarSection>
       {children}
@@ -74,14 +71,14 @@ function NavbarLink({
   icon,
   title,
   href,
-  isActive = false,
 }: {
   icon?: ReactElement;
   title: string;
   href: string;
-  isActive?: boolean;
 }) {
   const router = useRouter();
+  const currentPath = usePathname();
+  const isActive = currentPath.startsWith(href);
   return (
     <div
       className={`relative ${
@@ -156,7 +153,6 @@ export function StudentNavbar() {
     {}
   );
 
-  const currentPath = usePathname();
   return (
     <NavbarBase student>
       <NavbarSection title="Courses I'm attending">
@@ -165,7 +161,6 @@ export function StudentNavbar() {
             key={course.id}
             title={course.title}
             href={`/student/course/${course.id}`}
-            isActive={currentPath.startsWith(`/course/${course.id}`)}
           />
         ))}
       </NavbarSection>
@@ -188,7 +183,6 @@ export function LecturerNavbar() {
     {}
   );
 
-  const currentPath = usePathname();
   return (
     <NavbarBase student={false}>
       <NavbarSection title="Courses I'm tutoring">
@@ -197,7 +191,6 @@ export function LecturerNavbar() {
             key={course.id}
             title={course.title}
             href={`/course/${course.id}`}
-            isActive={currentPath.startsWith(`/course/${course.id}`)}
           />
         ))}
       </NavbarSection>

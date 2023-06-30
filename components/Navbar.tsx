@@ -1,11 +1,11 @@
-import { NavbarQuery } from "@/__generated__/NavbarQuery.graphql";
-import { NavbarStudentFragment$key } from "@/__generated__/NavbarStudentFragment.graphql";
-import { NavbarLecturerFragment$key } from "@/__generated__/NavbarLecturerFragment.graphql";
-import { graphql, useFragment, useLazyLoadQuery } from "react-relay";
+"use client";
+import { NavbarLecturerQuery } from "@/__generated__/NavbarLecturerQuery.graphql";
+import { NavbarStudentQuery } from "@/__generated__/NavbarStudentQuery.graphql";
 import logo from "@/assets/logo.svg";
 import { CollectionsBookmark, Dashboard, Logout } from "@mui/icons-material";
 import {
   Avatar,
+  Divider,
   IconButton,
   List,
   ListItem,
@@ -16,14 +16,18 @@ import {
   ListSubheader,
   Tooltip,
 } from "@mui/material";
-import { useRouter } from "next/router";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { ReactElement } from "react";
 import { useAuth } from "react-oidc-context";
-import React, { ReactElement } from "react";
+import { graphql, useLazyLoadQuery } from "react-relay";
 
-function NavbarBase({ children }: { children: any }) {
-  const currentPath = window.location.pathname;
-
+function NavbarBase({
+  children,
+  student,
+}: {
+  children: React.ReactElement;
+  student: boolean;
+}) {
   return (
     <div className="bg-slate-200 h-full px-8 flex flex-col gap-6 w-96 overflow-auto">
       <div className="text-center my-8 text-3xl font-medium tracking-wider sticky">
@@ -33,18 +37,17 @@ function NavbarBase({ children }: { children: any }) {
         <NavbarLink
           title="Dashboard"
           icon={<Dashboard />}
-          href="/"
-          isActive={currentPath === "/"}
+          exact
+          href={student ? "/student" : "/lecturer"}
         />
         <NavbarLink
           title="Course Catalog"
           icon={<CollectionsBookmark />}
-          href="/join"
-          isActive={currentPath === "/join"}
+          href="/student/course/join"
         />
       </NavbarSection>
       {children}
-      <UserInfo />
+      <UserInfo student={student} />
     </div>
   );
 }
@@ -69,14 +72,17 @@ function NavbarLink({
   icon,
   title,
   href,
-  isActive = false,
+  exact,
 }: {
   icon?: ReactElement;
   title: string;
   href: string;
-  isActive?: boolean;
+  exact?: boolean;
 }) {
   const router = useRouter();
+  const currentPath = usePathname();
+
+  const isActive = exact ? currentPath == href : currentPath.startsWith(href);
   return (
     <div
       className={`relative ${
@@ -94,8 +100,9 @@ function NavbarLink({
   );
 }
 
-function UserInfo() {
+function UserInfo({ student }: { student: boolean }) {
   const auth = useAuth();
+  const router = useRouter();
   return (
     <div className="sticky bottom-0 py-6 -mt-6 bg-gradient-to-t from-slate-200 from-75% to-transparent">
       <NavbarSection>
@@ -117,90 +124,80 @@ function UserInfo() {
           </ListItemAvatar>
           <ListItemText primary={auth.user?.profile?.name} />
         </ListItem>
+
+        <Divider></Divider>
+        <ListItemButton
+          onClick={() =>
+            student ? router.push("/lecturer") : router.push("/student")
+          }
+        >
+          {student ? (
+            <ListItemText primary="Switch to lecturer view" />
+          ) : (
+            <ListItemText primary="Switch to student view" />
+          )}
+        </ListItemButton>
       </NavbarSection>
     </div>
   );
 }
 
-function StudentNavbar({ _query }: { _query: NavbarStudentFragment$key }) {
-  const { allCourses } = useFragment(
+export function StudentNavbar() {
+  const { allCourses } = useLazyLoadQuery<NavbarStudentQuery>(
     graphql`
-      fragment NavbarStudentFragment on Query {
+      query NavbarStudentQuery {
         allCourses: courses {
           elements {
             id
             title
           }
         }
-      }
-    `,
-    _query
-  );
-
-  const currentPath = window.location.pathname;
-  return (
-    <NavbarBase>
-      <NavbarSection title="Courses I'm attending">
-        {allCourses.elements.map((course) => (
-          <NavbarLink
-            key={course.id}
-            title={course.title}
-            href={`/course/${course.id}`}
-            isActive={currentPath.startsWith(`/course/${course.id}`)}
-          />
-        ))}
-      </NavbarSection>
-    </NavbarBase>
-  );
-}
-
-function LecturerNavbar({ _query }: { _query: NavbarLecturerFragment$key }) {
-  const { allCourses } = useFragment(
-    graphql`
-      fragment NavbarLecturerFragment on Query {
-        allCourses: courses {
-          elements {
-            id
-            title
-          }
-        }
-      }
-    `,
-    _query
-  );
-
-  const currentPath = window.location.pathname;
-  return (
-    <NavbarBase>
-      <NavbarSection title="Courses I'm tutoring">
-        {allCourses.elements.map((course) => (
-          <NavbarLink
-            key={course.id}
-            title={course.title}
-            href={`/course/${course.id}`}
-            isActive={currentPath.startsWith(`/course/${course.id}`)}
-          />
-        ))}
-      </NavbarSection>
-    </NavbarBase>
-  );
-}
-
-export function Navbar() {
-  const query = useLazyLoadQuery<NavbarQuery>(
-    graphql`
-      query NavbarQuery {
-        ...NavbarStudentFragment
-        ...NavbarLecturerFragment
       }
     `,
     {}
   );
 
-  const pathname = usePathname();
-  return pathname.includes("student") ? (
-    <StudentNavbar _query={query} />
-  ) : (
-    <LecturerNavbar _query={query} />
+  return (
+    <NavbarBase student>
+      <NavbarSection title="Courses I'm attending">
+        {allCourses.elements.map((course) => (
+          <NavbarLink
+            key={course.id}
+            title={course.title}
+            href={`/student/course/${course.id}`}
+          />
+        ))}
+      </NavbarSection>
+    </NavbarBase>
+  );
+}
+
+export function LecturerNavbar() {
+  const { allCourses } = useLazyLoadQuery<NavbarLecturerQuery>(
+    graphql`
+      query NavbarLecturerQuery {
+        allCourses: courses {
+          elements {
+            id
+            title
+          }
+        }
+      }
+    `,
+    {}
+  );
+
+  return (
+    <NavbarBase student={false}>
+      <NavbarSection title="Courses I'm tutoring">
+        {allCourses.elements.map((course) => (
+          <NavbarLink
+            key={course.id}
+            title={course.title}
+            href={`/lecturer/course/${course.id}`}
+          />
+        ))}
+      </NavbarSection>
+    </NavbarBase>
   );
 }

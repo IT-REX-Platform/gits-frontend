@@ -141,8 +141,9 @@ function StudentNavbar({ _query }: { _query: NavbarStudentFragment$key }) {
   return (
     <NavbarBase>
       <NavbarSection title="Courses I'm attending">
-        {allCourses.elements.map((course, i) => (
+        {allCourses.elements.map((course) => (
           <NavbarLink
+            key={course.id}
             title={course.title}
             href={`/course/${course.id}`}
             isActive={currentPath.startsWith(`/course/${course.id}`)}
@@ -172,8 +173,9 @@ function LecturerNavbar({ _query }: { _query: NavbarLecturerFragment$key }) {
   return (
     <NavbarBase>
       <NavbarSection title="Courses I'm tutoring">
-        {allCourses.elements.map((course, i) => (
+        {allCourses.elements.map((course) => (
           <NavbarLink
+            key={course.id}
             title={course.title}
             href={`/course/${course.id}`}
             isActive={currentPath.startsWith(`/course/${course.id}`)}

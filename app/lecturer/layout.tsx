@@ -1,16 +1,8 @@
 "use client";
 
 import { LecturerNavbar } from "@/components/Navbar";
+import { PageLayout } from "@/components/PageLayout";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="flex overflow-hidden h-full bg-slate-200 justify-center">
-      <LecturerNavbar />
-      <div className="grow overflow-auto flex flex-col">
-        <div className="px-8 py-11 max-w-[96rem] mr-8 my-8 bg-white rounded-[3rem] grow">
-          {children}
-        </div>
-      </div>
-    </div>
-  );
+  return <PageLayout navbar={<LecturerNavbar />}>{children}</PageLayout>;
 }

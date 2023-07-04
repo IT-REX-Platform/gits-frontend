@@ -25,7 +25,7 @@ export function ChapterHeader({
       <div className="mr-10">
         <ChapterProgress progress={progress} />
       </div>
-      <div className="px-16 py-4 flex bg-slate-200 rounded-full justify-between items-center flex-grow">
+      <div className="px-12 py-4 flex bg-slate-200 rounded-full justify-between items-center flex-grow">
         <div className="pt-2 pr-8">
           <Typography variant="h2">{title}</Typography>
           <Typography variant="subtitle1">{subtitle}</Typography>

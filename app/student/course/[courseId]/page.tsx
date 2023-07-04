@@ -91,7 +91,7 @@ function StudentCoursePage() {
         onClose={() => setInfoDialogOpen(false)}
       />
 
-      <div className="w-fit my-12 pl-8 pr-10 py-6 border-x-4 border-y-4 border-slate-200 rounded-3xl">
+      <div className="w-fit my-12 pl-8 pr-10 py-6 border-4 border-slate-200 rounded-3xl">
         <RewardScores health={60} fitness={20} growth={100} power={75} />
       </div>
 

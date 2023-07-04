@@ -41,6 +41,7 @@ export function RewardScores({
           color={colors.amber[400]}
           progress={power}
           icon={<PowerIcon />}
+          noBar
         />
       </div>
     </div>
@@ -52,44 +53,61 @@ export function StatDisplay({
   progress,
   color,
   icon,
+  noBar = false,
 }: {
   label: string;
   progress: number;
   color: string;
   icon: ReactElement;
+  noBar?: boolean;
 }) {
+  const score = noBar ? (
+    <ProgressValue color={color} progress={progress} />
+  ) : (
+    <ProgressBar color={color} progress={progress} />
+  );
+
   return (
     <div className="flex items-end gap-4">
       <div className="">{icon}</div>
       <div className="flex flex-col">
         <Typography variant="caption">{label}</Typography>
-        <ProgressBar className="h-4 w-48" color={color} progress={progress} />
+        {score}
       </div>
     </div>
   );
 }
 
-export function ProgressBar({
-  className = "",
+export function ProgressValue({
   color,
   progress,
 }: {
-  className?: string;
   color: string;
   progress: number;
 }) {
   return (
-    <div className={`relative rounded-full overflow-hidden ${className}`}>
-      <div
-        className="w-full h-full bg-slate-100"
-        // style={{
-        //   clipPath: "polygon(0% 0%, calc(100% - 1rem) 0%, 100% 100%, 0% 100%)",
-        // }}
-      ></div>
+    <div
+      className="h-5 flex items-center font-extrabold text-lg -mt-1"
+      style={{ color }}
+    >
+      {progress}
+    </div>
+  );
+}
+
+export function ProgressBar({
+  color,
+  progress,
+}: {
+  color: string;
+  progress: number;
+}) {
+  return (
+    <div className="relative rounded-full overflow-hidden h-4 w-48">
+      <div className="w-full h-full bg-slate-100"></div>
       <div
         className="absolute top-0 h-full transition-[width] duration-500"
         style={{
-          // clipPath: "polygon(0% 0%, calc(100% - 1rem) 0%, 100% 100%, 0% 100%)",
           background: color,
           width: `${progress}%`,
         }}

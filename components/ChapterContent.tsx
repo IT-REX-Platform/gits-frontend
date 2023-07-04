@@ -26,7 +26,7 @@ export function ChapterContentItem({
         <div
           className={`${
             first ? "h-[5.375rem] -mt-8" : "h-[3.375rem]"
-          } border-l-4 border-b-4`}
+          } border-l-4 border-b-4 ${last ? "rounded-bl-sm" : ""}`}
           style={{
             borderColor: disabled
               ? theme.palette.grey["200"]

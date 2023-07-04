@@ -50,8 +50,8 @@ const theme = createTheme({
 
 export default function App({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="de">
-      <body>
+    <html lang="de" className="h-full">
+      <body className="h-full">
         <AuthProvider {...oidcConfig}>
           <LocalizationProvider dateAdapter={AdapterDayjs}>
             <Suspense fallback="Loading...">

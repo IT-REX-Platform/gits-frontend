@@ -1,6 +1,7 @@
-import { ComponentProps, MouseEventHandler, ReactElement } from "react";
+"use client";
+import { MouseEventHandler, ReactElement } from "react";
 import colors from "tailwindcss/colors";
-import { CircularProgress, Typography, useTheme } from "@mui/material";
+import { CircularProgress, Typography } from "@mui/material";
 import {
   ArrowRight,
   Download,

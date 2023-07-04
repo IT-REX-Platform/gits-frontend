@@ -1,3 +1,4 @@
+"use client";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import Button from "@mui/material/Button";
 import { useState } from "react";

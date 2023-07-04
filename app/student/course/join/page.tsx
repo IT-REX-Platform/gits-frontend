@@ -1,4 +1,6 @@
-import { joinQuery } from "@/__generated__/joinQuery.graphql";
+"use client";
+
+import { pageJoinQuery } from "@/__generated__/pageJoinQuery.graphql";
 import { Heading } from "@/components/Heading";
 import { Add } from "@mui/icons-material";
 import { Button, TextField } from "@mui/material";
@@ -7,9 +9,9 @@ import { useState } from "react";
 import { graphql, useLazyLoadQuery } from "react-relay";
 
 export default function JoinCourse() {
-  const { courses } = useLazyLoadQuery<joinQuery>(
+  const { courses } = useLazyLoadQuery<pageJoinQuery>(
     graphql`
-      query joinQuery {
+      query pageJoinQuery {
         courses {
           elements {
             id

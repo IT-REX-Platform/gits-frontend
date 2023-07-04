@@ -1,3 +1,4 @@
+"use client";
 import { CircularProgress, Typography, useTheme } from "@mui/material";
 
 type SkillLevel = "green" | "yellow" | "red";

@@ -1,9 +1,8 @@
-import "@/styles/globals.css";
-import type { AppProps } from "next/app";
-import { Suspense, useEffect, useMemo } from "react";
-import { RelayPageProps } from "../src/relay-types";
+"use client";
 
-import { Navbar } from "@/components/Navbar";
+import "@/styles/globals.css";
+import { Suspense, useEffect, useMemo } from "react";
+
 import { initRelayEnvironment } from "@/src/RelayEnvironment";
 import "@fontsource/roboto/300.css";
 import "@fontsource/roboto/400.css";
@@ -18,7 +17,6 @@ import {
   useAuth,
 } from "react-oidc-context";
 import { RelayEnvironmentProvider } from "react-relay";
-import { RecordSource } from "relay-runtime";
 import { ThemeProvider, colors, createTheme } from "@mui/material";
 
 const oidcConfig: AuthProviderProps = {
@@ -50,34 +48,29 @@ const theme = createTheme({
   },
 });
 
-export default function App(props: AppProps<RelayPageProps>) {
+export default function App({ children }: { children: React.ReactNode }) {
   return (
-    <AuthProvider {...oidcConfig}>
-      <LocalizationProvider dateAdapter={AdapterDayjs}>
-        <Suspense fallback="Loading...">
-          <SigninContent {...props} />
-        </Suspense>
-      </LocalizationProvider>
-    </AuthProvider>
+    <html lang="de">
+      <body>
+        <AuthProvider {...oidcConfig}>
+          <LocalizationProvider dateAdapter={AdapterDayjs}>
+            <Suspense fallback="Loading...">
+              <SigninContent>{children}</SigninContent>
+            </Suspense>
+          </LocalizationProvider>
+        </AuthProvider>
+      </body>
+    </html>
   );
 }
 
-function SigninContent({ pageProps, Component }: AppProps<RelayPageProps>) {
+function SigninContent({ children }: { children: React.ReactNode }) {
   const auth = useAuth();
 
   const environment = useMemo(
     () => initRelayEnvironment(auth.user?.access_token),
     [auth.user?.access_token]
   );
-
-  // re-hydrate the relay store (requires special getServerSide... https://github.com/vercel/next.js/blob/canary/examples/with-relay-modern/pages/index.js)
-  useEffect(() => {
-    const store = environment.getStore();
-    // Hydrate the store.
-    store.publish(new RecordSource(pageProps.initialRecords));
-    // Notify any existing subscribers.
-    store.notify();
-  }, [environment, pageProps.initialRecords]);
 
   // automatically sign-in
   useEffect(() => {
@@ -90,6 +83,7 @@ function SigninContent({ pageProps, Component }: AppProps<RelayPageProps>) {
       auth.signinRedirect();
     }
   }, [
+    auth,
     auth.isAuthenticated,
     auth.activeNavigator,
     auth.isLoading,
@@ -114,14 +108,7 @@ function SigninContent({ pageProps, Component }: AppProps<RelayPageProps>) {
   if (auth.isAuthenticated) {
     return (
       <RelayEnvironmentProvider environment={environment}>
-        <ThemeProvider theme={theme}>
-          <div className="grid grid-cols-[auto_1fr] h-[100vh] overflow-hidden">
-            <Navbar />
-            <div className="overflow-auto">
-              <Component {...pageProps} />
-            </div>
-          </div>
-        </ThemeProvider>
+        <ThemeProvider theme={theme}>{children}</ThemeProvider>
       </RelayEnvironmentProvider>
     );
   }

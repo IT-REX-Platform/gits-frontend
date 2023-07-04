@@ -1,8 +1,8 @@
+"use client";
 import { useTheme } from "@mui/material";
-import { ReactElement } from "react";
+import React from "react";
 
 export function ChapterContent({ children }: { children: any }) {
-  const theme = useTheme();
   return <div>{children}</div>;
 }
 
@@ -13,7 +13,7 @@ export function ChapterContentItem({
   first = false,
   last = false,
 }: {
-  children: ReactElement[] | ReactElement;
+  children: React.ReactNode;
   disabled?: boolean;
   finished?: boolean;
   first?: boolean;

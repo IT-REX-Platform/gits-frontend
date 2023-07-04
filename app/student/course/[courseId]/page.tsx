@@ -1,6 +1,7 @@
-import { CourseIdStudentQuery } from "@/__generated__/CourseIdStudentQuery.graphql";
+"use client";
+import { pageCourseIdQuery } from "@/__generated__/pageCourseIdQuery.graphql";
 import Error from "next/error";
-import { useRouter } from "next/router";
+import { useParams } from "next/navigation";
 import { graphql, useLazyLoadQuery } from "react-relay";
 import { Typography } from "@mui/material";
 
@@ -23,13 +24,13 @@ export default function CoursePage() {
 
 function StudentCoursePage() {
   // Get course id from url
-  const router = useRouter();
-  const id = router.query.courseId;
+  const params = useParams();
+  const id = params.courseId;
 
   // Fetch course data
-  const { coursesById } = useLazyLoadQuery<CourseIdStudentQuery>(
+  const { coursesById } = useLazyLoadQuery<pageCourseIdQuery>(
     graphql`
-      query CourseIdStudentQuery($id: [UUID!]!) {
+      query pageCourseIdQuery($id: [UUID!]!) {
         coursesById(ids: $id) {
           title
           description

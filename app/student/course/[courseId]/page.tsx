@@ -3,7 +3,7 @@ import { pageCourseIdQuery } from "@/__generated__/pageCourseIdQuery.graphql";
 import Error from "next/error";
 import { useParams } from "next/navigation";
 import { graphql, useLazyLoadQuery } from "react-relay";
-import { Typography } from "@mui/material";
+import { Dialog, DialogTitle, IconButton, Typography } from "@mui/material";
 
 import { FlashcardContent, VideoContent } from "@/components/Content";
 import { ChapterHeader } from "@/components/ChapterHeader";
@@ -13,6 +13,8 @@ import {
 } from "@/components/ChapterContent";
 import dayjs from "dayjs";
 import { RewardScores } from "@/components/RewardScores";
+import { useState } from "react";
+import { Info } from "@mui/icons-material";
 
 export default function CoursePage() {
   return <StudentCoursePage />;
@@ -31,6 +33,9 @@ function StudentCoursePage() {
   // Get course id from url
   const params = useParams();
   const id = params.courseId;
+
+  // Info dialog
+  const [infoDialogOpen, setInfoDialogOpen] = useState(false);
 
   // Fetch course data
   const { coursesById } = useLazyLoadQuery<pageCourseIdQuery>(
@@ -71,10 +76,18 @@ function StudentCoursePage() {
 
   return (
     <main>
-      <Typography variant="h1" gutterBottom>
-        {course.title}
-      </Typography>
-      <Typography variant="body1">{course.description}</Typography>
+      <div className="flex gap-4 items-center">
+        <Typography variant="h1">{course.title}</Typography>
+        <IconButton onClick={() => setInfoDialogOpen(true)}>
+          <Info />
+        </IconButton>
+      </div>
+      <InfoDialog
+        open={infoDialogOpen}
+        title={course.title}
+        description={course.description}
+        onClose={() => setInfoDialogOpen(false)}
+      />
 
       <div className="w-fit my-12 pl-12 pr-16 py-6 border-x-8 border-y-4 border-slate-200 rounded-3xl">
         <RewardScores health={60} fitness={20} growth={100} power={75} />
@@ -123,5 +136,26 @@ function StudentCoursePage() {
         </section>
       ))}
     </main>
+  );
+}
+
+function InfoDialog({
+  title,
+  description,
+  open,
+  onClose,
+}: {
+  title: string;
+  description: string;
+  open: boolean;
+  onClose: () => void;
+}) {
+  return (
+    <Dialog onClose={onClose} open={open}>
+      <DialogTitle>{title}</DialogTitle>
+      <Typography variant="body1" sx={{ padding: 3, paddingTop: 0 }}>
+        {description}
+      </Typography>
+    </Dialog>
   );
 }

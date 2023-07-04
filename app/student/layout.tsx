@@ -1,12 +1,8 @@
 "use client";
 
 import { StudentNavbar } from "@/components/Navbar";
+import { PageLayout } from "@/components/PageLayout";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="grid grid-cols-[auto_1fr] h-[100vh] overflow-hidden">
-      <StudentNavbar />
-      <div className="overflow-auto">{children}</div>
-    </div>
-  );
+  return <PageLayout navbar={<StudentNavbar />}>{children}</PageLayout>;
 }

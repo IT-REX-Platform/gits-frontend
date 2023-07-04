@@ -41,11 +41,11 @@ export default function LecturerPage() {
   );
 
   return (
-    <div className="p-10">
-      <Typography gutterBottom variant="h4" component="div">
+    <main>
+      <Typography variant="h1" gutterBottom>
         Dashboard
       </Typography>
-      <Typography gutterBottom variant="h5" component="div">
+      <Typography variant="h2" gutterBottom>
         My Courses
       </Typography>
 
@@ -131,6 +131,6 @@ export default function LecturerPage() {
           </Card>
         ))}
       </div>
-    </div>
+    </main>
   );
 }

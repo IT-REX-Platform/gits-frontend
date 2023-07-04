@@ -9,7 +9,6 @@ import { pageEditCourseGeneralFragment$key } from "@/__generated__/pageEditCours
 import { pageEditCourseMutation } from "@/__generated__/pageEditCourseMutation.graphql";
 import { pageEditCourseQuery } from "@/__generated__/pageEditCourseQuery.graphql";
 import { Form, FormActions, FormSection } from "@/components/Form";
-import { Heading } from "@/components/Heading";
 import { Add, Edit } from "@mui/icons-material";
 
 import {
@@ -18,6 +17,7 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  Typography,
 } from "@mui/material";
 
 import {
@@ -62,24 +62,22 @@ export default function EditCoursePage() {
 
   return (
     <main className="flex flex-col gap-3">
-      <div className="w-full bg-sky-700">
-        <Heading className="text-white">Edit Course</Heading>
-        <div className="mt-5 ml-10 flex flex-row justify-start">
-          {["General" as const, "Chapters" as const].map((title) => (
-            <div
-              className={
-                "py-2 px-6 text-white font-bold cursor-pointer " +
-                (tab === title
-                  ? "border-b-2 border-white bg-sky-600"
-                  : "hover:bg-sky-600 ")
-              }
-              key={title}
-              onClick={() => setTab(title)}
-            >
-              {title}
-            </div>
-          ))}
-        </div>
+      <Typography variant="h1" gutterBottom>
+        Edit Course
+      </Typography>
+      <div className="flex flex-row justify-start gap-3 mb-8">
+        {["General" as const, "Chapters" as const].map((title) => (
+          <div
+            className={
+              "py-2 px-6 font-bold cursor-pointer rounded-full " +
+              (tab === title ? "text-white bg-sky-800" : "hover:bg-gray-100")
+            }
+            key={title}
+            onClick={() => setTab(title)}
+          >
+            {title}
+          </div>
+        ))}
       </div>
       <div className="px-6">
         {tab === "General" && <EditGeneral _course={coursesById[0]} />}

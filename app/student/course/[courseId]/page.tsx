@@ -1,21 +1,43 @@
 "use client";
 import { pageCourseIdQuery } from "@/__generated__/pageCourseIdQuery.graphql";
-import AssignmentIcon from "@mui/icons-material/Assignment";
-import QuizIcon from "@mui/icons-material/Quiz";
-import StyleOutlinedIcon from "@mui/icons-material/StyleOutlined";
-import { Button } from "@mui/material";
 import Error from "next/error";
-import Link from "next/link";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import { graphql, useLazyLoadQuery } from "react-relay";
-import { VictoryLabel, VictoryPie } from "victory";
+import { Dialog, DialogTitle, IconButton, Typography } from "@mui/material";
 
-export default function Details() {
+import { FlashcardContent, VideoContent } from "@/components/Content";
+import { ChapterHeader } from "@/components/ChapterHeader";
+import {
+  ChapterContent,
+  ChapterContentItem,
+} from "@/components/ChapterContent";
+import dayjs from "dayjs";
+import { RewardScores } from "@/components/RewardScores";
+import { useState } from "react";
+import { Info } from "@mui/icons-material";
+
+export default function CoursePage() {
+  return <StudentCoursePage />;
+}
+
+function displayContent(id: string, type: string, name: string) {
+  switch (type) {
+    case "MEDIA":
+      return <VideoContent key={id} subtitle={name} progress={100} />;
+    case "FLASHCARD":
+      return <FlashcardContent key={id} subtitle={name} progress={100} />;
+  }
+}
+
+function StudentCoursePage() {
+  // Get course id from url
   const params = useParams();
-  const router = useRouter();
   const id = params.courseId;
-  const currentDate = new Date();
 
+  // Info dialog
+  const [infoDialogOpen, setInfoDialogOpen] = useState(false);
+
+  // Fetch course data
   const { coursesById } = useLazyLoadQuery<pageCourseIdQuery>(
     graphql`
       query pageCourseIdQuery($id: [UUID!]!) {
@@ -29,6 +51,15 @@ export default function Details() {
               number
               startDate
               endDate
+              suggestedStartDate
+              suggestedEndDate
+              contents {
+                id
+                metadata {
+                  name
+                  type
+                }
+              }
             }
           }
         }
@@ -42,133 +73,93 @@ export default function Details() {
     return <Error statusCode={404} title="Course could not be found." />;
   }
 
-  //TODO: change later, when implementing the services into this side
+  // Extract course
   const course = coursesById[0];
-  const knowledge = 88;
-  const understanding = 50;
-  const analyses = 40;
-  const usage = 22;
-
-  const viewablechapters = course.chapters.elements.filter((chapter) => {
-    const start = new Date(chapter?.startDate);
-    //const end = new Date(chapter?.endDate);
-
-    return (
-      start.toISOString() <= currentDate.toISOString()
-      //end.toISOString() >= currentDate.toISOString()
-    );
-  });
 
   return (
-    <div className="grid grid-flow-dense grid-cols-6 gap-2 m-10">
-      <div className="col-span-full m-2 font-bold text-2xl underline">
-        {course.title}
+    <main>
+      <div className="flex gap-4 items-center">
+        <Typography variant="h1">{course.title}</Typography>
+        <IconButton onClick={() => setInfoDialogOpen(true)}>
+          <Info />
+        </IconButton>
       </div>
-      <div className="col-span-full m-2 text-xl">{course.description}</div>
-      <div className="col-span-6 border-solid border-sky-900 border-2 m-2 p-2 rounded-lg ">
-        <p className="max-[1000px]:hidden underline">Skill levels</p>
-        <div className="grid grid-cols-4">
-          <VictoryPie
-            colorScale={["green", "transparent"]}
-            innerRadius={120}
-            cornerRadius={100}
-            labels={["Know"]}
-            labelRadius={1}
-            labelPosition={"startAngle"}
-            data={[{ y: knowledge }, { y: 100 - knowledge }]}
-            width={1250}
-            style={{ labels: { fontSize: 50, fill: "black" } }}
-            labelComponent={<VictoryLabel dy={5} />}
-          />
-          <VictoryPie
-            colorScale={["yellow", "transparent"]}
-            innerRadius={120}
-            cornerRadius={100}
-            labels={["Grasp"]}
-            labelRadius={1}
-            labelPosition={"startAngle"}
-            data={[{ y: understanding }, { y: 100 - understanding }]}
-            width={1250}
-            style={{ labels: { fontSize: 50, fill: "black" } }}
-            labelComponent={<VictoryLabel dy={5} />}
-          />
-          <VictoryPie
-            colorScale={["red", "transparent"]}
-            innerRadius={120}
-            cornerRadius={100}
-            labels={["Analysis"]}
-            labelRadius={1}
-            labelPosition={"startAngle"}
-            data={[{ y: analyses }, { y: 100 - analyses }]}
-            width={1250}
-            style={{ labels: { fontSize: 50, fill: "black" } }}
-            labelComponent={<VictoryLabel dy={5} />}
-          />
-          <VictoryPie
-            colorScale={["red", "transparent"]}
-            innerRadius={120}
-            cornerRadius={100}
-            labels={["Use"]}
-            labelRadius={1}
-            labelPosition={"startAngle"}
-            data={[{ y: usage }, { y: 100 - usage }]}
-            width={1250}
-            style={{ labels: { fontSize: 50, fill: "black" } }}
-            labelComponent={<VictoryLabel dy={5} />}
-          />
-        </div>
-      </div>
-      <div className="col-span-6">
-        <div className="grid grid-flow-dense grid-cols-3 p-2">
-          <Button
-            onClick={() => router.push("/")}
-            color="primary"
-            variant="outlined"
-            endIcon={
-              <StyleOutlinedIcon
-                sx={{ display: { xs: "none", md: "block" } }}
-              />
-            }
-          >
-            Flashcards
-          </Button>
-          <Button
-            onClick={() => router.push("/")}
-            color="primary"
-            variant="outlined"
-            endIcon={<QuizIcon sx={{ display: { xs: "none", md: "block" } }} />}
-          >
-            Quizzes
-          </Button>
-          <Button
-            onClick={() => router.push("/")}
-            color="primary"
-            variant="outlined"
-            endIcon={
-              <AssignmentIcon sx={{ display: { xs: "none", md: "block" } }} />
-            }
-          >
-            Assignments
-          </Button>
-        </div>
+      <InfoDialog
+        open={infoDialogOpen}
+        title={course.title}
+        description={course.description}
+        onClose={() => setInfoDialogOpen(false)}
+      />
+
+      <div className="w-fit my-12 pl-8 pr-10 py-6 border-4 border-slate-200 rounded-3xl">
+        <RewardScores health={60} fitness={20} growth={100} power={75} />
       </div>
 
-      <div className="col-span-6 border-solid border-sky-900 border-2 m-2 p-2 rounded-lg">
-        <p className="underline">Chapters</p>
-        <div className="flex flex-col gap-1">
-          {viewablechapters.map((chapter) => (
-            <Link
-              className="text-center font-bold border-solid border-sky-900 border-2 rounded-lg text-white bg-sky-900 hover:bg-white hover:text-sky-900"
-              href={{ pathname: `/chapter/${chapter!.id}` }}
-              key={chapter!.id}
-            >
-              <p>
-                {chapter?.number} {chapter?.title}
-              </p>
-            </Link>
-          ))}
+      <section className="mt-16">
+        <Typography variant="h2">Up next</Typography>
+        <div className="mt-8 flex gap-8 grid gap-x-12 gap-y-4 grid-cols-[max-content] xl:grid-cols-[repeat(2,max-content)] 2xl:grid-cols-[repeat(3,max-content)]">
+          <VideoContent subtitle="Publish-Subscribe Messaging" progress={0} />
+          <VideoContent subtitle="Publish-Subscribe Messaging" progress={40} />
+          <FlashcardContent
+            subtitle="Publish-Subscribe Messaging"
+            progress={40}
+          />
         </div>
-      </div>
-    </div>
+      </section>
+
+      {course.chapters.elements.map((chapter) => (
+        <section key={chapter.id} className="mt-24">
+          <ChapterHeader
+            title={chapter.title}
+            subtitle={`${dayjs(
+              chapter.suggestedStartDate ?? chapter.startDate
+            ).format("D. MMMM")} – ${dayjs(
+              chapter.suggestedEndDate ?? chapter.endDate
+            ).format("D. MMMM")}`}
+            progress={70}
+            skill_levels={{
+              remember: "green",
+              understand: "green",
+              apply: "yellow",
+              analyze: "red",
+            }}
+          />
+          <ChapterContent>
+            {chapter.contents.length > 0 && (
+              <ChapterContentItem first last>
+                {chapter.contents.map((content) =>
+                  displayContent(
+                    content.id,
+                    content.metadata.type,
+                    content.metadata.name
+                  )
+                )}
+              </ChapterContentItem>
+            )}
+          </ChapterContent>
+        </section>
+      ))}
+    </main>
+  );
+}
+
+function InfoDialog({
+  title,
+  description,
+  open,
+  onClose,
+}: {
+  title: string;
+  description: string;
+  open: boolean;
+  onClose: () => void;
+}) {
+  return (
+    <Dialog onClose={onClose} open={open}>
+      <DialogTitle>{title}</DialogTitle>
+      <Typography variant="body1" sx={{ padding: 3, paddingTop: 0 }}>
+        {description}
+      </Typography>
+    </Dialog>
   );
 }

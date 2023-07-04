@@ -1,9 +1,8 @@
 "use client";
 
 import { pageJoinQuery } from "@/__generated__/pageJoinQuery.graphql";
-import { Heading } from "@/components/Heading";
 import { Add } from "@mui/icons-material";
-import { Button, TextField } from "@mui/material";
+import { Button, TextField, Typography } from "@mui/material";
 import Link from "next/link";
 import { useState } from "react";
 import { graphql, useLazyLoadQuery } from "react-relay";
@@ -34,9 +33,11 @@ export default function JoinCourse() {
   );
 
   return (
-    <div className="mb-10">
-      <Heading className="mb-5">Course Catalog</Heading>
-      <div className="w-full flex px-10 mb-8">
+    <main>
+      <Typography variant="h1" gutterBottom>
+        Course Catalog
+      </Typography>
+      <div className="w-full flex mt-4 mb-8">
         <TextField
           id="outlined-basic"
           className="grow"
@@ -50,7 +51,7 @@ export default function JoinCourse() {
       <div className="flex flex-col gap-3">
         {filteredCourses.map((course) => (
           <Link
-            className="mx-10 font-bold text-sky-900 border border-sky-900 hover:bg-sky-100 p-5 pl-3 rounded-lg grid grid-cols-[1fr_1fr_auto] items-center"
+            className="font-bold text-sky-900 border border-sky-900 hover:bg-sky-100 p-5 pl-3 rounded-lg grid grid-cols-[1fr_1fr_auto] items-center"
             href={`/course/${course.id}`}
             key={course.id}
           >
@@ -72,6 +73,6 @@ export default function JoinCourse() {
           </Link>
         ))}
       </div>
-    </div>
+    </main>
   );
 }

@@ -1,7 +1,6 @@
 "use client";
 
 import { pageCreateCourseMutation } from "@/__generated__/pageCreateCourseMutation.graphql";
-import { Heading } from "@/components/Heading";
 import { MultistepForm, StepInfo } from "@/components/MultistepForm";
 import {
   Backdrop,
@@ -9,6 +8,7 @@ import {
   FormControlLabel,
   Switch,
   TextField,
+  Typography,
 } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers";
 import { Dayjs } from "dayjs";
@@ -135,8 +135,10 @@ export default function NewCourse() {
   ];
 
   return (
-    <main className="px-10 flex flex-col gap-3">
-      <Heading className="mb-5 pl-0 pr-0">Create new course</Heading>
+    <main className="flex flex-col gap-3">
+      <Typography variant="h1" gutterBottom>
+        Create new course
+      </Typography>
       <MultistepForm
         submitLabel="Create course"
         steps={steps}

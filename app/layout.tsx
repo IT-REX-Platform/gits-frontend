@@ -17,6 +17,7 @@ import {
   useAuth,
 } from "react-oidc-context";
 import { RelayEnvironmentProvider } from "react-relay";
+import { ThemeProvider, colors, createTheme } from "@mui/material";
 
 const oidcConfig: AuthProviderProps = {
   redirect_uri:
@@ -31,10 +32,26 @@ const oidcConfig: AuthProviderProps = {
   },
 };
 
+const theme = createTheme({
+  palette: {
+    success: colors.green,
+  },
+  typography: {
+    h1: {
+      fontSize: "2rem",
+      fontWeight: "400",
+    },
+    h2: {
+      fontSize: "1.5rem",
+      fontWeight: "400",
+    },
+  },
+});
+
 export default function App({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="de">
-      <body>
+    <html lang="de" className="h-full">
+      <body className="h-full">
         <AuthProvider {...oidcConfig}>
           <LocalizationProvider dateAdapter={AdapterDayjs}>
             <Suspense fallback="Loading...">
@@ -91,7 +108,7 @@ function SigninContent({ children }: { children: React.ReactNode }) {
   if (auth.isAuthenticated) {
     return (
       <RelayEnvironmentProvider environment={environment}>
-        {children}
+        <ThemeProvider theme={theme}>{children}</ThemeProvider>
       </RelayEnvironmentProvider>
     );
   }

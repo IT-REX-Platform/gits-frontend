@@ -29,8 +29,8 @@ function NavbarBase({
   student: boolean;
 }) {
   return (
-    <div className="bg-slate-200 h-full px-8 flex flex-col gap-6 w-96 overflow-auto">
-      <div className="text-center my-8 text-3xl font-medium tracking-wider sticky">
+    <div className="shrink-0 bg-slate-200 h-full px-8 flex flex-col gap-6 w-96 overflow-auto">
+      <div className="text-center my-16 text-3xl font-medium tracking-wider sticky">
         <img src={logo.src} className="w-24 m-auto" />
       </div>
       <NavbarSection>

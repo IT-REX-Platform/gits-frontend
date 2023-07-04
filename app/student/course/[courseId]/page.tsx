@@ -70,7 +70,7 @@ function StudentCoursePage() {
   const course = coursesById[0];
 
   return (
-    <main className="px-8 py-11">
+    <main>
       <Typography variant="h1" gutterBottom>
         {course.title}
       </Typography>

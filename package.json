@@ -11,7 +11,7 @@
     "format": "prettier --write .",
     "check-format": "prettier --check .",
     "prepare": "husky install",
-    "update-schema": "fetch-graphql-schema http://localhost:8080/graphql -o src/schema.graphql -r"
+    "update-schema": "fetch-graphql-schema http://orange.informatik.uni-stuttgart.de/graphql -o src/schema.graphql -r"
   },
   "lint-staged": {
     "*.{tsx,tsx,css,json}": "prettier --write"

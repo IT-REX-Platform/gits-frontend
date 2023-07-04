@@ -103,6 +103,12 @@ interface Assessment {
 
   # Metadata of the content
   metadata: ContentMetadata!
+
+  # Progress data of the content for the current user.
+  userProgressData: UserProgressData!
+
+  # Progress data of the specified user.
+  progressDataForUser(userId: UUID!): UserProgressData!
 }
 
 type AssessmentMetadata {
@@ -111,6 +117,13 @@ type AssessmentMetadata {
 
   # Type of the assessment
   skillType: SkillType!
+
+  # The initial learning interval for the assessment in days.
+  # This is the interval that is applied after the assessment is completed the first time.
+  # Following intervals are calculated based on the previous interval and the user's performance.
+  # If this is null, the assessment will never be scheduled for review, which
+  # is useful for assessments that are not meant to be repeated.
+  initialLearningInterval: Int
 }
 
 input AssessmentMetadataInput {
@@ -119,6 +132,13 @@ input AssessmentMetadataInput {
 
   # Type of the assessment
   skillType: SkillType!
+
+  # The initial learning interval for the assessment in days.
+  # This is the interval that is applied after the assessment is completed the first time.
+  # Following intervals are calculated based on the previous interval and the user's performance.
+  # If this is null, the assessment will never be scheduled for review, which
+  # is useful for assessments that are not meant to be repeated.
+  initialLearningInterval: Int
 }
 
 # A chapter is a part of a course.
@@ -179,6 +199,12 @@ interface Content {
 
   # Metadata of the content
   metadata: ContentMetadata!
+
+  # Progress data of the content for the current user.
+  userProgressData: UserProgressData!
+
+  # Progress data of the specified user.
+  progressDataForUser(userId: UUID!): UserProgressData!
 }
 
 type ContentMetadata {
@@ -187,6 +213,9 @@ type ContentMetadata {
 
   # Content type
   type: ContentType!
+
+  # Suggested date when the content should be done
+  suggestedDate: DateTime!
 
   # Number of reward points a student receives for completing this content
   rewardPoints: Int!
@@ -329,6 +358,9 @@ input CreateContentMetadataInput {
   # Type of the content
   type: ContentType!
 
+  # Suggested date when the content should be done
+  suggestedDate: DateTime!
+
   # Number of reward points a student receives for completing this content
   rewardPoints: Int!
 
@@ -359,6 +391,38 @@ input CreateCourseInput {
   published: Boolean!
 }
 
+input CreateFlashcardInput {
+  # Id of the flashcard set this flashcard belongs to.
+  setId: UUID!
+
+  # List of sides of this flashcard. Must be at least two sides.
+  sides: [CreateFlashcardSideInput!]!
+}
+
+input CreateFlashcardInSetInput {
+  # List of sides of this flashcard. Must be at least two sides.
+  sides: [CreateFlashcardSideInput!]!
+}
+
+input CreateFlashcardSetInput {
+  # The uuid of the assessment this flashcard set belongs to.
+  assessmentId: UUID!
+
+  # List of flashcards in this set.
+  flashcards: [CreateFlashcardInSetInput!]!
+}
+
+input CreateFlashcardSideInput {
+  # Text of this flashcard side. This can be markdown. Max length is 3000 characters.
+  text: String!
+
+  # Label of this flashcard side. E.g. "Front" or "Back", or "Question" or "Answer".
+  label: String!
+
+  # Whether this side is a question, i.e. should be shown to the user to guess the other sides or not.
+  isQuestion: Boolean!
+}
+
 # Input for creating new media content. Media specific fields are stored in the Media Service.
 input CreateMediaContentInput {
   # Metadata for the new Content
@@ -374,11 +438,6 @@ input CreateMediaRecordInput {
 
   #  IDs of the MediaContents this media record is associated with
   contentIds: [UUID!]!
-}
-
-input CreateUrlInput {
-  #  id of the media record of the file for which a url should be generated
-  id: UUID!
 }
 
 # An RFC-3339 compliant Full Date Scalar
@@ -397,13 +456,30 @@ input DateTimeFilter {
   before: DateTime
 }
 
-type DownloadUrl {
-  #  pre-signed Url from which the file can be downloaded
-  url: String
+# A flashcard is a set of two or more sides. Each side has a label and a text.
+# The label is used to specify which side of the flashcard is being shown to the user first for learning
+# and which sides he has to guess.
+type Flashcard {
+  # Unique identifier of this flashcard.
+  id: UUID!
+
+  # List of sides of this flashcard.
+  sides: [FlashcardSide!]!
+}
+
+# A set of flashcards. A flashcard set belongs to exactly one assessment. Therefore, the uuid of the assessment
+# also serves as the identifier of a flashcard set.
+type FlashcardSet {
+  # The uuid of the assessment this flashcard set belongs to.
+  # This also serves as the identifier of this flashcard set.
+  assessmentId: UUID!
+
+  # List of flashcards in this set.
+  flashcards: [Flashcard!]!
 }
 
 # A set of flashcards, flashcard related fields are stored in the flashcard service.
-type FlashcardSetAssessment implements Assessment & Content {
+type FlashcardSetAssessment implements Assessment, Content {
   # Assessment metadata
   assessmentMetadata: AssessmentMetadata!
 
@@ -412,6 +488,24 @@ type FlashcardSetAssessment implements Assessment & Content {
 
   # Metadata of the content
   metadata: ContentMetadata!
+
+  # Progress data of the content for the current user.
+  userProgressData: UserProgressData!
+
+  # Progress data of the specified user.
+  progressDataForUser(userId: UUID!): UserProgressData!
+  flashcardSet: FlashcardSet!
+}
+
+type FlashcardSide {
+  # Text of this flashcard side. This can be markdown.
+  text: String!
+
+  # Label of this flashcard side. E.g. "Front" or "Back", or "Question" or "Answer".
+  label: String!
+
+  # Whether this side is a question, i.e. should be shown to the user to guess the other sides or not.
+  isQuestion: Boolean!
 }
 
 # Filter for integer values.
@@ -436,6 +530,12 @@ type MediaContent implements Content {
 
   # Metadata of the content
   metadata: ContentMetadata!
+
+  # Progress data of the content for the current user.
+  userProgressData: UserProgressData!
+
+  # Progress data of the specified user.
+  progressDataForUser(userId: UUID!): UserProgressData!
   mediaRecords: [MediaRecord!]!
 }
 
@@ -455,6 +555,24 @@ type MediaRecord {
 
   #  IDs of the MediaContents this media record is associated with
   contentIds: [UUID!]!
+
+  #  Temporary upload url for the media record
+  uploadUrl: String!
+
+  #  Temporary download url for the media record
+  downloadUrl: String!
+
+  # The progress data of the given user for this medium.
+  userProgressData: MediaRecordProgressData!
+}
+
+type MediaRecordProgressData {
+  # Whether the medium has been worked on by the user.
+  workedOn: Boolean!
+
+  # Date on which the medium was worked on by the user.
+  # This is null if the medium has not been worked on by the user.
+  dateWorkedOn: DateTime
 }
 
 #  The type of the media record
@@ -468,26 +586,21 @@ enum MediaType {
 }
 
 type Mutation {
-  # Creates a new course with the given input and returns the created course.
-  createCourse(input: CreateCourseInput!): Course!
+  # Creates a new flashcard set.
+  createFlashcardSet(input: CreateFlashcardSetInput!): FlashcardSet!
 
-  # Creates a new chapter with the given input and returns the created chapter.
-  # The course id must be a course id of an existing course.
-  createChapter(input: CreateChapterInput!): Chapter!
+  # Deletes a flashcard set. Throws an error if the flashcard set does not exist.
+  # The contained flashcards are deleted as well.
+  deleteFlashcardSet(input: UUID!): UUID!
 
-  # Updates an existing course with the given input and returns the updated course.
-  # The course id must be a course id of an existing course.
-  updateCourse(input: UpdateCourseInput!): Course!
+  # Creates a new flashcard. Throws an error if the flashcard set does not exist.
+  createFlashcard(input: CreateFlashcardInput!): Flashcard!
 
-  # Updates an existing chapter with the given input and returns the updated chapter.
-  # The chapter id must be a chapter id of an existing chapter.
-  updateChapter(input: UpdateChapterInput!): Chapter!
+  # Updates a flashcard. Throws an error if the flashcard does not exist.
+  updateFlashcard(input: UpdateFlashcardInput!): Flashcard!
 
-  # Deletes an existing course, throws an error if no course with the given id exists.
-  deleteCourse(id: UUID!): UUID!
-
-  # Deletes an existing chapter, throws an error if no chapter with the given id exists.
-  deleteChapter(id: UUID!): UUID!
+  # Deletes a flashcard. Throws an error if the flashcard does not exist.
+  deleteFlashcard(input: UUID!): UUID!
 
   # Create new media content
   createMediaContent(input: CreateMediaContentInput!): MediaContent!
@@ -519,11 +632,34 @@ type Mutation {
   #  Deletes the media record with the given UUID
   deleteMediaRecord(id: UUID!): UUID!
 
-  #  Creates a new upload URL for the given media record
-  createStorageUploadUrl(input: CreateUrlInput): UploadUrl
+  # Logs that a media has been worked on by the current user.
+  # See https://gits-enpro.readthedocs.io/en/latest/dev-manuals/gamification/userProgress.html
+  #
+  # Possible side effects:
+  # When all media records of a content have been worked on by a user,
+  # a user-progress event is emitted for the content.
+  logMediaRecordWorkedOn(mediaRecordId: UUID!): MediaRecord!
 
-  #  Creates a new download URL for the given media record
-  createStorageDownloadUrl(input: CreateUrlInput): DownloadUrl
+  # Creates a new course with the given input and returns the created course.
+  createCourse(input: CreateCourseInput!): Course!
+
+  # Creates a new chapter with the given input and returns the created chapter.
+  # The course id must be a course id of an existing course.
+  createChapter(input: CreateChapterInput!): Chapter!
+
+  # Updates an existing course with the given input and returns the updated course.
+  # The course id must be a course id of an existing course.
+  updateCourse(input: UpdateCourseInput!): Course!
+
+  # Updates an existing chapter with the given input and returns the updated chapter.
+  # The chapter id must be a chapter id of an existing chapter.
+  updateChapter(input: UpdateChapterInput!): Chapter!
+
+  # Deletes an existing course, throws an error if no course with the given id exists.
+  deleteCourse(id: UUID!): UUID!
+
+  # Deletes an existing chapter, throws an error if no chapter with the given id exists.
+  deleteChapter(id: UUID!): UUID!
 }
 
 # Specifies the page size and page number for paginated results.
@@ -556,7 +692,53 @@ type PaginationInfo {
   hasNext: Boolean!
 }
 
+type ProgressLogItem {
+  # The date the user completed the content item.
+  timestamp: DateTime!
+
+  # Whether the user completed the content item successfully.
+  success: Boolean!
+
+  # Value between 0 and 1 representing the user's correctness on the content item.
+  # Can be null as some contents cannot provide a meaningful correctness value.
+  correctness: Float!
+
+  # How many hints the user used to complete the content item.
+  hintsUsed: Int!
+
+  # Time in milliseconds it took the user to complete the content item.
+  # Can be null for contents that do not measure completion time.
+  timeToComplete: Int
+}
+
 type Query {
+  # Get flashcards by their ids
+  flashcardsByIds(ids: [UUID!]!): [Flashcard!]!
+
+  # Get flashcard sets by their assessment ids.
+  # Returns a list of lists of flashcard sets, where each list corresponds to a single assessment id.
+  flashcardSetsByAssessmentIds(assessmentIds: [UUID!]!): [FlashcardSet!]!
+
+  # get all contents
+  contents: ContentPayload!
+
+  # get contents by ids
+  contentsByIds(ids: [UUID!]!): ContentPayload!
+
+  # get contents by chapter ids. Returns a list containing sublists, where each sublist contains all contents
+  # associated with that chapter
+  contentsByChapterIds(chapterIds: [UUID!]!): [[Content!]!]!
+
+  #  Returns the media records with the given IDs
+  mediaRecordsById(ids: [UUID!]!): [MediaRecord!]!
+
+  #  Returns all media records
+  mediaRecords: [MediaRecord!]!
+
+  #  Returns the media records associated the given content IDs as a list of lists where each sublist contains
+  #  the media records associated with the content ID at the same index in the input list
+  mediaRecordsByContentIds(contentIds: [UUID!]!): [[MediaRecord!]!]!
+
   # Get a list of courses. Can be filtered, sorted and paginated.
   courses(
     filter: CourseFilter
@@ -592,26 +774,6 @@ type Query {
     sortDirection: [SortDirection!]! = [ASC]
     pagination: Pagination
   ): ChapterPayload!
-
-  # get all contents
-  contents: ContentPayload!
-
-  # get contents by ids
-  contentsByIds(ids: [UUID!]!): ContentPayload!
-
-  # get contents by chapter ids. Returns a list containing sublists, where each sublist contains all contents
-  # associated with that chapter
-  contentsByChapterIds(chapterIds: [UUID!]!): [ContentPayload!]!
-
-  #  Returns the media records with the given IDs
-  mediaRecordsById(ids: [UUID!]!): [MediaRecord!]!
-
-  #  Returns all media records
-  mediaRecords: [MediaRecord!]!
-
-  #  Returns the media records associated the given content IDs as a list of lists where each sublist contains
-  #  the media records associated with the content ID at the same index in the input list
-  mediaRecordsByContentIds(contentIds: [UUID!]!): [[MediaRecord!]!]!
 }
 
 scalar ResolveToSourceArgs
@@ -693,6 +855,9 @@ input UpdateContentMetadataInput {
   # Name of the content
   name: String!
 
+  # Date when the content should be done
+  suggestedDate: DateTime!
+
   # Number of reward points a student receives for completing this content
   rewardPoints: Int!
 
@@ -726,6 +891,25 @@ input UpdateCourseInput {
   published: Boolean!
 }
 
+input UpdateFlashcardInput {
+  # Id of the flashcard to update.
+  id: UUID!
+
+  # List of sides of this flashcard. Must be at least two sides.
+  sides: [UpdateFlashcardSideInput!]!
+}
+
+input UpdateFlashcardSideInput {
+  # Text of this flashcard side. This can be markdown. Max length is 3000 characters.
+  text: String!
+
+  # Label of this flashcard side. E.g. "Front" or "Back", or "Question" or "Answer".
+  label: String!
+
+  # Whether this side is a question, i.e. should be shown to the user to guess the other sides or not.
+  isQuestion: Boolean!
+}
+
 input UpdateMediaContentInput {
   # ID of the Content to update
   id: UUID!
@@ -748,13 +932,35 @@ input UpdateMediaRecordInput {
   contentIds: [UUID!]!
 }
 
-type UploadUrl {
-  #  pre-signed Url to which the file can be uploaded
-  url: String
-}
-
 # A Url scalar
 scalar Url
+
+# Represents a user's progress on a content item.
+# See https://gits-enpro.readthedocs.io/en/latest/dev-manuals/gamification/userProgress.html
+type UserProgressData {
+  # The user's id.
+  userId: UUID!
+
+  # The id of the content item.
+  contentId: UUID!
+
+  # A list of entries each representing the user completing the content item.
+  # Sorted by date in descending order.
+  log: [ProgressLogItem]!
+
+  # The learning interval in days for the content item.
+  # If null, the content item is not scheduled for learning.
+  learningInterval: Int
+
+  # The next time the content should be learned.
+  # Calculated using the date the user completed the content item and the learning interval.
+  # This is null if the user has not completed the content item once.
+  nextLearnDate: DateTime
+
+  # The last time the content was learned.
+  # This is null if the user has not completed the content item once.
+  lastLearnDate: DateTime
+}
 
 # A universally unique identifier compliant UUID Scalar
 scalar UUID

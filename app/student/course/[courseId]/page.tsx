@@ -5,11 +5,7 @@ import { useParams } from "next/navigation";
 import { graphql, useLazyLoadQuery } from "react-relay";
 import { Typography } from "@mui/material";
 
-import {
-  FlashcardContent,
-  MaterialContent,
-  VideoContent,
-} from "@/components/Content";
+import { FlashcardContent, VideoContent } from "@/components/Content";
 import { ChapterHeader } from "@/components/ChapterHeader";
 import {
   ChapterContent,
@@ -20,6 +16,15 @@ import { RewardScores } from "@/components/RewardScores";
 
 export default function CoursePage() {
   return <StudentCoursePage />;
+}
+
+function displayContent(id: string, type: string, name: string) {
+  switch (type) {
+    case "MEDIA":
+      return <VideoContent key={id} subtitle={name} progress={100} />;
+    case "FLASHCARD":
+      return <FlashcardContent key={id} subtitle={name} progress={100} />;
+  }
 }
 
 function StudentCoursePage() {
@@ -103,22 +108,15 @@ function StudentCoursePage() {
             }}
           />
           <ChapterContent>
-            <ChapterContentItem finished first>
-              <VideoContent subtitle="Some content" progress={100} />
-              <FlashcardContent subtitle="Some content" progress={100} />
-            </ChapterContentItem>
-            <ChapterContentItem last>
-              <MaterialContent subtitle="Some content" />
-            </ChapterContentItem>
             {chapter.contents.length > 0 && (
               <ChapterContentItem first last>
-                {chapter.contents.map((content) => (
-                  <VideoContent
-                    key={content.id}
-                    subtitle={content.metadata.name}
-                    progress={100}
-                  />
-                ))}
+                {chapter.contents.map((content) =>
+                  displayContent(
+                    content.id,
+                    content.metadata.type,
+                    content.metadata.name
+                  )
+                )}
               </ChapterContentItem>
             )}
           </ChapterContent>

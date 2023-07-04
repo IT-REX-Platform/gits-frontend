@@ -49,6 +49,8 @@ function StudentCoursePage() {
               id
               title
               number
+              startDate
+              endDate
               suggestedStartDate
               suggestedEndDate
               contents {
@@ -109,9 +111,11 @@ function StudentCoursePage() {
         <section key={chapter.id} className="mt-24">
           <ChapterHeader
             title={chapter.title}
-            subtitle={`${dayjs(chapter.suggestedStartDate).format(
-              "D. MMMM"
-            )} – ${dayjs(chapter.suggestedEndDate).format("D. MMMM")}`}
+            subtitle={`${dayjs(
+              chapter.suggestedStartDate ?? chapter.startDate
+            ).format("D. MMMM")} – ${dayjs(
+              chapter.suggestedEndDate ?? chapter.endDate
+            ).format("D. MMMM")}`}
             progress={70}
             skill_levels={{
               remember: "green",

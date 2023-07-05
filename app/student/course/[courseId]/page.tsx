@@ -1,32 +1,24 @@
 "use client";
 import { pageCourseIdQuery } from "@/__generated__/pageCourseIdQuery.graphql";
+import { Dialog, DialogTitle, IconButton, Typography } from "@mui/material";
+import { chain } from "lodash";
 import Error from "next/error";
 import { useParams } from "next/navigation";
 import { graphql, useLazyLoadQuery } from "react-relay";
-import { Dialog, DialogTitle, IconButton, Typography } from "@mui/material";
 
-import { FlashcardContent, VideoContent } from "@/components/Content";
-import { ChapterHeader } from "@/components/ChapterHeader";
 import {
   ChapterContent,
   ChapterContentItem,
 } from "@/components/ChapterContent";
-import dayjs from "dayjs";
+import { ChapterHeader } from "@/components/ChapterHeader";
+import { FlashcardContent, VideoContent } from "@/components/Content";
 import { RewardScores } from "@/components/RewardScores";
-import { useState } from "react";
 import { Info } from "@mui/icons-material";
+import dayjs from "dayjs";
+import { useState } from "react";
 
 export default function CoursePage() {
   return <StudentCoursePage />;
-}
-
-function displayContent(id: string, type: string, name: string) {
-  switch (type) {
-    case "MEDIA":
-      return <VideoContent key={id} subtitle={name} progress={100} />;
-    case "FLASHCARD":
-      return <FlashcardContent key={id} subtitle={name} progress={100} />;
-  }
 }
 
 function StudentCoursePage() {
@@ -54,11 +46,15 @@ function StudentCoursePage() {
               suggestedStartDate
               suggestedEndDate
               contents {
-                id
-                metadata {
-                  name
-                  type
+                ...ContentFlashcardFragment
+                ...ContentVideoFragment
+
+                userProgressData {
+                  nextLearnDate
                 }
+
+                id
+                __typename
               }
             }
           }
@@ -75,6 +71,17 @@ function StudentCoursePage() {
 
   // Extract course
   const course = coursesById[0];
+
+  const nextFlashcard = chain(course.chapters.elements)
+    .flatMap((x) => x.contents)
+    .filter((x) => x.__typename === "FlashcardSetAssessment")
+    .minBy((x) => new Date(x.userProgressData.nextLearnDate))
+    .value();
+  const nextVideo = chain(course.chapters.elements)
+    .flatMap((x) => x.contents)
+    .filter((x) => x.__typename === "MediaContent")
+    .minBy((x) => new Date(x.userProgressData.nextLearnDate))
+    .value();
 
   return (
     <main>
@@ -97,13 +104,9 @@ function StudentCoursePage() {
 
       <section className="mt-16">
         <Typography variant="h2">Up next</Typography>
-        <div className="mt-8 flex gap-8 grid gap-x-12 gap-y-4 grid-cols-[max-content] xl:grid-cols-[repeat(2,max-content)] 2xl:grid-cols-[repeat(3,max-content)]">
-          <VideoContent subtitle="Publish-Subscribe Messaging" progress={0} />
-          <VideoContent subtitle="Publish-Subscribe Messaging" progress={40} />
-          <FlashcardContent
-            subtitle="Publish-Subscribe Messaging"
-            progress={40}
-          />
+        <div className="mt-8 gap-8 grid gap-x-12 gap-y-4 grid-cols-[max-content] xl:grid-cols-[repeat(2,max-content)] 2xl:grid-cols-[repeat(3,max-content)]">
+          {nextFlashcard && <FlashcardContent _flashcard={nextFlashcard} />}
+          {nextVideo && <VideoContent _media={nextVideo} />}
         </div>
       </section>
 
@@ -128,11 +131,11 @@ function StudentCoursePage() {
             {chapter.contents.length > 0 && (
               <ChapterContentItem first last>
                 {chapter.contents.map((content) =>
-                  displayContent(
-                    content.id,
-                    content.metadata.type,
-                    content.metadata.name
-                  )
+                  content.__typename === "FlashcardSetAssessment" ? (
+                    <FlashcardContent key={content.id} _flashcard={content} />
+                  ) : content.__typename === "MediaContent" ? (
+                    <VideoContent _media={content} />
+                  ) : null
                 )}
               </ChapterContentItem>
             )}

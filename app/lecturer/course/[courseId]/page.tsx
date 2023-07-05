@@ -1,37 +1,21 @@
 "use client";
-
-import { pageEditCourseAddChapterModalFragment$key } from "@/__generated__/pageEditCourseAddChapterModalFragment.graphql";
-import { pageEditCourseChaptersFragment$key } from "@/__generated__/pageEditCourseChaptersFragment.graphql";
-import { pageEditCourseChaptersMutation } from "@/__generated__/pageEditCourseChaptersMutation.graphql";
-import { pageEditCourseEditChapterModalFragment$key } from "@/__generated__/pageEditCourseEditChapterModalFragment.graphql";
-import { pageEditCourseEditChaptersMutation } from "@/__generated__/pageEditCourseEditChaptersMutation.graphql";
-import { pageEditCourseGeneralFragment$key } from "@/__generated__/pageEditCourseGeneralFragment.graphql";
-import { pageEditCourseMutation } from "@/__generated__/pageEditCourseMutation.graphql";
-import { pageEditCourseQuery } from "@/__generated__/pageEditCourseQuery.graphql";
-import { Form, FormActions, FormSection } from "@/components/Form";
-import { Add, Edit } from "@mui/icons-material";
-
+import { pageLecturerCourseIdQuery } from "@/__generated__/pageLecturerCourseIdQuery.graphql";
 import {
   Alert,
+  Backdrop,
+  Button,
+  CircularProgress,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
-  Typography,
-} from "@mui/material";
-
-import {
-  Backdrop,
-  Button,
-  CircularProgress,
+  IconButton,
   Switch,
   TextField,
+  Typography,
 } from "@mui/material";
-import { DatePicker } from "@mui/x-date-pickers";
-import dayjs, { Dayjs } from "dayjs";
-import NextError from "next/error";
+import Error from "next/error";
 import { useParams } from "next/navigation";
-import { useState } from "react";
 import {
   graphql,
   useFragment,
@@ -39,57 +23,189 @@ import {
   useMutation,
 } from "react-relay";
 
-export default function EditCoursePage() {
+import { pageEditCourseAddChapterModalFragment$key } from "@/__generated__/pageEditCourseAddChapterModalFragment.graphql";
+import { pageEditCourseChaptersMutation } from "@/__generated__/pageEditCourseChaptersMutation.graphql";
+import { pageEditCourseEditChapterModalFragment$key } from "@/__generated__/pageEditCourseEditChapterModalFragment.graphql";
+import { pageEditCourseEditChaptersMutation } from "@/__generated__/pageEditCourseEditChaptersMutation.graphql";
+import { pageEditCourseGeneralFragment$key } from "@/__generated__/pageEditCourseGeneralFragment.graphql";
+import { pageEditCourseMutation } from "@/__generated__/pageEditCourseMutation.graphql";
+import {
+  ChapterContent,
+  ChapterContentItem,
+} from "@/components/ChapterContent";
+import { ChapterHeader } from "@/components/ChapterHeader";
+import {
+  Content,
+  FlashcardContent,
+  ProgressFrame,
+  VideoContent,
+} from "@/components/Content";
+import { Form, FormSection } from "@/components/Form";
+import { Add, Edit, RemoveRedEye, Settings } from "@mui/icons-material";
+import { DatePicker } from "@mui/x-date-pickers";
+import dayjs, { Dayjs } from "dayjs";
+import { useState } from "react";
+
+export default function LecturerCoursePage() {
+  // Get course id from url
   const params = useParams();
-  const { coursesById } = useLazyLoadQuery<pageEditCourseQuery>(
+  const id = params.courseId;
+
+  // Info dialog
+  const [infoDialogOpen, setInfoDialogOpen] = useState(false);
+
+  // Fetch course data
+  const { coursesById } = useLazyLoadQuery<pageLecturerCourseIdQuery>(
     graphql`
-      query pageEditCourseQuery($id: [UUID!]!) {
+      query pageLecturerCourseIdQuery($id: [UUID!]!) {
         coursesById(ids: $id) {
+          title
+          description
+          ...pageEditCourseAddChapterModalFragment
           ...pageEditCourseGeneralFragment
-          ...pageEditCourseChaptersFragment
+
+          chapters {
+            elements {
+              ...pageEditCourseEditChapterModalFragment
+              id
+              title
+              number
+              suggestedStartDate
+              suggestedEndDate
+              contents {
+                ...ContentFlashcardFragment
+                ...ContentVideoFragment
+
+                userProgressData {
+                  nextLearnDate
+                }
+
+                id
+                __typename
+              }
+            }
+          }
         }
       }
     `,
-    { id: [params.courseId] }
+    { id: [id] }
   );
 
-  const [tab, setTab] = useState<"General" | "Chapters">("General");
+  const [openModal, setOpenModal] = useState(false);
 
   // Show 404 error page if id was not found
   if (coursesById.length == 0) {
-    return <NextError statusCode={404} />;
+    return <Error statusCode={404} title="Course could not be found." />;
   }
 
+  // Extract course
+  const course = coursesById[0];
+
+  const handleOpenModal = () => {
+    setOpenModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setOpenModal(false);
+  };
+
   return (
-    <main className="flex flex-col gap-3">
-      <Typography variant="h1" gutterBottom>
-        Edit Course
-      </Typography>
-      <div className="flex flex-row justify-start gap-3 mb-8">
-        {["General" as const, "Chapters" as const].map((title) => (
-          <div
-            className={
-              "py-2 px-6 font-bold cursor-pointer rounded-full " +
-              (tab === title ? "text-white bg-sky-800" : "hover:bg-gray-100")
+    <main>
+      {openModal && (
+        <AddChapterModal open _course={course} onClose={handleCloseModal} />
+      )}
+
+      <div className="flex w-full gap-4 items-center justify-between">
+        <Typography variant="h1">{course.title}</Typography>
+        <IconButton onClick={() => setInfoDialogOpen(true)}>
+          <Settings />
+        </IconButton>
+      </div>
+      <EditGeneral
+        _course={course}
+        open={infoDialogOpen}
+        onClose={() => setInfoDialogOpen(false)}
+      />
+
+      <Content
+        title="See overall student progress"
+        className="hover:bg-gray-100 rounded-full mt-12 mb-12"
+        subtitle=""
+        icon={
+          <RemoveRedEye
+            sx={{
+              fontSize: "2rem",
+              color: "text.secondary",
+            }}
+          />
+        }
+        iconFrame={<ProgressFrame color="lightblue" progress={0} />}
+      />
+
+      <Typography variant="body2">{course.description}</Typography>
+
+      <Content
+        title="Add new chapter"
+        className="hover:bg-gray-100 rounded-full mt-24"
+        subtitle=""
+        onClick={() => setOpenModal(true)}
+        icon={
+          <Add
+            sx={{
+              fontSize: "2rem",
+              color: "text.secondary",
+            }}
+          />
+        }
+        iconFrame={<ProgressFrame color="lightblue" progress={0} />}
+      />
+
+      {course.chapters.elements.map((chapter) => (
+        <section key={chapter.id} className="mt-6">
+          <ChapterHeader
+            title={
+              <div className="flex gap-2">
+                {chapter.title} <EditChapterModal _chapter={chapter} />
+              </div>
             }
-            key={title}
-            onClick={() => setTab(title)}
-          >
-            {title}
-          </div>
-        ))}
-      </div>
-      <div className="px-6">
-        {tab === "General" && <EditGeneral _course={coursesById[0]} />}
-        {tab === "Chapters" && <EditChapters _course={coursesById[0]} />}
-      </div>
+            subtitle={`${dayjs(chapter.suggestedStartDate).format(
+              "D. MMMM"
+            )} – ${dayjs(chapter.suggestedEndDate).format("D. MMMM")}`}
+            progress={70}
+            skill_levels={{
+              remember: "green",
+              understand: "green",
+              apply: "yellow",
+              analyze: "red",
+            }}
+          />
+
+          <ChapterContent>
+            {chapter.contents?.length > 0 && (
+              <ChapterContentItem first last>
+                {chapter.contents.map((content) =>
+                  content.__typename === "FlashcardSetAssessment" ? (
+                    <FlashcardContent key={content.id} _flashcard={content} />
+                  ) : content.__typename === "MediaContent" ? (
+                    <VideoContent _media={content} />
+                  ) : null
+                )}
+              </ChapterContentItem>
+            )}
+          </ChapterContent>
+        </section>
+      ))}
     </main>
   );
 }
 
 function EditGeneral({
   _course,
+  open,
+  onClose,
 }: {
+  open: boolean;
+  onClose: () => void;
   _course: pageEditCourseGeneralFragment$key;
 }) {
   const course = useFragment(
@@ -111,6 +227,7 @@ function EditGeneral({
       mutation pageEditCourseMutation($course: UpdateCourseInput!) {
         updateCourse(input: $course) {
           id
+          ...pageEditCourseGeneralFragment
         }
       }
     `);
@@ -146,6 +263,9 @@ function EditGeneral({
       onError(error) {
         setError(error);
       },
+      onCompleted() {
+        onClose();
+      },
     });
   }
 
@@ -160,145 +280,86 @@ function EditGeneral({
 
   return (
     <>
-      {error?.source.errors.map((err: any, i: number) => (
-        <Alert
-          key={i}
-          severity="error"
-          sx={{ minWidth: 400, maxWidth: 800, width: "fit-content" }}
-          onClose={() => setError(null)}
-        >
-          {err.message}
-        </Alert>
-      ))}
-      <Form>
-        <FormSection title="Course details">
-          <TextField
-            className="w-96"
-            label="Title"
-            variant="outlined"
-            value={title}
-            error={title === ""}
-            onChange={(e) => setTitle(e.target.value)}
-            required
-          />
-          <TextField
-            className="w-96"
-            label="Description"
-            variant="outlined"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            multiline
-          />
-        </FormSection>
+      <Dialog maxWidth="lg" onClose={onClose} open={open}>
+        <DialogTitle>{title}</DialogTitle>
+        <DialogContent>
+          {error?.source.errors.map((err: any, i: number) => (
+            <Alert
+              key={i}
+              severity="error"
+              sx={{ minWidth: 400, maxWidth: 800, width: "fit-content" }}
+              onClose={() => setError(null)}
+            >
+              {err.message}
+            </Alert>
+          ))}
+          <Form>
+            <FormSection title="Course details">
+              <TextField
+                className="w-96"
+                label="Title"
+                variant="outlined"
+                value={title}
+                error={title === ""}
+                onChange={(e) => setTitle(e.target.value)}
+                required
+              />
+              <TextField
+                className="w-96"
+                label="Description"
+                variant="outlined"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                multiline
+              />
+            </FormSection>
 
-        <FormSection title="Start and end">
-          <DatePicker
-            label="Start date"
-            value={startDate}
-            maxDate={endDate ?? undefined}
-            onChange={setStartDate}
-            slotProps={{
-              textField: {
-                required: true,
-                error: startDate == null || !startDate.isValid(),
-              },
-            }}
-          />
-          <DatePicker
-            label="End date"
-            value={endDate}
-            minDate={startDate ?? undefined}
-            defaultCalendarMonth={startDate ?? undefined}
-            onChange={setEndDate}
-            slotProps={{
-              textField: {
-                required: true,
-                error: endDate == null || !endDate.isValid(),
-              },
-            }}
-          />
-        </FormSection>
+            <FormSection title="Start and end">
+              <DatePicker
+                label="Start date"
+                value={startDate}
+                maxDate={endDate ?? undefined}
+                onChange={setStartDate}
+                slotProps={{
+                  textField: {
+                    required: true,
+                    error: startDate == null || !startDate.isValid(),
+                  },
+                }}
+              />
+              <DatePicker
+                label="End date"
+                value={endDate}
+                minDate={startDate ?? undefined}
+                defaultCalendarMonth={startDate ?? undefined}
+                onChange={setEndDate}
+                slotProps={{
+                  textField: {
+                    required: true,
+                    error: endDate == null || !endDate.isValid(),
+                  },
+                }}
+              />
+            </FormSection>
 
-        <FormSection title="Published">
-          <Switch
-            checked={publish}
-            onChange={(e) => setPublish(e.target.checked)}
-          />
-        </FormSection>
-
-        <FormActions>
+            <FormSection title="Published">
+              <Switch
+                checked={publish}
+                onChange={(e) => setPublish(e.target.checked)}
+              />
+            </FormSection>
+          </Form>
+          <Backdrop open={isUpdating} sx={{ zIndex: "modal" }}>
+            <CircularProgress />
+          </Backdrop>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleReset}>Reset</Button>
           <Button disabled={!valid} variant="contained" onClick={handleSubmit}>
             Update
           </Button>
-          <Button onClick={handleReset}>Reset</Button>
-        </FormActions>
-      </Form>
-      <Backdrop open={isUpdating} sx={{ zIndex: "modal" }}>
-        <CircularProgress />
-      </Backdrop>
-    </>
-  );
-}
-
-function EditChapters({
-  _course,
-}: {
-  _course: pageEditCourseChaptersFragment$key;
-}) {
-  const course = useFragment(
-    graphql`
-      fragment pageEditCourseChaptersFragment on Course {
-        id
-        chapters {
-          elements {
-            id
-            number
-            startDate
-            endDate
-            title
-            ...pageEditCourseEditChapterModalFragment
-          }
-        }
-        ...pageEditCourseAddChapterModalFragment
-      }
-    `,
-    _course
-  );
-
-  const [openModal, setOpenModal] = useState(false);
-
-  const handleOpenModal = () => {
-    setOpenModal(true);
-  };
-
-  const handleCloseModal = () => {
-    setOpenModal(false);
-  };
-
-  return (
-    <>
-      {course.chapters.elements.map((chapter) => (
-        <div key={chapter.id} className="border-b">
-          <div className="text-lg font-semibold px-4 pt-5 flex justify-between">
-            {chapter.number}. {chapter.title}
-            <EditChapterModal _chapter={chapter} />
-          </div>
-          <div className="px-4 text-gray-500 text-xs mb-5">
-            {dayjs(chapter.startDate).format("DD.MM.YY")} -{" "}
-            {dayjs(chapter.endDate).format("DD.MM.YY")}
-          </div>
-        </div>
-      ))}
-
-      <div className="flex mx-4 justify-end mt-4">
-        <Button variant="outlined" endIcon={<Add />} onClick={handleOpenModal}>
-          Add Chapter
-        </Button>
-      </div>
-
-      {openModal && (
-        <AddChapterModal open _course={course} onClose={handleCloseModal} />
-      )}
+        </DialogActions>
+      </Dialog>
     </>
   );
 }
@@ -371,9 +432,7 @@ function EditChapterModal({
       ) {
         updateChapter(input: $chapter) {
           id
-          course {
-            ...pageEditCourseChaptersFragment
-          }
+          ...pageEditCourseEditChapterModalFragment
         }
       }
     `);
@@ -560,7 +619,7 @@ function AddChapterModal({
         createChapter(input: $chapter) {
           id
           course {
-            ...pageEditCourseChaptersFragment
+            ...pageEditCourseAddChapterModalFragment
           }
         }
       }

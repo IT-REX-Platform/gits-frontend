@@ -36,6 +36,9 @@ function StudentCoursePage() {
         coursesById(ids: $id) {
           title
           description
+          rewardScores {
+            ...RewardScoresFragment
+          }
           chapters {
             elements {
               id
@@ -99,7 +102,7 @@ function StudentCoursePage() {
       />
 
       <div className="w-fit my-12 pl-8 pr-10 py-6 border-4 border-slate-200 rounded-3xl">
-        <RewardScores health={60} fitness={20} growth={100} power={75} />
+        <RewardScores _scores={course.rewardScores} />
       </div>
 
       <section className="mt-16">

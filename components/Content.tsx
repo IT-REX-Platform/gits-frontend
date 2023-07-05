@@ -1,31 +1,45 @@
 "use client";
-import { MouseEventHandler, ReactElement } from "react";
-import colors from "tailwindcss/colors";
-import { CircularProgress, Typography } from "@mui/material";
+import { ContentFlashcardFragment$key } from "@/__generated__/ContentFlashcardFragment.graphql";
+import { ContentVideoFragment$key } from "@/__generated__/ContentVideoFragment.graphql";
 import {
   ArrowRight,
   Download,
   QuestionAnswerRounded,
 } from "@mui/icons-material";
+import { CircularProgress, Typography } from "@mui/material";
+import { useParams, useRouter } from "next/navigation";
+import { MouseEventHandler, ReactElement } from "react";
+import { graphql, useFragment } from "react-relay";
+import colors from "tailwindcss/colors";
 
 export function VideoContent({
-  progress,
-  subtitle,
   disabled = false,
-  onClick = undefined,
+  _media,
 }: {
-  progress: number;
-  subtitle: string;
   disabled?: boolean;
-  onClick?: MouseEventHandler<HTMLButtonElement> | undefined;
+  _media: ContentVideoFragment$key;
 }) {
+  const media = useFragment(
+    graphql`
+      fragment ContentVideoFragment on MediaContent {
+        id
+        metadata {
+          name
+        }
+        userProgressData {
+          nextLearnDate
+        }
+      }
+    `,
+    _media
+  );
+
   return (
     <Content
       title="Watch video"
-      subtitle={subtitle}
+      subtitle={media.metadata.name}
       disabled={disabled}
       className="hover:bg-sky-100 rounded-full"
-      onClick={onClick}
       icon={
         <ArrowRight
           sx={{
@@ -37,7 +51,7 @@ export function VideoContent({
       iconFrame={
         <ProgressFrame
           color={disabled ? colors.gray[100] : colors.sky[200]}
-          progress={disabled ? 0 : progress}
+          progress={disabled ? 0 : 0}
         />
       }
     />
@@ -45,23 +59,39 @@ export function VideoContent({
 }
 
 export function FlashcardContent({
-  progress,
-  subtitle,
-  disabled = false,
-  onClick = undefined,
+  _flashcard,
+  disabled,
 }: {
-  progress: number;
-  subtitle: string;
+  _flashcard: ContentFlashcardFragment$key;
   disabled?: boolean;
-  onClick?: MouseEventHandler<HTMLButtonElement> | undefined;
 }) {
+  const { courseId } = useParams();
+  const flashcard = useFragment(
+    graphql`
+      fragment ContentFlashcardFragment on FlashcardSetAssessment {
+        id
+        metadata {
+          name
+        }
+        userProgressData {
+          nextLearnDate
+        }
+      }
+    `,
+    _flashcard
+  );
+
+  const { push } = useRouter();
+
   return (
     <Content
       title="Repeat flashcards"
-      subtitle={subtitle}
+      subtitle={flashcard.metadata.name}
       disabled={disabled}
       className="hover:bg-emerald-100 rounded-full"
-      onClick={onClick}
+      onClick={() =>
+        push(`/student/course/${courseId}/flashcards/${flashcard.id}`)
+      }
       icon={
         <QuestionAnswerRounded
           sx={{
@@ -73,7 +103,7 @@ export function FlashcardContent({
       iconFrame={
         <ProgressFrame
           color={disabled ? colors.gray[100] : colors.emerald[200]}
-          progress={disabled ? 0 : progress}
+          progress={disabled ? 0 : 0}
         />
       }
     />

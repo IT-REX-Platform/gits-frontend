@@ -278,6 +278,7 @@ type Course {
     sortDirection: [SortDirection!]! = [ASC]
     pagination: Pagination
   ): ChapterPayload!
+  rewardScores: RewardScores!
 }
 
 # Input type for filtering courses. All fields are optional.
@@ -479,7 +480,7 @@ type FlashcardSet {
 }
 
 # A set of flashcards, flashcard related fields are stored in the flashcard service.
-type FlashcardSetAssessment implements Assessment, Content {
+type FlashcardSetAssessment implements Assessment & Content {
   # Assessment metadata
   assessmentMetadata: AssessmentMetadata!
 
@@ -586,22 +587,6 @@ enum MediaType {
 }
 
 type Mutation {
-  # Creates a new flashcard set.
-  createFlashcardSet(input: CreateFlashcardSetInput!): FlashcardSet!
-
-  # Deletes a flashcard set. Throws an error if the flashcard set does not exist.
-  # The contained flashcards are deleted as well.
-  deleteFlashcardSet(input: UUID!): UUID!
-
-  # Creates a new flashcard. Throws an error if the flashcard set does not exist.
-  createFlashcard(input: CreateFlashcardInput!): Flashcard!
-
-  # Updates a flashcard. Throws an error if the flashcard does not exist.
-  updateFlashcard(input: UpdateFlashcardInput!): Flashcard!
-
-  # Deletes a flashcard. Throws an error if the flashcard does not exist.
-  deleteFlashcard(input: UUID!): UUID!
-
   # Create new media content
   createMediaContent(input: CreateMediaContentInput!): MediaContent!
 
@@ -623,23 +608,6 @@ type Mutation {
   # Remove a tag from an existing content
   removeTagFromContent(contentId: UUID!, tagName: String): Content!
 
-  #  Creates a new media record
-  createMediaRecord(input: CreateMediaRecordInput!): MediaRecord!
-
-  #  Updates an existing media record with the given UUID
-  updateMediaRecord(input: UpdateMediaRecordInput!): MediaRecord!
-
-  #  Deletes the media record with the given UUID
-  deleteMediaRecord(id: UUID!): UUID!
-
-  # Logs that a media has been worked on by the current user.
-  # See https://gits-enpro.readthedocs.io/en/latest/dev-manuals/gamification/userProgress.html
-  #
-  # Possible side effects:
-  # When all media records of a content have been worked on by a user,
-  # a user-progress event is emitted for the content.
-  logMediaRecordWorkedOn(mediaRecordId: UUID!): MediaRecord!
-
   # Creates a new course with the given input and returns the created course.
   createCourse(input: CreateCourseInput!): Course!
 
@@ -660,6 +628,48 @@ type Mutation {
 
   # Deletes an existing chapter, throws an error if no chapter with the given id exists.
   deleteChapter(id: UUID!): UUID!
+
+  #  Creates a new media record
+  createMediaRecord(input: CreateMediaRecordInput!): MediaRecord!
+
+  #  Updates an existing media record with the given UUID
+  updateMediaRecord(input: UpdateMediaRecordInput!): MediaRecord!
+
+  #  Deletes the media record with the given UUID
+  deleteMediaRecord(id: UUID!): UUID!
+
+  # Logs that a media has been worked on by the current user.
+  # See https://gits-enpro.readthedocs.io/en/latest/dev-manuals/gamification/userProgress.html
+  #
+  # Possible side effects:
+  # When all media records of a content have been worked on by a user,
+  # a user-progress event is emitted for the content.
+  logMediaRecordWorkedOn(mediaRecordId: UUID!): MediaRecord!
+
+  # Creates a new flashcard set.
+  createFlashcardSet(input: CreateFlashcardSetInput!): FlashcardSet!
+
+  # Deletes a flashcard set. Throws an error if the flashcard set does not exist.
+  # The contained flashcards are deleted as well.
+  deleteFlashcardSet(input: UUID!): UUID!
+
+  # Creates a new flashcard. Throws an error if the flashcard set does not exist.
+  createFlashcard(input: CreateFlashcardInput!): Flashcard!
+
+  # Updates a flashcard. Throws an error if the flashcard does not exist.
+  updateFlashcard(input: UpdateFlashcardInput!): Flashcard!
+
+  # Deletes a flashcard. Throws an error if the flashcard does not exist.
+  deleteFlashcard(input: UUID!): UUID!
+
+  # ONLY FOR TESTING PURPOSES. DO NOT USE IN FRONTEND. WILL BE REMOVED.
+  #
+  # Triggers the recalculation of the reward score of the user.
+  # This is done automatically at some time in the night.
+  #
+  # The purpose of this mutation is to allow testing of the reward score and demonstrate the functionality.
+  recalculateScores(courseId: UUID!, userId: UUID!): RewardScores!
+    @deprecated(reason: "Only for testing purposes. Will be removed.")
 }
 
 # Specifies the page size and page number for paginated results.
@@ -712,32 +722,15 @@ type ProgressLogItem {
 }
 
 type Query {
-  # Get flashcards by their ids
-  flashcardsByIds(ids: [UUID!]!): [Flashcard!]!
-
-  # Get flashcard sets by their assessment ids.
-  # Returns a list of lists of flashcard sets, where each list corresponds to a single assessment id.
-  flashcardSetsByAssessmentIds(assessmentIds: [UUID!]!): [FlashcardSet!]!
-
   # get all contents
   contents: ContentPayload!
 
   # get contents by ids
-  contentsByIds(ids: [UUID!]!): ContentPayload!
+  contentsByIds(ids: [UUID!]!): [Content!]!
 
   # get contents by chapter ids. Returns a list containing sublists, where each sublist contains all contents
   # associated with that chapter
   contentsByChapterIds(chapterIds: [UUID!]!): [[Content!]!]!
-
-  #  Returns the media records with the given IDs
-  mediaRecordsById(ids: [UUID!]!): [MediaRecord!]!
-
-  #  Returns all media records
-  mediaRecords: [MediaRecord!]!
-
-  #  Returns the media records associated the given content IDs as a list of lists where each sublist contains
-  #  the media records associated with the content ID at the same index in the input list
-  mediaRecordsByContentIds(contentIds: [UUID!]!): [[MediaRecord!]!]!
 
   # Get a list of courses. Can be filtered, sorted and paginated.
   courses(
@@ -774,9 +767,102 @@ type Query {
     sortDirection: [SortDirection!]! = [ASC]
     pagination: Pagination
   ): ChapterPayload!
+
+  #  Returns the media records with the given IDs
+  mediaRecordsById(ids: [UUID!]!): [MediaRecord!]!
+
+  #  Returns all media records
+  mediaRecords: [MediaRecord!]!
+
+  #  Returns the media records associated the given content IDs as a list of lists where each sublist contains
+  #  the media records associated with the content ID at the same index in the input list
+  mediaRecordsByContentIds(contentIds: [UUID!]!): [[MediaRecord!]!]!
+
+  # Get flashcards by their ids
+  flashcardsByIds(ids: [UUID!]!): [Flashcard!]!
+
+  # Get flashcard sets by their assessment ids.
+  # Returns a list of lists of flashcard sets, where each list corresponds to a single assessment id.
+  flashcardSetsByAssessmentIds(assessmentIds: [UUID!]!): [FlashcardSet!]!
+
+  # Get the reward score of the current user for the specified course.
+  userCourseRewardScores(courseId: UUID!): RewardScores!
+
+  # Get the reward score of the specified user for the specified course.
+  courseRewardScoresForUser(courseId: UUID!, userId: UUID!): RewardScores!
 }
 
 scalar ResolveToSourceArgs
+
+# The reason why the reward score has changed.
+enum RewardChangeReason {
+  # The user has completed a content for the first time.
+  # The associated contents are the content that were completed.
+  CONTENT_DONE
+
+  # The user has reviewed a content.
+  # The associated contents are the content that were reviewed.
+  CONTENT_REVIEWED
+
+  # There exists a content that is due for learning.
+  # The associated contents are the content that are due for learning.
+  CONTENT_DUE_FOR_LEARNING
+
+  # There exists a content that is due for repetition.
+  # The associated contents are the content that are due for repetition.
+  CONTENT_DUE_FOR_REPETITION
+}
+
+# An item in the reward score log.
+type RewardLogItem {
+  # The date when the reward score changed.
+  date: DateTime!
+
+  # The difference between the previous and the new reward score.
+  difference: Int!
+
+  # The old reward score.
+  oldValue: Int!
+
+  # The new reward score.
+  newValue: Int!
+
+  # The reason why the reward score has changed.
+  reason: RewardChangeReason!
+
+  # The ids of the contents that are associated with the change.
+  associatedContentIds: [UUID!]!
+  associatedContents: [Content!]!
+}
+
+# The reward score of a user.
+type RewardScore {
+  # The value of the reward score.
+  # Health and fitness are between 0 and 100.
+  # Growth, strength and power can be any non-negative integer.
+  value: Int!
+
+  # A log of the changes to the reward score, ordered by date descending.
+  log: [RewardLogItem!]!
+}
+
+# The five reward scores of a user.
+type RewardScores {
+  # Health represents how up-to-date the user is with the course.
+  health: RewardScore!
+
+  # Fitness represents how well the user repeats previously learned content.
+  fitness: RewardScore!
+
+  # Growth represents the overall progress of the user.
+  growth: RewardScore!
+
+  # Strength is earned by competing with other users.
+  strength: RewardScore!
+
+  # A composite score of all the other scores.
+  power: RewardScore!
+}
 
 # Type of the assessment
 enum SkillType {

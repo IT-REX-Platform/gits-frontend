@@ -1,31 +1,51 @@
+import { RewardScoresFragment$key } from "@/__generated__/RewardScoresFragment.graphql";
 import { Typography } from "@mui/material";
 import { ReactElement } from "react";
+import { useFragment } from "react-relay";
+import { graphql } from "relay-runtime";
 import colors from "tailwindcss/colors";
 
 export function RewardScores({
-  health,
-  fitness,
-  growth,
-  power,
+  _scores,
 }: {
-  health: number;
-  fitness: number;
-  growth: number;
-  power: number;
+  _scores: RewardScoresFragment$key;
 }) {
+  const rewardScores = useFragment(
+    graphql`
+      fragment RewardScoresFragment on RewardScores {
+        health {
+          value
+        }
+        fitness {
+          value
+        }
+        growth {
+          value
+        }
+        strength {
+          value
+        }
+        power {
+          value
+        }
+      }
+    `,
+    _scores
+  );
+
   return (
     <div className="flex gap-12">
       <div className="flex flex-col gap-2">
         <StatDisplay
           label="Health"
           color={colors.red[500]}
-          progress={health}
+          progress={rewardScores.health.value}
           icon={<HealthIcon />}
         />
         <StatDisplay
           label="Fitness"
           color={colors.blue[500]}
-          progress={fitness}
+          progress={rewardScores.fitness.value}
           icon={<FitnessIcon />}
         />
       </div>
@@ -33,13 +53,13 @@ export function RewardScores({
         <StatDisplay
           label="Growth"
           color={colors.green[500]}
-          progress={growth}
+          progress={rewardScores.growth.value}
           icon={<GrowthIcon />}
         />
         <StatDisplay
           label="Power"
           color={colors.amber[400]}
-          progress={power}
+          progress={rewardScores.power.value}
           icon={<PowerIcon />}
           noBar
         />

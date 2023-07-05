@@ -1,5 +1,6 @@
 "use client";
 import { CircularProgress, Typography, useTheme } from "@mui/material";
+import { ReactNode } from "react";
 
 type SkillLevel = "green" | "yellow" | "red";
 type SkillLevels = {
@@ -16,7 +17,7 @@ export function ChapterHeader({
   skill_levels,
 }: {
   progress: number;
-  title: string;
+  title: ReactNode;
   subtitle: string;
   skill_levels: SkillLevels;
 }) {

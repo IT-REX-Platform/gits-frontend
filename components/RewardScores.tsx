@@ -89,7 +89,7 @@ export function StatDisplay({
 
   return (
     <div className="flex items-end gap-4">
-      <div className="">{icon}</div>
+      <div className="w-8 flex justify-center">{icon}</div>
       <div className="flex flex-col">
         <Typography variant="caption">{label}</Typography>
         {score}

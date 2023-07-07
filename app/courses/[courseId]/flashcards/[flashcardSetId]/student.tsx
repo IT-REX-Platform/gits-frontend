@@ -1,24 +1,30 @@
 "use client";
 
-import { pageFlashcardsQuery } from "@/__generated__/pageFlashcardsQuery.graphql";
-import { Check, Close, Loop } from "@mui/icons-material";
-import { Button, Typography } from "@mui/material";
+import { studentFlashcardsQuery } from "@/__generated__/studentFlashcardsQuery.graphql";
+import {
+  ArrowBack,
+  Check,
+  Close,
+  Loop,
+  NavigateBefore,
+} from "@mui/icons-material";
+import { Button, IconButton, Typography } from "@mui/material";
 import { motion } from "framer-motion";
 import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
 import ReactMarkdown from "react-markdown";
 import { graphql, useLazyLoadQuery } from "react-relay";
 
-export default function Flashcards() {
+export default function StudentFlashcards() {
   // Get course id from url
   const { flashcardSetId, courseId } = useParams();
 
   const [currentIndex, setCurrentIndex] = useState(0);
 
   // Fetch course data
-  const { contentsByIds } = useLazyLoadQuery<pageFlashcardsQuery>(
+  const { contentsByIds } = useLazyLoadQuery<studentFlashcardsQuery>(
     graphql`
-      query pageFlashcardsQuery($id: [UUID!]!) {
+      query studentFlashcardsQuery($id: [UUID!]!) {
         contentsByIds(ids: $id) {
           id
           metadata {
@@ -50,20 +56,25 @@ export default function Flashcards() {
   const [turned, setTurned] = useState<Record<string, boolean>>({});
   const [knew, setKnew] = useState<Record<string, boolean>>({});
 
-  const { push } = useRouter();
+  const router = useRouter();
   const nextCard = () => {
     if (currentIndex + 1 < (flashcards.flashcardSet?.flashcards.length ?? 0)) {
       setCurrentIndex(currentIndex + 1);
       setKnew({});
       setTurned({});
     } else {
-      push(`/student/course/${courseId}`);
+      router.push(`/courses/${courseId}`);
     }
   };
 
   return (
     <main>
-      <Typography variant="h1">{flashcards.metadata.name}</Typography>
+      <div className="flex items-center gap-2">
+        <IconButton onClick={() => router.back()}>
+          <NavigateBefore sx={{ color: "text.primary" }} />
+        </IconButton>
+        <Typography variant="h1">{flashcards.metadata.name}</Typography>
+      </div>
 
       <div className="w-full border-b border-b-gray-300 mt-6 flex justify-center">
         <div className="bg-white -mb-[9px] px-3 text-xs text-gray-600">

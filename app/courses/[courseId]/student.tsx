@@ -1,5 +1,5 @@
 "use client";
-import { pageCourseIdQuery } from "@/__generated__/pageCourseIdQuery.graphql";
+import { studentCourseIdQuery } from "@/__generated__/studentCourseIdQuery.graphql";
 import { Dialog, DialogTitle, IconButton, Typography } from "@mui/material";
 import { chain } from "lodash";
 import Error from "next/error";
@@ -17,11 +17,7 @@ import { Info } from "@mui/icons-material";
 import dayjs from "dayjs";
 import { useState } from "react";
 
-export default function CoursePage() {
-  return <StudentCoursePage />;
-}
-
-function StudentCoursePage() {
+export default function StudentCoursePage() {
   // Get course id from url
   const params = useParams();
   const id = params.courseId;
@@ -30,9 +26,9 @@ function StudentCoursePage() {
   const [infoDialogOpen, setInfoDialogOpen] = useState(false);
 
   // Fetch course data
-  const { coursesById } = useLazyLoadQuery<pageCourseIdQuery>(
+  const { coursesById } = useLazyLoadQuery<studentCourseIdQuery>(
     graphql`
-      query pageCourseIdQuery($id: [UUID!]!) {
+      query studentCourseIdQuery($id: [UUID!]!) {
         coursesById(ids: $id) {
           title
           description

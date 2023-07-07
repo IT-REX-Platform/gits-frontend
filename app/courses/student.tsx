@@ -1,16 +1,16 @@
 "use client";
 
-import { pageJoinQuery } from "@/__generated__/pageJoinQuery.graphql";
+import { studentJoinQuery } from "@/__generated__/studentJoinQuery.graphql";
 import { Add } from "@mui/icons-material";
 import { Button, TextField, Typography } from "@mui/material";
 import Link from "next/link";
 import { useState } from "react";
 import { graphql, useLazyLoadQuery } from "react-relay";
 
-export default function JoinCourse() {
-  const { courses } = useLazyLoadQuery<pageJoinQuery>(
+export default function StudentCourseList() {
+  const { courses } = useLazyLoadQuery<studentJoinQuery>(
     graphql`
-      query pageJoinQuery {
+      query studentJoinQuery {
         courses {
           elements {
             id
@@ -52,7 +52,7 @@ export default function JoinCourse() {
         {filteredCourses.map((course) => (
           <Link
             className="font-bold text-sky-900 border border-sky-900 hover:bg-sky-100 p-5 pl-3 rounded-lg grid grid-cols-[1fr_1fr_auto] items-center"
-            href={`/course/${course.id}`}
+            href={`/courses/${course.id}`}
             key={course.id}
           >
             <div className="text-sm min-[830px]:text-xl min-[830px]:font-bold">

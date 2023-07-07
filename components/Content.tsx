@@ -89,9 +89,7 @@ export function FlashcardContent({
       subtitle={flashcard.metadata.name}
       disabled={disabled}
       className="hover:bg-emerald-100 rounded-full"
-      onClick={() =>
-        push(`/student/course/${courseId}/flashcards/${flashcard.id}`)
-      }
+      onClick={() => push(`/courses/${courseId}/flashcards/${flashcard.id}`)}
       icon={
         <QuestionAnswerRounded
           sx={{

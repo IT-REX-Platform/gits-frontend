@@ -1,7 +1,7 @@
 "use client";
 
 import "@/styles/globals.css";
-import { Suspense, useEffect, useMemo } from "react";
+import React, { Suspense, useEffect, useMemo } from "react";
 
 import { initRelayEnvironment } from "@/src/RelayEnvironment";
 import "@fontsource/roboto/300.css";
@@ -18,6 +18,8 @@ import {
 } from "react-oidc-context";
 import { RelayEnvironmentProvider } from "react-relay";
 import { ThemeProvider, colors, createTheme } from "@mui/material";
+import { PageViewProvider } from "@/src/currentView";
+import { PageLayout } from "@/components/PageLayout";
 
 const oidcConfig: AuthProviderProps = {
   redirect_uri:
@@ -54,9 +56,13 @@ export default function App({ children }: { children: React.ReactNode }) {
       <body className="h-full">
         <AuthProvider {...oidcConfig}>
           <LocalizationProvider dateAdapter={AdapterDayjs}>
-            <Suspense fallback="Loading...">
-              <SigninContent>{children}</SigninContent>
-            </Suspense>
+            <PageViewProvider>
+              <Suspense fallback="Loading...">
+                <SigninContent>
+                  <PageLayout>{children}</PageLayout>
+                </SigninContent>
+              </Suspense>
+            </PageViewProvider>
           </LocalizationProvider>
         </AuthProvider>
       </body>

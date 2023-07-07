@@ -1,6 +1,6 @@
 "use client";
 
-import { pageLecturerDashboardQuery } from "@/__generated__/pageLecturerDashboardQuery.graphql";
+import { studentStudentQuery } from "@/__generated__/studentStudentQuery.graphql";
 import {
   ArrowForwardIos,
   Check,
@@ -24,10 +24,10 @@ import Link from "next/link";
 import { useLazyLoadQuery } from "react-relay";
 import { graphql } from "relay-runtime";
 
-export default function LecturerPage() {
-  const { allCourses } = useLazyLoadQuery<pageLecturerDashboardQuery>(
+export default function StudentPage() {
+  const { allCourses } = useLazyLoadQuery<studentStudentQuery>(
     graphql`
-      query pageLecturerDashboardQuery {
+      query studentStudentQuery {
         allCourses: courses {
           elements {
             id
@@ -49,26 +49,26 @@ export default function LecturerPage() {
         My Courses
       </Typography>
 
-      <div className="grid grid-cols-2 lg:grid-cols-3 gap-5 mt-4">
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-8 mt-8">
         {/* MOCK */}
         {allCourses.elements.map((course) => (
           <Card variant="outlined" className="h-full" key={course.id}>
             <CardContent>
               <div className="flex gap-4 items-center">
-                <div className="aspect-square min-w-[40px]">
+                <div className="aspect-square min-w-[40px] grid">
                   <CircularProgress
                     variant="determinate"
                     value={100}
                     sx={{
                       color: (theme) => theme.palette.grey[200],
                     }}
-                    className="absolute"
+                    className="col-start-1 row-start-1"
                   />
                   <CircularProgress
                     variant="determinate"
                     value={45}
                     color="success"
-                    className="absolute"
+                    className="col-start-1 row-start-1"
                   />
                 </div>
                 <Typography
@@ -88,7 +88,7 @@ export default function LecturerPage() {
                   <Visibility />
                 </ListItemIcon>
                 <ListItemText
-                  primary="Get quiz results"
+                  primary="Watch the next video"
                   secondary="Chapter 4: Interfaces"
                 />
                 <ListItemIcon>
@@ -100,7 +100,7 @@ export default function LecturerPage() {
                   <Check />
                 </ListItemIcon>
                 <ListItemText
-                  primary="Grade Assignments"
+                  primary="Solve the Quiz"
                   secondary="Chapter 4: Interfaces"
                 />
                 <ListItemIcon>
@@ -113,7 +113,7 @@ export default function LecturerPage() {
                   <Refresh />
                 </ListItemIcon>
                 <ListItemText
-                  primary="Check Student Progress"
+                  primary="Refresh your Knowledge"
                   secondary="Chapter 1-3"
                 />
                 <ListItemIcon>
@@ -124,8 +124,8 @@ export default function LecturerPage() {
             <Divider />
 
             <CardActions>
-              <Link href={{ pathname: `/lecturer/course/${course.id}` }}>
-                <Button size="small">Show Details</Button>
+              <Link href={{ pathname: `/courses/${course.id}` }}>
+                <Button size="small">Continue</Button>
               </Link>
             </CardActions>
           </Card>

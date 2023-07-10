@@ -1,16 +1,80 @@
 "use client";
+import { ContentDocumentFragment$key } from "@/__generated__/ContentDocumentFragment.graphql";
 import { ContentFlashcardFragment$key } from "@/__generated__/ContentFlashcardFragment.graphql";
+import { ContentInvalidFragment$key } from "@/__generated__/ContentInvalidFragment.graphql";
+import { ContentMediaFragment$key } from "@/__generated__/ContentMediaFragment.graphql";
+import { ContentPresentationFragment$key } from "@/__generated__/ContentPresentationFragment.graphql";
+import { ContentUrlFragment$key } from "@/__generated__/ContentUrlFragment.graphql";
 import { ContentVideoFragment$key } from "@/__generated__/ContentVideoFragment.graphql";
 import {
   ArrowRight,
+  Description,
   Download,
+  Language,
+  PersonalVideo,
   QuestionAnswerRounded,
+  QuestionMark,
 } from "@mui/icons-material";
 import { CircularProgress, Typography } from "@mui/material";
 import { useParams, useRouter } from "next/navigation";
 import { MouseEventHandler, ReactElement } from "react";
 import { graphql, useFragment } from "react-relay";
 import colors from "tailwindcss/colors";
+
+export function MediaContent({
+  disabled = false,
+  recordIdx = 0,
+  _media,
+}: {
+  disabled?: boolean;
+  recordIdx?: number;
+  _media: ContentMediaFragment$key;
+}) {
+  const media = useFragment(
+    graphql`
+      fragment ContentMediaFragment on MediaContent {
+        ...ContentVideoFragment
+        ...ContentPresentationFragment
+        ...ContentDocumentFragment
+        ...ContentUrlFragment
+        ...ContentInvalidFragment
+        mediaRecords {
+          type
+        }
+      }
+    `,
+    _media
+  );
+
+  if (media.mediaRecords.length == 0) {
+    return (
+      <InvalidContent
+        title="Invalid content"
+        disabled={disabled}
+        _media={media}
+      />
+    );
+  }
+
+  switch (media.mediaRecords[recordIdx].type) {
+    case "VIDEO":
+      return <VideoContent disabled={disabled} _media={media} />;
+    case "PRESENTATION":
+      return <PresentationContent disabled={disabled} _media={media} />;
+    case "DOCUMENT":
+      return <DocumentContent disabled={disabled} _media={media} />;
+    case "URL":
+      return <UrlContent disabled={disabled} _media={media} />;
+    default:
+      return (
+        <InvalidContent
+          title="Unknown content type"
+          disabled={disabled}
+          _media={media}
+        />
+      );
+  }
+}
 
 export function VideoContent({
   disabled = false,
@@ -19,6 +83,8 @@ export function VideoContent({
   disabled?: boolean;
   _media: ContentVideoFragment$key;
 }) {
+  const router = useRouter();
+  const { courseId } = useParams();
   const media = useFragment(
     graphql`
       fragment ContentVideoFragment on MediaContent {
@@ -40,6 +106,7 @@ export function VideoContent({
       subtitle={media.metadata.name}
       disabled={disabled}
       className="hover:bg-sky-100 rounded-full"
+      onClick={() => router.push(`/courses/${courseId}/media/${media.id}`)}
       icon={
         <ArrowRight
           sx={{
@@ -53,6 +120,183 @@ export function VideoContent({
           color={disabled ? colors.gray[100] : colors.sky[200]}
           progress={disabled ? 0 : 0}
         />
+      }
+    />
+  );
+}
+
+export function InvalidContent({
+  title,
+  disabled = false,
+  _media,
+}: {
+  title: string;
+  disabled?: boolean;
+  _media: ContentInvalidFragment$key;
+}) {
+  const media = useFragment(
+    graphql`
+      fragment ContentInvalidFragment on MediaContent {
+        id
+        metadata {
+          name
+        }
+      }
+    `,
+    _media
+  );
+
+  return (
+    <Content
+      title={title}
+      subtitle={media.metadata.name}
+      disabled={disabled}
+      className="hover:bg-gray-100 rounded-xl"
+      icon={
+        <QuestionMark
+          sx={{
+            fontSize: "1.875rem",
+            color: disabled ? "text.disabled" : "text.secondary",
+          }}
+        />
+      }
+      iconFrame={
+        <StaticFrame color={disabled ? "bg-gray-100" : "bg-gray-300"} />
+      }
+    />
+  );
+}
+
+export function PresentationContent({
+  disabled = false,
+  _media,
+}: {
+  disabled?: boolean;
+  _media: ContentPresentationFragment$key;
+}) {
+  const media = useFragment(
+    graphql`
+      fragment ContentPresentationFragment on MediaContent {
+        id
+        metadata {
+          name
+        }
+        userProgressData {
+          nextLearnDate
+        }
+      }
+    `,
+    _media
+  );
+
+  return (
+    <Content
+      title="Look at slides"
+      subtitle={media.metadata.name}
+      disabled={disabled}
+      className="hover:bg-violet-100 rounded-full"
+      icon={
+        <PersonalVideo
+          sx={{
+            fontSize: "1.875rem",
+            color: disabled ? "text.disabled" : "text.secondary",
+          }}
+        />
+      }
+      iconFrame={
+        <ProgressFrame
+          color={disabled ? colors.gray[100] : colors.violet[200]}
+          progress={disabled ? 0 : 0}
+        />
+      }
+    />
+  );
+}
+
+export function DocumentContent({
+  disabled = false,
+  _media,
+}: {
+  disabled?: boolean;
+  _media: ContentDocumentFragment$key;
+}) {
+  const media = useFragment(
+    graphql`
+      fragment ContentDocumentFragment on MediaContent {
+        id
+        metadata {
+          name
+        }
+        userProgressData {
+          nextLearnDate
+        }
+      }
+    `,
+    _media
+  );
+
+  return (
+    <Content
+      title="Read document"
+      subtitle={media.metadata.name}
+      disabled={disabled}
+      className="hover:bg-indigo-100 rounded-full"
+      icon={
+        <Description
+          sx={{
+            fontSize: "1.875rem",
+            color: disabled ? "text.disabled" : "text.secondary",
+          }}
+        />
+      }
+      iconFrame={
+        <ProgressFrame
+          color={disabled ? colors.gray[100] : colors.indigo[200]}
+          progress={disabled ? 0 : 0}
+        />
+      }
+    />
+  );
+}
+
+export function UrlContent({
+  disabled = false,
+  _media,
+}: {
+  disabled?: boolean;
+  _media: ContentUrlFragment$key;
+}) {
+  const media = useFragment(
+    graphql`
+      fragment ContentUrlFragment on MediaContent {
+        id
+        metadata {
+          name
+        }
+        userProgressData {
+          nextLearnDate
+        }
+      }
+    `,
+    _media
+  );
+
+  return (
+    <Content
+      title="Open url"
+      subtitle={media.metadata.name}
+      disabled={disabled}
+      className="hover:bg-slate-100 rounded-xl"
+      icon={
+        <Language
+          sx={{
+            fontSize: "1.875rem",
+            color: disabled ? "text.disabled" : "white",
+          }}
+        />
+      }
+      iconFrame={
+        <StaticFrame color={disabled ? "bg-gray-100" : "bg-gray-400"} />
       }
     />
   );

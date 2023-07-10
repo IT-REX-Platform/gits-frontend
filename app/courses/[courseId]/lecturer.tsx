@@ -1,5 +1,5 @@
 "use client";
-import { pageLecturerCourseIdQuery } from "@/__generated__/pageLecturerCourseIdQuery.graphql";
+import { lecturerLecturerCourseIdQuery } from "@/__generated__/lecturerLecturerCourseIdQuery.graphql";
 import {
   Alert,
   Backdrop,
@@ -23,12 +23,12 @@ import {
   useMutation,
 } from "react-relay";
 
-import { pageEditCourseAddChapterModalFragment$key } from "@/__generated__/pageEditCourseAddChapterModalFragment.graphql";
-import { pageEditCourseChaptersMutation } from "@/__generated__/pageEditCourseChaptersMutation.graphql";
-import { pageEditCourseEditChapterModalFragment$key } from "@/__generated__/pageEditCourseEditChapterModalFragment.graphql";
-import { pageEditCourseEditChaptersMutation } from "@/__generated__/pageEditCourseEditChaptersMutation.graphql";
-import { pageEditCourseGeneralFragment$key } from "@/__generated__/pageEditCourseGeneralFragment.graphql";
-import { pageEditCourseMutation } from "@/__generated__/pageEditCourseMutation.graphql";
+import { lecturerEditCourseAddChapterModalFragment$key } from "@/__generated__/lecturerEditCourseAddChapterModalFragment.graphql";
+import { lecturerEditCourseChaptersMutation } from "@/__generated__/lecturerEditCourseChaptersMutation.graphql";
+import { lecturerEditCourseEditChapterModalFragment$key } from "@/__generated__/lecturerEditCourseEditChapterModalFragment.graphql";
+import { lecturerEditCourseEditChaptersMutation } from "@/__generated__/lecturerEditCourseEditChaptersMutation.graphql";
+import { lecturerEditCourseGeneralFragment$key } from "@/__generated__/lecturerEditCourseGeneralFragment.graphql";
+import { lecturerEditCourseMutation } from "@/__generated__/lecturerEditCourseMutation.graphql";
 import {
   ChapterContent,
   ChapterContentItem,
@@ -55,18 +55,18 @@ export default function LecturerCoursePage() {
   const [infoDialogOpen, setInfoDialogOpen] = useState(false);
 
   // Fetch course data
-  const { coursesById } = useLazyLoadQuery<pageLecturerCourseIdQuery>(
+  const { coursesById } = useLazyLoadQuery<lecturerLecturerCourseIdQuery>(
     graphql`
-      query pageLecturerCourseIdQuery($id: [UUID!]!) {
+      query lecturerLecturerCourseIdQuery($id: [UUID!]!) {
         coursesById(ids: $id) {
           title
           description
-          ...pageEditCourseAddChapterModalFragment
-          ...pageEditCourseGeneralFragment
+          ...lecturerEditCourseAddChapterModalFragment
+          ...lecturerEditCourseGeneralFragment
 
           chapters {
             elements {
-              ...pageEditCourseEditChapterModalFragment
+              ...lecturerEditCourseEditChapterModalFragment
               id
               title
               number
@@ -206,11 +206,11 @@ function EditGeneral({
 }: {
   open: boolean;
   onClose: () => void;
-  _course: pageEditCourseGeneralFragment$key;
+  _course: lecturerEditCourseGeneralFragment$key;
 }) {
   const course = useFragment(
     graphql`
-      fragment pageEditCourseGeneralFragment on Course {
+      fragment lecturerEditCourseGeneralFragment on Course {
         id
         title
         description
@@ -223,11 +223,11 @@ function EditGeneral({
   );
 
   const [updateCourse, isUpdating] =
-    useMutation<pageEditCourseMutation>(graphql`
-      mutation pageEditCourseMutation($course: UpdateCourseInput!) {
+    useMutation<lecturerEditCourseMutation>(graphql`
+      mutation lecturerEditCourseMutation($course: UpdateCourseInput!) {
         updateCourse(input: $course) {
           id
-          ...pageEditCourseGeneralFragment
+          ...lecturerEditCourseGeneralFragment
         }
       }
     `);
@@ -367,13 +367,13 @@ function EditGeneral({
 function EditChapterModal({
   _chapter,
 }: {
-  _chapter: pageEditCourseEditChapterModalFragment$key;
+  _chapter: lecturerEditCourseEditChapterModalFragment$key;
 }) {
   const [openModal, setOpenModal] = useState(false);
 
   const chapter = useFragment(
     graphql`
-      fragment pageEditCourseEditChapterModalFragment on Chapter {
+      fragment lecturerEditCourseEditChapterModalFragment on Chapter {
         id
         title
         description
@@ -426,13 +426,13 @@ function EditChapterModal({
     endDate.isValid();
 
   const [updateChapter, isUpdating] =
-    useMutation<pageEditCourseEditChaptersMutation>(graphql`
-      mutation pageEditCourseEditChaptersMutation(
+    useMutation<lecturerEditCourseEditChaptersMutation>(graphql`
+      mutation lecturerEditCourseEditChaptersMutation(
         $chapter: UpdateChapterInput!
       ) {
         updateChapter(input: $chapter) {
           id
-          ...pageEditCourseEditChapterModalFragment
+          ...lecturerEditCourseEditChapterModalFragment
         }
       }
     `);
@@ -577,11 +577,11 @@ function AddChapterModal({
 }: {
   open: boolean;
   onClose: () => void;
-  _course: pageEditCourseAddChapterModalFragment$key;
+  _course: lecturerEditCourseAddChapterModalFragment$key;
 }) {
   const course = useFragment(
     graphql`
-      fragment pageEditCourseAddChapterModalFragment on Course {
+      fragment lecturerEditCourseAddChapterModalFragment on Course {
         id
         chapters {
           elements {
@@ -614,12 +614,14 @@ function AddChapterModal({
     endDate.isValid();
 
   const [addChapter, isUpdating] =
-    useMutation<pageEditCourseChaptersMutation>(graphql`
-      mutation pageEditCourseChaptersMutation($chapter: CreateChapterInput!) {
+    useMutation<lecturerEditCourseChaptersMutation>(graphql`
+      mutation lecturerEditCourseChaptersMutation(
+        $chapter: CreateChapterInput!
+      ) {
         createChapter(input: $chapter) {
           id
           course {
-            ...pageEditCourseAddChapterModalFragment
+            ...lecturerEditCourseAddChapterModalFragment
           }
         }
       }

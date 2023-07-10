@@ -2,6 +2,7 @@
 import { NavbarLecturerQuery } from "@/__generated__/NavbarLecturerQuery.graphql";
 import { NavbarStudentQuery } from "@/__generated__/NavbarStudentQuery.graphql";
 import logo from "@/assets/logo.svg";
+import { PageView, usePageView } from "@/src/currentView";
 import { CollectionsBookmark, Dashboard, Logout } from "@mui/icons-material";
 import {
   Avatar,
@@ -21,33 +22,23 @@ import { ReactElement } from "react";
 import { useAuth } from "react-oidc-context";
 import { graphql, useLazyLoadQuery } from "react-relay";
 
-function NavbarBase({
-  children,
-  student,
-}: {
-  children: React.ReactElement;
-  student: boolean;
-}) {
+function NavbarBase({ children }: { children: React.ReactElement }) {
   return (
     <div className="shrink-0 bg-slate-200 h-full px-8 flex flex-col gap-6 w-96 overflow-auto">
       <div className="text-center my-16 text-3xl font-medium tracking-wider sticky">
         <img src={logo.src} className="w-24 m-auto" />
       </div>
       <NavbarSection>
-        <NavbarLink
-          title="Dashboard"
-          icon={<Dashboard />}
-          exact
-          href={student ? "/student" : "/lecturer"}
-        />
+        <NavbarLink title="Dashboard" icon={<Dashboard />} href="/" exact />
         <NavbarLink
           title="Course Catalog"
           icon={<CollectionsBookmark />}
-          href="/student/course/join"
+          href="/courses"
+          exact
         />
       </NavbarSection>
       {children}
-      <UserInfo student={student} />
+      <UserInfo />
     </div>
   );
 }
@@ -100,9 +91,27 @@ function NavbarLink({
   );
 }
 
-function UserInfo({ student }: { student: boolean }) {
+function UserInfo() {
   const auth = useAuth();
-  const router = useRouter();
+  const [pageView, setPageView] = usePageView();
+
+  function SwitchPageViewButton() {
+    switch (pageView) {
+      case PageView.Student:
+        return (
+          <ListItemButton onClick={() => setPageView(PageView.Lecturer)}>
+            <ListItemText primary="Switch to lecturer view" />
+          </ListItemButton>
+        );
+      case PageView.Lecturer:
+        return (
+          <ListItemButton onClick={() => setPageView(PageView.Student)}>
+            <ListItemText primary="Switch to student view" />
+          </ListItemButton>
+        );
+    }
+  }
+
   return (
     <div className="sticky bottom-0 py-6 -mt-6 bg-gradient-to-t from-slate-200 from-75% to-transparent">
       <NavbarSection>
@@ -126,17 +135,7 @@ function UserInfo({ student }: { student: boolean }) {
         </ListItem>
 
         <Divider></Divider>
-        <ListItemButton
-          onClick={() =>
-            student ? router.push("/lecturer") : router.push("/student")
-          }
-        >
-          {student ? (
-            <ListItemText primary="Switch to lecturer view" />
-          ) : (
-            <ListItemText primary="Switch to student view" />
-          )}
-        </ListItemButton>
+        <SwitchPageViewButton />
       </NavbarSection>
     </div>
   );
@@ -158,13 +157,13 @@ export function StudentNavbar() {
   );
 
   return (
-    <NavbarBase student>
+    <NavbarBase>
       <NavbarSection title="Courses I'm attending">
         {allCourses.elements.map((course) => (
           <NavbarLink
             key={course.id}
             title={course.title}
-            href={`/student/course/${course.id}`}
+            href={`/courses/${course.id}`}
           />
         ))}
       </NavbarSection>
@@ -188,16 +187,26 @@ export function LecturerNavbar() {
   );
 
   return (
-    <NavbarBase student={false}>
+    <NavbarBase>
       <NavbarSection title="Courses I'm tutoring">
         {allCourses.elements.map((course) => (
           <NavbarLink
             key={course.id}
             title={course.title}
-            href={`/lecturer/course/${course.id}`}
+            href={`/courses/${course.id}`}
           />
         ))}
       </NavbarSection>
     </NavbarBase>
   );
+}
+
+export function Navbar() {
+  const [pageView, _] = usePageView();
+  switch (pageView) {
+    case PageView.Student:
+      return <StudentNavbar />;
+    case PageView.Lecturer:
+      return <LecturerNavbar />;
+  }
 }

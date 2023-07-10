@@ -23,22 +23,28 @@ import colors from "tailwindcss/colors";
 
 export function MediaContent({
   disabled = false,
-  recordIdx = 0,
+  recordId,
+  replace = false,
   _media,
 }: {
   disabled?: boolean;
-  recordIdx?: number;
+  recordId?: string;
+  replace?: boolean;
   _media: ContentMediaFragment$key;
 }) {
+  const router = useRouter();
+  const { courseId } = useParams();
   const media = useFragment(
     graphql`
       fragment ContentMediaFragment on MediaContent {
+        id
         ...ContentVideoFragment
         ...ContentPresentationFragment
         ...ContentDocumentFragment
         ...ContentUrlFragment
         ...ContentInvalidFragment
         mediaRecords {
+          id
           type
         }
       }
@@ -56,13 +62,36 @@ export function MediaContent({
     );
   }
 
-  switch (media.mediaRecords[recordIdx].type) {
+  const record = recordId
+    ? media.mediaRecords.find((record) => record.id === recordId)!
+    : media.mediaRecords[0];
+
+  function onClick() {
+    const path = `/courses/${courseId}/media/${media.id}?recordId=${record.id}`;
+    if (replace) {
+      router.replace(path);
+    } else {
+      router.push(path);
+    }
+  }
+
+  switch (record.type) {
     case "VIDEO":
-      return <VideoContent disabled={disabled} _media={media} />;
+      return (
+        <VideoContent disabled={disabled} onClick={onClick} _media={media} />
+      );
     case "PRESENTATION":
-      return <PresentationContent disabled={disabled} _media={media} />;
+      return (
+        <PresentationContent
+          disabled={disabled}
+          onClick={onClick}
+          _media={media}
+        />
+      );
     case "DOCUMENT":
-      return <DocumentContent disabled={disabled} _media={media} />;
+      return (
+        <DocumentContent disabled={disabled} onClick={onClick} _media={media} />
+      );
     case "URL":
       return <UrlContent disabled={disabled} _media={media} />;
     default:
@@ -78,13 +107,13 @@ export function MediaContent({
 
 export function VideoContent({
   disabled = false,
+  onClick,
   _media,
 }: {
   disabled?: boolean;
+  onClick: () => void;
   _media: ContentVideoFragment$key;
 }) {
-  const router = useRouter();
-  const { courseId } = useParams();
   const media = useFragment(
     graphql`
       fragment ContentVideoFragment on MediaContent {
@@ -106,7 +135,7 @@ export function VideoContent({
       subtitle={media.metadata.name}
       disabled={disabled}
       className="hover:bg-sky-100 rounded-full"
-      onClick={() => router.push(`/courses/${courseId}/media/${media.id}`)}
+      onClick={onClick}
       icon={
         <ArrowRight
           sx={{
@@ -169,9 +198,11 @@ export function InvalidContent({
 
 export function PresentationContent({
   disabled = false,
+  onClick,
   _media,
 }: {
   disabled?: boolean;
+  onClick: () => void;
   _media: ContentPresentationFragment$key;
 }) {
   const media = useFragment(
@@ -195,6 +226,7 @@ export function PresentationContent({
       subtitle={media.metadata.name}
       disabled={disabled}
       className="hover:bg-violet-100 rounded-full"
+      onClick={onClick}
       icon={
         <PersonalVideo
           sx={{
@@ -215,9 +247,11 @@ export function PresentationContent({
 
 export function DocumentContent({
   disabled = false,
+  onClick,
   _media,
 }: {
   disabled?: boolean;
+  onClick: () => void;
   _media: ContentDocumentFragment$key;
 }) {
   const media = useFragment(
@@ -241,6 +275,7 @@ export function DocumentContent({
       subtitle={media.metadata.name}
       disabled={disabled}
       className="hover:bg-indigo-100 rounded-full"
+      onClick={onClick}
       icon={
         <Description
           sx={{

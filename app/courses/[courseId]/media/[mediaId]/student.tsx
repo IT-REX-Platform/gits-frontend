@@ -4,14 +4,16 @@ import { studentContentMediaDisplayFragment$key } from "@/__generated__/studentC
 import { studentMediaQuery } from "@/__generated__/studentMediaQuery.graphql";
 import { MediaContent } from "@/components/Content";
 import { Heading } from "@/components/Heading";
+import { PdfViewer } from "@/components/PdfViewer";
 import { Typography } from "@mui/material";
 import Error from "next/error";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import ReactPlayer from "react-player";
 import { graphql, useFragment, useLazyLoadQuery } from "react-relay";
 
 export default function StudentMediaPage() {
   const { mediaId } = useParams();
+  const searchParams = useSearchParams();
   const media = useLazyLoadQuery<studentMediaQuery>(
     graphql`
       query studentMediaQuery($mediaId: UUID!) {
@@ -47,7 +49,18 @@ export default function StudentMediaPage() {
     return <Error statusCode={404} />;
   }
 
-  const mainRecord = content.mediaRecords[0];
+  const recordId = searchParams.get("recordId");
+  const mainRecord = recordId
+    ? content.mediaRecords.find((record) => record.id === recordId)
+    : content.mediaRecords[0];
+
+  if (mainRecord == null) {
+    return <Error statusCode={404} />;
+  }
+
+  const relatedRecords = content.mediaRecords.filter(
+    (record) => record.id !== mainRecord.id
+  );
   return (
     <main>
       <Heading
@@ -58,12 +71,21 @@ export default function StudentMediaPage() {
       <div className="my-8">
         <ContentMediaDisplay _record={mainRecord} />
       </div>
-      <Typography variant="h2">Related media</Typography>
-      <div className="mt-4">
-        {content.mediaRecords.slice(1).map((record, i) => (
-          <MediaContent key={record.id} _media={content} recordIdx={i + 1} />
-        ))}
-      </div>
+      {relatedRecords.length > 0 && (
+        <>
+          <Typography variant="h2">Related media</Typography>
+          <div className="mt-4">
+            {relatedRecords.map((record) => (
+              <MediaContent
+                key={record.id}
+                _media={content}
+                recordId={record.id}
+                replace
+              />
+            ))}
+          </div>
+        </>
+      )}
     </main>
   );
 }
@@ -90,6 +112,9 @@ function ContentMediaDisplay({
   switch (mediaRecord.type) {
     case "VIDEO":
       return <VideoPlayer url={url} />;
+    case "PRESENTATION":
+    case "DOCUMENT":
+      return <PdfViewer url={url} />;
     default:
       return <>Unsupported media type</>;
   }

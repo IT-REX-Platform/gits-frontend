@@ -18,7 +18,7 @@ export function PdfViewer({ url }: { url: string }) {
   const [numPages, setNumPages] = useState(0);
 
   const controls = (
-    <div className="flex justify-center items-center relative gap-4 border-gray-100 border-y-2 py-2 w-full">
+    <div className="flex justify-center items-center relative gap-4 border-gray-100 border-y-2 py-2 w-full mb-1">
       <div className="flex items-center bg-gray-100 rounded-full">
         {/* Zoom-Out Button */}
         <IconButton

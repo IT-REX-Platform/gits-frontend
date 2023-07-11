@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { KeyboardEvent, useEffect, useState } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
 import "react-pdf/dist/esm/Page/TextLayer.css";
 import "react-pdf/dist/esm/Page/AnnotationLayer.css";
@@ -57,22 +57,21 @@ export function PdfViewer({ url }: { url: string }) {
     </div>
   );
 
-  useEffect(() => {
-    function handleKeyDown(e: KeyboardEvent) {
-      if (e.key === "ArrowLeft" && page > 1) {
-        setPage((page) => page - 1);
-      }
-      if (e.key === "ArrowRight" && page < numPages) {
-        setPage((page) => page + 1);
-      }
+  function handleKeyDown(e: KeyboardEvent) {
+    if (e.key === "ArrowLeft" && page > 1) {
+      setPage((page) => page - 1);
     }
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [page]);
+    if (e.key === "ArrowRight" && page < numPages) {
+      setPage((page) => page + 1);
+    }
+  }
 
   return (
-    <div className="flex flex-col items-center">
+    <div
+      className="flex flex-col items-center"
+      onKeyDown={handleKeyDown}
+      tabIndex={-1}
+    >
       {controls}
       <Document
         file={url}

@@ -98,7 +98,7 @@ export default function StudentMediaPage() {
   );
 }
 
-function fixUrl(_record: studentFixRecordUrlFragment$key) {
+function useDownloadUrl(_record: studentFixRecordUrlFragment$key) {
   const mediaRecord = useFragment(
     graphql`
       fragment studentFixRecordUrlFragment on MediaRecord {
@@ -130,7 +130,7 @@ function ContentMediaDisplay({
     _record
   );
 
-  const url = fixUrl(mediaRecord);
+  const url = useDownloadUrl(mediaRecord);
 
   switch (mediaRecord.type) {
     case "VIDEO":
@@ -158,7 +158,7 @@ function DownloadButton({
     _record
   );
 
-  const url = fixUrl(mediaRecord);
+  const url = useDownloadUrl(mediaRecord);
   return (
     <Button
       href={url}

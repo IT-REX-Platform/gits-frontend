@@ -22,7 +22,7 @@ export function PdfViewer({ url }: { url: string }) {
         b64.replace("application/x-www-form-urlencoded", "application/pdf")
       )
       .then((b64) => setData(b64));
-  }, []);
+  }, [url]);
 
   useEffect(() => {
     if (ref.current && data) {

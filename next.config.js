@@ -16,11 +16,6 @@ const nextConfig = {
       transform: "@mui/icons-material/{{ matches.[1] }}/{{member}}",
     },
   },
-
-  webpack: (config) => {
-    config.externals = [...config.externals, { canvas: "canvas" }];
-    return config;
-  },
 };
 
 module.exports = nextConfig;

@@ -67,7 +67,7 @@ export default function StudentMediaPage() {
     (record) => record.id !== mainRecord.id
   );
   return (
-    <main>
+    <main className="flex flex-col h-full">
       <div className="flex items-end justify-between">
         <Heading
           title={mainRecord.name}
@@ -76,7 +76,7 @@ export default function StudentMediaPage() {
         />
         <DownloadButton _record={mainRecord} />
       </div>
-      <div className="my-8">
+      <div className="my-8 grow">
         <ContentMediaDisplay _record={mainRecord} />
       </div>
       {relatedRecords.length > 0 && (
@@ -88,7 +88,6 @@ export default function StudentMediaPage() {
                 key={record.id}
                 _media={content}
                 recordId={record.id}
-                replace
               />
             ))}
           </div>
@@ -134,7 +133,7 @@ function ContentMediaDisplay({
 
   switch (mediaRecord.type) {
     case "VIDEO":
-      return <VideoPlayer url={url} />;
+      return <ReactPlayer url={url} width="100%" height="auto" controls />;
     case "PRESENTATION":
     case "DOCUMENT":
       return <PdfViewer url={url} />;
@@ -170,8 +169,4 @@ function DownloadButton({
       Download
     </Button>
   );
-}
-
-function VideoPlayer({ url }: { url: string }) {
-  return <ReactPlayer url={url} width="100%" height="auto" controls />;
 }

@@ -1,11 +1,14 @@
 "use client";
 
+import { studentContentDownloadButtonFragment$key } from "@/__generated__/studentContentDownloadButtonFragment.graphql";
 import { studentContentMediaDisplayFragment$key } from "@/__generated__/studentContentMediaDisplayFragment.graphql";
+import { studentFixRecordUrlFragment$key } from "@/__generated__/studentFixRecordUrlFragment.graphql";
 import { studentMediaQuery } from "@/__generated__/studentMediaQuery.graphql";
 import { MediaContent } from "@/components/Content";
 import { Heading } from "@/components/Heading";
 import { PdfViewer } from "@/components/PdfViewer";
-import { Typography } from "@mui/material";
+import { Download } from "@mui/icons-material";
+import { Button, Typography } from "@mui/material";
 import Error from "next/error";
 import { useParams, useSearchParams } from "next/navigation";
 import ReactPlayer from "react-player";
@@ -27,6 +30,8 @@ export default function StudentMediaPage() {
               id
               name
               ...studentContentMediaDisplayFragment
+              ...studentContentDownloadButtonFragment
+              ...studentFixRecordUrlFragment
             }
           }
 
@@ -63,11 +68,14 @@ export default function StudentMediaPage() {
   );
   return (
     <main>
-      <Heading
-        title={mainRecord.name}
-        overline={content.metadata.name}
-        backButton
-      />
+      <div className="flex items-end justify-between">
+        <Heading
+          title={mainRecord.name}
+          overline={content.metadata.name}
+          backButton
+        />
+        <DownloadButton _record={mainRecord} />
+      </div>
       <div className="my-8">
         <ContentMediaDisplay _record={mainRecord} />
       </div>
@@ -90,15 +98,10 @@ export default function StudentMediaPage() {
   );
 }
 
-function ContentMediaDisplay({
-  _record,
-}: {
-  _record: studentContentMediaDisplayFragment$key;
-}) {
+function fixUrl(_record: studentFixRecordUrlFragment$key) {
   const mediaRecord = useFragment(
     graphql`
-      fragment studentContentMediaDisplayFragment on MediaRecord {
-        type
+      fragment studentFixRecordUrlFragment on MediaRecord {
         downloadUrl
       }
     `,
@@ -109,6 +112,26 @@ function ContentMediaDisplay({
   const downloadUrl = new URL(mediaRecord.downloadUrl);
   const url = `${baseUrl}${downloadUrl.pathname}${downloadUrl.search}`;
 
+  return url;
+}
+
+function ContentMediaDisplay({
+  _record,
+}: {
+  _record: studentContentMediaDisplayFragment$key;
+}) {
+  const mediaRecord = useFragment(
+    graphql`
+      fragment studentContentMediaDisplayFragment on MediaRecord {
+        ...studentFixRecordUrlFragment
+        type
+      }
+    `,
+    _record
+  );
+
+  const url = fixUrl(mediaRecord);
+
   switch (mediaRecord.type) {
     case "VIDEO":
       return <VideoPlayer url={url} />;
@@ -118,6 +141,35 @@ function ContentMediaDisplay({
     default:
       return <>Unsupported media type</>;
   }
+}
+
+function DownloadButton({
+  _record,
+}: {
+  _record: studentContentDownloadButtonFragment$key;
+}) {
+  const mediaRecord = useFragment(
+    graphql`
+      fragment studentContentDownloadButtonFragment on MediaRecord {
+        ...studentFixRecordUrlFragment
+        name
+      }
+    `,
+    _record
+  );
+
+  const url = fixUrl(mediaRecord);
+  return (
+    <Button
+      href={url}
+      target="_blank"
+      download={mediaRecord.name}
+      sx={{ color: "text.secondary" }}
+      startIcon={<Download />}
+    >
+      Download
+    </Button>
+  );
 }
 
 function VideoPlayer({ url }: { url: string }) {

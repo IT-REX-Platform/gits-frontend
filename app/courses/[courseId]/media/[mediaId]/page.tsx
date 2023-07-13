@@ -1,15 +1,15 @@
 "use client";
 
 import { PageView, usePageView } from "@/src/currentView";
-import StudentFlashcards from "./student";
-import EditFlashcards from "./lecturer";
+import StudentMediaPage from "./student";
+import Error from "next/error";
 
 export default function CoursePage() {
   const [pageView, _] = usePageView();
   switch (pageView) {
     case PageView.Student:
-      return <StudentFlashcards />;
+      return <StudentMediaPage />;
     case PageView.Lecturer:
-      return <EditFlashcards />;
+      return <Error statusCode={404} />;
   }
 }

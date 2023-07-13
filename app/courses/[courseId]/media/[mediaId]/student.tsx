@@ -68,14 +68,12 @@ export default function StudentMediaPage() {
   );
   return (
     <main className="flex flex-col h-full">
-      <div className="flex items-end justify-between">
-        <Heading
-          title={mainRecord.name}
-          overline={content.metadata.name}
-          backButton
-        />
-        <DownloadButton _record={mainRecord} />
-      </div>
+      <Heading
+        title={mainRecord.name}
+        overline={content.metadata.name}
+        action={<DownloadButton _record={mainRecord} />}
+        backButton
+      />
       <div className="my-8 grow">
         <ContentMediaDisplay _record={mainRecord} />
       </div>

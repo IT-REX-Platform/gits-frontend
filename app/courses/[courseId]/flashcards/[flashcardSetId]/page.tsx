@@ -2,7 +2,7 @@
 
 import { PageView, usePageView } from "@/src/currentView";
 import StudentFlashcards from "./student";
-import Error from "next/error";
+import EditFlashcards from "./lecturer";
 
 export default function CoursePage() {
   const [pageView, _] = usePageView();
@@ -10,6 +10,6 @@ export default function CoursePage() {
     case PageView.Student:
       return <StudentFlashcards />;
     case PageView.Lecturer:
-      return <Error statusCode={404} />;
+      return <EditFlashcards />;
   }
 }

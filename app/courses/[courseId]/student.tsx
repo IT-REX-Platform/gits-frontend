@@ -1,6 +1,12 @@
 "use client";
 import { studentCourseIdQuery } from "@/__generated__/studentCourseIdQuery.graphql";
-import { Dialog, DialogTitle, IconButton, Typography } from "@mui/material";
+import {
+  Button,
+  Dialog,
+  DialogTitle,
+  IconButton,
+  Typography,
+} from "@mui/material";
 import { chain } from "lodash";
 import Error from "next/error";
 import { useParams } from "next/navigation";
@@ -16,6 +22,7 @@ import { RewardScores } from "@/components/RewardScores";
 import { Info } from "@mui/icons-material";
 import dayjs from "dayjs";
 import { useState } from "react";
+import Link from "next/link";
 
 export default function StudentCoursePage() {
   // Get course id from url
@@ -96,9 +103,13 @@ export default function StudentCoursePage() {
         description={course.description}
         onClose={() => setInfoDialogOpen(false)}
       />
-
-      <div className="w-fit my-12 pl-8 pr-10 py-6 border-4 border-slate-200 rounded-3xl">
-        <RewardScores _scores={course.rewardScores} />
+      <div className="grid grid-cols-2">
+        <div className="w-fit my-12 pl-8 pr-10 py-6 border-4 border-slate-200 rounded-3xl">
+          <RewardScores _scores={course.rewardScores} />
+        </div>
+        <Link href={{ pathname: `${id}/scoreboard` }}>
+          <Button variant="contained">Scoreboard</Button>
+        </Link>
       </div>
 
       <section className="mt-16">

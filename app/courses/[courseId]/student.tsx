@@ -12,6 +12,15 @@ import Error from "next/error";
 import { useParams } from "next/navigation";
 import { graphql, useLazyLoadQuery } from "react-relay";
 
+import * as React from "react";
+import Table from "@mui/material/Table";
+import TableBody from "@mui/material/TableBody";
+import TableCell from "@mui/material/TableCell";
+import TableContainer from "@mui/material/TableContainer";
+import TableHead from "@mui/material/TableHead";
+import TableRow from "@mui/material/TableRow";
+import Paper from "@mui/material/Paper";
+
 import {
   ChapterContent,
   ChapterContentItem,
@@ -24,6 +33,10 @@ import dayjs from "dayjs";
 import { useState } from "react";
 import Link from "next/link";
 
+function createData(name: string, power: number) {
+  return { name, power };
+}
+
 export default function StudentCoursePage() {
   // Get course id from url
   const params = useParams();
@@ -31,6 +44,12 @@ export default function StudentCoursePage() {
 
   // Info dialog
   const [infoDialogOpen, setInfoDialogOpen] = useState(false);
+
+  const rows = [
+    createData("Student 1", 159),
+    createData("Student 2", 159),
+    createData("Student 3", 159),
+  ];
 
   // Fetch course data
   const { coursesById } = useLazyLoadQuery<studentCourseIdQuery>(
@@ -107,9 +126,38 @@ export default function StudentCoursePage() {
         <div className="w-fit my-12 pl-8 pr-10 py-6 border-4 border-slate-200 rounded-3xl">
           <RewardScores _scores={course.rewardScores} />
         </div>
-        <Link href={{ pathname: `${id}/scoreboard` }}>
-          <Button variant="contained">Scoreboard</Button>
-        </Link>
+        <div>
+          <TableContainer component={Paper} className="my-10">
+            <Table sx={{ minWidth: 650 }} size="small">
+              <TableHead>
+                <TableRow>
+                  <TableCell sx={{ backgroundColor: "#90a4ae" }}>
+                    Student Name
+                  </TableCell>
+                  <TableCell sx={{ backgroundColor: "#90a4ae" }} align="right">
+                    Power
+                  </TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {rows.map((row) => (
+                  <TableRow
+                    key={row.name}
+                    sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
+                  >
+                    <TableCell component="th" scope="row">
+                      {row.name}
+                    </TableCell>
+                    <TableCell align="right">{row.power}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+          <Link href={{ pathname: `${id}/scoreboard` }}>
+            <Button variant="contained">Full Scoreboard</Button>
+          </Link>
+        </div>
       </div>
 
       <section className="mt-16">

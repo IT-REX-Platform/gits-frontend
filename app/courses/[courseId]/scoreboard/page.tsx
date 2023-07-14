@@ -8,6 +8,9 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TablePagination from "@mui/material/TablePagination";
 import TableRow from "@mui/material/TableRow";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
+import { graphql, useLazyLoadQuery } from "react-relay";
+import { pageScoreboardQuery } from "@/__generated__/pageScoreboardQuery.graphql";
 
 interface Column {
   id: "place" | "name" | "power";
@@ -40,6 +43,21 @@ function createData(place: string, name: string, power: number): Data {
 export default function StickyHeadTable() {
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
+
+  const params = useParams();
+  const courseId = params.courseId;
+
+  const { scoreboard } = useLazyLoadQuery<pageScoreboardQuery>(
+    graphql`
+      query pageScoreboardQuery($courseId: UUID!) {
+        scoreboard(courseId: $courseId) {
+          userId
+          powerScore
+        }
+      }
+    `,
+    { courseId: courseId }
+  );
 
   const handleChangePage = (event: unknown, newPage: number) => {
     setPage(newPage);

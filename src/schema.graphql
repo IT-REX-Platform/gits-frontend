@@ -5,94 +5,37 @@ directive @specifiedBy(
 ) on SCALAR
 
 #  see also https://github.com/graphql-java/graphql-java-extended-validation/blob/master/README.md
-directive @DecimalMax(
-  value: String!
-  inclusive: Boolean! = true
-  message: String = "graphql.validation.DecimalMax.message"
-) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+directive @DecimalMax(value: String!, inclusive: Boolean! = true, message: String = "graphql.validation.DecimalMax.message") on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
 
-directive @DecimalMin(
-  value: String!
-  inclusive: Boolean! = true
-  message: String = "graphql.validation.DecimalMin.message"
-) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+directive @DecimalMin(value: String!, inclusive: Boolean! = true, message: String = "graphql.validation.DecimalMin.message") on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
 
-directive @Max(
-  value: Int! = 2147483647
-  message: String = "graphql.validation.Max.message"
-) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+directive @Max(value: Int! = 2147483647, message: String = "graphql.validation.Max.message") on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
 
-directive @Min(
-  value: Int! = 0
-  message: String = "graphql.validation.Min.message"
-) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+directive @Min(value: Int! = 0, message: String = "graphql.validation.Min.message") on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
 
-directive @Negative(
-  message: String = "graphql.validation.Negative.message"
-) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+directive @Negative(message: String = "graphql.validation.Negative.message") on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
 
-directive @NegativeOrZero(
-  message: String = "graphql.validation.NegativeOrZero.message"
-) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+directive @NegativeOrZero(message: String = "graphql.validation.NegativeOrZero.message") on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
 
-directive @NotBlank(
-  message: String = "graphql.validation.NotBlank.message"
-) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+directive @NotBlank(message: String = "graphql.validation.NotBlank.message") on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
 
-directive @NotEmpty(
-  message: String = "graphql.validation.NotEmpty.message"
-) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+directive @NotEmpty(message: String = "graphql.validation.NotEmpty.message") on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
 
-directive @ContainerNotEmpty(
-  message: String = "graphql.validation.ContainerNotEmpty.message"
-) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+directive @ContainerNotEmpty(message: String = "graphql.validation.ContainerNotEmpty.message") on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
 
-directive @Pattern(
-  regexp: String! = ".*"
-  message: String = "graphql.validation.Pattern.message"
-) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+directive @Pattern(regexp: String! = ".*", message: String = "graphql.validation.Pattern.message") on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
 
-directive @Positive(
-  message: String = "graphql.validation.Positive.message"
-) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+directive @Positive(message: String = "graphql.validation.Positive.message") on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
 
-directive @PositiveOrZero(
-  message: String = "graphql.validation.PositiveOrZero.message"
-) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+directive @PositiveOrZero(message: String = "graphql.validation.PositiveOrZero.message") on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
 
-directive @Range(
-  min: Int = 0
-  max: Int = 2147483647
-  message: String = "graphql.validation.Range.message"
-) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+directive @Range(min: Int = 0, max: Int = 2147483647, message: String = "graphql.validation.Range.message") on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
 
-directive @Size(
-  min: Int = 0
-  max: Int = 2147483647
-  message: String = "graphql.validation.Size.message"
-) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+directive @Size(min: Int = 0, max: Int = 2147483647, message: String = "graphql.validation.Size.message") on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
 
-directive @ContainerSize(
-  min: Int = 0
-  max: Int = 2147483647
-  message: String = "graphql.validation.ContainerSize.message"
-) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+directive @ContainerSize(min: Int = 0, max: Int = 2147483647, message: String = "graphql.validation.ContainerSize.message") on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
 
-directive @resolveTo(
-  requiredSelectionSet: String
-  sourceName: String!
-  sourceTypeName: String!
-  sourceFieldName: String!
-  sourceSelectionSet: String
-  sourceArgs: ResolveToSourceArgs
-  keyField: String
-  keysArg: String
-  pubsubTopic: String
-  filterBy: String
-  additionalArgs: ResolveToSourceArgs
-  result: String
-  resultType: String
-) on FIELD_DEFINITION
+directive @resolveTo(requiredSelectionSet: String, sourceName: String!, sourceTypeName: String!, sourceFieldName: String!, sourceSelectionSet: String, sourceArgs: ResolveToSourceArgs, keyField: String, keysArg: String, pubsubTopic: String, filterBy: String, additionalArgs: ResolveToSourceArgs, result: String, resultType: String) on FIELD_DEFINITION
 
 interface Assessment {
   # Assessment metadata
@@ -466,6 +409,35 @@ type Flashcard {
 
   # List of sides of this flashcard.
   sides: [FlashcardSide!]!
+
+  # Progress data of the flashcard, specific to given users.
+  # If userId is not provided, the progress data of the current user is returned.
+  userProgressData: FlashcardProgressData!
+}
+
+type FlashcardProgressData {
+  # The date the user learned the flashcard.
+  # This is null it the user has not learned the content item once.
+  lastLearned: DateTime
+
+  # The learning interval in days for the content item.
+  learningInterval: Int
+
+  # The next time the content should be learned.
+  # Calculated using the date the user completed the content item and the learning interval.
+  # This is null if the user has not completed the content item once.
+  nextLearn: DateTime
+}
+
+type FlashcardProgressDataLog {
+  # The id of the Log
+  id: UUID
+
+  # The date the user learned the flashcard.
+  learnedAt: DateTime!
+
+  # Whether the user knew the flashcard or not.
+  success: Boolean!
 }
 
 # A set of flashcards. A flashcard set belongs to exactly one assessment. Therefore, the uuid of the assessment
@@ -480,7 +452,7 @@ type FlashcardSet {
 }
 
 # A set of flashcards, flashcard related fields are stored in the flashcard service.
-type FlashcardSetAssessment implements Assessment & Content {
+type FlashcardSetAssessment implements Assessment& Content {
   # Assessment metadata
   assessmentMetadata: AssessmentMetadata!
 
@@ -524,6 +496,28 @@ input IntFilter {
 
 # 24-hour clock time value string in the format `hh:mm:ss` or `hh:mm:ss.sss`.
 scalar LocalTime
+
+input LogFlashcardLearnedInput {
+  # The id of the flashcard that was learned.
+  flashcardId: UUID!
+
+  # The id of the user that learned the flashcard.
+  userId: UUID!
+
+  # If the user knew the flashcard or not.
+  successful: Boolean!
+}
+
+input LogFlashcardSetLearnedInput {
+  # The id of the flashcard that was learned.
+  flashcardSetId: UUID!
+
+  # The id of the user that learned the flashcard.
+  userId: UUID!
+
+  # The percentage of flashcards in the set that the user knew.
+  percentageSuccess: Float!
+}
 
 type MediaContent implements Content {
   # ID of the content
@@ -629,23 +623,6 @@ type Mutation {
   # Deletes an existing chapter, throws an error if no chapter with the given id exists.
   deleteChapter(id: UUID!): UUID!
 
-  #  Creates a new media record
-  createMediaRecord(input: CreateMediaRecordInput!): MediaRecord!
-
-  #  Updates an existing media record with the given UUID
-  updateMediaRecord(input: UpdateMediaRecordInput!): MediaRecord!
-
-  #  Deletes the media record with the given UUID
-  deleteMediaRecord(id: UUID!): UUID!
-
-  # Logs that a media has been worked on by the current user.
-  # See https://gits-enpro.readthedocs.io/en/latest/dev-manuals/gamification/userProgress.html
-  #
-  # Possible side effects:
-  # When all media records of a content have been worked on by a user,
-  # a user-progress event is emitted for the content.
-  logMediaRecordWorkedOn(mediaRecordId: UUID!): MediaRecord!
-
   # Creates a new flashcard set.
   createFlashcardSet(input: CreateFlashcardSetInput!): FlashcardSet!
 
@@ -662,14 +639,33 @@ type Mutation {
   # Deletes a flashcard. Throws an error if the flashcard does not exist.
   deleteFlashcard(input: UUID!): UUID!
 
+  # Logs that a user has learned a flashcard.
+  logFlashcardLearned(input: LogFlashcardLearnedInput!): Flashcard!
+
   # ONLY FOR TESTING PURPOSES. DO NOT USE IN FRONTEND. WILL BE REMOVED.
   #
   # Triggers the recalculation of the reward score of the user.
   # This is done automatically at some time in the night.
   #
   # The purpose of this mutation is to allow testing of the reward score and demonstrate the functionality.
-  recalculateScores(courseId: UUID!, userId: UUID!): RewardScores!
-    @deprecated(reason: "Only for testing purposes. Will be removed.")
+  recalculateScores(courseId: UUID!, userId: UUID!): RewardScores! @deprecated(reason: "Only for testing purposes. Will be removed.")
+
+  #  Creates a new media record
+  createMediaRecord(input: CreateMediaRecordInput!): MediaRecord!
+
+  #  Updates an existing media record with the given UUID
+  updateMediaRecord(input: UpdateMediaRecordInput!): MediaRecord!
+
+  #  Deletes the media record with the given UUID
+  deleteMediaRecord(id: UUID!): UUID!
+
+  # Logs that a media has been worked on by the current user.
+  # See https://gits-enpro.readthedocs.io/en/latest/dev-manuals/gamification/userProgress.html
+  #
+  # Possible side effects:
+  # When all media records of a content have been worked on by a user,
+  # a user-progress event is emitted for the content.
+  logMediaRecordWorkedOn(mediaRecordId: UUID!): MediaRecord!
 }
 
 # Specifies the page size and page number for paginated results.
@@ -768,16 +764,6 @@ type Query {
     pagination: Pagination
   ): ChapterPayload!
 
-  #  Returns the media records with the given IDs
-  mediaRecordsById(ids: [UUID!]!): [MediaRecord!]!
-
-  #  Returns all media records
-  mediaRecords: [MediaRecord!]!
-
-  #  Returns the media records associated the given content IDs as a list of lists where each sublist contains
-  #  the media records associated with the content ID at the same index in the input list
-  mediaRecordsByContentIds(contentIds: [UUID!]!): [[MediaRecord!]!]!
-
   # Get flashcards by their ids
   flashcardsByIds(ids: [UUID!]!): [Flashcard!]!
 
@@ -790,6 +776,19 @@ type Query {
 
   # Get the reward score of the specified user for the specified course.
   courseRewardScoresForUser(courseId: UUID!, userId: UUID!): RewardScores!
+
+  # Gets the power scores for each user in the course, ordered by power score descending.
+  scoreboard(courseId: UUID!): [ScoreboardItem!]!
+
+  #  Returns the media records with the given IDs
+  mediaRecordsById(ids: [UUID!]!): [MediaRecord!]!
+
+  #  Returns all media records
+  mediaRecords: [MediaRecord!]!
+
+  #  Returns the media records associated the given content IDs as a list of lists where each sublist contains
+  #  the media records associated with the content ID at the same index in the input list
+  mediaRecordsByContentIds(contentIds: [UUID!]!): [[MediaRecord!]!]!
 }
 
 scalar ResolveToSourceArgs
@@ -811,6 +810,10 @@ enum RewardChangeReason {
   # There exists a content that is due for repetition.
   # The associated contents are the content that are due for repetition.
   CONTENT_DUE_FOR_REPETITION
+
+  # The score changed because the underlying scores changed.
+  # Relevant for the power score.
+  COMPOSITE_VALUE
 }
 
 # An item in the reward score log.
@@ -862,6 +865,15 @@ type RewardScores {
 
   # A composite score of all the other scores.
   power: RewardScore!
+}
+
+# An item in the scoreboard.
+type ScoreboardItem {
+  # The user id of the user.
+  userId: UUID!
+
+  # The power score of the user.
+  powerScore: Int!
 }
 
 # Type of the assessment

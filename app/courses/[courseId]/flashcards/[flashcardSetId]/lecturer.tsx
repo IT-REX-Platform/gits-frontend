@@ -518,7 +518,9 @@ function LocalFlashcard({
   const [sides, setSides] = useState<FlashcardSideData[]>([]);
   const [addSideOpen, setAddSideOpen] = useState(false);
 
-  const valid = sides.length >= 2;
+  const numQuestions = sides.filter((s) => s.isQuestion === true).length;
+  const numAnswers = sides.filter((s) => s.isQuestion === false).length;
+  const valid = numQuestions >= 1 && numAnswers >= 1;
 
   function handleEditFlashcardSide(idx: number, data: FlashcardSideData) {
     setSides((sides) => sides.map((side, i) => (i == idx ? data : side)));
@@ -563,8 +565,12 @@ function LocalFlashcard({
         Add side
       </Button>
       <div className="mt-4 flex gap-2">
-        {sides.length < 2 ? (
-          <Tooltip title="At least two sides are required to save">
+        {numQuestions < 1 ? (
+          <Tooltip title="At least one question side is required to save">
+            {saveButton}
+          </Tooltip>
+        ) : numAnswers < 1 ? (
+          <Tooltip title="At least one answer side is required to save">
             {saveButton}
           </Tooltip>
         ) : (

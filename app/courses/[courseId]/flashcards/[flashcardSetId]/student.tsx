@@ -1,14 +1,9 @@
 "use client";
 
 import { studentFlashcardsQuery } from "@/__generated__/studentFlashcardsQuery.graphql";
-import {
-  ArrowBack,
-  Check,
-  Close,
-  Loop,
-  NavigateBefore,
-} from "@mui/icons-material";
-import { Button, IconButton, Typography } from "@mui/material";
+import { Heading } from "@/components/Heading";
+import { Check, Close, Loop } from "@mui/icons-material";
+import { Button } from "@mui/material";
 import { motion } from "framer-motion";
 import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
@@ -69,13 +64,7 @@ export default function StudentFlashcards() {
 
   return (
     <main>
-      <div className="flex items-center gap-2">
-        <IconButton onClick={() => router.back()}>
-          <NavigateBefore sx={{ color: "text.primary" }} />
-        </IconButton>
-        <Typography variant="h1">{flashcards.metadata.name}</Typography>
-      </div>
-
+      <Heading title={flashcards.metadata.name} backButton />
       <div className="w-full border-b border-b-gray-300 mt-6 flex justify-center">
         <div className="bg-white -mb-[9px] px-3 text-xs text-gray-600">
           {currentIndex + 1}/{flashcards.flashcardSet?.flashcards.length ?? 0}

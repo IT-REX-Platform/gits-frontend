@@ -72,6 +72,11 @@ export default function StickyHeadTable() {
 
   const rows: any[] = [];
 
+  scoreboard.forEach((element, index: number) => {
+    index++;
+    rows.push(createData(`${index}`, element.userId, element.powerScore));
+  });
+
   return (
     <Paper sx={{ width: "100%", overflow: "hidden" }}>
       <TableContainer sx={{ maxHeight: "100%" }}>

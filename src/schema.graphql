@@ -5,94 +5,37 @@ directive @specifiedBy(
 ) on SCALAR
 
 #  see also https://github.com/graphql-java/graphql-java-extended-validation/blob/master/README.md
-directive @DecimalMax(
-  value: String!
-  inclusive: Boolean! = true
-  message: String = "graphql.validation.DecimalMax.message"
-) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+directive @DecimalMax(value: String!, inclusive: Boolean! = true, message: String = "graphql.validation.DecimalMax.message") on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
 
-directive @DecimalMin(
-  value: String!
-  inclusive: Boolean! = true
-  message: String = "graphql.validation.DecimalMin.message"
-) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+directive @DecimalMin(value: String!, inclusive: Boolean! = true, message: String = "graphql.validation.DecimalMin.message") on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
 
-directive @Max(
-  value: Int! = 2147483647
-  message: String = "graphql.validation.Max.message"
-) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+directive @Max(value: Int! = 2147483647, message: String = "graphql.validation.Max.message") on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
 
-directive @Min(
-  value: Int! = 0
-  message: String = "graphql.validation.Min.message"
-) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+directive @Min(value: Int! = 0, message: String = "graphql.validation.Min.message") on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
 
-directive @Negative(
-  message: String = "graphql.validation.Negative.message"
-) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+directive @Negative(message: String = "graphql.validation.Negative.message") on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
 
-directive @NegativeOrZero(
-  message: String = "graphql.validation.NegativeOrZero.message"
-) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+directive @NegativeOrZero(message: String = "graphql.validation.NegativeOrZero.message") on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
 
-directive @NotBlank(
-  message: String = "graphql.validation.NotBlank.message"
-) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+directive @NotBlank(message: String = "graphql.validation.NotBlank.message") on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
 
-directive @NotEmpty(
-  message: String = "graphql.validation.NotEmpty.message"
-) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+directive @NotEmpty(message: String = "graphql.validation.NotEmpty.message") on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
 
-directive @ContainerNotEmpty(
-  message: String = "graphql.validation.ContainerNotEmpty.message"
-) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+directive @ContainerNotEmpty(message: String = "graphql.validation.ContainerNotEmpty.message") on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
 
-directive @Pattern(
-  regexp: String! = ".*"
-  message: String = "graphql.validation.Pattern.message"
-) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+directive @Pattern(regexp: String! = ".*", message: String = "graphql.validation.Pattern.message") on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
 
-directive @Positive(
-  message: String = "graphql.validation.Positive.message"
-) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+directive @Positive(message: String = "graphql.validation.Positive.message") on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
 
-directive @PositiveOrZero(
-  message: String = "graphql.validation.PositiveOrZero.message"
-) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+directive @PositiveOrZero(message: String = "graphql.validation.PositiveOrZero.message") on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
 
-directive @Range(
-  min: Int = 0
-  max: Int = 2147483647
-  message: String = "graphql.validation.Range.message"
-) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+directive @Range(min: Int = 0, max: Int = 2147483647, message: String = "graphql.validation.Range.message") on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
 
-directive @Size(
-  min: Int = 0
-  max: Int = 2147483647
-  message: String = "graphql.validation.Size.message"
-) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+directive @Size(min: Int = 0, max: Int = 2147483647, message: String = "graphql.validation.Size.message") on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
 
-directive @ContainerSize(
-  min: Int = 0
-  max: Int = 2147483647
-  message: String = "graphql.validation.ContainerSize.message"
-) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+directive @ContainerSize(min: Int = 0, max: Int = 2147483647, message: String = "graphql.validation.ContainerSize.message") on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
 
-directive @resolveTo(
-  requiredSelectionSet: String
-  sourceName: String!
-  sourceTypeName: String!
-  sourceFieldName: String!
-  sourceSelectionSet: String
-  sourceArgs: ResolveToSourceArgs
-  keyField: String
-  keysArg: String
-  pubsubTopic: String
-  filterBy: String
-  additionalArgs: ResolveToSourceArgs
-  result: String
-  resultType: String
-) on FIELD_DEFINITION
+directive @resolveTo(requiredSelectionSet: String, sourceName: String!, sourceTypeName: String!, sourceFieldName: String!, sourceSelectionSet: String, sourceArgs: ResolveToSourceArgs, keyField: String, keysArg: String, pubsubTopic: String, filterBy: String, additionalArgs: ResolveToSourceArgs, result: String, resultType: String) on FIELD_DEFINITION
 
 interface Assessment {
   # Assessment metadata
@@ -279,6 +222,7 @@ type Course {
     pagination: Pagination
   ): ChapterPayload!
   rewardScores: RewardScores!
+  scoreboard: [ScoreboardItem!]!
 }
 
 # Input type for filtering courses. All fields are optional.
@@ -292,6 +236,22 @@ input CourseFilter {
   and: [CourseFilter!]
   or: [CourseFilter!]
   not: CourseFilter
+}
+
+# Represents a course membership object of a user. Each user can be a member of
+# set of courses and some users can also own courses
+type CourseMembership {
+  userId: UUID!
+  courseId: UUID!
+  role: String!
+  course: Course!
+}
+
+# Represents a course membership input object of a user.
+input CourseMembershipInput {
+  userId: UUID!
+  courseId: UUID!
+  role: String!
 }
 
 # Return type for the course query. Contains the course and the pagination info.
@@ -509,7 +469,7 @@ type FlashcardSet {
 }
 
 # A set of flashcards, flashcard related fields are stored in the flashcard service.
-type FlashcardSetAssessment implements Assessment & Content {
+type FlashcardSetAssessment implements Assessment& Content {
   # Assessment metadata
   assessmentMetadata: AssessmentMetadata!
 
@@ -659,6 +619,50 @@ type Mutation {
   # Remove a tag from an existing content
   removeTagFromContent(contentId: UUID!, tagName: String): Content!
 
+  # ONLY FOR TESTING PURPOSES. DO NOT USE IN FRONTEND. WILL BE REMOVED.
+  #
+  # Triggers the recalculation of the reward score of the user.
+  # This is done automatically at some time in the night.
+  #
+  # The purpose of this mutation is to allow testing of the reward score and demonstrate the functionality.
+  recalculateScores(courseId: UUID!, userId: UUID!): RewardScores! @deprecated(reason: "Only for testing purposes. Will be removed.")
+
+  #  Creates a new media record
+  createMediaRecord(input: CreateMediaRecordInput!): MediaRecord!
+
+  #  Updates an existing media record with the given UUID
+  updateMediaRecord(input: UpdateMediaRecordInput!): MediaRecord!
+
+  #  Deletes the media record with the given UUID
+  deleteMediaRecord(id: UUID!): UUID!
+
+  # Logs that a media has been worked on by the current user.
+  # See https://gits-enpro.readthedocs.io/en/latest/dev-manuals/gamification/userProgress.html
+  #
+  # Possible side effects:
+  # When all media records of a content have been worked on by a user,
+  # a user-progress event is emitted for the content.
+  logMediaRecordWorkedOn(mediaRecordId: UUID!): MediaRecord!
+
+  # Creates a new flashcard set.
+  createFlashcardSet(input: CreateFlashcardSetInput!): FlashcardSet!
+
+  # Deletes a flashcard set. Throws an error if the flashcard set does not exist.
+  # The contained flashcards are deleted as well.
+  deleteFlashcardSet(input: UUID!): UUID!
+
+  # Creates a new flashcard. Throws an error if the flashcard set does not exist.
+  createFlashcard(input: CreateFlashcardInput!): Flashcard!
+
+  # Updates a flashcard. Throws an error if the flashcard does not exist.
+  updateFlashcard(input: UpdateFlashcardInput!): Flashcard!
+
+  # Deletes a flashcard. Throws an error if the flashcard does not exist.
+  deleteFlashcard(input: UUID!): UUID!
+
+  # Logs that a user has learned a flashcard.
+  logFlashcardLearned(input: LogFlashcardLearnedInput!): Flashcard!
+
   # Creates a new course with the given input and returns the created course.
   createCourse(input: CreateCourseInput!): Course!
 
@@ -680,50 +684,14 @@ type Mutation {
   # Deletes an existing chapter, throws an error if no chapter with the given id exists.
   deleteChapter(id: UUID!): UUID!
 
-  # Creates a new flashcard set.
-  createFlashcardSet(input: CreateFlashcardSetInput!): FlashcardSet!
+  # registers a user to a course with a role
+  createMembership(input: CourseMembershipInput!): CourseMembership!
 
-  # Deletes a flashcard set. Throws an error if the flashcard set does not exist.
-  # The contained flashcards are deleted as well.
-  deleteFlashcardSet(input: UUID!): UUID!
+  # updates the role of a user in a course
+  updateMembership(input: CourseMembershipInput!): CourseMembership!
 
-  # Creates a new flashcard. Throws an error if the flashcard set does not exist.
-  createFlashcard(input: CreateFlashcardInput!): Flashcard!
-
-  # Updates a flashcard. Throws an error if the flashcard does not exist.
-  updateFlashcard(input: UpdateFlashcardInput!): Flashcard!
-
-  # Deletes a flashcard. Throws an error if the flashcard does not exist.
-  deleteFlashcard(input: UUID!): UUID!
-
-  # Logs that a user has learned a flashcard.
-  logFlashcardLearned(input: LogFlashcardLearnedInput!): Flashcard!
-
-  # ONLY FOR TESTING PURPOSES. DO NOT USE IN FRONTEND. WILL BE REMOVED.
-  #
-  # Triggers the recalculation of the reward score of the user.
-  # This is done automatically at some time in the night.
-  #
-  # The purpose of this mutation is to allow testing of the reward score and demonstrate the functionality.
-  recalculateScores(courseId: UUID!, userId: UUID!): RewardScores!
-    @deprecated(reason: "Only for testing purposes. Will be removed.")
-
-  #  Creates a new media record
-  createMediaRecord(input: CreateMediaRecordInput!): MediaRecord!
-
-  #  Updates an existing media record with the given UUID
-  updateMediaRecord(input: UpdateMediaRecordInput!): MediaRecord!
-
-  #  Deletes the media record with the given UUID
-  deleteMediaRecord(id: UUID!): UUID!
-
-  # Logs that a media has been worked on by the current user.
-  # See https://gits-enpro.readthedocs.io/en/latest/dev-manuals/gamification/userProgress.html
-  #
-  # Possible side effects:
-  # When all media records of a content have been worked on by a user,
-  # a user-progress event is emitted for the content.
-  logMediaRecordWorkedOn(mediaRecordId: UUID!): MediaRecord!
+  # deletes user course link
+  deleteMembership(input: CourseMembershipInput!): CourseMembership!
 }
 
 # Specifies the page size and page number for paginated results.
@@ -775,6 +743,11 @@ type ProgressLogItem {
   timeToComplete: Int
 }
 
+type PublicUserInfo {
+  id: UUID!
+  userName: String!
+}
+
 type Query {
   # get all contents
   contents: ContentPayload!
@@ -785,6 +758,32 @@ type Query {
   # get contents by chapter ids. Returns a list containing sublists, where each sublist contains all contents
   # associated with that chapter
   contentsByChapterIds(chapterIds: [UUID!]!): [[Content!]!]!
+
+  # Get the reward score of the current user for the specified course.
+  userCourseRewardScores(courseId: UUID!): RewardScores!
+
+  # Get the reward score of the specified user for the specified course.
+  courseRewardScoresForUser(courseId: UUID!, userId: UUID!): RewardScores!
+
+  # Gets the power scores for each user in the course, ordered by power score descending.
+  scoreboard(courseId: UUID!): [ScoreboardItem!]!
+
+  #  Returns the media records with the given IDs
+  mediaRecordsById(ids: [UUID!]!): [MediaRecord!]!
+
+  #  Returns all media records
+  mediaRecords: [MediaRecord!]!
+
+  #  Returns the media records associated the given content IDs as a list of lists where each sublist contains
+  #  the media records associated with the content ID at the same index in the input list
+  mediaRecordsByContentIds(contentIds: [UUID!]!): [[MediaRecord!]!]!
+
+  # Get flashcards by their ids
+  flashcardsByIds(ids: [UUID!]!): [Flashcard!]!
+
+  # Get flashcard sets by their assessment ids.
+  # Returns a list of lists of flashcard sets, where each list corresponds to a single assessment id.
+  flashcardSetsByAssessmentIds(assessmentIds: [UUID!]!): [FlashcardSet!]!
 
   # Get a list of courses. Can be filtered, sorted and paginated.
   courses(
@@ -822,31 +821,28 @@ type Query {
     pagination: Pagination
   ): ChapterPayload!
 
-  # Get flashcards by their ids
-  flashcardsByIds(ids: [UUID!]!): [Flashcard!]!
+  # Retrieves a list of course memberships for a user ID
+  courseMemberships(id: UUID!): [CourseMembership!]
 
-  # Get flashcard sets by their assessment ids.
-  # Returns a list of lists of flashcard sets, where each list corresponds to a single assessment id.
-  flashcardSetsByAssessmentIds(assessmentIds: [UUID!]!): [FlashcardSet!]!
+  # Retrieves a list of course memberships for each user in a list of user IDs
+  courseMembershipsBatched(ids: [UUID!]!): [[CourseMembership!]!]!
 
-  # Get the reward score of the current user for the specified course.
-  userCourseRewardScores(courseId: UUID!): RewardScores!
+  # Gets the publicly available information for a user with the specified ID.
+  publicUserInfo(id: UUID!): PublicUserInfo!
 
-  # Get the reward score of the specified user for the specified course.
-  courseRewardScoresForUser(courseId: UUID!, userId: UUID!): RewardScores!
+  # Gets the publicly available information for a list of users with the specified IDs.
+  publicUserInfoBatched(ids: [UUID!]!): [PublicUserInfo!]!
 
-  # Gets the power scores for each user in the course, ordered by power score descending.
-  scoreboard(courseId: UUID!): [ScoreboardItem!]!
+  # Gets the user information of the currently authorized user.
+  currentUserInfo: UserInfo!
 
-  #  Returns the media records with the given IDs
-  mediaRecordsById(ids: [UUID!]!): [MediaRecord!]!
+  # Gets all of the user information of the specified user.
+  # Only available to the user themselves and privileged users.
+  userInfo(id: UUID!): UserInfo!
 
-  #  Returns all media records
-  mediaRecords: [MediaRecord!]!
-
-  #  Returns the media records associated the given content IDs as a list of lists where each sublist contains
-  #  the media records associated with the content ID at the same index in the input list
-  mediaRecordsByContentIds(contentIds: [UUID!]!): [[MediaRecord!]!]!
+  # Gets all of the users' information for a list of users with the specified IDs.
+  # Only available to the user themselves and privileged users.
+  userInfoBatched(ids: [UUID!]!): [UserInfo!]!
 }
 
 scalar ResolveToSourceArgs
@@ -898,10 +894,15 @@ type RewardLogItem {
 
 # The reward score of a user.
 type RewardScore {
-  # The value of the reward score.
+  # The absolute value of the reward score.
   # Health and fitness are between 0 and 100.
   # Growth, strength and power can be any non-negative integer.
   value: Int!
+
+  # The relative value of the reward score.
+  # Shows how many points relative to the total points have been achieved.
+  # Only used for growth currently.
+  percentage: Float!
 
   # A log of the changes to the reward score, ordered by date descending.
   log: [RewardLogItem!]!
@@ -932,6 +933,7 @@ type ScoreboardItem {
 
   # The power score of the user.
   powerScore: Int!
+  user: PublicUserInfo!
 }
 
 # Type of the assessment
@@ -1090,6 +1092,16 @@ input UpdateMediaRecordInput {
 
 # A Url scalar
 scalar Url
+
+type UserInfo {
+  id: UUID!
+  userName: String!
+  firstName: String!
+  lastName: String!
+
+  # The course memberships of the user.
+  courseMemberships: [CourseMembership!]!
+}
 
 # Represents a user's progress on a content item.
 # See https://gits-enpro.readthedocs.io/en/latest/dev-manuals/gamification/userProgress.html

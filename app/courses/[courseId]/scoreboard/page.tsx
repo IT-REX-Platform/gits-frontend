@@ -51,7 +51,9 @@ export default function StickyHeadTable() {
     graphql`
       query pageScoreboardQuery($courseId: UUID!) {
         scoreboard(courseId: $courseId) {
-          userId
+          user {
+            userName
+          }
           powerScore
         }
       }
@@ -74,7 +76,9 @@ export default function StickyHeadTable() {
 
   scoreboard.forEach((element, index: number) => {
     index++;
-    rows.push(createData(`${index}`, element.userId, element.powerScore));
+    rows.push(
+      createData(`${index}`, element.user.userName, element.powerScore)
+    );
   });
 
   return (

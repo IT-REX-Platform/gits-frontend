@@ -11,6 +11,8 @@ import TableRow from "@mui/material/TableRow";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { graphql, useLazyLoadQuery } from "react-relay";
 import { pageScoreboardQuery } from "@/__generated__/pageScoreboardQuery.graphql";
+import { Button } from "@mui/material";
+import Link from "next/link";
 
 interface Column {
   id: "place" | "name" | "power";
@@ -38,6 +40,10 @@ interface Data {
 
 function createData(place: string, name: string, power: number): Data {
   return { place, name, power };
+}
+
+function capitalizeFirstLetter(str: string): string {
+  return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
 export default function StickyHeadTable() {
@@ -77,62 +83,78 @@ export default function StickyHeadTable() {
   scoreboard.forEach((element, index: number) => {
     index++;
     rows.push(
-      createData(`${index}`, element.user.userName, element.powerScore)
+      createData(
+        `${index}`,
+        capitalizeFirstLetter(element.user.userName),
+        element.powerScore
+      )
     );
   });
 
   return (
-    <Paper sx={{ width: "100%", overflow: "hidden" }}>
-      <TableContainer sx={{ maxHeight: "100%" }}>
-        <Table stickyHeader aria-label="sticky table">
-          <TableHead>
-            <TableRow>
-              {columns.map((column) => (
-                <TableCell
-                  key={column.id}
-                  align={column.align}
-                  style={{ minWidth: column.minWidth }}
-                  sx={{ backgroundColor: "#90a4ae" }}
-                  className="border-solid border-2"
-                >
-                  {column.label}
-                </TableCell>
-              ))}
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {rows
-              .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-              .map((row) => {
-                return (
-                  <TableRow hover role="checkbox" tabIndex={-1} key={row.name}>
-                    {columns.map((column) => {
-                      const value = row[column.id];
-                      return (
-                        <TableCell
-                          key={column.id}
-                          align={column.align}
-                          className="border-solid border-2"
-                        >
-                          {value}
-                        </TableCell>
-                      );
-                    })}
-                  </TableRow>
-                );
-              })}
-          </TableBody>
-        </Table>
-      </TableContainer>
-      <TablePagination
-        rowsPerPageOptions={[10, 25, 100]}
-        component="div"
-        count={rows.length}
-        rowsPerPage={rowsPerPage}
-        page={page}
-        onPageChange={handleChangePage}
-        onRowsPerPageChange={handleChangeRowsPerPage}
-      />
-    </Paper>
+    <div>
+      <Link href={`/courses/${courseId}`}>
+        <Button variant="contained" sx={{ margin: "10px" }}>
+          Back
+        </Button>
+      </Link>
+      <Paper sx={{ width: "100%", overflow: "hidden" }}>
+        <TableContainer sx={{ maxHeight: "100%" }}>
+          <Table stickyHeader aria-label="sticky table">
+            <TableHead>
+              <TableRow>
+                {columns.map((column) => (
+                  <TableCell
+                    key={column.id}
+                    align={column.align}
+                    style={{ minWidth: column.minWidth }}
+                    sx={{ backgroundColor: "#90a4ae" }}
+                    className="border-solid border-2"
+                  >
+                    {column.label}
+                  </TableCell>
+                ))}
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {rows
+                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                .map((row) => {
+                  return (
+                    <TableRow
+                      hover
+                      role="checkbox"
+                      tabIndex={-1}
+                      key={row.name}
+                    >
+                      {columns.map((column) => {
+                        const value = row[column.id];
+                        return (
+                          <TableCell
+                            key={column.id}
+                            align={column.align}
+                            className="border-solid border-2"
+                          >
+                            {value}
+                          </TableCell>
+                        );
+                      })}
+                    </TableRow>
+                  );
+                })}
+            </TableBody>
+          </Table>
+        </TableContainer>
+        <TablePagination
+          rowsPerPageOptions={[10, 25, 100]}
+          component="div"
+          count={rows.length}
+          rowsPerPage={rowsPerPage}
+          page={page}
+          onPageChange={handleChangePage}
+          onRowsPerPageChange={handleChangeRowsPerPage}
+        />
+      </Paper>
+    </div>
   );
 }

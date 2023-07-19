@@ -1,4 +1,4 @@
-lockfileVersion: '6.0'
+lockfileVersion: '6.1'
 
 settings:
   autoInstallPeers: true
@@ -29,6 +29,9 @@ dependencies:
   '@types/node':
     specifier: 18.15.12
     version: 18.15.12
+  '@types/pdfobject':
+    specifier: ^2.2.3
+    version: 2.2.3
   '@types/react':
     specifier: 18.0.37
     version: 18.0.37
@@ -834,6 +837,10 @@ packages:
 
   /@types/parse-json@4.0.0:
     resolution: {integrity: sha512-//oorEZjL6sbPcKUaCdIGlIUeH26mgzimjBB77G6XRgnDl/L5wOnpyBGRe/Mmf5CVW3PwEBE1NjiMZ/ssFh4wA==}
+    dev: false
+
+  /@types/pdfobject@2.2.3:
+    resolution: {integrity: sha512-MD9wkJikZX9GwEbYwMsJWDChNpATrf2ULVQ5oEfZue/SwA5l77Sm8KWWoM4NYS/RFy+/r0oDm4Z3EBbr7In08g==}
     dev: false
 
   /@types/prop-types@15.7.5:

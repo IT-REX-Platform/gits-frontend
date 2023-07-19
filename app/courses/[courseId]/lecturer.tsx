@@ -23,13 +23,21 @@ import {
   useMutation,
 } from "react-relay";
 
+import { ContentType } from "@/__generated__/MediaContentModalCreateMutation.graphql";
 import { MediaRecordSelector$key } from "@/__generated__/MediaRecordSelector.graphql";
+import { lecturerCreateFlashcardAssessmentMutation } from "@/__generated__/lecturerCreateFlashcardAssessmentMutation.graphql";
+import { lecturerCreateFlashcardSetMutation } from "@/__generated__/lecturerCreateFlashcardSetMutation.graphql";
 import { lecturerEditCourseAddChapterModalFragment$key } from "@/__generated__/lecturerEditCourseAddChapterModalFragment.graphql";
 import { lecturerEditCourseChaptersMutation } from "@/__generated__/lecturerEditCourseChaptersMutation.graphql";
 import { lecturerEditCourseEditChapterModalFragment$key } from "@/__generated__/lecturerEditCourseEditChapterModalFragment.graphql";
 import { lecturerEditCourseEditChaptersMutation } from "@/__generated__/lecturerEditCourseEditChaptersMutation.graphql";
 import { lecturerEditCourseGeneralFragment$key } from "@/__generated__/lecturerEditCourseGeneralFragment.graphql";
 import { lecturerEditCourseMutation } from "@/__generated__/lecturerEditCourseMutation.graphql";
+import { SkillType } from "@/__generated__/lecturerEditFlashcardSetModalFragment.graphql";
+import {
+  AssessmentMetadataFormSection,
+  AssessmentMetadataPayload,
+} from "@/components/AssessmentMetadataFormSection";
 import {
   ChapterContent,
   ChapterContentItem,
@@ -38,9 +46,13 @@ import { ChapterHeader } from "@/components/ChapterHeader";
 import {
   Content,
   FlashcardContent,
+  MediaContent,
   ProgressFrame,
-  VideoContent,
 } from "@/components/Content";
+import {
+  ContentMetadataFormSection,
+  ContentMetadataPayload,
+} from "@/components/ContentMetadataFormSection";
 import { Form, FormSection } from "@/components/Form";
 import { Add, Edit, RemoveRedEye, Settings } from "@mui/icons-material";
 import { DatePicker } from "@mui/x-date-pickers";
@@ -56,6 +68,11 @@ export default function LecturerCoursePage() {
   // Info dialog
   const [infoDialogOpen, setInfoDialogOpen] = useState(false);
 
+  // Flashcard set dialog
+  const [addFlashcardsChapter, setAddFlashcardsChapter] = useState<
+    string | null
+  >(null);
+
   // Fetch course data
   const { coursesById, ...query } =
     useLazyLoadQuery<lecturerLecturerCourseIdQuery>(
@@ -68,9 +85,9 @@ export default function LecturerCoursePage() {
             description
             ...lecturerEditCourseAddChapterModalFragment
             ...lecturerEditCourseGeneralFragment
-
             chapters {
               elements {
+                __id
                 ...lecturerEditCourseEditChapterModalFragment
                 id
                 title
@@ -79,14 +96,18 @@ export default function LecturerCoursePage() {
                 suggestedEndDate
                 contents {
                   ...ContentFlashcardFragment
+                  ...ContentMediaFragment
                   ...ContentVideoFragment
+                  ...ContentPresentationFragment
+                  ...ContentDocumentFragment
+                  ...ContentUrlFragment
+                  ...ContentInvalidFragment
 
                   userProgressData {
                     nextLearnDate
                   }
-
-                  id
                   __typename
+                  id
                 }
               }
             }
@@ -187,10 +208,24 @@ export default function LecturerCoursePage() {
                 content.__typename === "FlashcardSetAssessment" ? (
                   <FlashcardContent key={content.id} _flashcard={content} />
                 ) : content.__typename === "MediaContent" ? (
-                  <VideoContent _media={content} />
+                  <MediaContent _media={content} />
                 ) : null
               )}
-              <AddMediaButton chapterId={chapter.id} _mediaRecords={query} />
+              <div className="col-span-full mt-2">
+                <Button
+                  startIcon={<Add />}
+                  onClick={() => setAddFlashcardsChapter(chapter.id)}
+                >
+                  Add flashcards
+                </Button>
+              </div>
+              {chapter.id === addFlashcardsChapter && (
+                <AddFlashcardSetModal
+                  onClose={() => setAddFlashcardsChapter(null)}
+                  chapterId={chapter.id}
+                  chapterRecordId={chapter.__id}
+                />
+              )}
             </ChapterContentItem>
           </ChapterContent>
         </section>
@@ -789,6 +824,125 @@ function AddMediaButton({
         onClose={() => setOpenModal(false)}
         _mediaRecords={_mediaRecords}
       />
+    </>
+  );
+}
+
+function AddFlashcardSetModal({
+  onClose,
+  chapterId,
+  chapterRecordId,
+}: {
+  onClose: () => void;
+  chapterId: string;
+  chapterRecordId: string;
+}) {
+  const [metadata, setMetadata] = useState<ContentMetadataPayload | null>(null);
+  const [assessmentMetadata, setAssessmentMetadata] =
+    useState<AssessmentMetadataPayload | null>(null);
+  const [error, setError] = useState<any>(null);
+  const valid = metadata != null && assessmentMetadata != null;
+
+  const [createAssessment, isCreatingAssessment] =
+    useMutation<lecturerCreateFlashcardAssessmentMutation>(graphql`
+      mutation lecturerCreateFlashcardAssessmentMutation(
+        $assessment: CreateAssessmentInput!
+      ) {
+        createAssessment(input: $assessment) {
+          __id
+          __typename
+
+          ...ContentFlashcardFragment
+
+          id
+          userProgressData {
+            nextLearnDate
+          }
+        }
+      }
+    `);
+  const [createFlashcardSet, isCreatingFlashcardSet] =
+    useMutation<lecturerCreateFlashcardSetMutation>(graphql`
+      mutation lecturerCreateFlashcardSetMutation($assessmentId: UUID!) {
+        createFlashcardSet(
+          input: { assessmentId: $assessmentId, flashcards: [] }
+        ) {
+          assessmentId
+        }
+      }
+    `);
+  const isUpdating = isCreatingAssessment || isCreatingFlashcardSet;
+
+  function handleSubmit() {
+    const assessment = {
+      metadata: {
+        ...metadata!,
+        chapterId,
+        tagNames: [],
+        type: "FLASHCARDS" as ContentType,
+      },
+      assessmentMetadata: {
+        ...assessmentMetadata!,
+        skillType: assessmentMetadata!.skillType as SkillType,
+      },
+    };
+    createAssessment({
+      variables: { assessment },
+      onError: setError,
+      onCompleted(response) {
+        createFlashcardSet({
+          variables: {
+            assessmentId: response.createAssessment.id,
+          },
+          onError: setError,
+          updater(store) {
+            // Get record of chapter and of the new assignment
+            const chapterRecord = store.get(chapterRecordId);
+            const newRecord = store.get(response!.createAssessment.__id);
+            if (!chapterRecord || !newRecord) return;
+
+            // Update the linked records of the chapter contents
+            const contentRecords =
+              chapterRecord.getLinkedRecords("contents") ?? [];
+            chapterRecord.setLinkedRecords(
+              [...contentRecords, newRecord],
+              "contents"
+            );
+          },
+          onCompleted() {
+            onClose();
+          },
+        });
+      },
+    });
+    onClose();
+  }
+
+  return (
+    <>
+      <Dialog maxWidth="md" open onClose={onClose}>
+        <DialogTitle>Add flashcard set</DialogTitle>
+        <DialogContent>
+          {error?.source.errors.map((err: any, i: number) => (
+            <Alert key={i} severity="error" onClose={() => setError(null)}>
+              {err.message}
+            </Alert>
+          ))}
+          <Form>
+            <ContentMetadataFormSection onChange={setMetadata} />
+            <AssessmentMetadataFormSection onChange={setAssessmentMetadata} />
+          </Form>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={onClose}>Cancel</Button>
+          <Button disabled={!valid} onClick={handleSubmit}>
+            Save
+          </Button>
+        </DialogActions>
+      </Dialog>
+      <Backdrop open={isUpdating} sx={{ zIndex: "modal" }}>
+        <CircularProgress />
+      </Backdrop>
     </>
   );
 }

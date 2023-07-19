@@ -279,6 +279,7 @@ type Course {
     pagination: Pagination
   ): ChapterPayload!
   rewardScores: RewardScores!
+  scoreboard: [ScoreboardItem!]!
 }
 
 # Input type for filtering courses. All fields are optional.
@@ -292,6 +293,22 @@ input CourseFilter {
   and: [CourseFilter!]
   or: [CourseFilter!]
   not: CourseFilter
+}
+
+# Represents a course membership object of a user. Each user can be a member of
+# set of courses and some users can also own courses
+type CourseMembership {
+  userId: UUID!
+  courseId: UUID!
+  role: String!
+  course: Course!
+}
+
+# Represents a course membership input object of a user.
+input CourseMembershipInput {
+  userId: UUID!
+  courseId: UUID!
+  role: String!
 }
 
 # Return type for the course query. Contains the course and the pagination info.
@@ -466,6 +483,35 @@ type Flashcard {
 
   # List of sides of this flashcard.
   sides: [FlashcardSide!]!
+
+  # Progress data of the flashcard, specific to given users.
+  # If userId is not provided, the progress data of the current user is returned.
+  userProgressData: FlashcardProgressData!
+}
+
+type FlashcardProgressData {
+  # The date the user learned the flashcard.
+  # This is null it the user has not learned the content item once.
+  lastLearned: DateTime
+
+  # The learning interval in days for the content item.
+  learningInterval: Int
+
+  # The next time the content should be learned.
+  # Calculated using the date the user completed the content item and the learning interval.
+  # This is null if the user has not completed the content item once.
+  nextLearn: DateTime
+}
+
+type FlashcardProgressDataLog {
+  # The id of the Log
+  id: UUID
+
+  # The date the user learned the flashcard.
+  learnedAt: DateTime!
+
+  # Whether the user knew the flashcard or not.
+  success: Boolean!
 }
 
 # A set of flashcards. A flashcard set belongs to exactly one assessment. Therefore, the uuid of the assessment
@@ -524,6 +570,28 @@ input IntFilter {
 
 # 24-hour clock time value string in the format `hh:mm:ss` or `hh:mm:ss.sss`.
 scalar LocalTime
+
+input LogFlashcardLearnedInput {
+  # The id of the flashcard that was learned.
+  flashcardId: UUID!
+
+  # The id of the user that learned the flashcard.
+  userId: UUID!
+
+  # If the user knew the flashcard or not.
+  successful: Boolean!
+}
+
+input LogFlashcardSetLearnedInput {
+  # The id of the flashcard that was learned.
+  flashcardSetId: UUID!
+
+  # The id of the user that learned the flashcard.
+  userId: UUID!
+
+  # The percentage of flashcards in the set that the user knew.
+  percentageSuccess: Float!
+}
 
 type MediaContent implements Content {
   # ID of the content
@@ -608,26 +676,14 @@ type Mutation {
   # Remove a tag from an existing content
   removeTagFromContent(contentId: UUID!, tagName: String): Content!
 
-  # Creates a new course with the given input and returns the created course.
-  createCourse(input: CreateCourseInput!): Course!
-
-  # Creates a new chapter with the given input and returns the created chapter.
-  # The course id must be a course id of an existing course.
-  createChapter(input: CreateChapterInput!): Chapter!
-
-  # Updates an existing course with the given input and returns the updated course.
-  # The course id must be a course id of an existing course.
-  updateCourse(input: UpdateCourseInput!): Course!
-
-  # Updates an existing chapter with the given input and returns the updated chapter.
-  # The chapter id must be a chapter id of an existing chapter.
-  updateChapter(input: UpdateChapterInput!): Chapter!
-
-  # Deletes an existing course, throws an error if no course with the given id exists.
-  deleteCourse(id: UUID!): UUID!
-
-  # Deletes an existing chapter, throws an error if no chapter with the given id exists.
-  deleteChapter(id: UUID!): UUID!
+  # ONLY FOR TESTING PURPOSES. DO NOT USE IN FRONTEND. WILL BE REMOVED.
+  #
+  # Triggers the recalculation of the reward score of the user.
+  # This is done automatically at some time in the night.
+  #
+  # The purpose of this mutation is to allow testing of the reward score and demonstrate the functionality.
+  recalculateScores(courseId: UUID!, userId: UUID!): RewardScores!
+    @deprecated(reason: "Only for testing purposes. Will be removed.")
 
   #  Creates a new media record
   createMediaRecord(input: CreateMediaRecordInput!): MediaRecord!
@@ -662,14 +718,38 @@ type Mutation {
   # Deletes a flashcard. Throws an error if the flashcard does not exist.
   deleteFlashcard(input: UUID!): UUID!
 
-  # ONLY FOR TESTING PURPOSES. DO NOT USE IN FRONTEND. WILL BE REMOVED.
-  #
-  # Triggers the recalculation of the reward score of the user.
-  # This is done automatically at some time in the night.
-  #
-  # The purpose of this mutation is to allow testing of the reward score and demonstrate the functionality.
-  recalculateScores(courseId: UUID!, userId: UUID!): RewardScores!
-    @deprecated(reason: "Only for testing purposes. Will be removed.")
+  # Logs that a user has learned a flashcard.
+  logFlashcardLearned(input: LogFlashcardLearnedInput!): Flashcard!
+
+  # Creates a new course with the given input and returns the created course.
+  createCourse(input: CreateCourseInput!): Course!
+
+  # Creates a new chapter with the given input and returns the created chapter.
+  # The course id must be a course id of an existing course.
+  createChapter(input: CreateChapterInput!): Chapter!
+
+  # Updates an existing course with the given input and returns the updated course.
+  # The course id must be a course id of an existing course.
+  updateCourse(input: UpdateCourseInput!): Course!
+
+  # Updates an existing chapter with the given input and returns the updated chapter.
+  # The chapter id must be a chapter id of an existing chapter.
+  updateChapter(input: UpdateChapterInput!): Chapter!
+
+  # Deletes an existing course, throws an error if no course with the given id exists.
+  deleteCourse(id: UUID!): UUID!
+
+  # Deletes an existing chapter, throws an error if no chapter with the given id exists.
+  deleteChapter(id: UUID!): UUID!
+
+  # registers a user to a course with a role
+  createMembership(input: CourseMembershipInput!): CourseMembership!
+
+  # updates the role of a user in a course
+  updateMembership(input: CourseMembershipInput!): CourseMembership!
+
+  # deletes user course link
+  deleteMembership(input: CourseMembershipInput!): CourseMembership!
 }
 
 # Specifies the page size and page number for paginated results.
@@ -721,6 +801,11 @@ type ProgressLogItem {
   timeToComplete: Int
 }
 
+type PublicUserInfo {
+  id: UUID!
+  userName: String!
+}
+
 type Query {
   # get all contents
   contents: ContentPayload!
@@ -731,6 +816,32 @@ type Query {
   # get contents by chapter ids. Returns a list containing sublists, where each sublist contains all contents
   # associated with that chapter
   contentsByChapterIds(chapterIds: [UUID!]!): [[Content!]!]!
+
+  # Get the reward score of the current user for the specified course.
+  userCourseRewardScores(courseId: UUID!): RewardScores!
+
+  # Get the reward score of the specified user for the specified course.
+  courseRewardScoresForUser(courseId: UUID!, userId: UUID!): RewardScores!
+
+  # Gets the power scores for each user in the course, ordered by power score descending.
+  scoreboard(courseId: UUID!): [ScoreboardItem!]!
+
+  #  Returns the media records with the given IDs
+  mediaRecordsById(ids: [UUID!]!): [MediaRecord!]!
+
+  #  Returns all media records
+  mediaRecords: [MediaRecord!]!
+
+  #  Returns the media records associated the given content IDs as a list of lists where each sublist contains
+  #  the media records associated with the content ID at the same index in the input list
+  mediaRecordsByContentIds(contentIds: [UUID!]!): [[MediaRecord!]!]!
+
+  # Get flashcards by their ids
+  flashcardsByIds(ids: [UUID!]!): [Flashcard!]!
+
+  # Get flashcard sets by their assessment ids.
+  # Returns a list of lists of flashcard sets, where each list corresponds to a single assessment id.
+  flashcardSetsByAssessmentIds(assessmentIds: [UUID!]!): [FlashcardSet!]!
 
   # Get a list of courses. Can be filtered, sorted and paginated.
   courses(
@@ -768,28 +879,28 @@ type Query {
     pagination: Pagination
   ): ChapterPayload!
 
-  #  Returns the media records with the given IDs
-  mediaRecordsById(ids: [UUID!]!): [MediaRecord!]!
+  # Retrieves a list of course memberships for a user ID
+  courseMemberships(id: UUID!): [CourseMembership!]
 
-  #  Returns all media records
-  mediaRecords: [MediaRecord!]!
+  # Retrieves a list of course memberships for each user in a list of user IDs
+  courseMembershipsBatched(ids: [UUID!]!): [[CourseMembership!]!]!
 
-  #  Returns the media records associated the given content IDs as a list of lists where each sublist contains
-  #  the media records associated with the content ID at the same index in the input list
-  mediaRecordsByContentIds(contentIds: [UUID!]!): [[MediaRecord!]!]!
+  # Gets the publicly available information for a user with the specified ID.
+  publicUserInfo(id: UUID!): PublicUserInfo!
 
-  # Get flashcards by their ids
-  flashcardsByIds(ids: [UUID!]!): [Flashcard!]!
+  # Gets the publicly available information for a list of users with the specified IDs.
+  publicUserInfoBatched(ids: [UUID!]!): [PublicUserInfo!]!
 
-  # Get flashcard sets by their assessment ids.
-  # Returns a list of lists of flashcard sets, where each list corresponds to a single assessment id.
-  flashcardSetsByAssessmentIds(assessmentIds: [UUID!]!): [FlashcardSet!]!
+  # Gets the user information of the currently authorized user.
+  currentUserInfo: UserInfo!
 
-  # Get the reward score of the current user for the specified course.
-  userCourseRewardScores(courseId: UUID!): RewardScores!
+  # Gets all of the user information of the specified user.
+  # Only available to the user themselves and privileged users.
+  userInfo(id: UUID!): UserInfo!
 
-  # Get the reward score of the specified user for the specified course.
-  courseRewardScoresForUser(courseId: UUID!, userId: UUID!): RewardScores!
+  # Gets all of the users' information for a list of users with the specified IDs.
+  # Only available to the user themselves and privileged users.
+  userInfoBatched(ids: [UUID!]!): [UserInfo!]!
 }
 
 scalar ResolveToSourceArgs
@@ -811,6 +922,10 @@ enum RewardChangeReason {
   # There exists a content that is due for repetition.
   # The associated contents are the content that are due for repetition.
   CONTENT_DUE_FOR_REPETITION
+
+  # The score changed because the underlying scores changed.
+  # Relevant for the power score.
+  COMPOSITE_VALUE
 }
 
 # An item in the reward score log.
@@ -837,10 +952,15 @@ type RewardLogItem {
 
 # The reward score of a user.
 type RewardScore {
-  # The value of the reward score.
+  # The absolute value of the reward score.
   # Health and fitness are between 0 and 100.
   # Growth, strength and power can be any non-negative integer.
   value: Int!
+
+  # The relative value of the reward score.
+  # Shows how many points relative to the total points have been achieved.
+  # Only used for growth currently.
+  percentage: Float!
 
   # A log of the changes to the reward score, ordered by date descending.
   log: [RewardLogItem!]!
@@ -862,6 +982,16 @@ type RewardScores {
 
   # A composite score of all the other scores.
   power: RewardScore!
+}
+
+# An item in the scoreboard.
+type ScoreboardItem {
+  # The user id of the user.
+  userId: UUID!
+
+  # The power score of the user.
+  powerScore: Int!
+  user: PublicUserInfo!
 }
 
 # Type of the assessment
@@ -1020,6 +1150,16 @@ input UpdateMediaRecordInput {
 
 # A Url scalar
 scalar Url
+
+type UserInfo {
+  id: UUID!
+  userName: String!
+  firstName: String!
+  lastName: String!
+
+  # The course memberships of the user.
+  courseMemberships: [CourseMembership!]!
+}
 
 # Represents a user's progress on a content item.
 # See https://gits-enpro.readthedocs.io/en/latest/dev-manuals/gamification/userProgress.html

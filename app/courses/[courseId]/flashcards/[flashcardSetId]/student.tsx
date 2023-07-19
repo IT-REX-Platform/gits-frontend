@@ -1,14 +1,17 @@
 "use client";
 
+import { studentFlashcardLogProgressMutation } from "@/__generated__/studentFlashcardLogProgressMutation.graphql";
 import { studentFlashcardsQuery } from "@/__generated__/studentFlashcardsQuery.graphql";
 import { Heading } from "@/components/Heading";
 import { Check, Close, Loop } from "@mui/icons-material";
-import { Button } from "@mui/material";
+import { Alert, Button, CircularProgress } from "@mui/material";
 import { motion } from "framer-motion";
+import { chain } from "lodash";
 import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
 import ReactMarkdown from "react-markdown";
-import { graphql, useLazyLoadQuery } from "react-relay";
+import { useAuth } from "react-oidc-context";
+import { graphql, useLazyLoadQuery, useMutation } from "react-relay";
 
 export default function StudentFlashcards() {
   // Get course id from url
@@ -43,6 +46,17 @@ export default function StudentFlashcards() {
     { id: [flashcardSetId] }
   );
 
+  const [flashcardLearned, logging] =
+    useMutation<studentFlashcardLogProgressMutation>(graphql`
+      mutation studentFlashcardLogProgressMutation(
+        $input: LogFlashcardLearnedInput!
+      ) {
+        logFlashcardLearned(input: $input) {
+          id
+        }
+      }
+    `);
+
   const flashcards = contentsByIds[0];
   const currentFlashcard = flashcards.flashcardSet!.flashcards[currentIndex];
   const question = currentFlashcard.sides.find((x) => x.isQuestion);
@@ -52,19 +66,64 @@ export default function StudentFlashcards() {
   const [knew, setKnew] = useState<Record<string, boolean>>({});
 
   const router = useRouter();
-  const nextCard = () => {
-    if (currentIndex + 1 < (flashcards.flashcardSet?.flashcards.length ?? 0)) {
-      setCurrentIndex(currentIndex + 1);
-      setKnew({});
-      setTurned({});
-    } else {
-      router.push(`/courses/${courseId}`);
+
+  const [error, setError] = useState<any>(null);
+
+  const { user } = useAuth();
+
+  const nextCard = async () => {
+    // TODO it shouldn't even be required that we pass the user id
+    if (!user) {
+      throw new Error("USER MISSING");
     }
+
+    const knewAll = chain(currentFlashcard.sides)
+      .filter((x) => !x.isQuestion)
+      .map((x) => knew[x.label] ?? false)
+      .every()
+      .value();
+
+    flashcardLearned({
+      variables: {
+        input: {
+          flashcardId: currentFlashcard.id,
+          successful: knewAll,
+          userId: user.profile.sub,
+        },
+      },
+      onCompleted() {
+        if (
+          currentIndex + 1 <
+          (flashcards.flashcardSet?.flashcards.length ?? 0)
+        ) {
+          setCurrentIndex(currentIndex + 1);
+          setKnew({});
+          setTurned({});
+        } else {
+          router.push(`/courses/${courseId}`);
+        }
+      },
+      onError(error) {
+        setError(error);
+      },
+    });
   };
 
   return (
     <main>
       <Heading title={flashcards.metadata.name} backButton />
+
+      {error?.source.errors.map((err: any, i: number) => (
+        <Alert
+          key={i}
+          severity="error"
+          sx={{ minWidth: 400, maxWidth: 800, width: "fit-content" }}
+          onClose={() => setError(null)}
+        >
+          {err.message}
+        </Alert>
+      ))}
+
       <div className="w-full border-b border-b-gray-300 mt-6 flex justify-center">
         <div className="bg-white -mb-[9px] px-3 text-xs text-gray-600">
           {currentIndex + 1}/{flashcards.flashcardSet?.flashcards.length ?? 0}
@@ -158,9 +217,14 @@ export default function StudentFlashcards() {
           onClick={nextCard}
           className="mb-6"
         >
-          {currentIndex + 1 < (flashcards.flashcardSet?.flashcards.length ?? 0)
-            ? "Next"
-            : "Finish"}
+          {logging ? (
+            <CircularProgress size={16}></CircularProgress>
+          ) : currentIndex + 1 <
+            (flashcards.flashcardSet?.flashcards.length ?? 0) ? (
+            "Next"
+          ) : (
+            "Finish"
+          )}
         </Button>
       </div>
     </main>

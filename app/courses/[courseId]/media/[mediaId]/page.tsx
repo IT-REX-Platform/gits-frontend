@@ -1,8 +1,8 @@
 "use client";
 
 import { PageView, usePageView } from "@/src/currentView";
+import LecturerMediaPage from "./lecturer";
 import StudentMediaPage from "./student";
-import Error from "next/error";
 
 export default function CoursePage() {
   const [pageView, _] = usePageView();
@@ -10,6 +10,6 @@ export default function CoursePage() {
     case PageView.Student:
       return <StudentMediaPage />;
     case PageView.Lecturer:
-      return <Error statusCode={404} />;
+      return <LecturerMediaPage />;
   }
 }

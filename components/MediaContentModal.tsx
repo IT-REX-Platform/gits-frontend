@@ -3,10 +3,7 @@ import { MediaContentModal$key } from "@/__generated__/MediaContentModal.graphql
 import { MediaContentModalCreateMutation } from "@/__generated__/MediaContentModalCreateMutation.graphql";
 import { MediaContentModalUpdateMutation } from "@/__generated__/MediaContentModalUpdateMutation.graphql";
 import { MediaContentModalUpdateRecordMutation } from "@/__generated__/MediaContentModalUpdateRecordMutation.graphql";
-import {
-  MediaRecordSelector$data,
-  MediaRecordSelector$key,
-} from "@/__generated__/MediaRecordSelector.graphql";
+import { MediaRecordSelector$key } from "@/__generated__/MediaRecordSelector.graphql";
 import { Form, FormSection } from "@/components/Form";
 import {
   Alert,
@@ -21,6 +18,7 @@ import {
 } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers";
 import dayjs, { Dayjs } from "dayjs";
+import { uniq } from "lodash";
 import { useState } from "react";
 import { graphql, useFragment, useMutation } from "react-relay";
 import { MediaRecordSelector } from "./MediaRecordSelector";
@@ -34,7 +32,7 @@ export function MediaContentModal({
 }: {
   onClose: () => void;
   isOpen: boolean;
-  chapterId: string;
+  chapterId?: string;
   _existingMediaContent?: MediaContentModal$key;
   _mediaRecords: MediaRecordSelector$key;
 }) {
@@ -50,6 +48,11 @@ export function MediaContentModal({
         }
         mediaRecords {
           id
+          uploadUrl
+          name
+          downloadUrl
+          contentIds
+          type
         }
       }
     `,
@@ -64,9 +67,9 @@ export function MediaContentModal({
     existingContent?.metadata.rewardPoints ?? 0
   );
 
-  const [selectedRecords, setSelectedRecords] = useState<
-    MediaRecordSelector$data["mediaRecords"]
-  >([]);
+  const [selectedRecords, setSelectedRecords] = useState(
+    existingContent?.mediaRecords ?? []
+  );
 
   const [error, setError] = useState<any>(null);
 
@@ -133,7 +136,7 @@ export function MediaContentModal({
           variables: {
             input: {
               id: record.id,
-              contentIds: [...record.contentIds, contentId],
+              contentIds: uniq([...record.contentIds, contentId]),
               name: record.name,
               type: record.type,
             },
@@ -184,7 +187,7 @@ export function MediaContentModal({
           setError(error);
         },
         updater(store, data) {
-          const chapter = store.get(chapterId);
+          const chapter = store.get(chapterId!);
           const newRecord = store.get(data.createMediaContent.id);
           const linkedRecords = chapter!.getLinkedRecords("contents");
           chapter!.setLinkedRecords(
@@ -254,7 +257,7 @@ export function MediaContentModal({
       <DialogActions>
         <Button onClick={onClose}>Cancel</Button>
         <Button disabled={!valid} onClick={handleSubmit}>
-          Add
+          {_existingMediaContent ? "Save" : "Add"}
         </Button>
       </DialogActions>
     </Dialog>

@@ -211,13 +211,14 @@ export default function LecturerCoursePage() {
                   <MediaContent _media={content} />
                 ) : null
               )}
-              <div className="col-span-full mt-2">
+              <div className="col-span-full mt-2 flex gap-2">
                 <Button
                   startIcon={<Add />}
                   onClick={() => setAddFlashcardsChapter(chapter.id)}
                 >
                   Add flashcards
                 </Button>
+                <AddMediaButton _mediaRecords={query} chapterId={chapter.id} />
               </div>
               {chapter.id === addFlashcardsChapter && (
                 <AddFlashcardSetModal
@@ -802,21 +803,9 @@ function AddMediaButton({
 
   return (
     <>
-      <Content
-        title="Add new media"
-        className="hover:bg-gray-100 rounded-full"
-        subtitle=""
-        onClick={() => setOpenModal(true)}
-        icon={
-          <Add
-            sx={{
-              fontSize: "2rem",
-              color: "text.secondary",
-            }}
-          />
-        }
-        iconFrame={<ProgressFrame color="lightblue" progress={0} />}
-      />
+      <Button startIcon={<Add />} onClick={() => setOpenModal(true)}>
+        Add media
+      </Button>
 
       <MediaContentModal
         chapterId={chapterId}

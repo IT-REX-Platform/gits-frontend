@@ -32,6 +32,7 @@ import { Info } from "@mui/icons-material";
 import dayjs from "dayjs";
 import { useState } from "react";
 import Link from "next/link";
+import { studentCourseIdScoreboardQuery } from "@/__generated__/studentCourseIdScoreboardQuery.graphql";
 
 function createData(name: string, power: number) {
   return { name, power };
@@ -45,11 +46,7 @@ export default function StudentCoursePage() {
   // Info dialog
   const [infoDialogOpen, setInfoDialogOpen] = useState(false);
 
-  const rows = [
-    createData("Student 1", 159),
-    createData("Student 2", 159),
-    createData("Student 3", 159),
-  ];
+  const rows: any[] = [];
 
   // Fetch course data
   const { coursesById } = useLazyLoadQuery<studentCourseIdQuery>(
@@ -89,10 +86,32 @@ export default function StudentCoursePage() {
     { id: [id] }
   );
 
+  const { scoreboard } = useLazyLoadQuery<studentCourseIdScoreboardQuery>(
+    graphql`
+      query studentCourseIdScoreboardQuery($courseId: UUID!) {
+        scoreboard(courseId: $courseId) {
+          user {
+            userName
+          }
+          powerScore
+        }
+      }
+    `,
+    { courseId: id }
+  );
+
   // Show 404 error page if id was not found
   if (coursesById.length == 0) {
     return <Error statusCode={404} title="Course could not be found." />;
   }
+
+  // Extract scoreboard
+  scoreboard.forEach((element, index: number) => {
+    if (index < 3) {
+      rows.push(createData(element.user.userName, element.powerScore));
+    }
+    index++;
+  });
 
   // Extract course
   const course = coursesById[0];

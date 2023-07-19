@@ -26,7 +26,7 @@ import {
   ChapterContentItem,
 } from "@/components/ChapterContent";
 import { ChapterHeader } from "@/components/ChapterHeader";
-import { FlashcardContent, VideoContent } from "@/components/Content";
+import { FlashcardContent, MediaContent } from "@/components/Content";
 import { RewardScores } from "@/components/RewardScores";
 import { Info } from "@mui/icons-material";
 import dayjs from "dayjs";
@@ -69,14 +69,21 @@ export default function StudentCoursePage() {
               suggestedEndDate
               contents {
                 ...ContentFlashcardFragment
+                ...ContentMediaFragment
                 ...ContentVideoFragment
+                ...ContentPresentationFragment
+                ...ContentDocumentFragment
+                ...ContentUrlFragment
+                ...ContentInvalidFragment
 
                 userProgressData {
                   nextLearnDate
                 }
 
                 id
-                __typename
+                metadata {
+                  type
+                }
               }
             }
           }
@@ -118,12 +125,12 @@ export default function StudentCoursePage() {
 
   const nextFlashcard = chain(course.chapters.elements)
     .flatMap((x) => x.contents)
-    .filter((x) => x.__typename === "FlashcardSetAssessment")
+    .filter((x) => x.metadata.type === "FLASHCARDS")
     .minBy((x) => new Date(x.userProgressData.nextLearnDate))
     .value();
   const nextVideo = chain(course.chapters.elements)
     .flatMap((x) => x.contents)
-    .filter((x) => x.__typename === "MediaContent")
+    .filter((x) => x.metadata.type === "MEDIA")
     .minBy((x) => new Date(x.userProgressData.nextLearnDate))
     .value();
 
@@ -183,7 +190,7 @@ export default function StudentCoursePage() {
         <Typography variant="h2">Up next</Typography>
         <div className="mt-8 gap-8 grid gap-x-12 gap-y-4 grid-cols-[max-content] xl:grid-cols-[repeat(2,max-content)] 2xl:grid-cols-[repeat(3,max-content)]">
           {nextFlashcard && <FlashcardContent _flashcard={nextFlashcard} />}
-          {nextVideo && <VideoContent _media={nextVideo} />}
+          {nextVideo && <MediaContent _media={nextVideo} />}
         </div>
       </section>
 
@@ -208,10 +215,10 @@ export default function StudentCoursePage() {
             {chapter.contents.length > 0 && (
               <ChapterContentItem first last>
                 {chapter.contents.map((content) =>
-                  content.__typename === "FlashcardSetAssessment" ? (
+                  content.metadata.type === "FLASHCARDS" ? (
                     <FlashcardContent key={content.id} _flashcard={content} />
-                  ) : content.__typename === "MediaContent" ? (
-                    <VideoContent _media={content} />
+                  ) : content.metadata.type === "MEDIA" ? (
+                    <MediaContent _media={content} />
                   ) : null
                 )}
               </ChapterContentItem>

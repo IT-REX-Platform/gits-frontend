@@ -1,10 +1,8 @@
 "use client";
 import { ContentDocumentFragment$key } from "@/__generated__/ContentDocumentFragment.graphql";
 import { ContentFlashcardFragment$key } from "@/__generated__/ContentFlashcardFragment.graphql";
-import { ContentInvalidFragment$key } from "@/__generated__/ContentInvalidFragment.graphql";
 import { ContentMediaFragment$key } from "@/__generated__/ContentMediaFragment.graphql";
 import { ContentPresentationFragment$key } from "@/__generated__/ContentPresentationFragment.graphql";
-import { ContentUrlFragment$key } from "@/__generated__/ContentUrlFragment.graphql";
 import { ContentVideoFragment$key } from "@/__generated__/ContentVideoFragment.graphql";
 import {
   ArrowRight,
@@ -38,14 +36,16 @@ export function MediaContent({
     graphql`
       fragment ContentMediaFragment on MediaContent {
         id
+        metadata {
+          name
+        }
         ...ContentVideoFragment
         ...ContentPresentationFragment
         ...ContentDocumentFragment
-        ...ContentUrlFragment
-        ...ContentInvalidFragment
         mediaRecords {
           id
           type
+          name
         }
       }
     `,
@@ -56,8 +56,8 @@ export function MediaContent({
     return (
       <InvalidContent
         title="Invalid content"
+        subtitle={media.metadata.name}
         disabled={disabled}
-        _media={media}
       />
     );
   }
@@ -75,14 +75,22 @@ export function MediaContent({
     }
   }
 
+  let subtitle = recordId ? record.name : media.metadata.name;
+
   switch (record.type) {
     case "VIDEO":
       return (
-        <VideoContent disabled={disabled} onClick={onClick} _media={media} />
+        <VideoContent
+          subtitle={subtitle}
+          disabled={disabled}
+          onClick={onClick}
+          _media={media}
+        />
       );
     case "PRESENTATION":
       return (
         <PresentationContent
+          subtitle={subtitle}
           disabled={disabled}
           onClick={onClick}
           _media={media}
@@ -90,26 +98,33 @@ export function MediaContent({
       );
     case "DOCUMENT":
       return (
-        <DocumentContent disabled={disabled} onClick={onClick} _media={media} />
+        <DocumentContent
+          subtitle={subtitle}
+          disabled={disabled}
+          onClick={onClick}
+          _media={media}
+        />
       );
     case "URL":
-      return <UrlContent disabled={disabled} _media={media} />;
+      return <UrlContent subtitle={subtitle} disabled={disabled} />;
     default:
       return (
         <InvalidContent
           title="Unknown content type"
+          subtitle={subtitle}
           disabled={disabled}
-          _media={media}
         />
       );
   }
 }
 
 export function VideoContent({
+  subtitle,
   disabled = false,
   onClick,
   _media,
 }: {
+  subtitle: string;
   disabled?: boolean;
   onClick: () => void;
   _media: ContentVideoFragment$key;
@@ -118,14 +133,8 @@ export function VideoContent({
     graphql`
       fragment ContentVideoFragment on MediaContent {
         id
-        metadata {
-          name
-        }
         userProgressData {
-          nextLearnDate
-        }
-        mediaRecords {
-          id
+          lastLearnDate
         }
       }
     `,
@@ -135,7 +144,7 @@ export function VideoContent({
   return (
     <Content
       title="Watch video"
-      subtitle={media.metadata.name}
+      subtitle={subtitle}
       disabled={disabled}
       className="hover:bg-sky-100 rounded-full"
       onClick={onClick}
@@ -150,7 +159,7 @@ export function VideoContent({
       iconFrame={
         <ProgressFrame
           color={disabled ? colors.gray[100] : colors.sky[200]}
-          progress={disabled ? 0 : 0}
+          progress={media.userProgressData.lastLearnDate ? 100 : 0}
         />
       }
     />
@@ -159,29 +168,17 @@ export function VideoContent({
 
 export function InvalidContent({
   title,
+  subtitle,
   disabled = false,
-  _media,
 }: {
   title: string;
+  subtitle: string;
   disabled?: boolean;
-  _media: ContentInvalidFragment$key;
 }) {
-  const media = useFragment(
-    graphql`
-      fragment ContentInvalidFragment on MediaContent {
-        id
-        metadata {
-          name
-        }
-      }
-    `,
-    _media
-  );
-
   return (
     <Content
       title={title}
-      subtitle={media.metadata.name}
+      subtitle={subtitle}
       disabled={disabled}
       className="hover:bg-gray-100 rounded-xl"
       icon={
@@ -200,10 +197,12 @@ export function InvalidContent({
 }
 
 export function PresentationContent({
+  subtitle,
   disabled = false,
   onClick,
   _media,
 }: {
+  subtitle: string;
   disabled?: boolean;
   onClick: () => void;
   _media: ContentPresentationFragment$key;
@@ -212,11 +211,8 @@ export function PresentationContent({
     graphql`
       fragment ContentPresentationFragment on MediaContent {
         id
-        metadata {
-          name
-        }
         userProgressData {
-          nextLearnDate
+          lastLearnDate
         }
       }
     `,
@@ -226,7 +222,7 @@ export function PresentationContent({
   return (
     <Content
       title="Look at slides"
-      subtitle={media.metadata.name}
+      subtitle={subtitle}
       disabled={disabled}
       className="hover:bg-violet-100 rounded-full"
       onClick={onClick}
@@ -241,7 +237,7 @@ export function PresentationContent({
       iconFrame={
         <ProgressFrame
           color={disabled ? colors.gray[100] : colors.violet[200]}
-          progress={disabled ? 0 : 0}
+          progress={media.userProgressData.lastLearnDate ? 100 : 0}
         />
       }
     />
@@ -249,10 +245,12 @@ export function PresentationContent({
 }
 
 export function DocumentContent({
+  subtitle,
   disabled = false,
   onClick,
   _media,
 }: {
+  subtitle: string;
   disabled?: boolean;
   onClick: () => void;
   _media: ContentDocumentFragment$key;
@@ -261,11 +259,8 @@ export function DocumentContent({
     graphql`
       fragment ContentDocumentFragment on MediaContent {
         id
-        metadata {
-          name
-        }
         userProgressData {
-          nextLearnDate
+          lastLearnDate
         }
       }
     `,
@@ -275,7 +270,7 @@ export function DocumentContent({
   return (
     <Content
       title="Read document"
-      subtitle={media.metadata.name}
+      subtitle={subtitle}
       disabled={disabled}
       className="hover:bg-indigo-100 rounded-full"
       onClick={onClick}
@@ -290,7 +285,7 @@ export function DocumentContent({
       iconFrame={
         <ProgressFrame
           color={disabled ? colors.gray[100] : colors.indigo[200]}
-          progress={disabled ? 0 : 0}
+          progress={media.userProgressData.lastLearnDate ? 100 : 0}
         />
       }
     />
@@ -298,31 +293,16 @@ export function DocumentContent({
 }
 
 export function UrlContent({
+  subtitle,
   disabled = false,
-  _media,
 }: {
+  subtitle: string;
   disabled?: boolean;
-  _media: ContentUrlFragment$key;
 }) {
-  const media = useFragment(
-    graphql`
-      fragment ContentUrlFragment on MediaContent {
-        id
-        metadata {
-          name
-        }
-        userProgressData {
-          nextLearnDate
-        }
-      }
-    `,
-    _media
-  );
-
   return (
     <Content
       title="Open url"
-      subtitle={media.metadata.name}
+      subtitle={subtitle}
       disabled={disabled}
       className="hover:bg-slate-100 rounded-xl"
       icon={

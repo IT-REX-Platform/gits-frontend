@@ -77,8 +77,6 @@ export default function StudentCoursePage() {
                 ...ContentVideoFragment
                 ...ContentPresentationFragment
                 ...ContentDocumentFragment
-                ...ContentUrlFragment
-                ...ContentInvalidFragment
 
                 userProgressData {
                   nextLearnDate

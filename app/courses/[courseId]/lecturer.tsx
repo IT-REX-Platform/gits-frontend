@@ -100,8 +100,6 @@ export default function LecturerCoursePage() {
                   ...ContentVideoFragment
                   ...ContentPresentationFragment
                   ...ContentDocumentFragment
-                  ...ContentUrlFragment
-                  ...ContentInvalidFragment
 
                   userProgressData {
                     nextLearnDate

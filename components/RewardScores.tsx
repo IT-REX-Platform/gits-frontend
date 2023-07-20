@@ -20,10 +20,7 @@ export function RewardScores({
           value
         }
         growth {
-          value
-        }
-        strength {
-          value
+          percentage
         }
         power {
           value
@@ -53,7 +50,7 @@ export function RewardScores({
         <StatDisplay
           label="Growth"
           color={colors.green[500]}
-          progress={rewardScores.growth.value}
+          progress={rewardScores.growth.percentage * 100}
           icon={<GrowthIcon />}
         />
         <StatDisplay

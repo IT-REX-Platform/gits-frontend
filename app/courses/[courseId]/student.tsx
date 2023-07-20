@@ -149,12 +149,12 @@ export default function StudentCoursePage() {
         description={course.description}
         onClose={() => setInfoDialogOpen(false)}
       />
-      <div className="grid grid-cols-2">
+      <div className="grid grid-cols-2 items-start">
         <div className="w-fit my-12 pl-8 pr-10 py-6 border-4 border-slate-200 rounded-3xl">
           <RewardScores _scores={course.rewardScores} />
         </div>
         <div>
-          <TableContainer component={Paper} className="my-12">
+          <TableContainer component={Paper} className="mt-12 mb-2">
             <Table sx={{ minWidth: 650 }} size="small">
               <TableHead>
                 <TableRow>

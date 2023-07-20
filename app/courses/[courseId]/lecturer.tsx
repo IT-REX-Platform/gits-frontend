@@ -23,12 +23,21 @@ import {
   useMutation,
 } from "react-relay";
 
+import { ContentType } from "@/__generated__/MediaContentModalCreateMutation.graphql";
+import { MediaRecordSelector$key } from "@/__generated__/MediaRecordSelector.graphql";
+import { lecturerCreateFlashcardAssessmentMutation } from "@/__generated__/lecturerCreateFlashcardAssessmentMutation.graphql";
+import { lecturerCreateFlashcardSetMutation } from "@/__generated__/lecturerCreateFlashcardSetMutation.graphql";
 import { lecturerEditCourseAddChapterModalFragment$key } from "@/__generated__/lecturerEditCourseAddChapterModalFragment.graphql";
 import { lecturerEditCourseChaptersMutation } from "@/__generated__/lecturerEditCourseChaptersMutation.graphql";
 import { lecturerEditCourseEditChapterModalFragment$key } from "@/__generated__/lecturerEditCourseEditChapterModalFragment.graphql";
 import { lecturerEditCourseEditChaptersMutation } from "@/__generated__/lecturerEditCourseEditChaptersMutation.graphql";
 import { lecturerEditCourseGeneralFragment$key } from "@/__generated__/lecturerEditCourseGeneralFragment.graphql";
 import { lecturerEditCourseMutation } from "@/__generated__/lecturerEditCourseMutation.graphql";
+import { SkillType } from "@/__generated__/lecturerEditFlashcardSetModalFragment.graphql";
+import {
+  AssessmentMetadataFormSection,
+  AssessmentMetadataPayload,
+} from "@/components/AssessmentMetadataFormSection";
 import {
   ChapterContent,
   ChapterContentItem,
@@ -40,25 +49,16 @@ import {
   MediaContent,
   ProgressFrame,
 } from "@/components/Content";
+import {
+  ContentMetadataFormSection,
+  ContentMetadataPayload,
+} from "@/components/ContentMetadataFormSection";
 import { Form, FormSection } from "@/components/Form";
 import { Add, Edit, RemoveRedEye, Settings } from "@mui/icons-material";
 import { DatePicker } from "@mui/x-date-pickers";
 import dayjs, { Dayjs } from "dayjs";
 import { useState } from "react";
-import {
-  ContentMetadataFormSection,
-  ContentMetadataPayload,
-} from "@/components/ContentMetadataFormSection";
-import {
-  AssessmentMetadataFormSection,
-  AssessmentMetadataPayload,
-} from "@/components/AssessmentMetadataFormSection";
-import {
-  ContentType,
-  SkillType,
-  lecturerCreateFlashcardAssessmentMutation,
-} from "@/__generated__/lecturerCreateFlashcardAssessmentMutation.graphql";
-import { lecturerCreateFlashcardSetMutation } from "@/__generated__/lecturerCreateFlashcardSetMutation.graphql";
+import { MediaContentModal } from "../../../components/MediaContentModal";
 
 export default function LecturerCoursePage() {
   // Get course id from url
@@ -74,47 +74,48 @@ export default function LecturerCoursePage() {
   >(null);
 
   // Fetch course data
-  const { coursesById } = useLazyLoadQuery<lecturerLecturerCourseIdQuery>(
-    graphql`
-      query lecturerLecturerCourseIdQuery($id: [UUID!]!) {
-        coursesById(ids: $id) {
-          title
-          description
-          ...lecturerEditCourseAddChapterModalFragment
-          ...lecturerEditCourseGeneralFragment
+  const { coursesById, ...query } =
+    useLazyLoadQuery<lecturerLecturerCourseIdQuery>(
+      graphql`
+        query lecturerLecturerCourseIdQuery($id: [UUID!]!) {
+          ...MediaRecordSelector
 
-          chapters {
-            elements {
-              __id
-              ...lecturerEditCourseEditChapterModalFragment
-              id
-              title
-              number
-              suggestedStartDate
-              suggestedEndDate
-              contents {
-                ...ContentFlashcardFragment
-                ...ContentMediaFragment
-                ...ContentVideoFragment
-                ...ContentPresentationFragment
-                ...ContentDocumentFragment
-                ...ContentUrlFragment
-                ...ContentInvalidFragment
-
-                userProgressData {
-                  nextLearnDate
-                }
-
+          coursesById(ids: $id) {
+            title
+            description
+            ...lecturerEditCourseAddChapterModalFragment
+            ...lecturerEditCourseGeneralFragment
+            chapters {
+              elements {
+                __id
+                ...lecturerEditCourseEditChapterModalFragment
                 id
-                __typename
+                title
+                number
+                suggestedStartDate
+                suggestedEndDate
+                contents {
+                  ...ContentFlashcardFragment
+                  ...ContentMediaFragment
+                  ...ContentVideoFragment
+                  ...ContentPresentationFragment
+                  ...ContentDocumentFragment
+                  ...ContentUrlFragment
+                  ...ContentInvalidFragment
+
+                  userProgressData {
+                    nextLearnDate
+                  }
+                  __typename
+                  id
+                }
               }
             }
           }
         }
-      }
-    `,
-    { id: [id] }
-  );
+      `,
+      { id: [id] }
+    );
 
   const [openModal, setOpenModal] = useState(false);
 
@@ -125,10 +126,6 @@ export default function LecturerCoursePage() {
 
   // Extract course
   const course = coursesById[0];
-
-  const handleOpenModal = () => {
-    setOpenModal(true);
-  };
 
   const handleCloseModal = () => {
     setOpenModal(false);
@@ -214,13 +211,14 @@ export default function LecturerCoursePage() {
                   <MediaContent _media={content} />
                 ) : null
               )}
-              <div className="col-span-full mt-2">
+              <div className="col-span-full mt-2 flex gap-2">
                 <Button
                   startIcon={<Add />}
                   onClick={() => setAddFlashcardsChapter(chapter.id)}
                 >
                   Add flashcards
                 </Button>
+                <AddMediaButton _mediaRecords={query} chapterId={chapter.id} />
               </div>
               {chapter.id === addFlashcardsChapter && (
                 <AddFlashcardSetModal
@@ -790,6 +788,31 @@ function AddChapterModal({
       <Backdrop open={isUpdating} sx={{ zIndex: "modal" }}>
         <CircularProgress />
       </Backdrop>
+    </>
+  );
+}
+
+function AddMediaButton({
+  chapterId,
+  _mediaRecords,
+}: {
+  chapterId: string;
+  _mediaRecords: MediaRecordSelector$key;
+}) {
+  const [openModal, setOpenModal] = useState(false);
+
+  return (
+    <>
+      <Button startIcon={<Add />} onClick={() => setOpenModal(true)}>
+        Add media
+      </Button>
+
+      <MediaContentModal
+        chapterId={chapterId}
+        isOpen={openModal}
+        onClose={() => setOpenModal(false)}
+        _mediaRecords={_mediaRecords}
+      />
     </>
   );
 }

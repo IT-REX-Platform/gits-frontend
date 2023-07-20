@@ -124,6 +124,9 @@ export function VideoContent({
         userProgressData {
           nextLearnDate
         }
+        mediaRecords {
+          id
+        }
       }
     `,
     _media

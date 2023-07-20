@@ -49,26 +49,26 @@ export default function LecturerPage() {
         My Courses
       </Typography>
 
-      <div className="grid grid-cols-2 lg:grid-cols-3 gap-5 mt-4">
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-8 mt-8">
         {/* MOCK */}
         {allCourses.elements.map((course) => (
           <Card variant="outlined" className="h-full" key={course.id}>
             <CardContent>
               <div className="flex gap-4 items-center">
-                <div className="aspect-square min-w-[40px]">
+                <div className="aspect-square min-w-[40px] grid">
                   <CircularProgress
                     variant="determinate"
                     value={100}
                     sx={{
                       color: (theme) => theme.palette.grey[200],
                     }}
-                    className="absolute"
+                    className="col-start-1 row-start-1"
                   />
                   <CircularProgress
                     variant="determinate"
                     value={45}
                     color="success"
-                    className="absolute"
+                    className="col-start-1 row-start-1"
                   />
                 </div>
                 <Typography

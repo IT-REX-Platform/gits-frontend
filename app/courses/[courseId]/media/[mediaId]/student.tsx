@@ -2,7 +2,6 @@
 
 import { studentContentDownloadButtonFragment$key } from "@/__generated__/studentContentDownloadButtonFragment.graphql";
 import { studentContentMediaDisplayFragment$key } from "@/__generated__/studentContentMediaDisplayFragment.graphql";
-import { studentFixRecordUrlFragment$key } from "@/__generated__/studentFixRecordUrlFragment.graphql";
 import { studentMediaQuery } from "@/__generated__/studentMediaQuery.graphql";
 import { MediaContent } from "@/components/Content";
 import { Heading } from "@/components/Heading";
@@ -31,7 +30,6 @@ export default function StudentMediaPage() {
               name
               ...studentContentMediaDisplayFragment
               ...studentContentDownloadButtonFragment
-              ...studentFixRecordUrlFragment
             }
           }
 
@@ -95,24 +93,7 @@ export default function StudentMediaPage() {
   );
 }
 
-function useDownloadUrl(_record: studentFixRecordUrlFragment$key) {
-  const mediaRecord = useFragment(
-    graphql`
-      fragment studentFixRecordUrlFragment on MediaRecord {
-        downloadUrl
-      }
-    `,
-    _record
-  );
-
-  const baseUrl = process.env.NEXT_PUBLIC_MINIO_URL ?? "http://localhost:9000";
-  const downloadUrl = new URL(mediaRecord.downloadUrl);
-  const url = `${baseUrl}${downloadUrl.pathname}${downloadUrl.search}`;
-
-  return url;
-}
-
-function ContentMediaDisplay({
+export function ContentMediaDisplay({
   _record,
 }: {
   _record: studentContentMediaDisplayFragment$key;
@@ -120,27 +101,32 @@ function ContentMediaDisplay({
   const mediaRecord = useFragment(
     graphql`
       fragment studentContentMediaDisplayFragment on MediaRecord {
-        ...studentFixRecordUrlFragment
         type
+        downloadUrl
       }
     `,
     _record
   );
 
-  const url = useDownloadUrl(mediaRecord);
-
   switch (mediaRecord.type) {
     case "VIDEO":
-      return <ReactPlayer url={url} width="100%" height="auto" controls />;
+      return (
+        <ReactPlayer
+          url={mediaRecord.downloadUrl}
+          width="100%"
+          height="auto"
+          controls
+        />
+      );
     case "PRESENTATION":
     case "DOCUMENT":
-      return <PdfViewer url={url} />;
+      return <PdfViewer url={mediaRecord.downloadUrl} />;
     default:
       return <>Unsupported media type</>;
   }
 }
 
-function DownloadButton({
+export function DownloadButton({
   _record,
 }: {
   _record: studentContentDownloadButtonFragment$key;
@@ -148,17 +134,16 @@ function DownloadButton({
   const mediaRecord = useFragment(
     graphql`
       fragment studentContentDownloadButtonFragment on MediaRecord {
-        ...studentFixRecordUrlFragment
         name
+        downloadUrl
       }
     `,
     _record
   );
 
-  const url = useDownloadUrl(mediaRecord);
   return (
     <Button
-      href={url}
+      href={mediaRecord.downloadUrl}
       target="_blank"
       download={mediaRecord.name}
       sx={{ color: "text.secondary" }}

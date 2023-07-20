@@ -143,6 +143,27 @@ export function MediaContentModal({
           },
         });
       }
+
+      const removedRecords =
+        existingContent?.mediaRecords.filter(
+          (r) => !selectedRecords.map((sr) => sr.id).includes(r.id)
+        ) ?? [];
+      for (const record of removedRecords) {
+        await updateMediaRecord({
+          variables: {
+            input: {
+              id: record.id,
+              contentIds: uniq([
+                ...record.contentIds.filter(
+                  (cid) => cid != existingContent!.id
+                ),
+              ]),
+              name: record.name,
+              type: record.type,
+            },
+          },
+        });
+      }
     };
 
     if (existingContent) {

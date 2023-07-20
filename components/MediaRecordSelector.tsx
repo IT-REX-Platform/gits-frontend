@@ -105,7 +105,9 @@ export function MediaRecordSelector({
       for (const file of acceptedFiles) {
         let type: MediaType;
 
-        if (file.type.includes("audio")) {
+        if (file.type.includes("video")) {
+          type = "VIDEO";
+        } else if (file.type.includes("audio")) {
           type = "AUDIO";
         } else if (file.type.includes("image")) {
           type = "IMAGE";

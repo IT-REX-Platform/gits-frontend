@@ -1,5 +1,6 @@
 "use client";
 import { studentCourseIdQuery } from "@/__generated__/studentCourseIdQuery.graphql";
+import { studentCourseIdScoreboardQuery } from "@/__generated__/studentCourseIdScoreboardQuery.graphql";
 import {
   Button,
   Dialog,
@@ -29,10 +30,15 @@ import { ChapterHeader } from "@/components/ChapterHeader";
 import { FlashcardContent, MediaContent } from "@/components/Content";
 import { RewardScores } from "@/components/RewardScores";
 import { Info } from "@mui/icons-material";
+import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import dayjs from "dayjs";
 import { useState } from "react";
 import Link from "next/link";
-import { studentCourseIdScoreboardQuery } from "@/__generated__/studentCourseIdScoreboardQuery.graphql";
+
+interface Data {
+  name: string;
+  power: number;
+}
 
 function createData(name: string, power: number) {
   return { name, power };
@@ -45,8 +51,6 @@ export default function StudentCoursePage() {
 
   // Info dialog
   const [infoDialogOpen, setInfoDialogOpen] = useState(false);
-
-  const rows: any[] = [];
 
   // Fetch course data
   const { coursesById } = useLazyLoadQuery<studentCourseIdQuery>(
@@ -113,12 +117,11 @@ export default function StudentCoursePage() {
   }
 
   // Extract scoreboard
-  scoreboard.forEach((element, index: number) => {
-    if (index < 3) {
-      rows.push(createData(element.user.userName, element.powerScore));
-    }
-    index++;
-  });
+  const rows: Data[] = scoreboard
+    .slice(0, 3)
+    .map((element, index) =>
+      createData(element.user.userName, element.powerScore)
+    );
 
   // Extract course
   const course = coursesById[0];
@@ -153,16 +156,12 @@ export default function StudentCoursePage() {
           <RewardScores _scores={course.rewardScores} />
         </div>
         <div>
-          <TableContainer component={Paper} className="my-10">
+          <TableContainer component={Paper} className="my-12">
             <Table sx={{ minWidth: 650 }} size="small">
               <TableHead>
                 <TableRow>
-                  <TableCell sx={{ backgroundColor: "#90a4ae" }}>
-                    Student Name
-                  </TableCell>
-                  <TableCell sx={{ backgroundColor: "#90a4ae" }} align="right">
-                    Power
-                  </TableCell>
+                  <TableCell>Student Name</TableCell>
+                  <TableCell align="right">Power</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -181,7 +180,9 @@ export default function StudentCoursePage() {
             </Table>
           </TableContainer>
           <Link href={{ pathname: `${id}/scoreboard` }}>
-            <Button variant="contained">Full Scoreboard</Button>
+            <Button variant="text" endIcon={<NavigateNextIcon />}>
+              Full Scoreboard
+            </Button>
           </Link>
         </div>
       </div>

@@ -3,16 +3,24 @@
 import { studentContentDownloadButtonFragment$key } from "@/__generated__/studentContentDownloadButtonFragment.graphql";
 import { studentContentMediaDisplayFragment$key } from "@/__generated__/studentContentMediaDisplayFragment.graphql";
 import { studentFixRecordUrlFragment$key } from "@/__generated__/studentFixRecordUrlFragment.graphql";
+import { studentMediaLogProgressMutation } from "@/__generated__/studentMediaLogProgressMutation.graphql";
 import { studentMediaQuery } from "@/__generated__/studentMediaQuery.graphql";
 import { MediaContent } from "@/components/Content";
 import { Heading } from "@/components/Heading";
 import { PdfViewer } from "@/components/PdfViewer";
 import { Download } from "@mui/icons-material";
 import { Button, Typography } from "@mui/material";
+import { first } from "lodash";
 import Error from "next/error";
 import { useParams, useSearchParams } from "next/navigation";
+import { useEffect } from "react";
 import ReactPlayer from "react-player";
-import { graphql, useFragment, useLazyLoadQuery } from "react-relay";
+import {
+  graphql,
+  useFragment,
+  useLazyLoadQuery,
+  useMutation,
+} from "react-relay";
 
 export default function StudentMediaPage() {
   const { mediaId } = useParams();
@@ -42,22 +50,42 @@ export default function StudentMediaPage() {
     { mediaId }
   );
 
+  const recordId = searchParams.get("recordId");
+
+  const content = media.contentsByIds[0];
+
+  const mainRecord = recordId
+    ? content?.mediaRecords?.find((record) => record.id === recordId)
+    : first(content?.mediaRecords ?? []);
+
+  const [mediaRecordWorkedOn] =
+    useMutation<studentMediaLogProgressMutation>(graphql`
+      mutation studentMediaLogProgressMutation($id: UUID!) {
+        logMediaRecordWorkedOn(mediaRecordId: $id) {
+          id
+        }
+      }
+    `);
+
+  useEffect(() => {
+    if (mainRecord) {
+      const timeout = setTimeout(() => {
+        mediaRecordWorkedOn({ variables: { id: mainRecord.id } });
+      }, 5000);
+      return () => clearTimeout(timeout);
+    }
+  }, [mainRecord, mediaRecordWorkedOn]);
+
   if (media.contentsByIds.length == 0) {
     return <Error statusCode={404} />;
   }
 
-  const content = media.contentsByIds[0];
   if (content.metadata.type !== "MEDIA") {
     return <Error statusCode={400} />;
   }
   if (!content.mediaRecords || content.mediaRecords.length == 0) {
     return <Error statusCode={404} />;
   }
-
-  const recordId = searchParams.get("recordId");
-  const mainRecord = recordId
-    ? content.mediaRecords.find((record) => record.id === recordId)
-    : content.mediaRecords[0];
 
   if (mainRecord == null) {
     return <Error statusCode={404} />;

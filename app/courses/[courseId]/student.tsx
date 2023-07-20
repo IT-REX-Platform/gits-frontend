@@ -1,10 +1,26 @@
 "use client";
 import { studentCourseIdQuery } from "@/__generated__/studentCourseIdQuery.graphql";
-import { Dialog, DialogTitle, IconButton, Typography } from "@mui/material";
+import { studentCourseIdScoreboardQuery } from "@/__generated__/studentCourseIdScoreboardQuery.graphql";
+import {
+  Button,
+  Dialog,
+  DialogTitle,
+  IconButton,
+  Typography,
+} from "@mui/material";
 import { chain } from "lodash";
 import Error from "next/error";
 import { useParams } from "next/navigation";
 import { graphql, useLazyLoadQuery } from "react-relay";
+
+import * as React from "react";
+import Table from "@mui/material/Table";
+import TableBody from "@mui/material/TableBody";
+import TableCell from "@mui/material/TableCell";
+import TableContainer from "@mui/material/TableContainer";
+import TableHead from "@mui/material/TableHead";
+import TableRow from "@mui/material/TableRow";
+import Paper from "@mui/material/Paper";
 
 import {
   ChapterContent,
@@ -14,8 +30,19 @@ import { ChapterHeader } from "@/components/ChapterHeader";
 import { FlashcardContent, MediaContent } from "@/components/Content";
 import { RewardScores } from "@/components/RewardScores";
 import { Info } from "@mui/icons-material";
+import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import dayjs from "dayjs";
 import { useState } from "react";
+import Link from "next/link";
+
+interface Data {
+  name: string;
+  power: number;
+}
+
+function createData(name: string, power: number) {
+  return { name, power };
+}
 
 export default function StudentCoursePage() {
   // Get course id from url
@@ -70,10 +97,29 @@ export default function StudentCoursePage() {
     { id: [id] }
   );
 
+  const { scoreboard } = useLazyLoadQuery<studentCourseIdScoreboardQuery>(
+    graphql`
+      query studentCourseIdScoreboardQuery($courseId: UUID!) {
+        scoreboard(courseId: $courseId) {
+          user {
+            userName
+          }
+          powerScore
+        }
+      }
+    `,
+    { courseId: id }
+  );
+
   // Show 404 error page if id was not found
   if (coursesById.length == 0) {
     return <Error statusCode={404} title="Course could not be found." />;
   }
+
+  // Extract scoreboard
+  const rows: Data[] = scoreboard
+    .slice(0, 3)
+    .map((element) => createData(element.user.userName, element.powerScore));
 
   // Extract course
   const course = coursesById[0];
@@ -103,9 +149,40 @@ export default function StudentCoursePage() {
         description={course.description}
         onClose={() => setInfoDialogOpen(false)}
       />
-
-      <div className="w-fit my-12 pl-8 pr-10 py-6 border-4 border-slate-200 rounded-3xl">
-        <RewardScores _scores={course.rewardScores} />
+      <div className="grid grid-cols-2">
+        <div className="w-fit my-12 pl-8 pr-10 py-6 border-4 border-slate-200 rounded-3xl">
+          <RewardScores _scores={course.rewardScores} />
+        </div>
+        <div>
+          <TableContainer component={Paper} className="my-12">
+            <Table sx={{ minWidth: 650 }} size="small">
+              <TableHead>
+                <TableRow>
+                  <TableCell>Student Name</TableCell>
+                  <TableCell align="right">Power</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {rows.map((row) => (
+                  <TableRow
+                    key={row.name}
+                    sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
+                  >
+                    <TableCell component="th" scope="row">
+                      {row.name}
+                    </TableCell>
+                    <TableCell align="right">{row.power}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+          <Link href={{ pathname: `${id}/scoreboard` }}>
+            <Button variant="text" endIcon={<NavigateNextIcon />}>
+              Full Scoreboard
+            </Button>
+          </Link>
+        </div>
       </div>
 
       <section className="mt-16">

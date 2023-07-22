@@ -198,6 +198,7 @@ export function MediaRecordSelector({
           className="grow"
           label="Search Media"
           variant="outlined"
+          sx={{ margin: "8px" }}
           value={search}
           onChange={(x) => setSearch(x.target.value)}
         />

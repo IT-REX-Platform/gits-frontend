@@ -31,6 +31,7 @@ import {
   ListItemButton,
   ListItemIcon,
   ListItemText,
+  TextField,
 } from "@mui/material";
 import { useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
@@ -169,13 +170,40 @@ export function MediaRecordSelector({
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
 
+  const [search, setSearch] = useState("");
+
+  const filteredMedia = mediaRecords.filter(
+    (x) => !search || x.name.toLowerCase().includes(search.toLowerCase())
+  );
+
   return (
     <>
       <Dialog maxWidth="md" open={isOpen} onClose={onClose}>
         <DialogTitle>Add media</DialogTitle>
+
+        <div
+          className="m-2 flex  items-center gap-8 w-96 min-h-36 bg-slate-100 shadow-inner hover:bg-slate-200 p-8 rounded-md border border-dashed border-slate-500 cursor-pointer"
+          {...getRootProps()}
+        >
+          <input {...getInputProps()} />
+          <FileUploadOutlined />
+          {isDragActive ? (
+            <p>Drop the files here ...</p>
+          ) : (
+            <p>Drag & drop some files here, or click to select files</p>
+          )}
+        </div>
+        <TextField
+          id="outlined-basic"
+          className="grow"
+          label="Search Media"
+          variant="outlined"
+          value={search}
+          onChange={(x) => setSearch(x.target.value)}
+        />
         <DialogContent sx={{ paddingX: 0 }}>
           <List>
-            {mediaRecords.map((record) => {
+            {filteredMedia.map((record) => {
               const checked = selectedRecords.find((x) => x.id === record.id);
               const toggle = () =>
                 setSelectedRecords(
@@ -257,19 +285,6 @@ export function MediaRecordSelector({
             })}
           </List>
         </DialogContent>
-
-        <div
-          className="m-4 flex  items-center gap-8 w-96 min-h-36 bg-slate-100 shadow-inner hover:bg-slate-200 p-8 rounded-md border border-dashed border-slate-500 cursor-pointer"
-          {...getRootProps()}
-        >
-          <input {...getInputProps()} />
-          <FileUploadOutlined />
-          {isDragActive ? (
-            <p>Drop the files here ...</p>
-          ) : (
-            <p>Drag & drop some files here, or click to select files</p>
-          )}
-        </div>
         <DialogActions>
           <Button onClick={onClose}>Ok</Button>
         </DialogActions>

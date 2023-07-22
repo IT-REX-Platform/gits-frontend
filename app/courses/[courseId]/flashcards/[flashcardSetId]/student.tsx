@@ -10,7 +10,6 @@ import { chain } from "lodash";
 import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
 import ReactMarkdown from "react-markdown";
-import { useAuth } from "react-oidc-context";
 import { graphql, useLazyLoadQuery, useMutation } from "react-relay";
 
 export default function StudentFlashcards() {
@@ -20,31 +19,35 @@ export default function StudentFlashcards() {
   const [currentIndex, setCurrentIndex] = useState(0);
 
   // Fetch course data
-  const { contentsByIds } = useLazyLoadQuery<studentFlashcardsQuery>(
-    graphql`
-      query studentFlashcardsQuery($id: [UUID!]!) {
-        contentsByIds(ids: $id) {
-          id
-          metadata {
-            name
+  const { contentsByIds, currentUserInfo } =
+    useLazyLoadQuery<studentFlashcardsQuery>(
+      graphql`
+        query studentFlashcardsQuery($id: [UUID!]!) {
+          currentUserInfo {
+            id
           }
-          ... on FlashcardSetAssessment {
-            flashcardSet {
-              flashcards {
-                id
-                sides {
-                  isQuestion
-                  label
-                  text
+          contentsByIds(ids: $id) {
+            id
+            metadata {
+              name
+            }
+            ... on FlashcardSetAssessment {
+              flashcardSet {
+                flashcards {
+                  id
+                  sides {
+                    isQuestion
+                    label
+                    text
+                  }
                 }
               }
             }
           }
         }
-      }
-    `,
-    { id: [flashcardSetId] }
-  );
+      `,
+      { id: [flashcardSetId] }
+    );
 
   const [flashcardLearned, logging] =
     useMutation<studentFlashcardLogProgressMutation>(graphql`
@@ -69,14 +72,7 @@ export default function StudentFlashcards() {
 
   const [error, setError] = useState<any>(null);
 
-  const { user } = useAuth();
-
   const nextCard = async () => {
-    // TODO it shouldn't even be required that we pass the user id
-    if (!user) {
-      throw new Error("USER MISSING");
-    }
-
     const knewAll = chain(currentFlashcard.sides)
       .filter((x) => !x.isQuestion)
       .map((x) => knew[x.label] ?? false)
@@ -88,7 +84,7 @@ export default function StudentFlashcards() {
         input: {
           flashcardId: currentFlashcard.id,
           successful: knewAll,
-          userId: user.profile.sub,
+          userId: currentUserInfo.id,
         },
       },
       onCompleted() {

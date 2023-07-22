@@ -206,7 +206,7 @@ export default function LecturerCoursePage() {
                 content.__typename === "FlashcardSetAssessment" ? (
                   <FlashcardContent key={content.id} _flashcard={content} />
                 ) : content.__typename === "MediaContent" ? (
-                  <MediaContent _media={content} />
+                  <MediaContent key={content.id} _media={content} />
                 ) : null
               )}
               <div className="col-span-full mt-2 flex gap-2">

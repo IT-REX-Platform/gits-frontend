@@ -4,7 +4,7 @@ import React, { useContext, useState } from "react";
 
 export enum PageView {
   Student = "student",
-  Lecturer = "lecturer",
+  Lecturer = "TUTOR",
 }
 
 const PageViewContext = React.createContext<{

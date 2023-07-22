@@ -25,6 +25,7 @@ export default function LecturerMediaPage() {
           metadata {
             name
             type
+            chapterId
           }
           ... on MediaContent {
             mediaRecords {
@@ -97,15 +98,31 @@ export default function LecturerMediaPage() {
               sx={{ color: "text.secondary" }}
               startIcon={deleting ? <CircularProgress size={16} /> : <Delete />}
               onClick={() => {
-                del({
-                  variables: { id: content.id },
-                  onCompleted() {
-                    router.push(`/courses/${courseId}`);
-                  },
-                  onError(error) {
-                    setError(error);
-                  },
-                });
+                if (
+                  confirm(
+                    "Do you really want to delete this content? This can't be undone."
+                  )
+                ) {
+                  del({
+                    variables: { id: content.id },
+                    onCompleted() {
+                      router.push(`/courses/${courseId}`);
+                    },
+                    onError(error) {
+                      setError(error);
+                    },
+                    updater(store) {
+                      const chapter = store.get(content.metadata.chapterId);
+                      const contents = chapter?.getLinkedRecords("contents");
+                      if (chapter && contents) {
+                        chapter.setLinkedRecords(
+                          contents.filter((x) => x.getDataID() !== content.id),
+                          "contents"
+                        );
+                      }
+                    },
+                  });
+                }
               }}
             >
               Delete

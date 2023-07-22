@@ -1,11 +1,14 @@
 "use client";
 import { ContentDocumentFragment$key } from "@/__generated__/ContentDocumentFragment.graphql";
 import { ContentFlashcardFragment$key } from "@/__generated__/ContentFlashcardFragment.graphql";
+import { ContentInvalidDeleteMutation } from "@/__generated__/ContentInvalidDeleteMutation.graphql";
 import { ContentMediaFragment$key } from "@/__generated__/ContentMediaFragment.graphql";
 import { ContentPresentationFragment$key } from "@/__generated__/ContentPresentationFragment.graphql";
 import { ContentVideoFragment$key } from "@/__generated__/ContentVideoFragment.graphql";
+import { PageView, usePageView } from "@/src/currentView";
 import {
   ArrowRight,
+  Delete,
   Description,
   Download,
   Language,
@@ -13,10 +16,10 @@ import {
   QuestionAnswerRounded,
   QuestionMark,
 } from "@mui/icons-material";
-import { CircularProgress, Typography } from "@mui/material";
+import { CircularProgress, IconButton, Typography } from "@mui/material";
 import { useParams, useRouter } from "next/navigation";
-import { MouseEventHandler, ReactElement } from "react";
-import { graphql, useFragment } from "react-relay";
+import { MouseEventHandler, ReactElement, ReactNode } from "react";
+import { graphql, useFragment, useMutation } from "react-relay";
 import colors from "tailwindcss/colors";
 
 export function MediaContent({
@@ -38,6 +41,7 @@ export function MediaContent({
         id
         metadata {
           name
+          chapterId
         }
         ...ContentVideoFragment
         ...ContentPresentationFragment
@@ -55,6 +59,8 @@ export function MediaContent({
   if (media.mediaRecords.length == 0) {
     return (
       <InvalidContent
+        id={media.id}
+        chapterId={media.metadata.chapterId}
         title="Invalid content"
         subtitle={media.metadata.name}
         disabled={disabled}
@@ -110,6 +116,8 @@ export function MediaContent({
     default:
       return (
         <InvalidContent
+          id={media.id}
+          chapterId={media.metadata.chapterId}
           title="Unknown content type"
           subtitle={subtitle}
           disabled={disabled}
@@ -141,9 +149,11 @@ export function VideoContent({
     _media
   );
 
+  const [pageView] = usePageView();
+
   return (
     <Content
-      title="Watch video"
+      title={pageView === PageView.Student ? "Watch Video" : "Video"}
       subtitle={subtitle}
       disabled={disabled}
       className="hover:bg-sky-100 rounded-full"
@@ -170,17 +180,60 @@ export function InvalidContent({
   title,
   subtitle,
   disabled = false,
+  id,
+  chapterId,
 }: {
   title: string;
   subtitle: string;
   disabled?: boolean;
+  id: string;
+  chapterId: string;
 }) {
+  const [del, deleting] = useMutation<ContentInvalidDeleteMutation>(graphql`
+    mutation ContentInvalidDeleteMutation($id: UUID!) {
+      deleteContent(id: $id)
+    }
+  `);
+
+  const [pageView] = usePageView();
+
+  if (pageView === PageView.Student) {
+    return null;
+  }
+
   return (
     <Content
       title={title}
       subtitle={subtitle}
       disabled={disabled}
       className="hover:bg-gray-100 rounded-xl"
+      action={
+        pageView === PageView.Lecturer ? (
+          <IconButton
+            href="#"
+            onClick={(e) => {
+              e.stopPropagation();
+              if (!deleting) {
+                del({
+                  variables: { id },
+                  updater(store) {
+                    const chapter = store.get(chapterId);
+                    const contents = chapter?.getLinkedRecords("contents");
+                    if (chapter && contents) {
+                      chapter.setLinkedRecords(
+                        contents.filter((x) => x.getDataID() !== id),
+                        "contents"
+                      );
+                    }
+                  },
+                });
+              }
+            }}
+          >
+            <Delete />
+          </IconButton>
+        ) : undefined
+      }
       icon={
         <QuestionMark
           sx={{
@@ -219,9 +272,11 @@ export function PresentationContent({
     _media
   );
 
+  const [pageView] = usePageView();
+
   return (
     <Content
-      title="Look at slides"
+      title={pageView === PageView.Student ? "Look at Slides" : "Slides"}
       subtitle={subtitle}
       disabled={disabled}
       className="hover:bg-violet-100 rounded-full"
@@ -267,9 +322,11 @@ export function DocumentContent({
     _media
   );
 
+  const [pageView] = usePageView();
+
   return (
     <Content
-      title="Read document"
+      title={pageView === PageView.Student ? "Read Document" : "Document"}
       subtitle={subtitle}
       disabled={disabled}
       className="hover:bg-indigo-100 rounded-full"
@@ -345,9 +402,11 @@ export function FlashcardContent({
 
   const { push } = useRouter();
 
+  const [pageView] = usePageView();
+
   return (
     <Content
-      title="Repeat flashcards"
+      title={pageView == PageView.Student ? "Repeat Flashcards" : "Flashcards"}
       subtitle={flashcard.metadata.name}
       disabled={disabled}
       className="hover:bg-emerald-100 rounded-full"
@@ -406,6 +465,7 @@ export function Content({
   disabled = false,
   className = "",
   onClick = undefined,
+  action,
 }: {
   title: string;
   subtitle: string;
@@ -414,11 +474,12 @@ export function Content({
   disabled?: boolean;
   className?: string;
   onClick?: MouseEventHandler<HTMLButtonElement> | undefined;
+  action?: ReactNode;
 }) {
   return (
     <button
       disabled={disabled}
-      className={`group flex items-center text-left gap-4 pr-12 hover:disabled:bg-gray-50 ${
+      className={`group flex items-center text-left gap-4 pr-3 hover:disabled:bg-gray-50 ${
         !disabled ? "cursor-pointer" : "cursor-default"
       } ${className}`}
       onClick={onClick}
@@ -445,6 +506,8 @@ export function Content({
           {subtitle}
         </Typography>
       </div>
+      <div className="flex-1"></div>
+      {action}
     </button>
   );
 }

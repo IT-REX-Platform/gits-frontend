@@ -1,4 +1,5 @@
 import { lecturerAddFlashcardMutation } from "@/__generated__/lecturerAddFlashcardMutation.graphql";
+import { lecturerDeleteFlashcardContentMutation } from "@/__generated__/lecturerDeleteFlashcardContentMutation.graphql";
 import { lecturerEditFlashcardFragment$key } from "@/__generated__/lecturerEditFlashcardFragment.graphql";
 import { lecturerEditFlashcardMutation } from "@/__generated__/lecturerEditFlashcardMutation.graphql";
 import { lecturerEditFlashcardSetModalFragment$key } from "@/__generated__/lecturerEditFlashcardSetModalFragment.graphql";
@@ -13,7 +14,7 @@ import {
 } from "@/components/ContentMetadataFormSection";
 import { Form, FormSection } from "@/components/Form";
 import { Heading } from "@/components/Heading";
-import { Add, Edit, Help, QuestionAnswer } from "@mui/icons-material";
+import { Add, Delete, Edit, Help, QuestionAnswer } from "@mui/icons-material";
 import {
   Alert,
   Backdrop,
@@ -34,7 +35,7 @@ import {
   Typography,
 } from "@mui/material";
 import Error from "next/error";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
 import {
   graphql,
@@ -44,7 +45,7 @@ import {
 } from "react-relay";
 
 export default function EditFlashcards() {
-  const { flashcardSetId } = useParams();
+  const { flashcardSetId, courseId } = useParams();
   const { contentsByIds } = useLazyLoadQuery<lecturerEditFlashcardsQuery>(
     graphql`
       query lecturerEditFlashcardsQuery($id: UUID!) {
@@ -102,6 +103,15 @@ export default function EditFlashcards() {
   const content = contentsByIds[0];
   const flashcardSet = content.flashcardSet;
 
+  const [del, deleting] =
+    useMutation<lecturerDeleteFlashcardContentMutation>(graphql`
+      mutation lecturerDeleteFlashcardContentMutation($id: UUID!) {
+        deleteContent(id: $id)
+      }
+    `);
+
+  const router = useRouter();
+
   if (flashcardSet == null) {
     return <Error statusCode={400} />;
   }
@@ -158,13 +168,49 @@ export default function EditFlashcards() {
       <Heading
         title={content.metadata.name}
         action={
-          <Button
-            sx={{ color: "text.secondary" }}
-            startIcon={<Edit />}
-            onClick={() => setEditSetOpen(true)}
-          >
-            Edit
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              sx={{ color: "text.secondary" }}
+              startIcon={deleting ? <CircularProgress size={16} /> : <Delete />}
+              onClick={() => {
+                if (
+                  confirm(
+                    "Do you really want to delete this flashcard set? This can't be undone."
+                  )
+                ) {
+                  del({
+                    variables: { id: content.id },
+                    onCompleted() {
+                      router.push(`/courses/${courseId}`);
+                    },
+                    onError(error) {
+                      setError(error);
+                    },
+                    updater(store) {
+                      const chapter = store.get(content.metadata.chapterId);
+                      const contents = chapter?.getLinkedRecords("contents");
+                      if (chapter && contents) {
+                        chapter.setLinkedRecords(
+                          contents.filter((x) => x.getDataID() !== content.id),
+                          "contents"
+                        );
+                      }
+                    },
+                  });
+                }
+              }}
+            >
+              Delete
+            </Button>
+
+            <Button
+              sx={{ color: "text.secondary" }}
+              startIcon={<Edit />}
+              onClick={() => setEditSetOpen(true)}
+            >
+              Edit
+            </Button>
+          </div>
         }
         backButton
       />

@@ -8,19 +8,18 @@ import {
   IconButton,
   Typography,
 } from "@mui/material";
-import { chain } from "lodash";
+import { chain, orderBy } from "lodash";
 import Error from "next/error";
 import { useParams } from "next/navigation";
 import { graphql, useLazyLoadQuery } from "react-relay";
 
-import * as React from "react";
+import Paper from "@mui/material/Paper";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
-import Paper from "@mui/material/Paper";
 
 import {
   ChapterContent,
@@ -32,8 +31,8 @@ import { RewardScores } from "@/components/RewardScores";
 import { Info } from "@mui/icons-material";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import dayjs from "dayjs";
-import { useState } from "react";
 import Link from "next/link";
+import { useState } from "react";
 
 interface Data {
   name: string;
@@ -191,7 +190,7 @@ export default function StudentCoursePage() {
         </div>
       </section>
 
-      {course.chapters.elements.map((chapter) => (
+      {orderBy(course.chapters.elements, (x) => x.number).map((chapter) => (
         <section key={chapter.id} className="mt-24">
           <ChapterHeader
             title={chapter.title}

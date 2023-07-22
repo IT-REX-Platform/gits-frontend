@@ -57,6 +57,7 @@ import { Form, FormSection } from "@/components/Form";
 import { Add, Edit, RemoveRedEye, Settings } from "@mui/icons-material";
 import { DatePicker } from "@mui/x-date-pickers";
 import dayjs, { Dayjs } from "dayjs";
+import { orderBy } from "lodash";
 import { useState } from "react";
 import { MediaContentModal } from "../../../components/MediaContentModal";
 
@@ -180,7 +181,7 @@ export default function LecturerCoursePage() {
         iconFrame={<ProgressFrame color="lightblue" progress={0} />}
       />
 
-      {course.chapters.elements.map((chapter) => (
+      {orderBy(course.chapters.elements, (x) => x.number).map((chapter) => (
         <section key={chapter.id} className="mt-6">
           <ChapterHeader
             title={

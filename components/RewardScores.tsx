@@ -1,5 +1,10 @@
 import { RewardScoresFragment$key } from "@/__generated__/RewardScoresFragment.graphql";
-import { Typography } from "@mui/material";
+import {
+  RewardScoresStatFragment$data,
+  RewardScoresStatFragment$key,
+} from "@/__generated__/RewardScoresStatFragment.graphql";
+import { Tooltip, Typography } from "@mui/material";
+import { chain } from "lodash";
 import { ReactElement } from "react";
 import { useFragment } from "react-relay";
 import { graphql } from "relay-runtime";
@@ -14,16 +19,16 @@ export function RewardScores({
     graphql`
       fragment RewardScoresFragment on RewardScores {
         health {
-          value
+          ...RewardScoresStatFragment
         }
         fitness {
-          value
+          ...RewardScoresStatFragment
         }
         growth {
-          percentage
+          ...RewardScoresStatFragment
         }
         power {
-          value
+          ...RewardScoresStatFragment
         }
       }
     `,
@@ -36,29 +41,33 @@ export function RewardScores({
         <StatDisplay
           label="Health"
           color={colors.red[500]}
-          progress={rewardScores.health.value}
+          formatter={(x) => x.value}
           icon={<HealthIcon />}
+          _score={rewardScores.health}
         />
         <StatDisplay
           label="Fitness"
           color={colors.blue[500]}
-          progress={rewardScores.fitness.value}
+          formatter={(x) => x.value}
           icon={<FitnessIcon />}
+          _score={rewardScores.fitness}
         />
       </div>
       <div className="flex flex-col gap-2">
         <StatDisplay
           label="Growth"
           color={colors.green[500]}
-          progress={rewardScores.growth.percentage * 100}
+          formatter={(x) => x.percentage * 100}
           icon={<GrowthIcon />}
+          _score={rewardScores.growth}
         />
         <StatDisplay
           label="Power"
           color={colors.amber[400]}
-          progress={rewardScores.power.value}
+          formatter={(x) => x.value}
           icon={<PowerIcon />}
           noBar
+          _score={rewardScores.power}
         />
       </div>
     </div>
@@ -67,24 +76,49 @@ export function RewardScores({
 
 export function StatDisplay({
   label,
-  progress,
   color,
   icon,
   noBar = false,
+  _score,
+  formatter,
 }: {
   label: string;
-  progress: number;
   color: string;
   icon: ReactElement;
   noBar?: boolean;
+  _score: RewardScoresStatFragment$key;
+  formatter: (x: RewardScoresStatFragment$data) => number;
 }) {
-  const score = noBar ? (
-    <ProgressValue color={color} progress={progress} />
-  ) : (
-    <ProgressBar color={color} progress={progress} />
+  const data = useFragment(
+    graphql`
+      fragment RewardScoresStatFragment on RewardScore {
+        value
+        percentage
+        log {
+          date
+          difference
+          associatedContents {
+            metadata {
+              name
+            }
+          }
+        }
+      }
+    `,
+    _score
   );
 
-  return (
+  const lastThreeChanges = chain(data.log)
+    .orderBy((x) => x.date, "desc")
+    .slice(0, 3)
+    .value();
+
+  const score = noBar ? (
+    <ProgressValue color={color} progress={formatter(data)} />
+  ) : (
+    <ProgressBar color={color} progress={formatter(data)} />
+  );
+  const content = (
     <div className="flex items-end gap-4">
       <div className="w-8 flex justify-center">{icon}</div>
       <div className="flex flex-col">
@@ -93,6 +127,31 @@ export function StatDisplay({
       </div>
     </div>
   );
+
+  if (data.log.length > 0) {
+    return (
+      <Tooltip
+        title={
+          <div>
+            Verlauf:
+            <br />
+            {lastThreeChanges.map((x, index) => (
+              <div key={index}>
+                {new Date(x.date).toLocaleDateString("de-DE")}&nbsp;&nbsp;{" "}
+                {x.difference.toLocaleString("de-DE", {
+                  signDisplay: "exceptZero",
+                })}
+              </div>
+            ))}
+          </div>
+        }
+      >
+        {content}
+      </Tooltip>
+    );
+  } else {
+    return content;
+  }
 }
 
 export function ProgressValue({

@@ -52,6 +52,7 @@ export default function StudentCoursePage() {
   const router = useRouter();
   // Info dialog
   const [infoDialogOpen, setInfoDialogOpen] = useState(false);
+  const [error, setError] = useState<any>(null);
 
   // Fetch course data
   const {
@@ -142,7 +143,6 @@ export default function StudentCoursePage() {
     .filter((x) => x.metadata.type === "MEDIA")
     .minBy((x) => new Date(x.userProgressData.nextLearnDate))
     .value();
-  const [error, setError] = useState<any>(null);
 
   return (
     <main>

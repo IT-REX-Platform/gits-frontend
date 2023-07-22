@@ -34,6 +34,8 @@ import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import dayjs from "dayjs";
 import Link from "next/link";
 import { useState } from "react";
+import { Topic, TopicContent, TopicHeader } from "@/components/Topic";
+import { TopicStage, TopicStageBarrier } from "@/components/TopicStage";
 
 interface Data {
   name: string;
@@ -246,6 +248,76 @@ export default function StudentCoursePage() {
             </Button>
           </Link>
         </div>
+      </div>
+
+      <div className="mt-12"></div>
+      <ChapterHeader
+        title="Chapter 1: Data Structures"
+        subtitle="1. Janurary 2023 - 2. Februrary 2023"
+        progress={30}
+        skill_levels={{
+          remember: "green",
+          analyze: "red",
+          apply: "red",
+          understand: "yellow",
+        }}
+      />
+      <div className="mt-8 pb-4 flex gap-12 items-start overflow-x-auto thin-scrollbar">
+        <Topic>
+          <TopicHeader>Linked Lists</TopicHeader>
+          <TopicContent>
+            <TopicStage progress={60}>
+              {nextFlashcard && <FlashcardContent _flashcard={nextFlashcard} />}
+              {nextFlashcard && <FlashcardContent _flashcard={nextFlashcard} />}
+              {nextFlashcard && <FlashcardContent _flashcard={nextFlashcard} />}
+            </TopicStage>
+            <TopicStageBarrier />
+            <TopicStage progress={0}>
+              {nextVideo && <MediaContent disabled _media={nextVideo} />}
+              {nextVideo && <MediaContent disabled _media={nextVideo} />}
+            </TopicStage>
+          </TopicContent>
+        </Topic>
+        <Topic>
+          <TopicHeader done>Linked Lists</TopicHeader>
+          <TopicContent>
+            <TopicStage progress={100}>
+              {nextFlashcard && <FlashcardContent _flashcard={nextFlashcard} />}
+              {nextFlashcard && <FlashcardContent _flashcard={nextFlashcard} />}
+            </TopicStage>
+            <TopicStage progress={80}>
+              {nextVideo && <MediaContent _media={nextVideo} />}
+              {nextVideo && <MediaContent _media={nextVideo} />}
+            </TopicStage>
+          </TopicContent>
+        </Topic>
+        <Topic>
+          <TopicHeader>Linked Lists</TopicHeader>
+          <TopicContent>
+            <TopicStage progress={60}>
+              {nextFlashcard && <FlashcardContent _flashcard={nextFlashcard} />}
+            </TopicStage>
+            <TopicStageBarrier />
+            <TopicStage progress={0}>
+              {nextVideo && <MediaContent disabled _media={nextVideo} />}
+            </TopicStage>
+          </TopicContent>
+        </Topic>
+        <Topic>
+          <TopicHeader>Linked Lists</TopicHeader>
+          <TopicContent>
+            <TopicStage progress={60}>
+              {nextFlashcard && <FlashcardContent _flashcard={nextFlashcard} />}
+              {nextFlashcard && <FlashcardContent _flashcard={nextFlashcard} />}
+              {nextFlashcard && <FlashcardContent _flashcard={nextFlashcard} />}
+            </TopicStage>
+            <TopicStageBarrier />
+            <TopicStage progress={0}>
+              {nextVideo && <MediaContent disabled _media={nextVideo} />}
+              {nextVideo && <MediaContent disabled _media={nextVideo} />}
+            </TopicStage>
+          </TopicContent>
+        </Topic>
       </div>
 
       <section className="mt-16">

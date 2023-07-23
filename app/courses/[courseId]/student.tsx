@@ -8,7 +8,7 @@ import {
   IconButton,
   Typography,
 } from "@mui/material";
-import { chain } from "lodash";
+import { chain, orderBy } from "lodash";
 import Error from "next/error";
 import { useParams, useRouter } from "next/navigation";
 import { graphql, useLazyLoadQuery, useMutation } from "react-relay";
@@ -250,7 +250,7 @@ export default function StudentCoursePage() {
         </div>
       </section>
 
-      {course.chapters.elements.map((chapter) => (
+      {orderBy(course.chapters.elements, (x) => x.number).map((chapter) => (
         <section key={chapter.id} className="mt-24">
           <ChapterHeader
             title={chapter.title}

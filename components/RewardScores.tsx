@@ -137,7 +137,7 @@ function HealthIcon() {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      height="1.875rem"
+      height="30px"
       viewBox="0 0 512 512"
       fill={colors.red[500]}
     >
@@ -150,7 +150,7 @@ function FitnessIcon() {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      height="1.75rem"
+      height="28px"
       viewBox="0 0 448 512"
       fill={colors.blue[500]}
     >
@@ -163,7 +163,7 @@ function GrowthIcon() {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      height="1.75rem"
+      height="28px"
       viewBox="0 0 512 512"
       fill={colors.green[500]}
     >
@@ -177,7 +177,7 @@ function PowerIcon() {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      height="1.75rem"
+      height="28px"
       viewBox="0 0 512 512"
       fill={colors.amber[400]}
     >

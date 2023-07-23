@@ -1,7 +1,7 @@
 "use client";
 import { studentCourseIdQuery } from "@/__generated__/studentCourseIdQuery.graphql";
-import { studentCourseIdScoreboardQuery } from "@/__generated__/studentCourseIdScoreboardQuery.graphql";
 import {
+  Alert,
   Button,
   Dialog,
   DialogTitle,
@@ -10,8 +10,8 @@ import {
 } from "@mui/material";
 import { chain, orderBy } from "lodash";
 import Error from "next/error";
-import { useParams } from "next/navigation";
-import { graphql, useLazyLoadQuery } from "react-relay";
+import { useParams, useRouter } from "next/navigation";
+import { graphql, useLazyLoadQuery, useMutation } from "react-relay";
 
 import Paper from "@mui/material/Paper";
 import Table from "@mui/material/Table";
@@ -21,6 +21,7 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 
+import { studentCourseLeaveMutation } from "@/__generated__/studentCourseLeaveMutation.graphql";
 import {
   ChapterContent,
   ChapterContentItem,
@@ -48,14 +49,30 @@ export default function StudentCoursePage() {
   const params = useParams();
   const id = params.courseId;
 
+  const router = useRouter();
   // Info dialog
   const [infoDialogOpen, setInfoDialogOpen] = useState(false);
+  const [error, setError] = useState<any>(null);
 
   // Fetch course data
-  const { coursesById } = useLazyLoadQuery<studentCourseIdQuery>(
+  const {
+    coursesById,
+    scoreboard,
+    currentUserInfo: { id: userId },
+  } = useLazyLoadQuery<studentCourseIdQuery>(
     graphql`
-      query studentCourseIdQuery($id: [UUID!]!) {
-        coursesById(ids: $id) {
+      query studentCourseIdQuery($id: UUID!) {
+        scoreboard(courseId: $id) {
+          user {
+            userName
+          }
+          powerScore
+        }
+        currentUserInfo {
+          id
+        }
+
+        coursesById(ids: [$id]) {
           title
           description
           rewardScores {
@@ -91,22 +108,17 @@ export default function StudentCoursePage() {
         }
       }
     `,
-    { id: [id] }
+    { id }
   );
 
-  const { scoreboard } = useLazyLoadQuery<studentCourseIdScoreboardQuery>(
-    graphql`
-      query studentCourseIdScoreboardQuery($courseId: UUID!) {
-        scoreboard(courseId: $courseId) {
-          user {
-            userName
-          }
-          powerScore
-        }
+  const [leave] = useMutation<studentCourseLeaveMutation>(graphql`
+    mutation studentCourseLeaveMutation($input: CourseMembershipInput!) {
+      deleteMembership(input: $input) {
+        courseId
+        role
       }
-    `,
-    { courseId: id }
-  );
+    }
+  `);
 
   // Show 404 error page if id was not found
   if (coursesById.length == 0) {
@@ -134,11 +146,59 @@ export default function StudentCoursePage() {
 
   return (
     <main>
+      {error?.source.errors.map((err: any, i: number) => (
+        <Alert
+          key={i}
+          severity="error"
+          sx={{ minWidth: 400, maxWidth: 800, width: "fit-content" }}
+          onClose={() => setError(null)}
+        >
+          {err.message}
+        </Alert>
+      ))}
       <div className="flex gap-4 items-center">
         <Typography variant="h1">{course.title}</Typography>
         <IconButton onClick={() => setInfoDialogOpen(true)}>
           <Info />
         </IconButton>
+
+        <div className="flex-1"></div>
+
+        <Button
+          color="inherit"
+          size="small"
+          variant="text"
+          onClick={() => {
+            if (
+              confirm(
+                "Do you really want to leave this course? You might loose the progress you've already made"
+              )
+            ) {
+              leave({
+                variables: {
+                  input: { courseId: id, role: "STUDENT", userId },
+                },
+                onError: setError,
+
+                updater(store) {
+                  const userRecord = store.get(userId)!;
+                  const records =
+                    userRecord.getLinkedRecords("courseMemberships")!;
+
+                  userRecord.setLinkedRecords(
+                    records.filter((x) => x.getValue("courseId") !== id),
+                    "courseMemberships"
+                  );
+                },
+                onCompleted() {
+                  router.push("/courses");
+                },
+              });
+            }
+          }}
+        >
+          Leave course
+        </Button>
       </div>
       <InfoDialog
         open={infoDialogOpen}
@@ -214,7 +274,7 @@ export default function StudentCoursePage() {
                   content.metadata.type === "FLASHCARDS" ? (
                     <FlashcardContent key={content.id} _flashcard={content} />
                   ) : content.metadata.type === "MEDIA" ? (
-                    <MediaContent _media={content} />
+                    <MediaContent key={content.id} _media={content} />
                   ) : null
                 )}
               </ChapterContentItem>

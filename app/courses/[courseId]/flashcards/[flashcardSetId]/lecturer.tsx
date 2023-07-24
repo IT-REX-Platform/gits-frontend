@@ -46,6 +46,15 @@ import {
 
 export default function EditFlashcards() {
   const { flashcardSetId, courseId } = useParams();
+  const [del, deleting] =
+    useMutation<lecturerDeleteFlashcardContentMutation>(graphql`
+      mutation lecturerDeleteFlashcardContentMutation($id: UUID!) {
+        deleteContent(id: $id)
+      }
+    `);
+
+  const router = useRouter();
+
   const { contentsByIds } = useLazyLoadQuery<lecturerEditFlashcardsQuery>(
     graphql`
       query lecturerEditFlashcardsQuery($id: UUID!) {
@@ -102,15 +111,6 @@ export default function EditFlashcards() {
 
   const content = contentsByIds[0];
   const flashcardSet = content.flashcardSet;
-
-  const [del, deleting] =
-    useMutation<lecturerDeleteFlashcardContentMutation>(graphql`
-      mutation lecturerDeleteFlashcardContentMutation($id: UUID!) {
-        deleteContent(id: $id)
-      }
-    `);
-
-  const router = useRouter();
 
   if (flashcardSet == null) {
     return <Error statusCode={400} />;

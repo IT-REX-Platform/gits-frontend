@@ -1,5 +1,4 @@
 "use client";
-import { NavbarLecturerQuery } from "@/__generated__/NavbarLecturerQuery.graphql";
 import { NavbarStudentQuery } from "@/__generated__/NavbarStudentQuery.graphql";
 import logo from "@/assets/logo.svg";
 import { PageView, usePageView } from "@/src/currentView";
@@ -141,14 +140,20 @@ function UserInfo() {
   );
 }
 
-export function StudentNavbar() {
-  const { allCourses } = useLazyLoadQuery<NavbarStudentQuery>(
+export function Navbar() {
+  const [pageView] = usePageView();
+
+  const { currentUserInfo } = useLazyLoadQuery<NavbarStudentQuery>(
     graphql`
       query NavbarStudentQuery {
-        allCourses: courses {
-          elements {
-            id
-            title
+        currentUserInfo {
+          id
+          courseMemberships {
+            role
+            course {
+              id
+              title
+            }
           }
         }
       }
@@ -156,57 +161,31 @@ export function StudentNavbar() {
     {}
   );
 
+  const filtered = currentUserInfo.courseMemberships.filter(
+    (x) => x.role === "TUTOR" || pageView === PageView.Student
+  );
+
   return (
     <NavbarBase>
-      <NavbarSection title="Courses I'm attending">
-        {allCourses.elements.map((course) => (
-          <NavbarLink
-            key={course.id}
-            title={course.title}
-            href={`/courses/${course.id}`}
-          />
-        ))}
-      </NavbarSection>
-    </NavbarBase>
-  );
-}
-
-export function LecturerNavbar() {
-  const { allCourses } = useLazyLoadQuery<NavbarLecturerQuery>(
-    graphql`
-      query NavbarLecturerQuery {
-        allCourses: courses {
-          elements {
-            id
-            title
+      {filtered.length > 0 ? (
+        <NavbarSection
+          title={
+            pageView === PageView.Lecturer
+              ? "Courses I'm tutoring"
+              : "Courses I'm attending"
           }
-        }
-      }
-    `,
-    {}
-  );
-
-  return (
-    <NavbarBase>
-      <NavbarSection title="Courses I'm tutoring">
-        {allCourses.elements.map((course) => (
-          <NavbarLink
-            key={course.id}
-            title={course.title}
-            href={`/courses/${course.id}`}
-          />
-        ))}
-      </NavbarSection>
+        >
+          {filtered.map(({ course }) => (
+            <NavbarLink
+              key={course.id}
+              title={course.title}
+              href={`/courses/${course.id}`}
+            />
+          ))}
+        </NavbarSection>
+      ) : (
+        <></>
+      )}
     </NavbarBase>
   );
-}
-
-export function Navbar() {
-  const [pageView, _] = usePageView();
-  switch (pageView) {
-    case PageView.Student:
-      return <StudentNavbar />;
-    case PageView.Lecturer:
-      return <LecturerNavbar />;
-  }
 }

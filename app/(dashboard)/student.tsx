@@ -25,20 +25,23 @@ import { useLazyLoadQuery } from "react-relay";
 import { graphql } from "relay-runtime";
 
 export default function StudentPage() {
-  const { allCourses } = useLazyLoadQuery<studentStudentQuery>(
+  const { currentUserInfo } = useLazyLoadQuery<studentStudentQuery>(
     graphql`
       query studentStudentQuery {
-        allCourses: courses {
-          elements {
-            id
-            title
-            description
+        currentUserInfo {
+          courseMemberships {
+            role
+            course {
+              id
+              title
+            }
           }
         }
       }
     `,
     {}
   );
+  const courses = currentUserInfo.courseMemberships.map((x) => x.course);
 
   return (
     <main>
@@ -51,7 +54,7 @@ export default function StudentPage() {
 
       <div className="grid grid-cols-2 lg:grid-cols-3 gap-8 mt-8">
         {/* MOCK */}
-        {allCourses.elements.map((course) => (
+        {courses.map((course) => (
           <Card variant="outlined" className="h-full" key={course.id}>
             <CardContent>
               <div className="flex gap-4 items-center">

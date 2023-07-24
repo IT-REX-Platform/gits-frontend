@@ -221,7 +221,7 @@ export function MediaContentModal({
   }
 
   return (
-    <Dialog maxWidth="md" open={isOpen} onClose={onClose}>
+    <Dialog maxWidth="lg" open={isOpen} onClose={onClose}>
       <DialogTitle>Add media</DialogTitle>
       <DialogContent>
         {error?.source.errors.map((err: any, i: number) => (

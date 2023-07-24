@@ -22,7 +22,7 @@ export function ChapterHeader({
   skill_levels: SkillLevels;
 }) {
   return (
-    <div className="flex items-center py-2 pl-8 pr-12 -mx-8 mb-8 bg-slate-100">
+    <div className="flex items-center py-2 pl-8 pr-12 -mx-8 mb-8 bg-slate-50">
       <div className="mr-10">
         <ChapterProgress progress={progress} />
       </div>
@@ -51,7 +51,7 @@ export function ChapterProgress({ progress }: { progress: number }) {
         value={100}
         size="3rem"
         thickness={4}
-        className="!text-white"
+        className="!text-gray-200"
       />
       <CircularProgress
         className="absolute"

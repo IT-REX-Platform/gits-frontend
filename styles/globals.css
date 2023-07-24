@@ -27,6 +27,14 @@
   }
   .thin-scrollbar::-webkit-scrollbar {
     width: 8px;
+    height: 8px;
+  }
+  .thin-scrollbar::-webkit-scrollbar-track {
+    background-color: rgba(155, 155, 155, 0.1);
+  }
+  .thin-scrollbar::-webkit-scrollbar-thumb {
+    background-color: rgba(155, 155, 155, 0.5);
+    border: transparent;
   }
 
   .no-scrollbar {

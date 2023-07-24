@@ -250,10 +250,18 @@ export default function StudentCoursePage() {
         </div>
       </div>
 
-      <div className="mt-12"></div>
+      <section className="mt-16">
+        <Typography variant="h2">Up next</Typography>
+        <div className="mt-8 gap-8 grid gap-x-12 gap-y-4 grid-cols-[max-content] xl:grid-cols-[repeat(2,max-content)] 2xl:grid-cols-[repeat(3,max-content)]">
+          {nextFlashcard && <FlashcardContent _flashcard={nextFlashcard} />}
+          {nextVideo && <MediaContent _media={nextVideo} />}
+        </div>
+      </section>
+
+      <div className="mt-24"></div>
       <ChapterHeader
         title="Chapter 1: Data Structures"
-        subtitle="1. Janurary 2023 - 2. Februrary 2023"
+        subtitle="1. Janurary - 2. Februrary"
         progress={30}
         skill_levels={{
           remember: "green",
@@ -262,7 +270,7 @@ export default function StudentCoursePage() {
           understand: "yellow",
         }}
       />
-      <div className="mt-8 pb-4 flex gap-12 items-start overflow-x-auto thin-scrollbar">
+      <div className="pb-4 flex gap-12 items-start overflow-x-auto thin-scrollbar">
         <Topic>
           <TopicHeader>Linked Lists</TopicHeader>
           <TopicContent>

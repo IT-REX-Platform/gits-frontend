@@ -5,6 +5,7 @@ import {
 } from "@/__generated__/RewardScoresStatFragment.graphql";
 import { Tooltip, Typography } from "@mui/material";
 import { chain } from "lodash";
+import Link from "next/link";
 import { ReactElement } from "react";
 import { useFragment } from "react-relay";
 import { graphql } from "relay-runtime";
@@ -12,8 +13,10 @@ import colors from "tailwindcss/colors";
 
 export function RewardScores({
   _scores,
+  courseId,
 }: {
   _scores: RewardScoresFragment$key;
+  courseId: string;
 }) {
   const rewardScores = useFragment(
     graphql`
@@ -39,6 +42,7 @@ export function RewardScores({
     <div className="flex gap-12">
       <div className="flex flex-col gap-2">
         <StatDisplay
+          courseId={courseId}
           label="Health"
           color={colors.red[500]}
           formatter={(x) => x.value}
@@ -46,6 +50,7 @@ export function RewardScores({
           _score={rewardScores.health}
         />
         <StatDisplay
+          courseId={courseId}
           label="Fitness"
           color={colors.blue[500]}
           formatter={(x) => x.value}
@@ -55,6 +60,7 @@ export function RewardScores({
       </div>
       <div className="flex flex-col gap-2">
         <StatDisplay
+          courseId={courseId}
           label="Growth"
           color={colors.green[500]}
           formatter={(x) => x.percentage * 100}
@@ -62,6 +68,7 @@ export function RewardScores({
           _score={rewardScores.growth}
         />
         <StatDisplay
+          courseId={courseId}
           label="Power"
           color={colors.amber[400]}
           formatter={(x) => x.value}
@@ -81,12 +88,14 @@ export function StatDisplay({
   noBar = false,
   _score,
   formatter,
+  courseId,
 }: {
   label: string;
   color: string;
   icon: ReactElement;
   noBar?: boolean;
   _score: RewardScoresStatFragment$key;
+  courseId: string;
   formatter: (x: RewardScoresStatFragment$data) => number;
 }) {
   const data = useFragment(
@@ -98,6 +107,7 @@ export function StatDisplay({
           date
           difference
           associatedContents {
+            id
             metadata {
               name
             }
@@ -140,7 +150,22 @@ export function StatDisplay({
                 {new Date(x.date).toLocaleDateString("de-DE")}&nbsp;&nbsp;{" "}
                 {x.difference.toLocaleString("de-DE", {
                   signDisplay: "exceptZero",
-                })}
+                })}{" "}
+                Punkte
+                <ul className="ml-3 text-gray-300 font-light">
+                  {x.associatedContents.map((x, index) => (
+                    <li key={index}>
+                      {x ? (
+                        <Link href={`/courses/${courseId}/media/${x.id}`}>
+                          <b className="font-normal">{x.metadata.name}</b>{" "}
+                          bearbeitet
+                        </Link>
+                      ) : (
+                        <span>(gelöscht) bearbeitet</span>
+                      )}
+                    </li>
+                  ))}
+                </ul>
               </div>
             ))}
           </div>

@@ -13,14 +13,13 @@ import Error from "next/error";
 import { useParams } from "next/navigation";
 import { graphql, useLazyLoadQuery } from "react-relay";
 
-import * as React from "react";
+import Paper from "@mui/material/Paper";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
-import Paper from "@mui/material/Paper";
 
 import {
   ChapterContent,
@@ -32,8 +31,8 @@ import { RewardScores } from "@/components/RewardScores";
 import { Info } from "@mui/icons-material";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import dayjs from "dayjs";
-import { useState } from "react";
 import Link from "next/link";
+import { useState } from "react";
 
 interface Data {
   name: string;
@@ -57,6 +56,7 @@ export default function StudentCoursePage() {
     graphql`
       query studentCourseIdQuery($id: [UUID!]!) {
         coursesById(ids: $id) {
+          id
           title
           description
           rewardScores {
@@ -149,7 +149,7 @@ export default function StudentCoursePage() {
       />
       <div className="grid grid-cols-2 items-start">
         <div className="w-fit my-12 pl-8 pr-10 py-6 border-4 border-slate-200 rounded-3xl">
-          <RewardScores _scores={course.rewardScores} />
+          <RewardScores _scores={course.rewardScores} courseId={course.id} />
         </div>
         <div>
           <TableContainer component={Paper} className="mt-12 mb-2">

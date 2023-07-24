@@ -16,6 +16,15 @@ const nextConfig = {
       transform: "@mui/icons-material/{{ matches.[1] }}/{{member}}",
     },
   },
+
+  webpack: (config) => {
+    config.module.rules.push({
+      test: /\.node/,
+      use: "raw-loader",
+    });
+
+    return config;
+  },
 };
 
 module.exports = nextConfig;

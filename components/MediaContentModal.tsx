@@ -90,6 +90,18 @@ export function MediaContentModal({
           userProgressData {
             nextLearnDate
           }
+          metadata {
+            chapterId
+            name
+            rewardPoints
+            suggestedDate
+          }
+          mediaRecords {
+            id
+            name
+            downloadUrl
+            type
+          }
           __typename
         }
       }

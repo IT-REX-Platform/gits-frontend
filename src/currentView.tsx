@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 
 export enum PageView {
   Student = "student",
@@ -13,9 +13,27 @@ const PageViewContext = React.createContext<{
 } | null>(null);
 
 export function PageViewProvider({ children }: { children: React.ReactNode }) {
-  const [pageView, setPageView] = useState(PageView.Student);
+  const [pageView, setPageView] = useState<PageView>();
+
+  useEffect(() => {
+    if (typeof window !== "undefined" && !pageView) {
+      setPageView(
+        window.localStorage.getItem("current_pageview") === "TUTOR"
+          ? PageView.Lecturer
+          : PageView.Student
+      );
+    } else if (pageView) {
+      window.localStorage.setItem(
+        "current_pageview",
+        pageView ?? PageView.Student
+      );
+    }
+  }, [pageView]);
+
   return (
-    <PageViewContext.Provider value={{ pageView, setPageView }}>
+    <PageViewContext.Provider
+      value={{ pageView: pageView ?? PageView.Student, setPageView }}
+    >
       {children}
     </PageViewContext.Provider>
   );

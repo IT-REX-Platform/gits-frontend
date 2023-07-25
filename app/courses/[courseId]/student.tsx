@@ -73,6 +73,7 @@ export default function StudentCoursePage() {
         }
 
         coursesById(ids: [$id]) {
+          id
           title
           description
           rewardScores {
@@ -208,7 +209,7 @@ export default function StudentCoursePage() {
       />
       <div className="grid grid-cols-2 items-start">
         <div className="w-fit my-12 pl-8 pr-10 py-6 border-4 border-slate-200 rounded-3xl">
-          <RewardScores _scores={course.rewardScores} />
+          <RewardScores _scores={course.rewardScores} courseId={course.id} />
         </div>
         <div>
           <TableContainer component={Paper} className="mt-12 mb-2">

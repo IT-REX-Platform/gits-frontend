@@ -90,6 +90,18 @@ export function MediaContentModal({
           userProgressData {
             nextLearnDate
           }
+          metadata {
+            chapterId
+            name
+            rewardPoints
+            suggestedDate
+          }
+          mediaRecords {
+            id
+            name
+            downloadUrl
+            type
+          }
           __typename
         }
       }
@@ -221,7 +233,7 @@ export function MediaContentModal({
   }
 
   return (
-    <Dialog maxWidth="md" open={isOpen} onClose={onClose}>
+    <Dialog maxWidth="lg" open={isOpen} onClose={onClose}>
       <DialogTitle>Add media</DialogTitle>
       <DialogContent>
         {error?.source.errors.map((err: any, i: number) => (

@@ -139,7 +139,7 @@ export default function LecturerMediaPage() {
         backButton
       />
       <div className="my-8 grow">
-        <ContentMediaDisplay _record={mainRecord} />
+        <ContentMediaDisplay onProgressChange={() => {}} _record={mainRecord} />
       </div>
       {relatedRecords.length > 0 && (
         <>

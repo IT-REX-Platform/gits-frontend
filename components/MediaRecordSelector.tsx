@@ -9,6 +9,7 @@ import {
   MediaType,
 } from "@/__generated__/MediaRecordSelectorCreateMediaRecordMutation.graphql";
 import { MediaRecordSelectorDeleteMediaRecordMutation } from "@/__generated__/MediaRecordSelectorDeleteMediaRecordMutation.graphql";
+import { MediaRecordSelectorUpdateRecordMutation } from "@/__generated__/MediaRecordSelectorUpdateRecordMutation.graphql";
 import {
   Add,
   Delete,
@@ -18,6 +19,7 @@ import {
   InsertDriveFile,
 } from "@mui/icons-material";
 import {
+  Alert,
   Button,
   Checkbox,
   CircularProgress,
@@ -31,6 +33,8 @@ import {
   ListItemButton,
   ListItemIcon,
   ListItemText,
+  MenuItem,
+  Select,
   TextField,
 } from "@mui/material";
 import { useCallback, useState } from "react";
@@ -53,6 +57,8 @@ export function MediaRecordSelector({
         ) => MediaRecordSelector$data["mediaRecords"])
   ) => void;
 }) {
+  const [error, setError] = useState<any>(null);
+
   const { mediaRecords } = useFragment(
     graphql`
       fragment MediaRecordSelector on Query {
@@ -80,6 +86,18 @@ export function MediaRecordSelector({
           name
           downloadUrl
           contentIds
+          type
+        }
+      }
+    `);
+
+  const [updateMediaRecord] =
+    useMutation<MediaRecordSelectorUpdateRecordMutation>(graphql`
+      mutation MediaRecordSelectorUpdateRecordMutation(
+        $input: UpdateMediaRecordInput!
+      ) {
+        updateMediaRecord(input: $input) {
+          id
           type
         }
       }
@@ -178,11 +196,22 @@ export function MediaRecordSelector({
 
   return (
     <>
-      <Dialog maxWidth="md" open={isOpen} onClose={onClose}>
+      <Dialog open={isOpen} onClose={onClose}>
         <DialogTitle>Add media</DialogTitle>
 
+        {error?.source.errors.map((err: any, i: number) => (
+          <Alert
+            key={i}
+            severity="error"
+            sx={{ minWidth: 400, maxWidth: 800, width: "fit-content" }}
+            onClose={() => setError(null)}
+          >
+            {err.message}
+          </Alert>
+        ))}
+
         <div
-          className="m-2 flex  items-center gap-8 w-96 min-h-36 bg-slate-100 shadow-inner hover:bg-slate-200 p-8 rounded-md border border-dashed border-slate-500 cursor-pointer"
+          className="m-2 flex  items-center gap-8 w-[500px] min-h-36 bg-slate-100 shadow-inner hover:bg-slate-200 p-8 rounded-md border border-dashed border-slate-500 cursor-pointer"
           {...getRootProps()}
         >
           <input {...getInputProps()} />
@@ -218,6 +247,38 @@ export function MediaRecordSelector({
                   key={record.id}
                   secondaryAction={
                     <>
+                      <Select
+                        value={record.type}
+                        onChange={(e) =>
+                          updateMediaRecord({
+                            variables: {
+                              input: {
+                                id: record.id,
+                                contentIds: record.contentIds,
+                                name: record.name,
+                                type: e.target.value as MediaType,
+                              },
+                            },
+                            onError: setError,
+                          })
+                        }
+                        variant="standard"
+                        size="small"
+                        className="min-w-[120px]"
+                      >
+                        {[
+                          ["AUDIO", "Audio"],
+                          ["DOCUMENT", "Document"],
+                          ["IMAGE", "Image"],
+                          ["PRESENTATION", "Presentation"],
+                          ["VIDEO", "Video"],
+                        ].map(([type, label]) => (
+                          <MenuItem key={type} value={type}>
+                            {label}
+                          </MenuItem>
+                        ))}
+                      </Select>
+
                       <IconButton
                         size="small"
                         onClick={() => {

@@ -62,7 +62,6 @@ export default function StudentCoursePage() {
   } = useLazyLoadQuery<studentCourseIdQuery>(
     graphql`
       query studentCourseIdQuery($id: UUID!) {
-        id
         scoreboard(courseId: $id) {
           user {
             userName
@@ -74,6 +73,7 @@ export default function StudentCoursePage() {
         }
 
         coursesById(ids: [$id]) {
+          id
           title
           description
           rewardScores {

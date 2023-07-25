@@ -23,6 +23,8 @@ const nextConfig = {
       use: "raw-loader",
     });
 
+    config.externals.push("canvas");
+
     return config;
   },
 };

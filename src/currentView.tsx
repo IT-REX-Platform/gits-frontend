@@ -14,13 +14,13 @@ const PageViewContext = React.createContext<{
 
 export function PageViewProvider({ children }: { children: React.ReactNode }) {
   const [pageView, setPageView] = useState(
-    localStorage.getItem("current_pageview") === "TUTOR"
+    window.localStorage.getItem("current_pageview") === "TUTOR"
       ? PageView.Lecturer
       : PageView.Student
   );
 
   useEffect(() => {
-    localStorage.setItem("current_pageview", pageView);
+    window.localStorage.setItem("current_pageview", pageView);
   }, [pageView]);
 
   return (

@@ -34,6 +34,7 @@ import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import dayjs from "dayjs";
 import Link from "next/link";
 import { useState } from "react";
+import { SkillLevels } from "@/components/SkillLevels";
 
 interface Data {
   name: string;
@@ -261,12 +262,6 @@ export default function StudentCoursePage() {
               chapter.suggestedEndDate ?? chapter.endDate
             ).format("D. MMMM")}`}
             progress={70}
-            skill_levels={{
-              remember: "green",
-              understand: "green",
-              apply: "yellow",
-              analyze: "red",
-            }}
           />
           <ChapterContent>
             {chapter.contents.length > 0 && (

@@ -20,7 +20,7 @@ export function SkillLevel({ level, label }: { level: number; label: string }) {
       <SkillLevelBase
         badge={<SkillBadge fillClass="fill-slate-500" level={level} />}
         label={label}
-        level="Stone"
+        level="Iron"
         tooltipClass="!bg-slate-500"
       />
     );

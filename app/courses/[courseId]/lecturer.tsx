@@ -193,12 +193,6 @@ export default function LecturerCoursePage() {
               "D. MMMM"
             )} – ${dayjs(chapter.suggestedEndDate).format("D. MMMM")}`}
             progress={70}
-            skill_levels={{
-              remember: "green",
-              understand: "green",
-              apply: "yellow",
-              analyze: "red",
-            }}
           />
 
           <ChapterContent>

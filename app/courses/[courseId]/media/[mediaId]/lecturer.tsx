@@ -144,7 +144,7 @@ export default function LecturerMediaPage() {
       {relatedRecords.length > 0 && (
         <>
           <Typography variant="h2">Related media</Typography>
-          <div className="mt-4">
+          <div className="mt-4 flex flex-col gap-2">
             {relatedRecords.map((record) => (
               <MediaContent
                 key={record.id}

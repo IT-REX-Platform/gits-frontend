@@ -27,7 +27,11 @@ import {
   ChapterContentItem,
 } from "@/components/ChapterContent";
 import { ChapterHeader } from "@/components/ChapterHeader";
-import { FlashcardContent, MediaContent } from "@/components/Content";
+import {
+  FlashcardContent,
+  MediaContent,
+  QuizContent,
+} from "@/components/Content";
 import { RewardScores } from "@/components/RewardScores";
 import { Info } from "@mui/icons-material";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
@@ -95,6 +99,7 @@ export default function StudentCoursePage() {
                 ...ContentVideoFragment
                 ...ContentPresentationFragment
                 ...ContentDocumentFragment
+                ...ContentQuizFragment
 
                 userProgressData {
                   nextLearnDate
@@ -138,6 +143,11 @@ export default function StudentCoursePage() {
   const nextFlashcard = chain(course.chapters.elements)
     .flatMap((x) => x.contents)
     .filter((x) => x.metadata.type === "FLASHCARDS")
+    .minBy((x) => new Date(x.userProgressData.nextLearnDate))
+    .value();
+  const nextQuiz = chain(course.chapters.elements)
+    .flatMap((x) => x.contents)
+    .filter((x) => x.metadata.type === "QUIZ")
     .minBy((x) => new Date(x.userProgressData.nextLearnDate))
     .value();
   const nextVideo = chain(course.chapters.elements)
@@ -248,6 +258,7 @@ export default function StudentCoursePage() {
         <Typography variant="h2">Up next</Typography>
         <div className="mt-8 gap-8 grid gap-x-12 gap-y-4 grid-cols-[max-content] xl:grid-cols-[repeat(2,max-content)] 2xl:grid-cols-[repeat(3,max-content)]">
           {nextFlashcard && <FlashcardContent _flashcard={nextFlashcard} />}
+          {nextQuiz && <QuizContent _quiz={nextQuiz} />}
           {nextVideo && <MediaContent _media={nextVideo} />}
         </div>
       </section>
@@ -269,6 +280,8 @@ export default function StudentCoursePage() {
                 {chapter.contents.map((content) =>
                   content.metadata.type === "FLASHCARDS" ? (
                     <FlashcardContent key={content.id} _flashcard={content} />
+                  ) : content.metadata.type === "QUIZ" ? (
+                    <QuizContent key={content.id} _quiz={content} />
                   ) : content.metadata.type === "MEDIA" ? (
                     <MediaContent key={content.id} _media={content} />
                   ) : null

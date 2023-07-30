@@ -25,24 +25,6 @@ export default function StudentQuiz() {
       { text: "Paris", isCorrect: true },
       { text: "Dublin", isCorrect: false },
     ]),
-    createQuestionItem("Who is CEO of Tesla?", [
-      { text: "Jeff Bezos", isCorrect: false },
-      { text: "Elon Musk", isCorrect: true },
-      { text: "Bill Gates", isCorrect: false },
-      { text: "Tony Stark", isCorrect: false },
-    ]),
-    createQuestionItem("The iPhone was created by which company?", [
-      { text: "Apple", isCorrect: true },
-      { text: "Intel", isCorrect: false },
-      { text: "Amazon", isCorrect: false },
-      { text: "Microsoft", isCorrect: false },
-    ]),
-    createQuestionItem("How many Harry Potter books are there?", [
-      { text: "1", isCorrect: false },
-      { text: "4", isCorrect: false },
-      { text: "6", isCorrect: false },
-      { text: "7", isCorrect: true },
-    ]),
   ];
   return (
     <main>

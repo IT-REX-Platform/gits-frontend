@@ -19,11 +19,14 @@ import {
 import { RewardScoreChartFragment$key } from "@/__generated__/RewardScoreChartFragment.graphql";
 import { RewardScoreChartScoreFragment$key } from "@/__generated__/RewardScoreChartScoreFragment.graphql";
 import { RewardScoreChartDataFragment$key } from "@/__generated__/RewardScoreChartDataFragment.graphql";
+import { RewardScoreFilterType } from "./RewardScoreHistoryTable";
 
 export function RewardScoreChart({
   _scores,
+  filter = [],
 }: {
   _scores: RewardScoreChartFragment$key;
+  filter?: RewardScoreFilterType[];
 }) {
   const scores = useFragment(
     graphql`
@@ -35,22 +38,6 @@ export function RewardScoreChart({
   );
 
   const data = useData(scores);
-  const [selection, setSelection] = useState({
-    health: true,
-    fitness: true,
-    growth: true,
-    power: true,
-  });
-
-  const handleLegendClick = useCallback(
-    (key: "health" | "fitness" | "growth" | "power") => {
-      setSelection((selection) => ({
-        ...selection,
-        [key]: !selection[key],
-      }));
-    },
-    [setSelection]
-  );
 
   return (
     <ResponsiveContainer width="100%" height="100%">
@@ -68,10 +55,7 @@ export function RewardScoreChart({
         <Tooltip
           labelFormatter={(date) => dayjs(date).format("D. MMMM YYYY")}
         />
-        <Legend
-          wrapperStyle={{ userSelect: "none" }}
-          onMouseDown={(e) => handleLegendClick(e.dataKey)}
-        />
+        <Legend />
         <Line
           type="monotone"
           dataKey="health"
@@ -79,7 +63,7 @@ export function RewardScoreChart({
           stroke={colors.red[500]}
           strokeWidth={2}
           dot={false}
-          hide={!selection.health}
+          hide={!filter.includes("health")}
         />
         <Line
           type="monotone"
@@ -88,7 +72,7 @@ export function RewardScoreChart({
           stroke={colors.blue[500]}
           strokeWidth={2}
           dot={false}
-          hide={!selection.fitness}
+          hide={!filter.includes("fitness")}
         />
         <Line
           type="monotone"
@@ -97,7 +81,7 @@ export function RewardScoreChart({
           stroke={colors.green[500]}
           strokeWidth={2}
           dot={false}
-          hide={!selection.growth}
+          hide={!filter.includes("growth")}
         />
         <Line
           type="monotone"
@@ -107,7 +91,7 @@ export function RewardScoreChart({
           strokeWidth={2}
           dot={false}
           yAxisId={1}
-          hide={!selection.power}
+          hide={!filter.includes("power")}
         />
       </LineChart>
     </ResponsiveContainer>

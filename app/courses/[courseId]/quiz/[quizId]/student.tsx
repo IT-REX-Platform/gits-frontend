@@ -7,11 +7,16 @@ import {
   Checkbox,
   FormGroup,
   FormControlLabel,
-  CircularProgress,
+  IconButton,
+  Dialog,
+  DialogTitle,
+  Typography,
 } from "@mui/material";
+import QuestionMarkIcon from "@mui/icons-material/QuestionMark";
 import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
 import { graphql, useLazyLoadQuery } from "react-relay";
+import { Info } from "@mui/icons-material";
 
 /* interface Answer {
   text: string;
@@ -33,6 +38,7 @@ export default function StudentQuiz() {
   const router = useRouter();
 
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [infoDialogOpen, setInfoDialogOpen] = useState(false);
 
   // Fetch quiz data
   const { contentsByIds, currentUserInfo } = useLazyLoadQuery<studentQuizQuery>(
@@ -106,7 +112,12 @@ export default function StudentQuiz() {
   return (
     <main>
       <Heading title="Quiz" backButton />
-
+      <InfoDialog
+        open={infoDialogOpen}
+        onClose={() => setInfoDialogOpen(false)}
+        title={questionText!}
+        hint={currentQuestion.hint!}
+      />
       <div className="w-full border-b border-b-gray-300 mt-6 flex justify-center">
         <div className="bg-white -mb-[9px] px-3 text-xs text-gray-600">
           {currentIndex + 1}/{quiz?.selectedQuestions.length ?? 0}
@@ -115,7 +126,13 @@ export default function StudentQuiz() {
 
       <div className="mt-6 text-center text-gray-600">{questionText}</div>
 
-      <div className="w-full border-b border-b-gray-300 mt-6 flex justify-center mb-6"></div>
+      <div className="w-full border-b border-b-gray-300 mt-6 flex justify-center mb-6">
+        <div>
+          <IconButton onClick={() => setInfoDialogOpen(true)}>
+            <QuestionMarkIcon />
+          </IconButton>
+        </div>
+      </div>
 
       <div className="flex justify-center gap-4">
         <FormGroup>
@@ -140,5 +157,29 @@ export default function StudentQuiz() {
         </Button>
       </div>
     </main>
+  );
+}
+
+function InfoDialog({
+  title,
+  hint,
+  open,
+  onClose,
+}: {
+  title: string;
+  hint: string;
+  open: boolean;
+  onClose: () => void;
+}) {
+  if (hint === null) {
+    hint = "There are no hints for this question.";
+  }
+  return (
+    <Dialog onClose={onClose} open={open}>
+      <DialogTitle>{title}</DialogTitle>
+      <Typography variant="body1" sx={{ padding: 3, paddingTop: 0 }}>
+        {hint}
+      </Typography>
+    </Dialog>
   );
 }

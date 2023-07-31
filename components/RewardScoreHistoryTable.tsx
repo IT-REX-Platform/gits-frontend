@@ -125,69 +125,67 @@ export function RewardScoreHistoryTable({
         </TableHead>
         <TableBody>
           {data.map((entry, i) => (
-            <>
-              <TableRow key={`row-${i}`}>
-                <TableCell>
-                  <div className={`flex items-center gap-4 ${entry.className}`}>
-                    {entry.icon}
-                    {entry.label}
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <div className="text-gray-500">
-                    {dayjs(entry.date).format("H:mm")}
-                  </div>
-                  <div>{dayjs(entry.date).format("D. MMMM YYYY")}</div>
-                </TableCell>
-                <TableCell>
-                  <span
-                    className={
-                      entry.difference < 0 ? "text-red-700" : "text-green-700"
-                    }
-                  >
-                    {entry.difference}
-                  </span>
-                </TableCell>
-                <TableCell>{reasons[entry.reason]}</TableCell>
-                <TableCell>
-                  <Collapse
-                    in={
-                      entry.associatedContents.length == 1 ||
-                      (entry.associatedContents.length > 1 && expanded.has(i))
-                    }
-                  >
-                    <div className="flex flex-col gap-3">
-                      {entry.associatedContents.map((content, j) => (
-                        <div key={`row-${i}-content-${j}`}>
-                          {content ? (
-                            <ContentLink _content={content} />
-                          ) : (
-                            <DeletedContent />
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  </Collapse>
-                  {entry.associatedContents.length > 1 && (
-                    <Button
-                      size="small"
-                      onClick={() => toggleExpanded(i)}
-                      startIcon={
-                        expanded.has(i) ? (
-                          <KeyboardArrowUp />
+            <TableRow key={`row-${i}`}>
+              <TableCell>
+                <div className={`flex items-center gap-4 ${entry.className}`}>
+                  {entry.icon}
+                  {entry.label}
+                </div>
+              </TableCell>
+              <TableCell>
+                <div className="text-gray-500">
+                  {dayjs(entry.date).format("H:mm")}
+                </div>
+                <div>{dayjs(entry.date).format("D. MMMM YYYY")}</div>
+              </TableCell>
+              <TableCell>
+                <span
+                  className={
+                    entry.difference < 0 ? "text-red-700" : "text-green-700"
+                  }
+                >
+                  {entry.difference}
+                </span>
+              </TableCell>
+              <TableCell>{reasons[entry.reason]}</TableCell>
+              <TableCell>
+                <Collapse
+                  in={
+                    entry.associatedContents.length == 1 ||
+                    (entry.associatedContents.length > 1 && expanded.has(i))
+                  }
+                >
+                  <div className="flex flex-col gap-3">
+                    {entry.associatedContents.map((content, j) => (
+                      <div key={`row-${i}-content-${j}`}>
+                        {content ? (
+                          <ContentLink _content={content} />
                         ) : (
-                          <KeyboardArrowDown />
-                        )
-                      }
-                      aria-label="show associated contents"
-                      className={expanded.has(i) ? "!mt-4" : ""}
-                    >
-                      {expanded.has(i) ? "Hide" : "Show"}
-                    </Button>
-                  )}
-                </TableCell>
-              </TableRow>
-            </>
+                          <DeletedContent />
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </Collapse>
+                {entry.associatedContents.length > 1 && (
+                  <Button
+                    size="small"
+                    onClick={() => toggleExpanded(i)}
+                    startIcon={
+                      expanded.has(i) ? (
+                        <KeyboardArrowUp />
+                      ) : (
+                        <KeyboardArrowDown />
+                      )
+                    }
+                    aria-label="show associated contents"
+                    className={expanded.has(i) ? "!mt-4" : ""}
+                  >
+                    {expanded.has(i) ? "Hide" : "Show"}
+                  </Button>
+                )}
+              </TableCell>
+            </TableRow>
           ))}
         </TableBody>
       </Table>

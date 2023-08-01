@@ -180,7 +180,7 @@ export default function LecturerCoursePage() {
             subtitle={`${dayjs(chapter.suggestedStartDate).format(
               "D. MMMM"
             )} – ${dayjs(chapter.suggestedEndDate).format("D. MMMM")}`}
-            progress={70}
+            progress={0}
             skill_levels={{
               remember: "green",
               understand: "green",

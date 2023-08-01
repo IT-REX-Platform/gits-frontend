@@ -1,4 +1,5 @@
 "use client";
+import { Done } from "@mui/icons-material";
 import { CircularProgress, Typography, useTheme } from "@mui/material";
 import { ReactNode } from "react";
 
@@ -61,6 +62,9 @@ export function ChapterProgress({ progress }: { progress: number }) {
         thickness={4}
         size="3rem"
       />
+      {progress == 100 && (
+        <Done fontSize="large" className="absolute text-green-600" />
+      )}
     </div>
   );
 }

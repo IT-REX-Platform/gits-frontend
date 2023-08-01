@@ -265,7 +265,13 @@ export default function StudentCoursePage() {
             ).format("D. MMMM")} – ${dayjs(
               chapter.suggestedEndDate ?? chapter.endDate
             ).format("D. MMMM")}`}
-            progress={70}
+            progress={
+              (100 *
+                chapter.contents.filter(
+                  (content) => content.userProgressData.lastLearnDate != null
+                ).length) /
+              chapter.contents.length
+            }
             skill_levels={{
               remember: "green",
               understand: "green",

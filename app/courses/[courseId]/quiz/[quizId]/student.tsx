@@ -39,6 +39,7 @@ export default function StudentQuiz() {
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [infoDialogOpen, setInfoDialogOpen] = useState(false);
+  const [checkAnswers, setCheckAnswers] = useState(false);
 
   // Fetch quiz data
   const { contentsByIds, currentUserInfo } = useLazyLoadQuery<studentQuizQuery>(
@@ -102,7 +103,13 @@ export default function StudentQuiz() {
   const answers = currentQuestion.answers;
 
   const nextQuestion = async () => {
-    if (currentIndex + 1 < (quiz?.selectedQuestions.length ?? 0)) {
+    if (!checkAnswers) {
+      setCheckAnswers(true);
+    } else if (
+      checkAnswers &&
+      currentIndex + 1 < (quiz?.selectedQuestions.length ?? 0)
+    ) {
+      setCheckAnswers(false);
       setCurrentIndex(currentIndex + 1);
     } else {
       router.push(`/courses/${courseId}`);
@@ -136,9 +143,14 @@ export default function StudentQuiz() {
 
       <div className="flex justify-center gap-4">
         <FormGroup>
-          {answers!.map((answer) => (
+          {answers!.map((answer, index) => (
             <div key={answer.text}>
-              <FormControlLabel control={<Checkbox />} label={answer.text} />
+              <FormControlLabel
+                control={
+                  <Checkbox value={answer.correct} disabled={checkAnswers} />
+                }
+                label={answer.text}
+              />
             </div>
           ))}
         </FormGroup>
@@ -151,7 +163,9 @@ export default function StudentQuiz() {
           onClick={nextQuestion}
           className="mb-6"
         >
-          {currentIndex + 1 < (quiz?.selectedQuestions.length ?? 0)
+          {!checkAnswers
+            ? "Check"
+            : currentIndex + 1 < (quiz?.selectedQuestions.length ?? 0)
             ? "Next"
             : "Finish"}
         </Button>

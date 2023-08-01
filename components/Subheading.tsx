@@ -12,7 +12,7 @@ export function Subheading({
 }) {
   return (
     <div
-      className={`-mx-8 px-8 py-4 my-8 bg-slate-100 flex justify-between items-center ${className}`}
+      className={`-mx-8 px-8 py-4 my-8 bg-slate-50 flex justify-between items-center ${className}`}
     >
       <Typography variant="h2">{children}</Typography>
       {action}

@@ -253,8 +253,8 @@ export default function StudentCoursePage() {
       <section className="mt-16">
         <Typography variant="h2">Up next</Typography>
         <div className="mt-8 gap-8 grid gap-x-12 gap-y-4 grid-cols-[max-content] xl:grid-cols-[repeat(2,max-content)] 2xl:grid-cols-[repeat(3,max-content)]">
-          {nextFlashcard && <FlashcardContent _flashcard={nextFlashcard} />}
-          {nextVideo && <MediaContent _media={nextVideo} />}
+          {nextFlashcard && <ContentLink _content={nextFlashcard} />}
+          {nextVideo && <ContentLink _content={nextVideo} />}
         </div>
       </section>
 
@@ -275,14 +275,14 @@ export default function StudentCoursePage() {
           <TopicHeader>Linked Lists</TopicHeader>
           <TopicContent>
             <TopicStage progress={60}>
-              {nextFlashcard && <FlashcardContent _flashcard={nextFlashcard} />}
-              {nextFlashcard && <FlashcardContent _flashcard={nextFlashcard} />}
-              {nextFlashcard && <FlashcardContent _flashcard={nextFlashcard} />}
+              {nextFlashcard && <ContentLink _content={nextFlashcard} />}
+              {nextFlashcard && <ContentLink _content={nextFlashcard} />}
+              {nextFlashcard && <ContentLink _content={nextFlashcard} />}
             </TopicStage>
             <TopicStageBarrier />
             <TopicStage progress={0}>
-              {nextVideo && <MediaContent disabled _media={nextVideo} />}
-              {nextVideo && <MediaContent disabled _media={nextVideo} />}
+              {nextVideo && <ContentLink disabled _content={nextVideo} />}
+              {nextVideo && <ContentLink disabled _content={nextVideo} />}
             </TopicStage>
           </TopicContent>
         </Topic>
@@ -290,12 +290,12 @@ export default function StudentCoursePage() {
           <TopicHeader done>Linked Lists</TopicHeader>
           <TopicContent>
             <TopicStage progress={100}>
-              {nextFlashcard && <FlashcardContent _flashcard={nextFlashcard} />}
-              {nextFlashcard && <FlashcardContent _flashcard={nextFlashcard} />}
+              {nextFlashcard && <ContentLink _content={nextFlashcard} />}
+              {nextFlashcard && <ContentLink _content={nextFlashcard} />}
             </TopicStage>
             <TopicStage progress={80}>
-              {nextVideo && <MediaContent _media={nextVideo} />}
-              {nextVideo && <MediaContent _media={nextVideo} />}
+              {nextVideo && <ContentLink _content={nextVideo} />}
+              {nextVideo && <ContentLink _content={nextVideo} />}
             </TopicStage>
           </TopicContent>
         </Topic>
@@ -303,11 +303,11 @@ export default function StudentCoursePage() {
           <TopicHeader>Linked Lists</TopicHeader>
           <TopicContent>
             <TopicStage progress={60}>
-              {nextFlashcard && <FlashcardContent _flashcard={nextFlashcard} />}
+              {nextFlashcard && <ContentLink _content={nextFlashcard} />}
             </TopicStage>
             <TopicStageBarrier />
             <TopicStage progress={0}>
-              {nextVideo && <MediaContent disabled _media={nextVideo} />}
+              {nextVideo && <ContentLink disabled _content={nextVideo} />}
             </TopicStage>
           </TopicContent>
         </Topic>
@@ -315,14 +315,14 @@ export default function StudentCoursePage() {
           <TopicHeader>Linked Lists</TopicHeader>
           <TopicContent>
             <TopicStage progress={60}>
-              {nextFlashcard && <FlashcardContent _flashcard={nextFlashcard} />}
-              {nextFlashcard && <FlashcardContent _flashcard={nextFlashcard} />}
-              {nextFlashcard && <FlashcardContent _flashcard={nextFlashcard} />}
+              {nextFlashcard && <ContentLink _content={nextFlashcard} />}
+              {nextFlashcard && <ContentLink _content={nextFlashcard} />}
+              {nextFlashcard && <ContentLink _content={nextFlashcard} />}
             </TopicStage>
             <TopicStageBarrier />
             <TopicStage progress={0}>
-              {nextVideo && <MediaContent disabled _media={nextVideo} />}
-              {nextVideo && <MediaContent disabled _media={nextVideo} />}
+              {nextVideo && <ContentLink disabled _content={nextVideo} />}
+              {nextVideo && <ContentLink disabled _content={nextVideo} />}
             </TopicStage>
           </TopicContent>
         </Topic>

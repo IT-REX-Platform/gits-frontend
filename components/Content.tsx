@@ -25,8 +25,10 @@ import { graphql, useFragment, useMutation } from "react-relay";
 import colors from "tailwindcss/colors";
 
 export function ContentLink({
+  disabled = false,
   _content,
 }: {
+  disabled?: boolean;
   _content: ContentLinkFragment$key;
 }) {
   const content = useFragment(
@@ -45,9 +47,9 @@ export function ContentLink({
 
   switch (content.metadata.type) {
     case "MEDIA":
-      return <MediaContent _media={content} />;
+      return <MediaContent disabled={disabled} _media={content} />;
     case "FLASHCARDS":
-      return <FlashcardContent _flashcard={content} />;
+      return <FlashcardContent disabled={disabled} _flashcard={content} />;
   }
 
   return null;

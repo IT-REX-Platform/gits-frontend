@@ -22,10 +22,7 @@ import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 
 import { studentCourseLeaveMutation } from "@/__generated__/studentCourseLeaveMutation.graphql";
-import {
-  ChapterContent,
-  ChapterContentItem,
-} from "@/components/ChapterContent";
+import { ChapterContent } from "@/components/ChapterContent";
 import { ChapterHeader } from "@/components/ChapterHeader";
 import { ContentLink } from "@/components/Content";
 import { RewardScores } from "@/components/RewardScores";
@@ -95,6 +92,7 @@ export default function StudentCoursePage() {
 
                 userProgressData {
                   nextLearnDate
+                  lastLearnDate
                 }
 
                 id
@@ -258,84 +256,6 @@ export default function StudentCoursePage() {
         </div>
       </section>
 
-      <div className="mt-24"></div>
-      <ChapterHeader
-        title="Chapter 1: Data Structures"
-        subtitle="1. Janurary - 2. Februrary"
-        progress={30}
-        skill_levels={{
-          remember: "green",
-          analyze: "red",
-          apply: "red",
-          understand: "yellow",
-        }}
-      />
-      <div className="pb-4 flex gap-12 items-start overflow-x-auto thin-scrollbar">
-        <Topic>
-          <TopicHeader>Linked Lists</TopicHeader>
-          <TopicContent>
-            <TopicStage progress={60}>
-              {nextFlashcard && <ContentLink _content={nextFlashcard} />}
-              {nextFlashcard && <ContentLink _content={nextFlashcard} />}
-              {nextFlashcard && <ContentLink _content={nextFlashcard} />}
-            </TopicStage>
-            <TopicStageBarrier />
-            <TopicStage progress={0}>
-              {nextVideo && <ContentLink disabled _content={nextVideo} />}
-              {nextVideo && <ContentLink disabled _content={nextVideo} />}
-            </TopicStage>
-          </TopicContent>
-        </Topic>
-        <Topic>
-          <TopicHeader done>Linked Lists</TopicHeader>
-          <TopicContent>
-            <TopicStage progress={100}>
-              {nextFlashcard && <ContentLink _content={nextFlashcard} />}
-              {nextFlashcard && <ContentLink _content={nextFlashcard} />}
-            </TopicStage>
-            <TopicStage progress={80}>
-              {nextVideo && <ContentLink _content={nextVideo} />}
-              {nextVideo && <ContentLink _content={nextVideo} />}
-            </TopicStage>
-          </TopicContent>
-        </Topic>
-        <Topic>
-          <TopicHeader>Linked Lists</TopicHeader>
-          <TopicContent>
-            <TopicStage progress={60}>
-              {nextFlashcard && <ContentLink _content={nextFlashcard} />}
-            </TopicStage>
-            <TopicStageBarrier />
-            <TopicStage progress={0}>
-              {nextVideo && <ContentLink disabled _content={nextVideo} />}
-            </TopicStage>
-          </TopicContent>
-        </Topic>
-        <Topic>
-          <TopicHeader>Linked Lists</TopicHeader>
-          <TopicContent>
-            <TopicStage progress={60}>
-              {nextFlashcard && <ContentLink _content={nextFlashcard} />}
-              {nextFlashcard && <ContentLink _content={nextFlashcard} />}
-              {nextFlashcard && <ContentLink _content={nextFlashcard} />}
-            </TopicStage>
-            <TopicStageBarrier />
-            <TopicStage progress={0}>
-              {nextVideo && <ContentLink disabled _content={nextVideo} />}
-              {nextVideo && <ContentLink disabled _content={nextVideo} />}
-            </TopicStage>
-          </TopicContent>
-        </Topic>
-      </div>
-
-      <section className="mt-16">
-        <Typography variant="h2">Up next</Typography>
-        <div className="mt-8 gap-8 grid gap-x-12 gap-y-4 grid-cols-[max-content] xl:grid-cols-[repeat(2,max-content)] 2xl:grid-cols-[repeat(3,max-content)]">
-          {nextFlashcard && <ContentLink _content={nextFlashcard} />}
-          {nextVideo && <ContentLink _content={nextVideo} />}
-        </div>
-      </section>
-
       {orderBy(course.chapters.elements, (x) => x.number).map((chapter) => (
         <section key={chapter.id} className="mt-24">
           <ChapterHeader
@@ -354,13 +274,24 @@ export default function StudentCoursePage() {
             }}
           />
           <ChapterContent>
-            {chapter.contents.length > 0 && (
-              <ChapterContentItem first last>
-                {chapter.contents.map((content) => (
-                  <ContentLink key={content.id} _content={content} />
-                ))}
-              </ChapterContentItem>
-            )}
+            <Topic>
+              <TopicContent>
+                <TopicStage
+                  progress={
+                    (100 *
+                      chapter.contents.filter(
+                        (content) =>
+                          content.userProgressData.lastLearnDate != null
+                      ).length) /
+                    chapter.contents.length
+                  }
+                >
+                  {chapter.contents.map((content) => (
+                    <ContentLink key={content.id} _content={content} />
+                  ))}
+                </TopicStage>
+              </TopicContent>
+            </Topic>
           </ChapterContent>
         </section>
       ))}

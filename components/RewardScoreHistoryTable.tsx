@@ -59,26 +59,30 @@ export function RewardScoreHistoryTable({
     _scores
   );
 
-  const healthData = useRewardScoreData(scores.health).map((e) => ({
+  const healthData = useRewardScoreData(scores.health).map((e, i) => ({
     ...e,
+    id: `health-${i}`,
     label: "Health",
     className: "text-red-500",
     icon: <HealthIcon />,
   }));
-  const fitnessData = useRewardScoreData(scores.fitness).map((e) => ({
+  const fitnessData = useRewardScoreData(scores.fitness).map((e, i) => ({
     ...e,
+    id: `fitness-${i}`,
     label: "Fitness",
     className: "text-blue-500",
     icon: <FitnessIcon />,
   }));
-  const growthData = useRewardScoreData(scores.growth).map((e) => ({
+  const growthData = useRewardScoreData(scores.growth).map((e, i) => ({
     ...e,
+    id: `growth-${i}`,
     label: "Growth",
     className: "text-green-500",
     icon: <GrowthIcon />,
   }));
-  const powerData = useRewardScoreData(scores.power).map((e) => ({
+  const powerData = useRewardScoreData(scores.power).map((e, i) => ({
     ...e,
+    id: `power-${i}`,
     label: "Power",
     className: "text-amber-400",
     icon: <PowerIcon />,
@@ -95,15 +99,15 @@ export function RewardScoreHistoryTable({
     "desc"
   );
 
-  const [expanded, setExpanded] = useState<Set<number>>(new Set());
+  const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const toggleExpanded = useCallback(
-    (i: number) => {
+    (id: string) => {
       setExpanded((expanded) => {
         let new_value = new Set(expanded);
-        if (new_value.has(i)) {
-          new_value.delete(i);
+        if (new_value.has(id)) {
+          new_value.delete(id);
         } else {
-          new_value.add(i);
+          new_value.add(id);
         }
         return new_value;
       });
@@ -124,8 +128,8 @@ export function RewardScoreHistoryTable({
           </TableRow>
         </TableHead>
         <TableBody>
-          {data.map((entry, i) => (
-            <TableRow key={`row-${i}`}>
+          {data.map((entry) => (
+            <TableRow key={entry.id}>
               <TableCell>
                 <div className={`flex items-center gap-4 ${entry.className}`}>
                   {entry.icon}
@@ -152,12 +156,13 @@ export function RewardScoreHistoryTable({
                 <Collapse
                   in={
                     entry.associatedContents.length == 1 ||
-                    (entry.associatedContents.length > 1 && expanded.has(i))
+                    (entry.associatedContents.length > 1 &&
+                      expanded.has(entry.id))
                   }
                 >
                   <div className="flex flex-col gap-3">
                     {entry.associatedContents.map((content, j) => (
-                      <div key={`row-${i}-content-${j}`}>
+                      <div key={`${entry.id}-content-${j}`}>
                         {content ? (
                           <ContentLink _content={content} />
                         ) : (
@@ -170,18 +175,18 @@ export function RewardScoreHistoryTable({
                 {entry.associatedContents.length > 1 && (
                   <Button
                     size="small"
-                    onClick={() => toggleExpanded(i)}
+                    onClick={() => toggleExpanded(entry.id)}
                     startIcon={
-                      expanded.has(i) ? (
+                      expanded.has(entry.id) ? (
                         <KeyboardArrowUp />
                       ) : (
                         <KeyboardArrowDown />
                       )
                     }
                     aria-label="show associated contents"
-                    className={expanded.has(i) ? "!mt-4" : ""}
+                    className={expanded.has(entry.id) ? "!mt-4" : ""}
                   >
-                    {expanded.has(i) ? "Hide" : "Show"}
+                    {expanded.has(entry.id) ? "Hide" : "Show"}
                   </Button>
                 )}
               </TableCell>

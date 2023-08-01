@@ -248,7 +248,7 @@ export default function StudentCoursePage() {
         </div>
       </div>
 
-      <section className="mt-16">
+      <section className="mt-8 mb-20">
         <Typography variant="h2">Up next</Typography>
         <div className="mt-8 gap-8 grid gap-x-12 gap-y-4 grid-cols-[max-content] xl:grid-cols-[repeat(2,max-content)] 2xl:grid-cols-[repeat(3,max-content)]">
           {nextFlashcard && <ContentLink _content={nextFlashcard} />}
@@ -257,7 +257,7 @@ export default function StudentCoursePage() {
       </section>
 
       {orderBy(course.chapters.elements, (x) => x.number).map((chapter) => (
-        <section key={chapter.id} className="mt-24">
+        <section key={chapter.id} className="mt-6">
           <ChapterHeader
             title={chapter.title}
             subtitle={`${dayjs(

@@ -38,10 +38,7 @@ import {
   AssessmentMetadataFormSection,
   AssessmentMetadataPayload,
 } from "@/components/AssessmentMetadataFormSection";
-import {
-  ChapterContent,
-  ChapterContentItem,
-} from "@/components/ChapterContent";
+import { ChapterContent } from "@/components/ChapterContent";
 import { ChapterHeader } from "@/components/ChapterHeader";
 import { Content, ContentLink, ProgressFrame } from "@/components/Content";
 import {
@@ -55,6 +52,8 @@ import dayjs, { Dayjs } from "dayjs";
 import { orderBy } from "lodash";
 import { useState } from "react";
 import { MediaContentModal } from "../../../components/MediaContentModal";
+import { Topic, TopicContent } from "@/components/Topic";
+import { TopicStage } from "@/components/TopicStage";
 
 export default function LecturerCoursePage() {
   // Get course id from url
@@ -142,7 +141,6 @@ export default function LecturerCoursePage() {
       <Content
         title="See overall student progress"
         className="hover:bg-gray-100 rounded-full mt-12 mb-12"
-        subtitle=""
         icon={
           <RemoveRedEye
             sx={{
@@ -158,8 +156,7 @@ export default function LecturerCoursePage() {
 
       <Content
         title="Add new chapter"
-        className="hover:bg-gray-100 rounded-full mt-24"
-        subtitle=""
+        className="hover:bg-gray-100 rounded-full my-16"
         onClick={() => setOpenModal(true)}
         icon={
           <Add
@@ -193,27 +190,34 @@ export default function LecturerCoursePage() {
           />
 
           <ChapterContent>
-            <ChapterContentItem first last>
-              {chapter.contents.map((content) => (
-                <ContentLink key={content.id} _content={content} />
-              ))}
-              <div className="col-span-full mt-2 flex gap-2">
-                <Button
-                  startIcon={<Add />}
-                  onClick={() => setAddFlashcardsChapter(chapter.id)}
-                >
-                  Add flashcards
-                </Button>
-                <AddMediaButton _mediaRecords={query} chapterId={chapter.id} />
-              </div>
-              {chapter.id === addFlashcardsChapter && (
-                <AddFlashcardSetModal
-                  onClose={() => setAddFlashcardsChapter(null)}
-                  chapterId={chapter.id}
-                  chapterRecordId={chapter.__id}
-                />
-              )}
-            </ChapterContentItem>
+            <Topic>
+              <TopicContent>
+                <TopicStage progress={0}>
+                  {chapter.contents.map((content) => (
+                    <ContentLink key={content.id} _content={content} />
+                  ))}
+                  <div className="mt-4 flex flex-col items-start">
+                    <Button
+                      startIcon={<Add />}
+                      onClick={() => setAddFlashcardsChapter(chapter.id)}
+                    >
+                      Add flashcards
+                    </Button>
+                    <AddMediaButton
+                      _mediaRecords={query}
+                      chapterId={chapter.id}
+                    />
+                  </div>
+                  {chapter.id === addFlashcardsChapter && (
+                    <AddFlashcardSetModal
+                      onClose={() => setAddFlashcardsChapter(null)}
+                      chapterId={chapter.id}
+                      chapterRecordId={chapter.__id}
+                    />
+                  )}
+                </TopicStage>
+              </TopicContent>
+            </Topic>
           </ChapterContent>
         </section>
       ))}

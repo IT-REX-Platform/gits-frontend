@@ -21,6 +21,7 @@ export type FieldOptions<T extends object> = {
 } & (
   | {
       type: "text";
+      multiline?: boolean;
     }
   | {
       type: "date";
@@ -46,6 +47,7 @@ export function DialogBase<T extends { [k in string]: any }>({
   validationSchema,
   onSubmit = () => {},
   onClose = () => {},
+  onDelete,
   clearError = () => {},
 }: {
   title: string;
@@ -57,6 +59,7 @@ export function DialogBase<T extends { [k in string]: any }>({
   validationSchema: ObjectSchema<T>;
   onSubmit?: (values: T) => void;
   onClose?: () => void;
+  onDelete?: () => void;
   clearError?: () => void;
 }) {
   const formik = useFormik<T>({
@@ -67,7 +70,7 @@ export function DialogBase<T extends { [k in string]: any }>({
   });
 
   return (
-    <Dialog open={open}>
+    <Dialog open={open} onClose={onClose}>
       <DialogTitle>{title}</DialogTitle>
       <DialogContent className="relative">
         <FormErrors error={error} onClose={clearError} />
@@ -91,6 +94,14 @@ export function DialogBase<T extends { [k in string]: any }>({
         )}
       </DialogContent>
       <DialogActions>
+        {onDelete && (
+          <>
+            <Button color="warning" disabled={inProgress}>
+              Delete
+            </Button>
+            <div className="grow"></div>
+          </>
+        )}
         <Button disabled={inProgress} onClick={onClose}>
           Cancel
         </Button>
@@ -128,6 +139,7 @@ function Field<T extends object>({
           error={hasError}
           helperText={errorText}
           required={field.required}
+          multiline={field.multiline}
         />
       );
     case "date":

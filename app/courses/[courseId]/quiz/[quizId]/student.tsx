@@ -14,23 +14,10 @@ import {
 } from "@mui/material";
 import QuestionMarkIcon from "@mui/icons-material/QuestionMark";
 import { useParams, useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { graphql, useLazyLoadQuery } from "react-relay";
-import { Info } from "@mui/icons-material";
 
-/* interface Answer {
-  text: string;
-  isCorrect: boolean;
-}
-
-interface QuestionItem {
-  question: string;
-  answers: Answer[];
-}
-
-function createQuestionItem(question: string, answers: Answer[]): QuestionItem {
-  return { question, answers };
-} */
+type UserAnswers = (number | null)[];
 
 export default function StudentQuiz() {
   // Get course id from url
@@ -40,6 +27,12 @@ export default function StudentQuiz() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [infoDialogOpen, setInfoDialogOpen] = useState(false);
   const [checkAnswers, setCheckAnswers] = useState(false);
+  const [userAnswers, setUserAnswers] = useState<UserAnswers>([]);
+
+  useEffect(() => {
+    // Reset user answers when the currentIndex changes
+    setUserAnswers([]);
+  }, [currentIndex]);
 
   // Fetch quiz data
   const { contentsByIds, currentUserInfo } = useLazyLoadQuery<studentQuizQuery>(
@@ -116,6 +109,14 @@ export default function StudentQuiz() {
     }
   };
 
+  const handleAnswerChange = (index: any) => {
+    setUserAnswers((prevAnswers) => {
+      const newAnswers = [...prevAnswers];
+      newAnswers[currentIndex] = index;
+      return newAnswers;
+    });
+  };
+
   return (
     <main>
       <Heading title="Quiz" backButton />
@@ -144,10 +145,22 @@ export default function StudentQuiz() {
       <div className="flex justify-center gap-4">
         <FormGroup>
           {answers!.map((answer, index) => (
-            <div key={answer.text}>
+            <div key={index}>
               <FormControlLabel
                 control={
-                  <Checkbox value={answer.correct} disabled={checkAnswers} />
+                  <Checkbox
+                    disabled={checkAnswers}
+                    style={{
+                      color:
+                        checkAnswers && answer.correct
+                          ? "green"
+                          : checkAnswers
+                          ? "red"
+                          : "blue",
+                    }}
+                    onChange={() => handleAnswerChange(index)}
+                    checked={userAnswers[currentIndex] === index}
+                  />
                 }
                 label={answer.text}
               />

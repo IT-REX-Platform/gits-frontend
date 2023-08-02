@@ -31,8 +31,8 @@ import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import dayjs from "dayjs";
 import Link from "next/link";
 import { useState } from "react";
-import { Topic, TopicContent } from "@/components/Topic";
-import { TopicStage } from "@/components/TopicStage";
+import { WorkPath, WorkPathContent } from "@/components/WorkPath";
+import { WorkPathStage } from "@/components/WorkPathStage";
 
 interface Data {
   name: string;
@@ -274,9 +274,9 @@ export default function StudentCoursePage() {
             }
           />
           <ChapterContent>
-            <Topic>
-              <TopicContent>
-                <TopicStage
+            <WorkPath>
+              <WorkPathContent>
+                <WorkPathStage
                   progress={
                     (100 *
                       chapter.contents.filter(
@@ -289,9 +289,9 @@ export default function StudentCoursePage() {
                   {chapter.contents.map((content) => (
                     <ContentLink key={content.id} _content={content} />
                   ))}
-                </TopicStage>
-              </TopicContent>
-            </Topic>
+                </WorkPathStage>
+              </WorkPathContent>
+            </WorkPath>
           </ChapterContent>
         </section>
       ))}

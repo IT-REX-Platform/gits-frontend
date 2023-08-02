@@ -1,7 +1,7 @@
 import { Done } from "@mui/icons-material";
 import { ReactNode } from "react";
 
-export function Topic({ children }: { children: ReactNode }) {
+export function WorkPath({ children }: { children: ReactNode }) {
   return (
     <div className="border-gray-200 w-fit flex flex-col shrink-0">
       {children}
@@ -9,7 +9,7 @@ export function Topic({ children }: { children: ReactNode }) {
   );
 }
 
-export function TopicHeader({
+export function WorkPathHeader({
   children,
   done = false,
 }: {
@@ -26,6 +26,6 @@ export function TopicHeader({
   );
 }
 
-export function TopicContent({ children }: { children: ReactNode }) {
+export function WorkPathContent({ children }: { children: ReactNode }) {
   return <div className="grow py-4">{children}</div>;
 }

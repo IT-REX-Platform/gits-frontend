@@ -14,8 +14,8 @@ import dayjs from "dayjs";
 import { orderBy } from "lodash";
 import { useState } from "react";
 import { MediaContentModal } from "../../../components/MediaContentModal";
-import { Topic, TopicContent } from "@/components/Topic";
-import { TopicStage } from "@/components/TopicStage";
+import { WorkPath, WorkPathContent } from "@/components/WorkPath";
+import { WorkPathStage } from "@/components/WorkPathStage";
 import { AddFlashcardSetModal } from "@/components/AddFlashcardSetModal";
 import { AddChapterModal } from "@/components/AddChapterModal";
 import { EditChapterModal } from "@/components/EditChapterModal";
@@ -147,9 +147,9 @@ export default function LecturerCoursePage() {
           />
 
           <ChapterContent>
-            <Topic>
-              <TopicContent>
-                <TopicStage progress={0}>
+            <WorkPath>
+              <WorkPathContent>
+                <WorkPathStage progress={0}>
                   {chapter.contents.map((content) => (
                     <ContentLink key={content.id} _content={content} />
                   ))}
@@ -160,9 +160,9 @@ export default function LecturerCoursePage() {
                       chapterId={chapter.id}
                     />
                   </div>
-                </TopicStage>
-              </TopicContent>
-            </Topic>
+                </WorkPathStage>
+              </WorkPathContent>
+            </WorkPath>
           </ChapterContent>
         </section>
       ))}

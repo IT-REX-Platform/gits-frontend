@@ -1,7 +1,7 @@
 import { ReactNode } from "react";
 import { Lock } from "@mui/icons-material";
 
-export function TopicStage({
+export function WorkPathStage({
   children,
   progress,
 }: {
@@ -28,7 +28,7 @@ export function TopicStage({
   );
 }
 
-export function TopicStageBarrier() {
+export function WorkPathStageBarrier() {
   return (
     <div className="flex items-stretch">
       <div className="w-8 mr-4 py-4 flex justify-center">

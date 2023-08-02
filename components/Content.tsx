@@ -2,6 +2,7 @@
 import { ContentDocumentFragment$key } from "@/__generated__/ContentDocumentFragment.graphql";
 import { ContentFlashcardFragment$key } from "@/__generated__/ContentFlashcardFragment.graphql";
 import { ContentInvalidDeleteMutation } from "@/__generated__/ContentInvalidDeleteMutation.graphql";
+import { ContentLinkFragment$key } from "@/__generated__/ContentLinkFragment.graphql";
 import { ContentMediaFragment$key } from "@/__generated__/ContentMediaFragment.graphql";
 import { ContentPresentationFragment$key } from "@/__generated__/ContentPresentationFragment.graphql";
 import { ContentVideoFragment$key } from "@/__generated__/ContentVideoFragment.graphql";
@@ -9,6 +10,7 @@ import { PageView, usePageView } from "@/src/currentView";
 import {
   ArrowRight,
   Delete,
+  DeleteForever,
   Description,
   Download,
   Language,
@@ -21,6 +23,35 @@ import { useParams, useRouter } from "next/navigation";
 import { MouseEventHandler, ReactElement, ReactNode } from "react";
 import { graphql, useFragment, useMutation } from "react-relay";
 import colors from "tailwindcss/colors";
+
+export function ContentLink({
+  _content,
+}: {
+  _content: ContentLinkFragment$key;
+}) {
+  const content = useFragment(
+    graphql`
+      fragment ContentLinkFragment on Content {
+        id
+        metadata {
+          type
+        }
+        ...ContentMediaFragment
+        ...ContentFlashcardFragment
+      }
+    `,
+    _content
+  );
+
+  switch (content.metadata.type) {
+    case "MEDIA":
+      return <MediaContent _media={content} />;
+    case "FLASHCARDS":
+      return <FlashcardContent _flashcard={content} />;
+  }
+
+  return null;
+}
 
 export function MediaContent({
   disabled = false,
@@ -172,6 +203,25 @@ export function VideoContent({
           progress={media.userProgressData.lastLearnDate ? 100 : 0}
         />
       }
+    />
+  );
+}
+
+export function DeletedContent() {
+  return (
+    <Content
+      title="Deleted content"
+      className="rounded-xl"
+      disabled
+      icon={
+        <DeleteForever
+          sx={{
+            fontSize: "1.875rem",
+            color: "text.disabled",
+          }}
+        />
+      }
+      iconFrame={<StaticFrame color="bg-gray-100" />}
     />
   );
 }
@@ -468,7 +518,7 @@ export function Content({
   action,
 }: {
   title: string;
-  subtitle: string;
+  subtitle?: string;
   icon: ReactElement;
   iconFrame: ReactElement;
   disabled?: boolean;
@@ -498,13 +548,15 @@ export function Content({
         >
           {title}
         </Typography>
-        <Typography
-          variant="subtitle2"
-          fontWeight={400}
-          color={disabled ? "text.disabled" : ""}
-        >
-          {subtitle}
-        </Typography>
+        {subtitle && (
+          <Typography
+            variant="subtitle2"
+            fontWeight={400}
+            color={disabled ? "text.disabled" : ""}
+          >
+            {subtitle}
+          </Typography>
+        )}
       </div>
       <div className="flex-1"></div>
       {action}

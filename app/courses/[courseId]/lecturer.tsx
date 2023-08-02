@@ -43,12 +43,7 @@ import {
   ChapterContentItem,
 } from "@/components/ChapterContent";
 import { ChapterHeader } from "@/components/ChapterHeader";
-import {
-  Content,
-  FlashcardContent,
-  MediaContent,
-  ProgressFrame,
-} from "@/components/Content";
+import { Content, ContentLink, ProgressFrame } from "@/components/Content";
 import {
   ContentMetadataFormSection,
   ContentMetadataPayload,
@@ -96,11 +91,7 @@ export default function LecturerCoursePage() {
                 suggestedStartDate
                 suggestedEndDate
                 contents {
-                  ...ContentFlashcardFragment
-                  ...ContentMediaFragment
-                  ...ContentVideoFragment
-                  ...ContentPresentationFragment
-                  ...ContentDocumentFragment
+                  ...ContentLinkFragment
 
                   userProgressData {
                     nextLearnDate
@@ -197,13 +188,9 @@ export default function LecturerCoursePage() {
 
           <ChapterContent>
             <ChapterContentItem first last>
-              {chapter.contents.map((content) =>
-                content.__typename === "FlashcardSetAssessment" ? (
-                  <FlashcardContent key={content.id} _flashcard={content} />
-                ) : content.__typename === "MediaContent" ? (
-                  <MediaContent key={content.id} _media={content} />
-                ) : null
-              )}
+              {chapter.contents.map((content) => (
+                <ContentLink key={content.id} _content={content} />
+              ))}
               <div className="col-span-full mt-2 flex gap-2">
                 <Button
                   startIcon={<Add />}

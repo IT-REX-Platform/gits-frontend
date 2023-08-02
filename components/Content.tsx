@@ -18,6 +18,7 @@ import {
   PersonalVideo,
   QuestionAnswerRounded,
   QuestionMark,
+  Quiz,
 } from "@mui/icons-material";
 import { CircularProgress, IconButton, Typography } from "@mui/material";
 import { useParams, useRouter } from "next/navigation";
@@ -39,6 +40,7 @@ export function ContentLink({
         }
         ...ContentMediaFragment
         ...ContentFlashcardFragment
+        ...ContentQuizFragment
       }
     `,
     _content
@@ -49,6 +51,8 @@ export function ContentLink({
       return <MediaContent _media={content} />;
     case "FLASHCARDS":
       return <FlashcardContent _flashcard={content} />;
+    case "QUIZ":
+      return <QuizContent _quiz={content} />;
   }
 
   return null;
@@ -515,7 +519,7 @@ export function QuizContent({
       className="hover:bg-emerald-100 rounded-full"
       onClick={() => push(`/courses/${courseId}/quiz/${quiz.id}`)}
       icon={
-        <QuestionAnswerRounded
+        <Quiz
           sx={{
             fontSize: "2rem",
             color: disabled ? "text.disabled" : "text.secondary",

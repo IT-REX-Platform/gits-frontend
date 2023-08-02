@@ -119,7 +119,7 @@ export default function StudentQuiz() {
 
   return (
     <main>
-      <Heading title="Quiz" backButton />
+      <Heading title={contentsByIds[0].metadata.name} backButton />
       <InfoDialog
         open={infoDialogOpen}
         onClose={() => setInfoDialogOpen(false)}

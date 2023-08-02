@@ -27,11 +27,7 @@ import {
   ChapterContentItem,
 } from "@/components/ChapterContent";
 import { ChapterHeader } from "@/components/ChapterHeader";
-import {
-  FlashcardContent,
-  MediaContent,
-  QuizContent,
-} from "@/components/Content";
+import { ContentLink } from "@/components/Content";
 import { RewardScores } from "@/components/RewardScores";
 import { Info } from "@mui/icons-material";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
@@ -94,12 +90,7 @@ export default function StudentCoursePage() {
               suggestedStartDate
               suggestedEndDate
               contents {
-                ...ContentFlashcardFragment
-                ...ContentMediaFragment
-                ...ContentVideoFragment
-                ...ContentPresentationFragment
-                ...ContentDocumentFragment
-                ...ContentQuizFragment
+                ...ContentLinkFragment
 
                 userProgressData {
                   nextLearnDate
@@ -219,8 +210,17 @@ export default function StudentCoursePage() {
         onClose={() => setInfoDialogOpen(false)}
       />
       <div className="grid grid-cols-2 items-start">
-        <div className="w-fit my-12 pl-8 pr-10 py-6 border-4 border-slate-200 rounded-3xl">
-          <RewardScores _scores={course.rewardScores} courseId={course.id} />
+        <div className="w-fit my-12">
+          <div className="pl-8 pr-10 py-6 border-4 border-slate-200 rounded-3xl">
+            <RewardScores _scores={course.rewardScores} courseId={course.id} />
+          </div>
+          <Button
+            className="!mt-2 !ml-8"
+            endIcon={<NavigateNextIcon />}
+            onClick={() => router.push(`/courses/${id}/statistics`)}
+          >
+            Full history
+          </Button>
         </div>
         <div>
           <TableContainer component={Paper} className="mt-12 mb-2">
@@ -257,9 +257,9 @@ export default function StudentCoursePage() {
       <section className="mt-16">
         <Typography variant="h2">Up next</Typography>
         <div className="mt-8 gap-8 grid gap-x-12 gap-y-4 grid-cols-[max-content] xl:grid-cols-[repeat(2,max-content)] 2xl:grid-cols-[repeat(3,max-content)]">
-          {nextFlashcard && <FlashcardContent _flashcard={nextFlashcard} />}
-          {nextQuiz && <QuizContent _quiz={nextQuiz} />}
-          {nextVideo && <MediaContent _media={nextVideo} />}
+          {nextFlashcard && <ContentLink _content={nextFlashcard} />}
+          {nextQuiz && <ContentLink _content={nextQuiz} />}
+          {nextVideo && <ContentLink _content={nextVideo} />}
         </div>
       </section>
 
@@ -277,15 +277,9 @@ export default function StudentCoursePage() {
           <ChapterContent>
             {chapter.contents.length > 0 && (
               <ChapterContentItem first last>
-                {chapter.contents.map((content) =>
-                  content.metadata.type === "FLASHCARDS" ? (
-                    <FlashcardContent key={content.id} _flashcard={content} />
-                  ) : content.metadata.type === "QUIZ" ? (
-                    <QuizContent key={content.id} _quiz={content} />
-                  ) : content.metadata.type === "MEDIA" ? (
-                    <MediaContent key={content.id} _media={content} />
-                  ) : null
-                )}
+                {chapter.contents.map((content) => (
+                  <ContentLink key={content.id} _content={content} />
+                ))}
               </ChapterContentItem>
             )}
           </ChapterContent>

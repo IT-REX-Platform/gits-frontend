@@ -31,8 +31,8 @@ import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import dayjs from "dayjs";
 import Link from "next/link";
 import { useState } from "react";
-import { Topic, TopicContent, TopicHeader } from "@/components/Topic";
-import { TopicStage, TopicStageBarrier } from "@/components/TopicStage";
+import { Topic, TopicContent } from "@/components/Topic";
+import { TopicStage } from "@/components/TopicStage";
 
 interface Data {
   name: string;
@@ -272,12 +272,6 @@ export default function StudentCoursePage() {
                 ).length) /
               chapter.contents.length
             }
-            skill_levels={{
-              remember: "green",
-              understand: "green",
-              apply: "yellow",
-              analyze: "red",
-            }}
           />
           <ChapterContent>
             <Topic>

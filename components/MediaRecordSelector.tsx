@@ -9,14 +9,12 @@ import {
   MediaType,
 } from "@/__generated__/MediaRecordSelectorCreateMediaRecordMutation.graphql";
 import { MediaRecordSelectorDeleteMediaRecordMutation } from "@/__generated__/MediaRecordSelectorDeleteMediaRecordMutation.graphql";
-import { MediaRecordSelectorUpdateRecordMutation } from "@/__generated__/MediaRecordSelectorUpdateRecordMutation.graphql";
 import {
   Add,
   Delete,
   Download,
   Error,
   FileUploadOutlined,
-  InsertDriveFile,
 } from "@mui/icons-material";
 import {
   Alert,
@@ -33,14 +31,14 @@ import {
   ListItemButton,
   ListItemIcon,
   ListItemText,
-  MenuItem,
-  Select,
   TextField,
 } from "@mui/material";
 import { useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { useFragment, useMutation } from "react-relay";
 import { graphql } from "relay-runtime";
+import { MediaRecordTypeSelector } from "./MediaRecordTypeSelector";
+import { MediaRecordIcon } from "./MediaRecordIcon";
 
 export function MediaRecordSelector({
   _mediaRecords,
@@ -64,6 +62,7 @@ export function MediaRecordSelector({
       fragment MediaRecordSelector on Query {
         mediaRecords {
           id
+          __id
           uploadUrl
           name
           downloadUrl
@@ -82,22 +81,11 @@ export function MediaRecordSelector({
       ) {
         createMediaRecord(input: $input) {
           id
+          __id
           uploadUrl
           name
           downloadUrl
           contentIds
-          type
-        }
-      }
-    `);
-
-  const [updateMediaRecord] =
-    useMutation<MediaRecordSelectorUpdateRecordMutation>(graphql`
-      mutation MediaRecordSelectorUpdateRecordMutation(
-        $input: UpdateMediaRecordInput!
-      ) {
-        updateMediaRecord(input: $input) {
-          id
           type
         }
       }
@@ -118,6 +106,50 @@ export function MediaRecordSelector({
   const [fileUploadStates, setFileUploadStates] = useState<
     Record<string, "running" | "failed" | "done">
   >({});
+  const [files, setFiles] = useState<File[]>([]);
+
+  const uploadFile = useCallback(
+    async (file: File, type: MediaType) => {
+      await createMediaRecord({
+        variables: {
+          input: { contentIds: [], name: file.name, type },
+        },
+        onCompleted(record) {
+          setFileUploadStates((x) => ({
+            ...x,
+            [record.createMediaRecord.id]: "running",
+          }));
+          fetch(record.createMediaRecord.uploadUrl, {
+            method: "PUT",
+            body: file,
+          })
+            .then(() => {
+              setFileUploadStates((x) => ({
+                ...x,
+                [record.createMediaRecord.id]: "done",
+              }));
+              setSelectedRecords((x) => [...x, record.createMediaRecord]);
+            })
+            .catch(() =>
+              setFileUploadStates((x) => ({
+                ...x,
+                [record.createMediaRecord.id]: "failed",
+              }))
+            );
+        },
+        updater(store, data) {
+          const rootStore = store.getRoot();
+          const mediaRecords = rootStore.getLinkedRecords("mediaRecords");
+          const newRecord = store.get(data.createMediaRecord.id);
+          rootStore.setLinkedRecords(
+            [...(mediaRecords ?? []), newRecord!],
+            "mediaRecords"
+          );
+        },
+      });
+    },
+    [createMediaRecord, setSelectedRecords]
+  );
 
   const onDrop = useCallback(
     async (acceptedFiles: File[]) => {
@@ -139,51 +171,24 @@ export function MediaRecordSelector({
         ) {
           type = "PRESENTATION";
         } else {
-          type = "DOCUMENT";
+          setFiles((files) => [...files, file]);
+          continue;
         }
 
         console.log("uploading file of type ", type);
-
-        await createMediaRecord({
-          variables: {
-            input: { contentIds: [], name: file.name, type },
-          },
-          onCompleted(record) {
-            setFileUploadStates((x) => ({
-              ...x,
-              [record.createMediaRecord.id]: "running",
-            }));
-            fetch(record.createMediaRecord.uploadUrl, {
-              method: "PUT",
-              body: file,
-            })
-              .then(() => {
-                setFileUploadStates((x) => ({
-                  ...x,
-                  [record.createMediaRecord.id]: "done",
-                }));
-                setSelectedRecords((x) => [...x, record.createMediaRecord]);
-              })
-              .catch(() =>
-                setFileUploadStates((x) => ({
-                  ...x,
-                  [record.createMediaRecord.id]: "failed",
-                }))
-              );
-          },
-          updater(store, data) {
-            const rootStore = store.getRoot();
-            const mediaRecords = rootStore.getLinkedRecords("mediaRecords");
-            const newRecord = store.get(data.createMediaRecord.id);
-            rootStore.setLinkedRecords(
-              [...(mediaRecords ?? []), newRecord!],
-              "mediaRecords"
-            );
-          },
-        });
+        await uploadFile(file, type);
       }
     },
-    [createMediaRecord, setSelectedRecords]
+    [setFiles, uploadFile]
+  );
+
+  const onTypeSelect = useCallback(
+    async (type: MediaType) => {
+      const file = files[0];
+      setFiles(([_, ...files]) => files);
+      await uploadFile(file, type);
+    },
+    [files, uploadFile]
   );
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
@@ -246,39 +251,12 @@ export function MediaRecordSelector({
                 <ListItem
                   key={record.id}
                   secondaryAction={
-                    <>
-                      <Select
-                        value={record.type}
-                        onChange={(e) =>
-                          updateMediaRecord({
-                            variables: {
-                              input: {
-                                id: record.id,
-                                contentIds: record.contentIds,
-                                name: record.name,
-                                type: e.target.value as MediaType,
-                              },
-                            },
-                            onError: setError,
-                          })
-                        }
-                        variant="standard"
+                    <div className="mr-2">
+                      <Checkbox
                         size="small"
-                        className="min-w-[120px]"
-                      >
-                        {[
-                          ["AUDIO", "Audio"],
-                          ["DOCUMENT", "Document"],
-                          ["IMAGE", "Image"],
-                          ["PRESENTATION", "Presentation"],
-                          ["VIDEO", "Video"],
-                        ].map(([type, label]) => (
-                          <MenuItem key={type} value={type}>
-                            {label}
-                          </MenuItem>
-                        ))}
-                      </Select>
-
+                        checked={!!checked}
+                        onClick={toggle}
+                      />
                       <IconButton
                         size="small"
                         onClick={() => {
@@ -328,17 +306,13 @@ export function MediaRecordSelector({
                           <Download />
                         </IconButton>
                       )}
-                    </>
+                    </div>
                   }
                   disablePadding
                 >
-                  <ListItemButton role={undefined} onClick={toggle} dense>
+                  <ListItemButton onClick={toggle}>
                     <ListItemIcon>
-                      <Checkbox
-                        edge="start"
-                        checked={!!checked}
-                        disableRipple
-                      />
+                      <MediaRecordIcon type={record.type} />
                     </ListItemIcon>
                     <ListItemText primary={record.name} />
                   </ListItemButton>
@@ -374,7 +348,7 @@ export function MediaRecordSelector({
                 }
               >
                 <ListItemIcon>
-                  <InsertDriveFile />
+                  <MediaRecordIcon type={record.type} />
                 </ListItemIcon>
                 <ListItemText primary={record.name} />
               </ListItem>
@@ -388,6 +362,14 @@ export function MediaRecordSelector({
         >
           Add Files
         </Button>
+        {files.length > 0 && (
+          <MediaRecordTypeSelector
+            open
+            file={files[0]}
+            onClose={() => setFiles(([_, ...files]) => files)}
+            onSelect={onTypeSelect}
+          />
+        )}
       </div>
     </>
   );

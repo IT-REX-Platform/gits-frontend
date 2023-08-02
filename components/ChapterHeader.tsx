@@ -1,58 +1,45 @@
 "use client";
 import { Done } from "@mui/icons-material";
-import { CircularProgress, Typography, useTheme } from "@mui/material";
+import { CircularProgress, Typography } from "@mui/material";
 import { ReactNode } from "react";
-
-type SkillLevel = "green" | "yellow" | "red";
-type SkillLevels = {
-  remember: SkillLevel;
-  understand: SkillLevel;
-  apply: SkillLevel;
-  analyze: SkillLevel;
-};
+import { SkillLevels } from "./SkillLevels";
 
 export function ChapterHeader({
   progress,
   title,
   subtitle,
-  skill_levels,
 }: {
   progress: number;
   title: ReactNode;
   subtitle: string;
-  skill_levels: SkillLevels;
 }) {
   return (
-    <div className="flex items-center py-2 pl-8 pr-12 -mx-8 mb-8 bg-slate-50">
+    <div className="flex items-center py-4 pl-8 pr-12 -mx-8 mb-8 bg-gradient-to-r from-slate-100 to-slate-50">
       <div className="mr-10">
         <ChapterProgress progress={progress} />
       </div>
-      <div className="py-4 flex justify-between items-center flex-grow">
+      <div className="flex justify-between items-center flex-grow">
         <div className="pr-8">
           <Typography variant="h2">{title}</Typography>
           <Typography variant="subtitle1">{subtitle}</Typography>
         </div>
-        <div className="grid grid-rows-4 lg:grid-rows-2 xl:grid-rows-1 grid-flow-col auto-cols-auto gap-x-6 gap-y-1 lg:gap-y-2">
-          <SkillLevel label="Remember" color={skill_levels.remember} />
-          <SkillLevel label="Understand" color={skill_levels.understand} />
-          <SkillLevel label="Apply" color={skill_levels.apply} />
-          <SkillLevel label="Analyze" color={skill_levels.analyze} />
-        </div>
+        <SkillLevels />
       </div>
     </div>
   );
 }
 
 export function ChapterProgress({ progress }: { progress: number }) {
-  const theme = useTheme();
   return (
     <div className="relative flex justify-center items-center">
+      <div className="absolute h-12 w-12 rounded-full shadow-lg shadow-slate-100"></div>
+      <div className="absolute h-10 w-10 rounded-full shadow-inner shadow-slate-100"></div>
       <CircularProgress
         variant="determinate"
         value={100}
         size="3rem"
         thickness={4}
-        className="!text-gray-200"
+        className="!text-white"
       />
       <CircularProgress
         className="absolute"
@@ -65,27 +52,6 @@ export function ChapterProgress({ progress }: { progress: number }) {
       {progress == 100 && (
         <Done fontSize="large" className="absolute text-green-600" />
       )}
-    </div>
-  );
-}
-
-export function SkillLevel({
-  label,
-  color,
-}: {
-  label: string;
-  color: "red" | "yellow" | "green";
-}) {
-  const circleColors = {
-    green: "bg-green-500",
-    yellow: "bg-yellow-300",
-    red: "bg-red-500",
-  };
-
-  return (
-    <div className="flex gap-2 items-center">
-      <div className={`w-5 h-5 rounded-full ${circleColors[color]}`}></div>
-      {label}
     </div>
   );
 }

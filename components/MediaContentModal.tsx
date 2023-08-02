@@ -2,7 +2,6 @@
 import { MediaContentModal$key } from "@/__generated__/MediaContentModal.graphql";
 import { MediaContentModalCreateMutation } from "@/__generated__/MediaContentModalCreateMutation.graphql";
 import { MediaContentModalUpdateMutation } from "@/__generated__/MediaContentModalUpdateMutation.graphql";
-import { MediaContentModalUpdateRecordMutation } from "@/__generated__/MediaContentModalUpdateRecordMutation.graphql";
 import { MediaRecordSelector$key } from "@/__generated__/MediaRecordSelector.graphql";
 import { Form, FormSection } from "@/components/Form";
 import {
@@ -18,7 +17,6 @@ import {
 } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers";
 import dayjs, { Dayjs } from "dayjs";
-import { uniq } from "lodash";
 import { useState } from "react";
 import { graphql, useFragment, useMutation } from "react-relay";
 import { MediaRecordSelector } from "./MediaRecordSelector";
@@ -40,6 +38,7 @@ export function MediaContentModal({
     graphql`
       fragment MediaContentModal on MediaContent {
         id
+        __id
         metadata {
           name
           rewardPoints
@@ -48,6 +47,7 @@ export function MediaContentModal({
         }
         mediaRecords {
           id
+          __id
           uploadUrl
           name
           downloadUrl
@@ -83,8 +83,12 @@ export function MediaContentModal({
     useMutation<MediaContentModalCreateMutation>(graphql`
       mutation MediaContentModalCreateMutation(
         $input: CreateContentMetadataInput!
+        $records: [UUID!]!
       ) {
-        createMediaContent(input: { metadata: $input }) {
+        createMediaContentAndLinkRecords(
+          contentInput: { metadata: $input }
+          mediaRecordIds: $records
+        ) {
           id
           ...ContentVideoFragment
           userProgressData {
@@ -110,7 +114,9 @@ export function MediaContentModal({
   const [updateMedia, isUpdating] =
     useMutation<MediaContentModalUpdateMutation>(graphql`
       mutation MediaContentModalUpdateMutation(
+        $contentId: UUID!
         $input: UpdateMediaContentInput!
+        $records: [UUID!]!
       ) {
         updateMediaContent(input: $input) {
           id
@@ -120,14 +126,10 @@ export function MediaContentModal({
           }
           __typename
         }
-      }
-    `);
-  const [updateMediaRecord] =
-    useMutation<MediaContentModalUpdateRecordMutation>(graphql`
-      mutation MediaContentModalUpdateRecordMutation(
-        $input: UpdateMediaRecordInput!
-      ) {
-        updateMediaRecord(input: $input) {
+        linkMediaRecordsWithContent(
+          contentId: $contentId
+          mediaRecordIds: $records
+        ) {
           id
         }
       }
@@ -141,46 +143,10 @@ export function MediaContentModal({
   }
 
   function handleSubmit() {
-    // TODO ugly workaround until we have a proper mutation to do this in one pass
-    const updateRecords = async (contentId: string) => {
-      for (const record of selectedRecords) {
-        await updateMediaRecord({
-          variables: {
-            input: {
-              id: record.id,
-              contentIds: uniq([...record.contentIds, contentId]),
-              name: record.name,
-              type: record.type,
-            },
-          },
-        });
-      }
-
-      const removedRecords =
-        existingContent?.mediaRecords.filter(
-          (r) => !selectedRecords.map((sr) => sr.id).includes(r.id)
-        ) ?? [];
-      for (const record of removedRecords) {
-        await updateMediaRecord({
-          variables: {
-            input: {
-              id: record.id,
-              contentIds: uniq([
-                ...record.contentIds.filter(
-                  (cid) => cid != existingContent!.id
-                ),
-              ]),
-              name: record.name,
-              type: record.type,
-            },
-          },
-        });
-      }
-    };
-
     if (existingContent) {
       updateMedia({
         variables: {
+          contentId: existingContent.id,
           input: {
             id: existingContent.id,
             metadata: {
@@ -191,13 +157,18 @@ export function MediaContentModal({
               tagNames: [],
             },
           },
+          records: selectedRecords.map((r) => r.id),
         },
-        onCompleted({ updateMediaContent: { id } }) {
-          updateRecords(id);
+        onCompleted() {
           onClose();
         },
         onError(error) {
           setError(error);
+        },
+        updater(store) {
+          const content = store.get(existingContent.__id);
+          const records = selectedRecords.map((r) => store.get(r.__id)!);
+          content!.setLinkedRecords(records, "mediaRecords");
         },
       });
     } else {
@@ -211,9 +182,9 @@ export function MediaContentModal({
             tagNames: [],
             type: "MEDIA",
           },
+          records: selectedRecords.map((r) => r.id),
         },
-        onCompleted({ createMediaContent: { id } }) {
-          updateRecords(id);
+        onCompleted() {
           onClose();
         },
         onError(error) {
@@ -221,7 +192,7 @@ export function MediaContentModal({
         },
         updater(store, data) {
           const chapter = store.get(chapterId!);
-          const newRecord = store.get(data.createMediaContent.id);
+          const newRecord = store.get(data.createMediaContentAndLinkRecords.id);
           const linkedRecords = chapter!.getLinkedRecords("contents");
           chapter!.setLinkedRecords(
             [...(linkedRecords ?? []), newRecord!],

@@ -11,14 +11,26 @@ import {
 import { FormErrors } from "./FormErrors";
 import { Form, FormSection } from "./Form";
 import { FormikProps, useFormik } from "formik";
+import { DatePicker } from "@mui/x-date-pickers";
+import { Dayjs } from "dayjs";
 
-export type FieldType = "text" | "date";
 export type FieldOptions<T extends object> = {
   key: keyof T;
   label: string;
-  type: FieldType;
   required: boolean;
-};
+} & (
+  | {
+      type: "text";
+    }
+  | {
+      type: "date";
+      minDate?: Dayjs;
+      maxDate?: Dayjs;
+      beforeOther?: keyof T;
+      afterOther?: keyof T;
+      defaultMonthDate?: Dayjs;
+    }
+);
 export type SectionOptions<T extends object> = {
   label: string;
   fields: FieldOptions<T>[];
@@ -100,6 +112,10 @@ function Field<T extends object>({
   formik: FormikProps<T>;
   field: FieldOptions<T>;
 }) {
+  const hasError = formik.touched[field.key] && !!formik.errors[field.key];
+  const errorText =
+    formik.touched[field.key] && (formik.errors[field.key] as string);
+
   switch (field.type) {
     case "text":
       return (
@@ -109,14 +125,34 @@ function Field<T extends object>({
           value={formik.values[field.key]}
           onChange={formik.handleChange}
           onBlur={formik.handleBlur}
-          error={formik.touched[field.key] && !!formik.errors[field.key]}
-          helperText={
-            formik.touched[field.key] && (formik.errors[field.key] as string)
-          }
+          error={hasError}
+          helperText={errorText}
           required={field.required}
         />
       );
     case "date":
-      return <div></div>;
+      return (
+        <DatePicker
+          label={field.label}
+          value={formik.values[field.key]}
+          minDate={
+            field.afterOther ? formik.values[field.afterOther] : field.minDate
+          }
+          maxDate={
+            field.beforeOther ? formik.values[field.beforeOther] : field.maxDate
+          }
+          defaultCalendarMonth={field.defaultMonthDate}
+          onChange={(value) => formik.setFieldValue(field.key as string, value)}
+          slotProps={{
+            textField: {
+              id: field.key as string,
+              required: field.required,
+              error: hasError,
+              helperText: errorText,
+              onBlur: formik.handleBlur,
+            },
+          }}
+        />
+      );
   }
 }

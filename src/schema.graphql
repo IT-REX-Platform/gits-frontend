@@ -497,6 +497,14 @@ input CreateQuizInput {
   multipleChoiceQuestions: [CreateMultipleChoiceQuestionInput!]! = []
 }
 
+input CreateSectionInput {
+  # Chapter Section will belong to
+  chapterId: UUID!
+
+  # name given to Section
+  name: String!
+}
+
 # An RFC-3339 compliant Full Date Scalar
 scalar Date
 
@@ -744,6 +752,24 @@ type MultipleChoiceQuestion implements Question {
 }
 
 type Mutation {
+  # registers a user to a course with a role
+  createMembership(input: CourseMembershipInput!): CourseMembership!
+
+  # updates the role of a user in a course
+  updateMembership(input: CourseMembershipInput!): CourseMembership!
+
+  # deletes user course link
+  deleteMembership(input: CourseMembershipInput!): CourseMembership!
+
+  # ONLY FOR TESTING PURPOSES. DO NOT USE IN FRONTEND. WILL BE REMOVED.
+  #
+  # Triggers the recalculation of the reward score of the user.
+  # This is done automatically at some time in the night.
+  #
+  # The purpose of this mutation is to allow testing of the reward score and demonstrate the functionality.
+  recalculateScores(courseId: UUID!, userId: UUID!): RewardScores!
+    @deprecated(reason: "Only for testing purposes. Will be removed.")
+
   # Creates a new media record
   createMediaRecord(input: CreateMediaRecordInput!): MediaRecord!
 
@@ -767,14 +793,17 @@ type Mutation {
   # a user-progress event is emitted for the content.
   logMediaRecordWorkedOn(mediaRecordId: UUID!): MediaRecord!
 
-  # registers a user to a course with a role
-  createMembership(input: CourseMembershipInput!): CourseMembership!
+  # Create a quiz.
+  createQuiz(assessmentId: UUID!, input: CreateQuizInput!): Quiz!
 
-  # updates the role of a user in a course
-  updateMembership(input: CourseMembershipInput!): CourseMembership!
+  # Modify a quiz.
+  mutateQuiz(assessmentId: UUID!): QuizMutation!
 
-  # deletes user course link
-  deleteMembership(input: CourseMembershipInput!): CourseMembership!
+  # Delete a quiz.
+  deleteQuiz(assessmentId: UUID!): UUID!
+    @deprecated(
+      reason: "Only for development, will be removed in production. Use deleteAssessment in contents service instead."
+    )
 
   # Creates a new course with the given input and returns the created course.
   createCourse(input: CreateCourseInput!): Course!
@@ -816,15 +845,6 @@ type Mutation {
   # Logs that a user has learned a flashcard.
   logFlashcardLearned(input: LogFlashcardLearnedInput!): Flashcard!
 
-  # ONLY FOR TESTING PURPOSES. DO NOT USE IN FRONTEND. WILL BE REMOVED.
-  #
-  # Triggers the recalculation of the reward score of the user.
-  # This is done automatically at some time in the night.
-  #
-  # The purpose of this mutation is to allow testing of the reward score and demonstrate the functionality.
-  recalculateScores(courseId: UUID!, userId: UUID!): RewardScores!
-    @deprecated(reason: "Only for testing purposes. Will be removed.")
-
   # Create new media content
   createMediaContent(input: CreateMediaContentInput!): MediaContent!
 
@@ -846,17 +866,26 @@ type Mutation {
   # Remove a tag from an existing content
   removeTagFromContent(contentId: UUID!, tagName: String): Content!
 
-  # Create a quiz.
-  createQuiz(assessmentId: UUID!, input: CreateQuizInput!): Quiz!
+  # create new Section
+  createSection(input: CreateSectionInput!): Section!
 
-  # Modify a quiz.
-  mutateQuiz(assessmentId: UUID!): QuizMutation!
+  # update the name of a Section
+  updateSection(input: UpdateSectionInput!): Section!
 
-  # Delete a quiz.
-  deleteQuiz(assessmentId: UUID!): UUID!
-    @deprecated(
-      reason: "Only for development, will be removed in production. Use deleteAssessment in contents service instead."
-    )
+  # delete a Section by ID
+  deleteSection(id: UUID!): UUID!
+
+  # create new Stage in Section
+  createStage(sectionId: UUID!): Stage!
+
+  # Update Content of Stage
+  updateStage(input: UpdateStageInput): Stage!
+
+  # delete Stage by ID
+  deleteStage(id: UUID!): UUID!
+
+  # update Order of Stages within a Section
+  updateStageOrder(input: StageOrderInput!): Section!
 
   # Creates a new media content and links the given media records to it.
   createMediaContentAndLinkRecords(
@@ -926,22 +955,6 @@ type PublicUserInfo {
 }
 
 type Query {
-  # Returns the media records with the given IDs
-  mediaRecordsById(ids: [UUID!]!): [MediaRecord!]!
-
-  # Returns all media records of the system.
-  mediaRecords: [MediaRecord!]!
-    @deprecated(
-      reason: "In production there should probably be no way to get all media records of the system."
-    )
-
-  # Returns all media records which the current user created.
-  userMediaRecords: [MediaRecord!]!
-
-  # Returns the media records associated the given content IDs as a list of lists where each sublist contains
-  # the media records associated with the content ID at the same index in the input list
-  mediaRecordsByContentIds(contentIds: [UUID!]!): [[MediaRecord!]!]!
-
   # Retrieves a list of course memberships for a user ID
   courseMemberships(id: UUID!): [CourseMembership!]
 
@@ -964,6 +977,38 @@ type Query {
   # Gets all of the users' information for a list of users with the specified IDs.
   # Only available to the user themselves and privileged users.
   userInfoBatched(ids: [UUID!]!): [UserInfo!]!
+
+  # Get the reward score of the current user for the specified course.
+  userCourseRewardScores(courseId: UUID!): RewardScores!
+
+  # Get the reward score of the specified user for the specified course.
+  courseRewardScoresForUser(courseId: UUID!, userId: UUID!): RewardScores!
+
+  # Gets the power scores for each user in the course, ordered by power score descending.
+  scoreboard(courseId: UUID!): [ScoreboardItem!]!
+
+  # Returns the media records with the given IDs
+  mediaRecordsById(ids: [UUID!]!): [MediaRecord!]!
+
+  # Returns all media records of the system.
+  mediaRecords: [MediaRecord!]!
+    @deprecated(
+      reason: "In production there should probably be no way to get all media records of the system."
+    )
+
+  # Returns all media records which the current user created.
+  userMediaRecords: [MediaRecord!]!
+
+  # Returns the media records associated the given content IDs as a list of lists where each sublist contains
+  # the media records associated with the content ID at the same index in the input list
+  mediaRecordsByContentIds(contentIds: [UUID!]!): [[MediaRecord!]!]!
+
+  # Get quiz by assessment ID.
+  # If any of the assessment IDs are not found, the corresponding quiz will be null.
+  findQuizzesByAssessmentIds(assessmentIds: [UUID!]!): [Quiz]!
+
+  # Get all quizzes.
+  quizzes: [Quiz!]!
 
   # Get a list of courses. Can be filtered, sorted and paginated.
   courses(
@@ -1008,15 +1053,6 @@ type Query {
   # Returns a list of lists of flashcard sets, where each list corresponds to a single assessment id.
   flashcardSetsByAssessmentIds(assessmentIds: [UUID!]!): [FlashcardSet!]!
 
-  # Get the reward score of the current user for the specified course.
-  userCourseRewardScores(courseId: UUID!): RewardScores!
-
-  # Get the reward score of the specified user for the specified course.
-  courseRewardScoresForUser(courseId: UUID!, userId: UUID!): RewardScores!
-
-  # Gets the power scores for each user in the course, ordered by power score descending.
-  scoreboard(courseId: UUID!): [ScoreboardItem!]!
-
   # get all contents
   contents: ContentPayload!
 
@@ -1030,12 +1066,8 @@ type Query {
   # associated with that chapter
   contentsByChapterIds(chapterIds: [UUID!]!): [[Content!]!]!
 
-  # Get quiz by assessment ID.
-  # If any of the assessment IDs are not found, the corresponding quiz will be null.
-  findQuizzesByAssessmentIds(assessmentIds: [UUID!]!): [Quiz]!
-
-  # Get all quizzes.
-  quizzes: [Quiz!]!
+  # retrieves all existing Sections for a Chapter
+  findSectionsByChapter(id: UUID!): [Section!]!
 }
 
 # Generic question interface.
@@ -1242,6 +1274,21 @@ type ScoreboardItem {
   user: PublicUserInfo!
 }
 
+# Representation of a Section
+type Section {
+  # Unique identifier of the Section Object
+  id: UUID!
+
+  # Name of the Section
+  name: String!
+
+  # Chapter the Section is located in
+  chapterId: UUID!
+
+  # List of Stages contained in a Section
+  stages: [Stage!]!
+}
+
 # Type of the assessment
 enum SkillType {
   REMEMBER
@@ -1254,6 +1301,29 @@ enum SkillType {
 enum SortDirection {
   ASC
   DESC
+}
+
+# Representation of a Stage
+type Stage {
+  # Unique identifier of the Stage Object
+  id: UUID!
+
+  # Position of the Stage within the Section
+  position: Int!
+
+  # List of Content that is labeled as required content
+  requiredContents: [Content!]!
+
+  # List of Content that is labeled as optional content
+  optionalContents: [Content!]!
+}
+
+input StageOrderInput {
+  # Identifier of target Section
+  sectionId: UUID!
+
+  # new position of all stages determined by their position in the list
+  stageIds: [UUID!]!
 }
 
 # Filter for string values.
@@ -1408,6 +1478,25 @@ input UpdateMultipleChoiceQuestionInput {
 
   # Optional hint for the question, can be markdown.
   hint: String
+}
+
+input UpdateSectionInput {
+  # Identifier of the Section
+  id: UUID!
+
+  # new name of the Section
+  name: String!
+}
+
+input UpdateStageInput {
+  # Identifier of the Stage
+  id: UUID!
+
+  # updated List of UUIDs for content labeled as required in this Stage
+  requiredContents: [UUID!]!
+
+  # updated List of UUIDs for content labeled as optional in this Stage
+  optionalContents: [UUID!]!
 }
 
 # A Url scalar

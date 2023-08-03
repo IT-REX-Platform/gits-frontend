@@ -12,10 +12,12 @@ import {
   DialogTitle,
   Typography,
 } from "@mui/material";
+import Error from "next/error";
 import QuestionMarkIcon from "@mui/icons-material/QuestionMark";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { graphql, useLazyLoadQuery } from "react-relay";
+import { is } from "date-fns/locale";
 
 type UserAnswers = (number | null)[];
 
@@ -90,7 +92,14 @@ export default function StudentQuiz() {
     { id: [quizId] }
   );
 
+  // Show 404 error page if id was not found
+  if (contentsByIds.length == 0) {
+    return <Error statusCode={404} title="Quiz could not be found." />;
+  }
   const quiz = contentsByIds[0].quiz;
+  if (quiz === null) {
+    return <Error statusCode={404} />;
+  }
   const currentQuestion = quiz!.selectedQuestions[currentIndex];
   const questionText = currentQuestion.text;
   const answers = currentQuestion.answers;
@@ -112,7 +121,7 @@ export default function StudentQuiz() {
   const handleAnswerChange = (index: any) => {
     setUserAnswers((prevAnswers) => {
       const newAnswers = [...prevAnswers];
-      newAnswers[currentIndex] = index;
+      newAnswers.push(index);
       return newAnswers;
     });
   };
@@ -136,9 +145,12 @@ export default function StudentQuiz() {
 
       <div className="w-full border-b border-b-gray-300 mt-6 flex justify-center mb-6">
         <div>
-          <IconButton onClick={() => setInfoDialogOpen(true)}>
-            <QuestionMarkIcon />
-          </IconButton>
+          <Button
+            onClick={() => setInfoDialogOpen(true)}
+            sx={{ color: "grey" }}
+          >
+            Hint
+          </Button>
         </div>
       </div>
 
@@ -156,10 +168,10 @@ export default function StudentQuiz() {
                           ? "green"
                           : checkAnswers
                           ? "red"
-                          : "blue",
+                          : "gray",
                     }}
                     onChange={() => handleAnswerChange(index)}
-                    checked={userAnswers[currentIndex] === index}
+                    checked={userAnswers.includes(index)}
                   />
                 }
                 label={answer.text}

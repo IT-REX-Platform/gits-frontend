@@ -14,7 +14,7 @@
     "update-schema": "fetch-graphql-schema http://orange.informatik.uni-stuttgart.de/graphql -o src/schema.graphql -r && sed -i 's/Assessment,/Assessment \\&/' src/schema.graphql"
   },
   "lint-staged": {
-    "*.{tsx,tsx,css,json}": "prettier --write"
+    "*.{ts,tsx,css,json}": "prettier --write"
   },
   "dependencies": {
     "@emotion/react": "^11.10.8",

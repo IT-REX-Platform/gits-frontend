@@ -264,7 +264,7 @@ export default function StudentCoursePage() {
                   (content) => content.userProgressData.lastLearnDate != null
                 ).length) /
               chapter.contents.length
-            : 100;
+            : 0;
 
         return (
           <section key={chapter.id} className="mt-6">

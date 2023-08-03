@@ -135,6 +135,11 @@ export default function StudentCoursePage() {
     .filter((x) => x.metadata.type === "FLASHCARDS")
     .minBy((x) => new Date(x.userProgressData.nextLearnDate))
     .value();
+  const nextQuiz = chain(course.chapters.elements)
+    .flatMap((x) => x.contents)
+    .filter((x) => x.metadata.type === "QUIZ")
+    .minBy((x) => new Date(x.userProgressData.nextLearnDate))
+    .value();
   const nextVideo = chain(course.chapters.elements)
     .flatMap((x) => x.contents)
     .filter((x) => x.metadata.type === "MEDIA")
@@ -252,6 +257,7 @@ export default function StudentCoursePage() {
         <Typography variant="h2">Up next</Typography>
         <div className="mt-8 gap-8 grid gap-x-12 gap-y-4 grid-cols-[max-content] xl:grid-cols-[repeat(2,max-content)] 2xl:grid-cols-[repeat(3,max-content)]">
           {nextFlashcard && <ContentLink _content={nextFlashcard} />}
+          {nextQuiz && <ContentLink _content={nextQuiz} />}
           {nextVideo && <ContentLink _content={nextVideo} />}
         </div>
       </section>

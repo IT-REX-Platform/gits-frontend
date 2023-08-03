@@ -5,6 +5,7 @@ import { ContentInvalidDeleteMutation } from "@/__generated__/ContentInvalidDele
 import { ContentLinkFragment$key } from "@/__generated__/ContentLinkFragment.graphql";
 import { ContentMediaFragment$key } from "@/__generated__/ContentMediaFragment.graphql";
 import { ContentPresentationFragment$key } from "@/__generated__/ContentPresentationFragment.graphql";
+import { ContentQuizFragment$key } from "@/__generated__/ContentQuizFragment.graphql";
 import { ContentVideoFragment$key } from "@/__generated__/ContentVideoFragment.graphql";
 import { PageView, usePageView } from "@/src/currentView";
 import {
@@ -17,6 +18,7 @@ import {
   PersonalVideo,
   QuestionAnswerRounded,
   QuestionMark,
+  Quiz,
 } from "@mui/icons-material";
 import { CircularProgress, IconButton, Typography } from "@mui/material";
 import { useParams, useRouter } from "next/navigation";
@@ -40,6 +42,7 @@ export function ContentLink({
         }
         ...ContentMediaFragment
         ...ContentFlashcardFragment
+        ...ContentQuizFragment
       }
     `,
     _content
@@ -50,6 +53,8 @@ export function ContentLink({
       return <MediaContent disabled={disabled} _media={content} />;
     case "FLASHCARDS":
       return <FlashcardContent disabled={disabled} _flashcard={content} />;
+    case "QUIZ":
+      return <QuizContent disabled={disabled} _quiz={content} />;
   }
 
   return null;
@@ -182,8 +187,6 @@ export function VideoContent({
     _media
   );
 
-  const [pageView] = usePageView();
-
   return (
     <Content
       type="Video"
@@ -248,7 +251,6 @@ export function InvalidContent({
   `);
 
   const [pageView] = usePageView();
-
   if (pageView === PageView.Student) {
     return null;
   }
@@ -324,8 +326,6 @@ export function PresentationContent({
     _media
   );
 
-  const [pageView] = usePageView();
-
   return (
     <Content
       type="Slides"
@@ -373,8 +373,6 @@ export function DocumentContent({
     `,
     _media
   );
-
-  const [pageView] = usePageView();
 
   return (
     <Content
@@ -453,9 +451,6 @@ export function FlashcardContent({
   );
 
   const { push } = useRouter();
-
-  const [pageView] = usePageView();
-
   return (
     <Content
       type="Flashcards"
@@ -465,6 +460,55 @@ export function FlashcardContent({
       onClick={() => push(`/courses/${courseId}/flashcards/${flashcard.id}`)}
       icon={
         <QuestionAnswerRounded
+          sx={{
+            fontSize: "2rem",
+            color: disabled ? "text.disabled" : "text.secondary",
+          }}
+        />
+      }
+      iconFrame={
+        <ProgressFrame
+          color={disabled ? colors.gray[100] : colors.emerald[200]}
+          progress={disabled ? 0 : 0}
+        />
+      }
+    />
+  );
+}
+
+export function QuizContent({
+  _quiz,
+  disabled,
+}: {
+  _quiz: ContentQuizFragment$key;
+  disabled?: boolean;
+}) {
+  const { courseId } = useParams();
+  const quiz = useFragment(
+    graphql`
+      fragment ContentQuizFragment on QuizAssessment {
+        id
+        metadata {
+          name
+        }
+        userProgressData {
+          nextLearnDate
+        }
+      }
+    `,
+    _quiz
+  );
+
+  const { push } = useRouter();
+  return (
+    <Content
+      type="Quiz"
+      title={quiz.metadata.name}
+      disabled={disabled}
+      className="hover:bg-emerald-100 rounded-full"
+      onClick={() => push(`/courses/${courseId}/quiz/${quiz.id}`)}
+      icon={
+        <Quiz
           sx={{
             fontSize: "2rem",
             color: disabled ? "text.disabled" : "text.secondary",

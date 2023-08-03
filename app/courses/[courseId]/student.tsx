@@ -32,7 +32,7 @@ import dayjs from "dayjs";
 import Link from "next/link";
 import { useState } from "react";
 import { WorkPath, WorkPathContent } from "@/components/WorkPath";
-import { WorkPathStage } from "@/components/WorkPathStage";
+import { Stage } from "@/components/Stage";
 
 interface Data {
   name: string;
@@ -256,45 +256,41 @@ export default function StudentCoursePage() {
         </div>
       </section>
 
-      {orderBy(course.chapters.elements, (x) => x.number).map((chapter) => (
-        <section key={chapter.id} className="mt-6">
-          <ChapterHeader
-            title={chapter.title}
-            subtitle={`${dayjs(
-              chapter.suggestedStartDate ?? chapter.startDate
-            ).format("D. MMMM")} – ${dayjs(
-              chapter.suggestedEndDate ?? chapter.endDate
-            ).format("D. MMMM")}`}
-            progress={
-              (100 *
+      {orderBy(course.chapters.elements, (x) => x.number).map((chapter) => {
+        const chapterProgress =
+          chapter.contents.length > 0
+            ? (100 *
                 chapter.contents.filter(
                   (content) => content.userProgressData.lastLearnDate != null
                 ).length) /
               chapter.contents.length
-            }
-          />
-          <ChapterContent>
-            <WorkPath>
-              <WorkPathContent>
-                <WorkPathStage
-                  progress={
-                    (100 *
-                      chapter.contents.filter(
-                        (content) =>
-                          content.userProgressData.lastLearnDate != null
-                      ).length) /
-                    chapter.contents.length
-                  }
-                >
-                  {chapter.contents.map((content) => (
-                    <ContentLink key={content.id} _content={content} />
-                  ))}
-                </WorkPathStage>
-              </WorkPathContent>
-            </WorkPath>
-          </ChapterContent>
-        </section>
-      ))}
+            : 100;
+
+        return (
+          <section key={chapter.id} className="mt-6">
+            <ChapterHeader
+              title={chapter.title}
+              subtitle={`${dayjs(
+                chapter.suggestedStartDate ?? chapter.startDate
+              ).format("D. MMMM")} – ${dayjs(
+                chapter.suggestedEndDate ?? chapter.endDate
+              ).format("D. MMMM")}`}
+              progress={chapterProgress}
+            />
+            <ChapterContent>
+              <WorkPath done={chapterProgress == 100}>
+                <WorkPathContent>
+                  <Stage progress={chapterProgress}>
+                    {chapter.contents.map((content) => (
+                      <ContentLink key={content.id} _content={content} />
+                    ))}
+                  </Stage>
+                </WorkPathContent>
+              </WorkPath>
+            </ChapterContent>
+          </section>
+        );
+      })}
     </main>
   );
 }

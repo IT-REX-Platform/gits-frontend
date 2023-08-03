@@ -1,10 +1,14 @@
+import { useState } from "react";
 import { graphql, useFragment, useMutation } from "react-relay";
-import * as yup from "yup";
 
+import { DialogBase } from "./DialogBase";
+import {
+  ChapterData,
+  dialogSections,
+  validationSchema,
+} from "./dialogs/chapterDialog";
 import { AddChapterModalFragment$key } from "@/__generated__/AddChapterModalFragment.graphql";
 import { AddChapterModalMutation } from "@/__generated__/AddChapterModalMutation.graphql";
-import { DialogBase } from "./DialogBase";
-import { useState } from "react";
 
 export function AddChapterModal({
   open,
@@ -43,14 +47,7 @@ export function AddChapterModal({
     }
   `);
 
-  function handleSubmit(values: {
-    title: string;
-    description: string;
-    startDate: Date | null;
-    endDate: Date | null;
-    suggestedStartDate: Date | null;
-    suggestedEndDate: Date | null;
-  }) {
+  function handleSubmit(values: ChapterData) {
     const nextCourseNumber = course.chapters.elements.length + 1;
 
     addChapter({
@@ -79,82 +76,16 @@ export function AddChapterModal({
     <DialogBase
       open={open}
       title="Add a chapter"
-      sections={[
-        {
-          label: "General",
-          fields: [
-            {
-              key: "title",
-              label: "Title",
-              type: "text",
-              required: true,
-            },
-            {
-              key: "description",
-              label: "Description",
-              type: "text",
-              required: false,
-              multiline: true,
-            },
-          ],
-        },
-        {
-          label: "Start and end",
-          fields: [
-            {
-              key: "startDate",
-              label: "Start date",
-              type: "date",
-              required: true,
-              beforeOther: "endDate",
-            },
-            {
-              key: "endDate",
-              label: "End date",
-              type: "date",
-              required: true,
-              afterOther: "startDate",
-            },
-          ],
-        },
-        {
-          label: "Suggested start and end",
-          fields: [
-            {
-              key: "suggestedStartDate",
-              label: "Suggested start date",
-              type: "date",
-              required: true,
-              beforeOther: "suggestedEndDate",
-              afterOther: "startDate",
-            },
-            {
-              key: "suggestedEndDate",
-              label: "Suggested end date",
-              type: "date",
-              required: true,
-              afterOther: "suggestedStartDate",
-              beforeOther: "endDate",
-            },
-          ],
-        },
-      ]}
+      sections={dialogSections}
       initialValues={{
         title: "",
         description: "",
-        startDate: null as Date | null,
-        endDate: null as Date | null,
-        suggestedStartDate: null as Date | null,
-        suggestedEndDate: null as Date | null,
+        startDate: null,
+        endDate: null,
+        suggestedStartDate: null,
+        suggestedEndDate: null,
       }}
-      validationSchema={yup.object({
-        title: yup.string().required("Required"),
-        description: yup.string().optional().default(""),
-        startDate: yup.date().required("Required"),
-        endDate: yup.date().required("Required"),
-        suggestedStartDate: yup.date().required("Required"),
-        suggestedEndDate: yup.date().required("Required"),
-      })}
+      validationSchema={validationSchema}
       onClose={onClose}
       onSubmit={handleSubmit}
       clearError={() => setError(null)}

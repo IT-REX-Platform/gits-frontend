@@ -1,11 +1,11 @@
 import { ReactNode } from "react";
 import { Lock } from "@mui/icons-material";
 
-export function WorkPathStage({
+export function Stage({
   children,
   progress,
 }: {
-  children: ReactNode;
+  children?: ReactNode;
   progress: number;
 }) {
   return (
@@ -21,14 +21,14 @@ export function WorkPathStage({
           style={{ height: `${progress}%` }}
         ></div>
       </div>
-      <div className="py-4 mr-4 border-b group-first:border-t border-gray-200 grow flex flex-col gap-4">
+      <div className="py-4 mr-4 border-b group-first:border-t border-gray-200 grow flex items-start flex-col gap-4">
         {children}
       </div>
     </div>
   );
 }
 
-export function WorkPathStageBarrier() {
+export function StageBarrier() {
   return (
     <div className="flex items-stretch">
       <div className="w-8 mr-4 py-4 flex justify-center">

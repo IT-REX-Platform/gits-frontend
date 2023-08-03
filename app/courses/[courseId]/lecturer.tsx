@@ -14,13 +14,21 @@ import dayjs from "dayjs";
 import { orderBy } from "lodash";
 import { useState } from "react";
 import { MediaContentModal } from "../../../components/MediaContentModal";
-import { WorkPath, WorkPathContent } from "@/components/WorkPath";
-import { WorkPathStage } from "@/components/WorkPathStage";
+import {
+  WorkPath,
+  WorkPathContent,
+  WorkPathHeader,
+} from "@/components/WorkPath";
+import { Stage } from "@/components/Stage";
 import { AddFlashcardSetModal } from "@/components/AddFlashcardSetModal";
 import { AddChapterModal } from "@/components/AddChapterModal";
 import { EditChapterModal } from "@/components/EditChapterModal";
 import { EditCourseModal } from "@/components/EditCourseModal";
 import { AddFlashcardSetModalFragment$key } from "@/__generated__/AddFlashcardSetModalFragment.graphql";
+import { AddWorkPathButton } from "@/components/AddWorkPathButton";
+import EditWorkPathButton from "@/components/EditWorkPathButton";
+import { AddStageButton } from "@/components/AddStageButton";
+import { DeleteStageButton } from "@/components/DeleteStageButton";
 
 export default function LecturerCoursePage() {
   // Get course id from url
@@ -148,8 +156,9 @@ export default function LecturerCoursePage() {
 
           <ChapterContent>
             <WorkPath>
+              <WorkPathHeader action={<EditWorkPathButton />}></WorkPathHeader>
               <WorkPathContent>
-                <WorkPathStage progress={0}>
+                <Stage progress={0}>
                   {chapter.contents.map((content) => (
                     <ContentLink key={content.id} _content={content} />
                   ))}
@@ -160,9 +169,16 @@ export default function LecturerCoursePage() {
                       chapterId={chapter.id}
                     />
                   </div>
-                </WorkPathStage>
+                  <div className="mt-2">
+                    <DeleteStageButton />
+                  </div>
+                </Stage>
+                <Stage progress={0}>
+                  <AddStageButton />
+                </Stage>
               </WorkPathContent>
             </WorkPath>
+            <AddWorkPathButton />
           </ChapterContent>
         </section>
       ))}

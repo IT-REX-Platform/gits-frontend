@@ -121,8 +121,13 @@ export default function StudentQuiz() {
   const handleAnswerChange = (index: any) => {
     setUserAnswers((prevAnswers) => {
       const newAnswers = [...prevAnswers];
-      newAnswers.push(index);
-      return newAnswers;
+      if (newAnswers.includes(index)) {
+        newAnswers.splice(newAnswers.indexOf(index), 1);
+        return newAnswers;
+      } else {
+        newAnswers.push(index);
+        return newAnswers;
+      }
     });
   };
 
@@ -168,7 +173,9 @@ export default function StudentQuiz() {
                           ? "green"
                           : checkAnswers
                           ? "red"
-                          : "gray",
+                          : userAnswers.includes(index)
+                          ? "blue"
+                          : "grey",
                     }}
                     onChange={() => handleAnswerChange(index)}
                     checked={userAnswers.includes(index)}

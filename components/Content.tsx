@@ -27,8 +27,10 @@ import { graphql, useFragment, useMutation } from "react-relay";
 import colors from "tailwindcss/colors";
 
 export function ContentLink({
+  disabled = false,
   _content,
 }: {
+  disabled?: boolean;
   _content: ContentLinkFragment$key;
 }) {
   const content = useFragment(
@@ -48,11 +50,11 @@ export function ContentLink({
 
   switch (content.metadata.type) {
     case "MEDIA":
-      return <MediaContent _media={content} />;
+      return <MediaContent disabled={disabled} _media={content} />;
     case "FLASHCARDS":
-      return <FlashcardContent _flashcard={content} />;
+      return <FlashcardContent disabled={disabled} _flashcard={content} />;
     case "QUIZ":
-      return <QuizContent _quiz={content} />;
+      return <QuizContent disabled={disabled} _quiz={content} />;
   }
 
   return null;
@@ -97,8 +99,8 @@ export function MediaContent({
       <InvalidContent
         id={media.id}
         chapterId={media.metadata.chapterId}
-        title="Invalid content"
-        subtitle={media.metadata.name}
+        type="Invalid content"
+        title={media.metadata.name}
         disabled={disabled}
       />
     );
@@ -117,13 +119,13 @@ export function MediaContent({
     }
   }
 
-  let subtitle = recordId ? record.name : media.metadata.name;
+  let title = recordId ? record.name : media.metadata.name;
 
   switch (record.type) {
     case "VIDEO":
       return (
         <VideoContent
-          subtitle={subtitle}
+          title={title}
           disabled={disabled}
           onClick={onClick}
           _media={media}
@@ -132,7 +134,7 @@ export function MediaContent({
     case "PRESENTATION":
       return (
         <PresentationContent
-          subtitle={subtitle}
+          title={title}
           disabled={disabled}
           onClick={onClick}
           _media={media}
@@ -141,21 +143,21 @@ export function MediaContent({
     case "DOCUMENT":
       return (
         <DocumentContent
-          subtitle={subtitle}
+          title={title}
           disabled={disabled}
           onClick={onClick}
           _media={media}
         />
       );
     case "URL":
-      return <UrlContent subtitle={subtitle} disabled={disabled} />;
+      return <UrlContent title={title} disabled={disabled} />;
     default:
       return (
         <InvalidContent
           id={media.id}
           chapterId={media.metadata.chapterId}
-          title="Unknown content type"
-          subtitle={subtitle}
+          type="Unknown content type"
+          title={title}
           disabled={disabled}
         />
       );
@@ -163,12 +165,12 @@ export function MediaContent({
 }
 
 export function VideoContent({
-  subtitle,
+  title,
   disabled = false,
   onClick,
   _media,
 }: {
-  subtitle: string;
+  title: string;
   disabled?: boolean;
   onClick: () => void;
   _media: ContentVideoFragment$key;
@@ -185,12 +187,10 @@ export function VideoContent({
     _media
   );
 
-  const [pageView] = usePageView();
-
   return (
     <Content
-      title={pageView === PageView.Student ? "Watch Video" : "Video"}
-      subtitle={subtitle}
+      type="Video"
+      title={title}
       disabled={disabled}
       className="hover:bg-sky-100 rounded-full"
       onClick={onClick}
@@ -232,14 +232,14 @@ export function DeletedContent() {
 }
 
 export function InvalidContent({
+  type,
   title,
-  subtitle,
   disabled = false,
   id,
   chapterId,
 }: {
+  type: string;
   title: string;
-  subtitle: string;
   disabled?: boolean;
   id: string;
   chapterId: string;
@@ -251,15 +251,14 @@ export function InvalidContent({
   `);
 
   const [pageView] = usePageView();
-
   if (pageView === PageView.Student) {
     return null;
   }
 
   return (
     <Content
+      type={type}
       title={title}
-      subtitle={subtitle}
       disabled={disabled}
       className="hover:bg-gray-100 rounded-xl"
       action={
@@ -305,12 +304,12 @@ export function InvalidContent({
 }
 
 export function PresentationContent({
-  subtitle,
+  title,
   disabled = false,
   onClick,
   _media,
 }: {
-  subtitle: string;
+  title: string;
   disabled?: boolean;
   onClick: () => void;
   _media: ContentPresentationFragment$key;
@@ -327,12 +326,10 @@ export function PresentationContent({
     _media
   );
 
-  const [pageView] = usePageView();
-
   return (
     <Content
-      title={pageView === PageView.Student ? "Look at Slides" : "Slides"}
-      subtitle={subtitle}
+      type="Slides"
+      title={title}
       disabled={disabled}
       className="hover:bg-violet-100 rounded-full"
       onClick={onClick}
@@ -355,12 +352,12 @@ export function PresentationContent({
 }
 
 export function DocumentContent({
-  subtitle,
+  title,
   disabled = false,
   onClick,
   _media,
 }: {
-  subtitle: string;
+  title: string;
   disabled?: boolean;
   onClick: () => void;
   _media: ContentDocumentFragment$key;
@@ -377,12 +374,10 @@ export function DocumentContent({
     _media
   );
 
-  const [pageView] = usePageView();
-
   return (
     <Content
-      title={pageView === PageView.Student ? "Read Document" : "Document"}
-      subtitle={subtitle}
+      type="Document"
+      title={title}
       disabled={disabled}
       className="hover:bg-indigo-100 rounded-full"
       onClick={onClick}
@@ -405,16 +400,16 @@ export function DocumentContent({
 }
 
 export function UrlContent({
-  subtitle,
+  title,
   disabled = false,
 }: {
-  subtitle: string;
+  title: string;
   disabled?: boolean;
 }) {
   return (
     <Content
-      title="Open url"
-      subtitle={subtitle}
+      type="Url"
+      title={title}
       disabled={disabled}
       className="hover:bg-slate-100 rounded-xl"
       icon={
@@ -456,13 +451,10 @@ export function FlashcardContent({
   );
 
   const { push } = useRouter();
-
-  const [pageView] = usePageView();
-
   return (
     <Content
-      title={pageView == PageView.Student ? "Repeat Flashcards" : "Flashcards"}
-      subtitle={flashcard.metadata.name}
+      type="Flashcards"
+      title={flashcard.metadata.name}
       disabled={disabled}
       className="hover:bg-emerald-100 rounded-full"
       onClick={() => push(`/courses/${courseId}/flashcards/${flashcard.id}`)}
@@ -508,13 +500,10 @@ export function QuizContent({
   );
 
   const { push } = useRouter();
-
-  const [pageView] = usePageView();
-
   return (
     <Content
-      title={pageView == PageView.Student ? "Repeat Quiz" : "Quiz"}
-      subtitle={quiz.metadata.name}
+      type="Quiz"
+      title={quiz.metadata.name}
       disabled={disabled}
       className="hover:bg-emerald-100 rounded-full"
       onClick={() => push(`/courses/${courseId}/quiz/${quiz.id}`)}
@@ -537,18 +526,18 @@ export function QuizContent({
 }
 
 export function MaterialContent({
-  subtitle,
+  title,
   disabled = false,
   onClick = undefined,
 }: {
-  subtitle: string;
+  title: string;
   disabled?: boolean;
   onClick?: MouseEventHandler<HTMLButtonElement> | undefined;
 }) {
   return (
     <Content
-      title="Download content"
-      subtitle={subtitle}
+      type="Download"
+      title={title}
       disabled={disabled}
       className="hover:bg-amber-100 rounded-xl"
       onClick={onClick}
@@ -565,8 +554,8 @@ export function MaterialContent({
 }
 
 export function Content({
+  type,
   title,
-  subtitle,
   icon,
   iconFrame,
   disabled = false,
@@ -574,8 +563,8 @@ export function Content({
   onClick = undefined,
   action,
 }: {
+  type?: string;
   title: string;
-  subtitle?: string;
   icon: ReactElement;
   iconFrame: ReactElement;
   disabled?: boolean;
@@ -596,24 +585,24 @@ export function Content({
         <div className="absolute">{icon}</div>
       </div>
       <div className="group-hover:group-enabled:translate-x-0.5">
+        {type && (
+          <Typography
+            variant="overline"
+            fontWeight={400}
+            color={disabled ? "text.disabled" : ""}
+          >
+            {type}
+          </Typography>
+        )}
         <Typography
           variant="subtitle1"
           fontSize="1.25rem"
           fontWeight="500"
-          lineHeight="1.5rem"
           color={disabled ? "text.disabled" : ""}
+          sx={type ? { marginTop: -1.8, paddingBottom: 0.4 } : undefined}
         >
           {title}
         </Typography>
-        {subtitle && (
-          <Typography
-            variant="subtitle2"
-            fontWeight={400}
-            color={disabled ? "text.disabled" : ""}
-          >
-            {subtitle}
-          </Typography>
-        )}
       </div>
       <div className="flex-1"></div>
       {action}

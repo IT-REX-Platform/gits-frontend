@@ -1,5 +1,6 @@
 "use client";
-import { CircularProgress, Typography, useTheme } from "@mui/material";
+import { Done } from "@mui/icons-material";
+import { CircularProgress, Typography } from "@mui/material";
 import { ReactNode } from "react";
 import { SkillLevels } from "./SkillLevels";
 
@@ -13,12 +14,12 @@ export function ChapterHeader({
   subtitle: string;
 }) {
   return (
-    <div className="flex items-center">
+    <div className="flex items-center py-4 pl-8 pr-12 -mx-8 mb-8 bg-gradient-to-r from-slate-100 to-slate-50">
       <div className="mr-10">
         <ChapterProgress progress={progress} />
       </div>
-      <div className="px-12 py-4 flex bg-gradient-to-r from-slate-200 to-slate-100 rounded-full justify-between items-center flex-grow">
-        <div className="pt-2 pr-8">
+      <div className="flex justify-between items-center flex-grow">
+        <div className="pr-8">
           <Typography variant="h2">{title}</Typography>
           <Typography variant="subtitle1">{subtitle}</Typography>
         </div>
@@ -29,15 +30,16 @@ export function ChapterHeader({
 }
 
 export function ChapterProgress({ progress }: { progress: number }) {
-  const theme = useTheme();
   return (
     <div className="relative flex justify-center items-center">
+      <div className="absolute h-12 w-12 rounded-full shadow-lg shadow-slate-100"></div>
+      <div className="absolute h-10 w-10 rounded-full shadow-inner shadow-slate-100"></div>
       <CircularProgress
         variant="determinate"
         value={100}
         size="3rem"
         thickness={4}
-        sx={{ color: "grey.200" }}
+        className="!text-white"
       />
       <CircularProgress
         className="absolute"
@@ -47,10 +49,9 @@ export function ChapterProgress({ progress }: { progress: number }) {
         thickness={4}
         size="3rem"
       />
-      <div
-        className="w-8 h-8 absolute rounded-full"
-        style={{ backgroundColor: theme.palette.grey["200"] }}
-      ></div>
+      {progress == 100 && (
+        <Done fontSize="large" className="absolute text-green-600" />
+      )}
     </div>
   );
 }

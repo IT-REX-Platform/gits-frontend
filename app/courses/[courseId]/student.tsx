@@ -11,7 +11,12 @@ import {
 import { chain, orderBy } from "lodash";
 import Error from "next/error";
 import { useParams, useRouter } from "next/navigation";
-import { graphql, useLazyLoadQuery, useMutation } from "react-relay";
+import {
+  graphql,
+  useFragment,
+  useLazyLoadQuery,
+  useMutation,
+} from "react-relay";
 
 import Paper from "@mui/material/Paper";
 import Table from "@mui/material/Table";
@@ -22,10 +27,7 @@ import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 
 import { studentCourseLeaveMutation } from "@/__generated__/studentCourseLeaveMutation.graphql";
-import {
-  ChapterContent,
-  ChapterContentItem,
-} from "@/components/ChapterContent";
+import { ChapterContent } from "@/components/ChapterContent";
 import { ChapterHeader } from "@/components/ChapterHeader";
 import { ContentLink } from "@/components/Content";
 import { RewardScores } from "@/components/RewardScores";
@@ -34,7 +36,10 @@ import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import dayjs from "dayjs";
 import Link from "next/link";
 import { useState } from "react";
-import { SkillLevels } from "@/components/SkillLevels";
+import { Section, SectionContent } from "@/components/Section";
+import { Stage, StageBarrier } from "@/components/Stage";
+import { studentCoursePageSectionFragment$key } from "@/__generated__/studentCoursePageSectionFragment.graphql";
+import { studentCoursePageStageFragment$key } from "@/__generated__/studentCoursePageStageFragment.graphql";
 
 interface Data {
   name: string;
@@ -94,6 +99,7 @@ export default function StudentCoursePage() {
 
                 userProgressData {
                   nextLearnDate
+                  lastLearnDate
                 }
 
                 id
@@ -254,7 +260,7 @@ export default function StudentCoursePage() {
         </div>
       </div>
 
-      <section className="mt-16">
+      <section className="mt-8 mb-20">
         <Typography variant="h2">Up next</Typography>
         <div className="mt-8 gap-8 grid gap-x-12 gap-y-4 grid-cols-[max-content] xl:grid-cols-[repeat(2,max-content)] 2xl:grid-cols-[repeat(3,max-content)]">
           {nextFlashcard && <ContentLink _content={nextFlashcard} />}
@@ -263,29 +269,151 @@ export default function StudentCoursePage() {
         </div>
       </section>
 
-      {orderBy(course.chapters.elements, (x) => x.number).map((chapter) => (
-        <section key={chapter.id} className="mt-24">
-          <ChapterHeader
-            title={chapter.title}
-            subtitle={`${dayjs(
-              chapter.suggestedStartDate ?? chapter.startDate
-            ).format("D. MMMM")} – ${dayjs(
-              chapter.suggestedEndDate ?? chapter.endDate
-            ).format("D. MMMM")}`}
-            progress={70}
-          />
-          <ChapterContent>
-            {chapter.contents.length > 0 && (
-              <ChapterContentItem first last>
-                {chapter.contents.map((content) => (
-                  <ContentLink key={content.id} _content={content} />
-                ))}
-              </ChapterContentItem>
-            )}
-          </ChapterContent>
-        </section>
-      ))}
+      {orderBy(course.chapters.elements, (x) => x.number).map((chapter) => {
+        const chapterProgress =
+          chapter.contents.length > 0
+            ? (100 *
+                chapter.contents.filter(
+                  (content) => content.userProgressData.lastLearnDate != null
+                ).length) /
+              chapter.contents.length
+            : 0;
+
+        return (
+          <section key={chapter.id} className="mt-6">
+            <ChapterHeader
+              title={chapter.title}
+              subtitle={`${dayjs(
+                chapter.suggestedStartDate ?? chapter.startDate
+              ).format("D. MMMM")} – ${dayjs(
+                chapter.suggestedEndDate ?? chapter.endDate
+              ).format("D. MMMM")}`}
+              progress={chapterProgress}
+            />
+            <ChapterContent>
+              <Section done={chapterProgress == 100}>
+                <SectionContent>
+                  <Stage progress={chapterProgress}>
+                    {chapter.contents.map((content) => (
+                      <ContentLink key={content.id} _content={content} />
+                    ))}
+                  </Stage>
+                </SectionContent>
+              </Section>
+            </ChapterContent>
+          </section>
+        );
+      })}
     </main>
+  );
+}
+
+function StudentSection({
+  _section,
+}: {
+  _section: studentCoursePageSectionFragment$key;
+}) {
+  const section = useFragment(
+    graphql`
+      fragment studentCoursePageSectionFragment on Section {
+        id
+        name
+        stages {
+          id
+          position
+          requiredContents {
+            userProgressData {
+              lastLearnDate
+            }
+          }
+          optionalContents {
+            id
+          }
+          ...studentCoursePageStageFragment
+        }
+      }
+    `,
+    _section
+  );
+
+  const stages = orderBy(section.stages, (stage) => stage.position);
+
+  // Workaround until the backend calculates the progress
+  const stageComplete = stages.map(
+    (stage) =>
+      (stage.requiredContents.length > 0 &&
+        stage.requiredContents.filter(
+          (content) => content.userProgressData.lastLearnDate != null
+        ).length == stage.requiredContents.length) ||
+      (stage.requiredContents.length == 0 && stage.optionalContents.length > 0)
+  );
+  const sectionComplete =
+    stages.length > 0 ? stageComplete[stages.length - 1] : false;
+
+  return (
+    <Section done={sectionComplete}>
+      <SectionContent>
+        {section.stages.map((stage, i) => (
+          <>
+            {/* Show barrier if this is the first non-complete stage */}
+            {(i == 0
+              ? false
+              : i == 1
+              ? !stageComplete[0]
+              : stageComplete[i - 2] && !stageComplete[i - 1]) && (
+              <StageBarrier />
+            )}
+            <StudentStage key={stage.id} _stage={stage} />
+          </>
+        ))}
+      </SectionContent>
+    </Section>
+  );
+}
+
+function StudentStage({
+  _stage,
+}: {
+  _stage: studentCoursePageStageFragment$key;
+}) {
+  const stage = useFragment(
+    graphql`
+      fragment studentCoursePageStageFragment on Stage {
+        requiredContents {
+          ...ContentLinkFragment
+          id
+          userProgressData {
+            lastLearnDate
+          }
+        }
+        optionalContents {
+          ...ContentLinkFragment
+          id
+          userProgressData {
+            lastLearnDate
+          }
+        }
+      }
+    `,
+    _stage
+  );
+
+  // Workaround until the backend calculates the progress
+  const progress =
+    stage.requiredContents.length > 0
+      ? (100 *
+          stage.requiredContents.filter(
+            (content) => content.userProgressData.lastLearnDate != null
+          ).length) /
+        stage.requiredContents.length
+      : 0;
+
+  return (
+    <Stage progress={progress}>
+      {stage.requiredContents.map((content) => (
+        <ContentLink key={content.id} _content={content} />
+      ))}
+    </Stage>
   );
 }
 

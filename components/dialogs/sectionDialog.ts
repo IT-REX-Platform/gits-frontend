@@ -1,11 +1,11 @@
 import * as yup from "yup";
 import { SectionOptions } from "../DialogBase";
 
-export type WorkPathData = {
+export type SectionData = {
   name: string;
 };
 
-export const dialogSections: SectionOptions<WorkPathData>[] = [
+export const dialogSections: SectionOptions<SectionData>[] = [
   {
     label: "General",
     fields: [
@@ -19,6 +19,6 @@ export const dialogSections: SectionOptions<WorkPathData>[] = [
   },
 ];
 
-export const validationSchema: yup.ObjectSchema<WorkPathData> = yup.object({
+export const validationSchema: yup.ObjectSchema<SectionData> = yup.object({
   name: yup.string().required("Required"),
 });

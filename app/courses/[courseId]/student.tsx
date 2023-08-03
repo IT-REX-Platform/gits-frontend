@@ -31,7 +31,7 @@ import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import dayjs from "dayjs";
 import Link from "next/link";
 import { useState } from "react";
-import { WorkPath, WorkPathContent } from "@/components/WorkPath";
+import { Section, SectionContent } from "@/components/Section";
 import { Stage } from "@/components/Stage";
 
 interface Data {
@@ -278,15 +278,15 @@ export default function StudentCoursePage() {
               progress={chapterProgress}
             />
             <ChapterContent>
-              <WorkPath done={chapterProgress == 100}>
-                <WorkPathContent>
+              <Section done={chapterProgress == 100}>
+                <SectionContent>
                   <Stage progress={chapterProgress}>
                     {chapter.contents.map((content) => (
                       <ContentLink key={content.id} _content={content} />
                     ))}
                   </Stage>
-                </WorkPathContent>
-              </WorkPath>
+                </SectionContent>
+              </Section>
             </ChapterContent>
           </section>
         );

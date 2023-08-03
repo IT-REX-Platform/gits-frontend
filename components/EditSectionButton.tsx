@@ -3,9 +3,9 @@ import { IconButton } from "@mui/material";
 import { Edit } from "@mui/icons-material";
 
 import { DialogBase } from "./DialogBase";
-import { dialogSections, validationSchema } from "./dialogs/workPathDialog";
+import { dialogSections, validationSchema } from "./dialogs/sectionDialog";
 
-export default function EditWorkPathButton() {
+export default function EditSectionButton() {
   const [open, setOpen] = useState(false);
 
   return (
@@ -15,7 +15,7 @@ export default function EditWorkPathButton() {
       </IconButton>
       <DialogBase
         open={open}
-        title="Edit work path"
+        title="Edit section"
         sections={dialogSections}
         initialValues={{
           name: "",

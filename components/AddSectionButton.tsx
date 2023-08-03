@@ -3,36 +3,36 @@ import { Button } from "@mui/material";
 import { Add } from "@mui/icons-material";
 
 import { DialogBase } from "./DialogBase";
-import { dialogSections, validationSchema } from "./dialogs/workPathDialog";
-import { WorkPath, WorkPathContent, WorkPathHeader } from "./WorkPath";
+import { dialogSections, validationSchema } from "./dialogs/sectionDialog";
+import { Section, SectionContent, SectionHeader } from "./Section";
 import { Stage } from "./Stage";
 
-export function AddWorkPathButton() {
+export function AddSectionButton() {
   const [open, setOpen] = useState(false);
 
   return (
     <>
-      <WorkPath>
-        <WorkPathHeader
+      <Section>
+        <SectionHeader
           action={
             <Button
               className="!ml-0.5"
               startIcon={<Add />}
               onClick={() => setOpen(true)}
             >
-              Add work path
+              Add section
             </Button>
           }
         />
-        <WorkPathContent>
+        <SectionContent>
           <Stage progress={0}>
             <div className="h-16"></div>
           </Stage>
-        </WorkPathContent>
-      </WorkPath>
+        </SectionContent>
+      </Section>
       <DialogBase
         open={open}
-        title="Add new work path"
+        title="Add section"
         sections={dialogSections}
         initialValues={{
           name: "",

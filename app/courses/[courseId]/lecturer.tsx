@@ -14,19 +14,15 @@ import dayjs from "dayjs";
 import { orderBy } from "lodash";
 import { useState } from "react";
 import { MediaContentModal } from "../../../components/MediaContentModal";
-import {
-  WorkPath,
-  WorkPathContent,
-  WorkPathHeader,
-} from "@/components/WorkPath";
+import { Section, SectionContent, SectionHeader } from "@/components/Section";
 import { Stage } from "@/components/Stage";
 import { AddFlashcardSetModal } from "@/components/AddFlashcardSetModal";
 import { AddChapterModal } from "@/components/AddChapterModal";
 import { EditChapterModal } from "@/components/EditChapterModal";
 import { EditCourseModal } from "@/components/EditCourseModal";
 import { AddFlashcardSetModalFragment$key } from "@/__generated__/AddFlashcardSetModalFragment.graphql";
-import { AddWorkPathButton } from "@/components/AddWorkPathButton";
-import EditWorkPathButton from "@/components/EditWorkPathButton";
+import { AddSectionButton } from "@/components/AddSectionButton";
+import EditSectionButton from "@/components/EditSectionButton";
 import { AddStageButton } from "@/components/AddStageButton";
 import { DeleteStageButton } from "@/components/DeleteStageButton";
 
@@ -159,9 +155,9 @@ export default function LecturerCoursePage() {
           />
 
           <ChapterContent>
-            <WorkPath>
-              <WorkPathHeader action={<EditWorkPathButton />}></WorkPathHeader>
-              <WorkPathContent>
+            <Section>
+              <SectionHeader action={<EditSectionButton />}></SectionHeader>
+              <SectionContent>
                 <Stage progress={0}>
                   {chapter.contents.map((content) => (
                     <ContentLink key={content.id} _content={content} />
@@ -180,9 +176,9 @@ export default function LecturerCoursePage() {
                 <Stage progress={0}>
                   <AddStageButton />
                 </Stage>
-              </WorkPathContent>
-            </WorkPath>
-            <AddWorkPathButton />
+              </SectionContent>
+            </Section>
+            <AddSectionButton />
           </ChapterContent>
         </section>
       ))}

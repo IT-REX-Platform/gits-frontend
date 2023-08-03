@@ -58,6 +58,8 @@ export default function LecturerCoursePage() {
                 id
                 title
                 number
+                startDate
+                endDate
                 suggestedStartDate
                 suggestedEndDate
                 contents {
@@ -148,9 +150,11 @@ export default function LecturerCoursePage() {
                 {chapter.title} <EditChapterModal _chapter={chapter} />
               </div>
             }
-            subtitle={`${dayjs(chapter.suggestedStartDate).format(
-              "D. MMMM"
-            )} – ${dayjs(chapter.suggestedEndDate).format("D. MMMM")}`}
+            subtitle={`${dayjs(
+              chapter.suggestedStartDate ?? chapter.startDate
+            ).format("D. MMMM")} – ${dayjs(
+              chapter.suggestedEndDate ?? chapter.endDate
+            ).format("D. MMMM")}`}
             progress={0}
           />
 

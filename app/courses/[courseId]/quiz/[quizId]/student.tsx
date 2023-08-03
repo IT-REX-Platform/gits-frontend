@@ -37,7 +37,7 @@ export default function StudentQuiz() {
   }, [currentIndex]);
 
   // Fetch quiz data
-  const { contentsByIds, currentUserInfo } = useLazyLoadQuery<studentQuizQuery>(
+  const { contentsByIds } = useLazyLoadQuery<studentQuizQuery>(
     graphql`
       query studentQuizQuery($id: [UUID!]!) {
         currentUserInfo {

@@ -11,7 +11,12 @@ import {
 import { chain, orderBy } from "lodash";
 import Error from "next/error";
 import { useParams, useRouter } from "next/navigation";
-import { graphql, useLazyLoadQuery, useMutation } from "react-relay";
+import {
+  graphql,
+  useFragment,
+  useLazyLoadQuery,
+  useMutation,
+} from "react-relay";
 
 import Paper from "@mui/material/Paper";
 import Table from "@mui/material/Table";
@@ -32,7 +37,9 @@ import dayjs from "dayjs";
 import Link from "next/link";
 import { useState } from "react";
 import { Section, SectionContent } from "@/components/Section";
-import { Stage } from "@/components/Stage";
+import { Stage, StageBarrier } from "@/components/Stage";
+import { studentCoursePageSectionFragment$key } from "@/__generated__/studentCoursePageSectionFragment.graphql";
+import { studentCoursePageStageFragment$key } from "@/__generated__/studentCoursePageStageFragment.graphql";
 
 interface Data {
   name: string;
@@ -298,6 +305,115 @@ export default function StudentCoursePage() {
         );
       })}
     </main>
+  );
+}
+
+function StudentSection({
+  _section,
+}: {
+  _section: studentCoursePageSectionFragment$key;
+}) {
+  const section = useFragment(
+    graphql`
+      fragment studentCoursePageSectionFragment on Section {
+        id
+        name
+        stages {
+          id
+          position
+          requiredContents {
+            userProgressData {
+              lastLearnDate
+            }
+          }
+          optionalContents {
+            id
+          }
+          ...studentCoursePageStageFragment
+        }
+      }
+    `,
+    _section
+  );
+
+  const stages = orderBy(section.stages, (stage) => stage.position);
+
+  // Workaround until the backend calculates the progress
+  const stageComplete = stages.map(
+    (stage) =>
+      (stage.requiredContents.length > 0 &&
+        stage.requiredContents.filter(
+          (content) => content.userProgressData.lastLearnDate != null
+        ).length == stage.requiredContents.length) ||
+      (stage.requiredContents.length == 0 && stage.optionalContents.length > 0)
+  );
+  const sectionComplete =
+    stages.length > 0 ? stageComplete[stages.length - 1] : false;
+
+  return (
+    <Section done={sectionComplete}>
+      <SectionContent>
+        {section.stages.map((stage, i) => (
+          <>
+            {/* Show barrier if this is the first non-complete stage */}
+            {(i == 0
+              ? false
+              : i == 1
+              ? !stageComplete[0]
+              : stageComplete[i - 2] && !stageComplete[i - 1]) && (
+              <StageBarrier />
+            )}
+            <StudentStage key={stage.id} _stage={stage} />
+          </>
+        ))}
+      </SectionContent>
+    </Section>
+  );
+}
+
+function StudentStage({
+  _stage,
+}: {
+  _stage: studentCoursePageStageFragment$key;
+}) {
+  const stage = useFragment(
+    graphql`
+      fragment studentCoursePageStageFragment on Stage {
+        requiredContents {
+          ...ContentLinkFragment
+          id
+          userProgressData {
+            lastLearnDate
+          }
+        }
+        optionalContents {
+          ...ContentLinkFragment
+          id
+          userProgressData {
+            lastLearnDate
+          }
+        }
+      }
+    `,
+    _stage
+  );
+
+  // Workaround until the backend calculates the progress
+  const progress =
+    stage.requiredContents.length > 0
+      ? (100 *
+          stage.requiredContents.filter(
+            (content) => content.userProgressData.lastLearnDate != null
+          ).length) /
+        stage.requiredContents.length
+      : 0;
+
+  return (
+    <Stage progress={progress}>
+      {stage.requiredContents.map((content) => (
+        <ContentLink key={content.id} _content={content} />
+      ))}
+    </Stage>
   );
 }
 

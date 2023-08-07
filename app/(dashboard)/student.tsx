@@ -54,8 +54,8 @@ export default function StudentPage() {
 
       {/* MOCK */}
       {courses.length === 0 ? (
-        <div className="text-center text-2xl text-slate-400 m-80">
-          You haven't joined any courses yet. Visit the{" "}
+        <div className="text-center text-2xl text-slate-400 my-80">
+          You have not joined any courses yet. Visit the{" "}
           <Link href="/courses" className="italic hover:text-sky-500">
             Course Catalog
           </Link>{" "}

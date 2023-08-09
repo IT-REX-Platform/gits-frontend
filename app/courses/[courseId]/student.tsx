@@ -219,7 +219,7 @@ export default function StudentCoursePage() {
         </Button>
       </div>
       <div className="grid grid-cols-2 items-start">
-        <div className="w-fit my-12">
+        <div className="object-cover my-12">
           <div className="pl-8 pr-10 py-6 border-4 border-slate-200 rounded-3xl">
             <RewardScores _scores={course.rewardScores} courseId={course.id} />
           </div>
@@ -231,9 +231,9 @@ export default function StudentCoursePage() {
             Full history
           </Button>
         </div>
-        <div>
+        <div className="mx-5">
           <TableContainer component={Paper} className="mt-12 mb-2">
-            <Table sx={{ minWidth: 650 }} size="small">
+            <Table size="small">
               <TableHead>
                 <TableRow>
                   <TableCell>Student Name</TableCell>

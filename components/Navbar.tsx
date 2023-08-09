@@ -120,7 +120,13 @@ function UserInfo() {
               <IconButton
                 edge="end"
                 aria-label="logout"
-                onClick={() => auth.signoutRedirect()}
+                onClick={() =>
+                  auth.signoutRedirect({
+                    post_logout_redirect_uri:
+                      process.env.NEXT_PUBLIC_OAUTH_REDIRECT_URL ??
+                      "http://localhost:3005",
+                  })
+                }
               >
                 <Logout />
               </IconButton>

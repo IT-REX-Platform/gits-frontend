@@ -143,7 +143,7 @@ export function StatDisplay({
       <Tooltip
         title={
           <div>
-            Verlauf:
+            History:
             <br />
             {lastThreeChanges.map((x, index) => (
               <div key={index}>
@@ -151,17 +151,20 @@ export function StatDisplay({
                 {x.difference.toLocaleString("de-DE", {
                   signDisplay: "exceptZero",
                 })}{" "}
-                Punkte
+                Points
                 <ul className="ml-3 text-gray-300 font-light">
-                  {x.associatedContents.map((x, index) => (
+                  {x.associatedContents.map((y, index) => (
                     <li key={index}>
-                      {x ? (
-                        <Link href={`/courses/${courseId}/media/${x.id}`}>
-                          <b className="font-normal">{x.metadata.name}</b>{" "}
-                          bearbeitet
+                      {y ? (
+                        <Link href={`/courses/${courseId}/media/${y.id}`}>
+                          {x.difference < 0 ? "Didn't work on " : "Worked on "}
+                          <b className="font-normal">{y.metadata.name}</b>
                         </Link>
                       ) : (
-                        <span>(gelöscht) bearbeitet</span>
+                        <div>
+                          {x.difference < 0 ? "Didn't work on " : "Worked on "}
+                          <b className="font-normal">(deleted)</b>
+                        </div>
                       )}
                     </li>
                   ))}

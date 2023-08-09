@@ -25,6 +25,7 @@ export default function StudentCourseStatsPage() {
     graphql`
       query studentCourseStatsQuery($id: UUID!) {
         coursesById(ids: [$id]) {
+          id
           rewardScores {
             ...RewardScoreChartFragment
             ...RewardScoreHistoryTableFragment

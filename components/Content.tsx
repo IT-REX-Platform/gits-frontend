@@ -1,5 +1,6 @@
 "use client";
 import { ContentDocumentFragment$key } from "@/__generated__/ContentDocumentFragment.graphql";
+import { ContentEarlyRepeatFragment$key } from "@/__generated__/ContentEarlyRepeatFragment.graphql";
 import { ContentFlashcardFragment$key } from "@/__generated__/ContentFlashcardFragment.graphql";
 import { ContentInvalidDeleteMutation } from "@/__generated__/ContentInvalidDeleteMutation.graphql";
 import { ContentLinkFragment$key } from "@/__generated__/ContentLinkFragment.graphql";
@@ -20,9 +21,20 @@ import {
   QuestionMark,
   Quiz,
 } from "@mui/icons-material";
-import { CircularProgress, IconButton, Typography } from "@mui/material";
+import {
+  Button,
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogProps,
+  DialogTitle,
+  IconButton,
+  Typography,
+} from "@mui/material";
+import dayjs from "dayjs";
 import { useParams, useRouter } from "next/navigation";
-import { MouseEventHandler, ReactElement, ReactNode } from "react";
+import { MouseEventHandler, ReactElement, ReactNode, useState } from "react";
 import { graphql, useFragment, useMutation } from "react-relay";
 import colors from "tailwindcss/colors";
 
@@ -427,6 +439,55 @@ export function UrlContent({
   );
 }
 
+function EarlyRepeatWarnModal({
+  _progress,
+  href,
+  onClose,
+  ...props
+}: {
+  _progress: ContentEarlyRepeatFragment$key;
+  href: string;
+  onClose: () => void;
+} & DialogProps) {
+  const { lastLearnDate, nextLearnDate } = useFragment(
+    graphql`
+      fragment ContentEarlyRepeatFragment on UserProgressData {
+        nextLearnDate
+        lastLearnDate
+        contentId
+      }
+    `,
+    _progress
+  );
+  const { push } = useRouter();
+
+  const diffLastLearn = Math.abs(
+    Math.floor(dayjs(lastLearnDate).diff(new Date(), "days"))
+  );
+
+  return (
+    <Dialog maxWidth="xs" {...props}>
+      <DialogTitle>You&apos;re a little early</DialogTitle>
+      <DialogContent>
+        You&apos;ve just learned this{" "}
+        {diffLastLearn === 0
+          ? "today"
+          : `${diffLastLearn} day${diffLastLearn > 1 ? "s" : ""}`}{" "}
+        ago. You won&apos;t earn any new reward points before{" "}
+        {new Date(nextLearnDate).toLocaleDateString("en-EN")}
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={() => push(href)} color="error">
+          Learn anyway
+        </Button>
+        <Button onClick={onClose} color="primary">
+          Go back
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+}
+
 export function FlashcardContent({
   _flashcard,
   disabled,
@@ -442,37 +503,59 @@ export function FlashcardContent({
         metadata {
           name
         }
+
         userProgressData {
           nextLearnDate
+          ...ContentEarlyRepeatFragment
         }
       }
     `,
     _flashcard
   );
 
+  const [showWarnModal, setShowWarnModal] = useState(false);
+
   const { push } = useRouter();
+  const href = `/courses/${courseId}/flashcards/${flashcard.id}`;
   return (
-    <Content
-      type="Flashcards"
-      title={flashcard.metadata.name}
-      disabled={disabled}
-      className="hover:bg-emerald-100 rounded-full"
-      onClick={() => push(`/courses/${courseId}/flashcards/${flashcard.id}`)}
-      icon={
-        <QuestionAnswerRounded
-          sx={{
-            fontSize: "2rem",
-            color: disabled ? "text.disabled" : "text.secondary",
-          }}
-        />
-      }
-      iconFrame={
-        <ProgressFrame
-          color={disabled ? colors.gray[100] : colors.emerald[200]}
-          progress={disabled ? 0 : 0}
-        />
-      }
-    />
+    <>
+      <EarlyRepeatWarnModal
+        open={showWarnModal}
+        href={href}
+        onClose={() => setShowWarnModal(false)}
+        _progress={flashcard.userProgressData}
+      />
+      <Content
+        type="Flashcards"
+        title={flashcard.metadata.name}
+        disabled={disabled}
+        className="hover:bg-emerald-100 rounded-full"
+        onClick={() => {
+          if (
+            flashcard.userProgressData.nextLearnDate &&
+            new Date(flashcard.userProgressData.nextLearnDate) > new Date()
+          ) {
+            setShowWarnModal(true);
+          } else {
+            push(href);
+          }
+        }}
+        icon={
+          <QuestionAnswerRounded
+            sx={{
+              fontSize: "2rem",
+              color: disabled ? "text.disabled" : "text.secondary",
+            }}
+          />
+        }
+        iconFrame={
+          <ProgressFrame
+            color={disabled ? colors.gray[100] : colors.emerald[200]}
+            progress={disabled ? 0 : 0}
+          />
+        }
+      />
+    </>
   );
 }
 
@@ -493,35 +576,57 @@ export function QuizContent({
         }
         userProgressData {
           nextLearnDate
+          ...ContentEarlyRepeatFragment
         }
       }
     `,
     _quiz
   );
+  const [showWarnModal, setShowWarnModal] = useState(false);
 
   const { push } = useRouter();
+  const href = `/courses/${courseId}/quiz/${quiz.id}`;
+
   return (
-    <Content
-      type="Quiz"
-      title={quiz.metadata.name}
-      disabled={disabled}
-      className="hover:bg-emerald-100 rounded-full"
-      onClick={() => push(`/courses/${courseId}/quiz/${quiz.id}`)}
-      icon={
-        <Quiz
-          sx={{
-            fontSize: "2rem",
-            color: disabled ? "text.disabled" : "text.secondary",
-          }}
-        />
-      }
-      iconFrame={
-        <ProgressFrame
-          color={disabled ? colors.gray[100] : colors.emerald[200]}
-          progress={disabled ? 0 : 0}
-        />
-      }
-    />
+    <>
+      <EarlyRepeatWarnModal
+        open={showWarnModal}
+        href={href}
+        onClose={() => setShowWarnModal(false)}
+        _progress={quiz.userProgressData}
+      />
+
+      <Content
+        type="Quiz"
+        title={quiz.metadata.name}
+        disabled={disabled}
+        className="hover:bg-emerald-100 rounded-full"
+        onClick={() => {
+          if (
+            quiz.userProgressData.nextLearnDate &&
+            new Date(quiz.userProgressData.nextLearnDate) > new Date()
+          ) {
+            setShowWarnModal(true);
+          } else {
+            push(href);
+          }
+        }}
+        icon={
+          <Quiz
+            sx={{
+              fontSize: "2rem",
+              color: disabled ? "text.disabled" : "text.secondary",
+            }}
+          />
+        }
+        iconFrame={
+          <ProgressFrame
+            color={disabled ? colors.gray[100] : colors.emerald[200]}
+            progress={disabled ? 0 : 0}
+          />
+        }
+      />
+    </>
   );
 }
 

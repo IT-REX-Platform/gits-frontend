@@ -515,6 +515,8 @@ export function FlashcardContent({
 
   const [showWarnModal, setShowWarnModal] = useState(false);
 
+  const [pageView] = usePageView();
+
   const { push } = useRouter();
   const href = `/courses/${courseId}/flashcards/${flashcard.id}`;
   return (
@@ -532,6 +534,7 @@ export function FlashcardContent({
         className="hover:bg-emerald-100 rounded-full"
         onClick={() => {
           if (
+            pageView === PageView.Student &&
             flashcard.userProgressData.nextLearnDate &&
             new Date(flashcard.userProgressData.nextLearnDate) > new Date()
           ) {
@@ -583,6 +586,7 @@ export function QuizContent({
     _quiz
   );
   const [showWarnModal, setShowWarnModal] = useState(false);
+  const [pageView] = usePageView();
 
   const { push } = useRouter();
   const href = `/courses/${courseId}/quiz/${quiz.id}`;
@@ -603,6 +607,7 @@ export function QuizContent({
         className="hover:bg-emerald-100 rounded-full"
         onClick={() => {
           if (
+            pageView === PageView.Student &&
             quiz.userProgressData.nextLearnDate &&
             new Date(quiz.userProgressData.nextLearnDate) > new Date()
           ) {

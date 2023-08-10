@@ -62,7 +62,7 @@ export default function StudentCoursePage() {
 
   // Fetch course data
   const {
-    coursesById,
+    coursesByIds,
     scoreboard,
     currentUserInfo: { id: userId },
   } = useLazyLoadQuery<studentCourseIdQuery>(
@@ -78,7 +78,7 @@ export default function StudentCoursePage() {
           id
         }
 
-        coursesById(ids: [$id]) {
+        coursesByIds(ids: [$id]) {
           id
           title
           description
@@ -125,7 +125,7 @@ export default function StudentCoursePage() {
   `);
 
   // Show 404 error page if id was not found
-  if (coursesById.length == 0) {
+  if (coursesByIds.length == 0) {
     return <Error statusCode={404} title="Course could not be found." />;
   }
 
@@ -135,7 +135,7 @@ export default function StudentCoursePage() {
     .map((element) => createData(element.user.userName, element.powerScore));
 
   // Extract course
-  const course = coursesById[0];
+  const course = coursesByIds[0];
 
   const nextFlashcard = chain(course.chapters.elements)
     .flatMap((x) => x.contents)

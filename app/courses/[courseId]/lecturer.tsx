@@ -35,13 +35,13 @@ export default function LecturerCoursePage() {
   const [infoDialogOpen, setInfoDialogOpen] = useState(false);
 
   // Fetch course data
-  const { coursesById, ...query } =
+  const { coursesByIds, ...query } =
     useLazyLoadQuery<lecturerLecturerCourseIdQuery>(
       graphql`
         query lecturerLecturerCourseIdQuery($id: [UUID!]!) {
           ...MediaRecordSelector
 
-          coursesById(ids: $id) {
+          coursesByIds(ids: $id) {
             title
             description
             ...AddChapterModalFragment
@@ -78,12 +78,12 @@ export default function LecturerCoursePage() {
   const [openModal, setOpenModal] = useState(false);
 
   // Show 404 error page if id was not found
-  if (coursesById.length == 0) {
+  if (coursesByIds.length == 0) {
     return <Error statusCode={404} title="Course could not be found." />;
   }
 
   // Extract course
-  const course = coursesById[0];
+  const course = coursesByIds[0];
 
   const handleCloseModal = () => {
     setOpenModal(false);

@@ -23,7 +23,7 @@ import { graphql, useLazyLoadQuery } from "react-relay";
 
 function NavbarBase({ children }: { children: React.ReactElement }) {
   return (
-    <div className="shrink-0 bg-slate-200 h-full px-8 flex flex-col gap-6 w-96 overflow-auto thin-scrollbar">
+    <div className="shrink-0 bg-slate-200 h-full px-8 flex flex-col gap-6 w-72 xl:w-96 overflow-auto thin-scrollbar">
       <div className="text-center my-16 text-3xl font-medium tracking-wider sticky">
         <img src={logo.src} className="w-24 m-auto" />
       </div>
@@ -120,7 +120,13 @@ function UserInfo() {
               <IconButton
                 edge="end"
                 aria-label="logout"
-                onClick={() => auth.signoutRedirect()}
+                onClick={() =>
+                  auth.signoutRedirect({
+                    post_logout_redirect_uri:
+                      process.env.NEXT_PUBLIC_OAUTH_REDIRECT_URL ??
+                      "http://localhost:3005",
+                  })
+                }
               >
                 <Logout />
               </IconButton>

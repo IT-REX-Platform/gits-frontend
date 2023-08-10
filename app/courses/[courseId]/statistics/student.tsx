@@ -21,11 +21,10 @@ export default function StudentCourseStatsPage() {
   const id = params.courseId;
 
   // Fetch course data
-  const { coursesById } = useLazyLoadQuery<studentCourseStatsQuery>(
+  const { coursesByIds } = useLazyLoadQuery<studentCourseStatsQuery>(
     graphql`
       query studentCourseStatsQuery($id: UUID!) {
-        coursesById(ids: [$id]) {
-          id
+        coursesByIds(ids: [$id]) {
           rewardScores {
             ...RewardScoreChartFragment
             ...RewardScoreHistoryTableFragment
@@ -45,12 +44,12 @@ export default function StudentCourseStatsPage() {
   >(["health", "fitness", "growth", "power"]);
 
   // Show 404 error page if id was not found
-  if (coursesById.length == 0) {
+  if (coursesByIds.length == 0) {
     return <Error statusCode={404} title="Course could not be found." />;
   }
 
   // Extract course
-  const course = coursesById[0];
+  const course = coursesByIds[0];
 
   return (
     <main>

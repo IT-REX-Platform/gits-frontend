@@ -1024,7 +1024,7 @@ type Query {
   ): CoursePayload!
 
   # Returns the courses with the given ids.
-  coursesById(ids: [UUID!]!): [Course!]!
+  coursesByIds(ids: [UUID!]!): [Course!]!
 
   # Returns a set of Resource Objects for the given resource ids, containing a
   # list of all course IDs for a resource and its availability in the course.

@@ -7,6 +7,7 @@ import { Check, Close, Loop } from "@mui/icons-material";
 import { Alert, Button, CircularProgress } from "@mui/material";
 import { motion } from "framer-motion";
 import { chain } from "lodash";
+import Error from "next/error";
 import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
 import ReactMarkdown from "react-markdown";
@@ -19,14 +20,14 @@ export default function StudentFlashcards() {
   const [currentIndex, setCurrentIndex] = useState(0);
 
   // Fetch course data
-  const { contentsByIds, currentUserInfo } =
+  const { findContentsByIds, currentUserInfo } =
     useLazyLoadQuery<studentFlashcardsQuery>(
       graphql`
         query studentFlashcardsQuery($id: [UUID!]!) {
           currentUserInfo {
             id
           }
-          contentsByIds(ids: $id) {
+          findContentsByIds(ids: $id) {
             id
             metadata {
               name
@@ -38,7 +39,10 @@ export default function StudentFlashcards() {
                   sides {
                     isQuestion
                     label
-                    text
+                    text {
+                      text
+                      referencedMediaRecordIds
+                    }
                   }
                 }
               }
@@ -60,7 +64,10 @@ export default function StudentFlashcards() {
       }
     `);
 
-  const flashcards = contentsByIds[0];
+  const flashcards = findContentsByIds[0];
+  if (!flashcards) {
+    return <Error statusCode={404} />;
+  }
   const currentFlashcard = flashcards.flashcardSet!.flashcards[currentIndex];
   const question = currentFlashcard.sides.find((x) => x.isQuestion);
   const answers = currentFlashcard.sides.filter((x) => !x.isQuestion);
@@ -126,7 +133,9 @@ export default function StudentFlashcards() {
         </div>
       </div>
 
-      <div className="mt-6 text-center text-gray-600">{question?.text}</div>
+      <div className="mt-6 text-center text-gray-600">
+        {question?.text.text}
+      </div>
 
       <div className="w-full border-b border-b-gray-300 mt-6 flex justify-center mb-6"></div>
 
@@ -167,7 +176,7 @@ export default function StudentFlashcards() {
               initial={false}
               transition={{ duration: 0.09, delay: 0.05 }}
             >
-              <ReactMarkdown>{answer.text}</ReactMarkdown>
+              <ReactMarkdown>{answer.text.text}</ReactMarkdown>
 
               <div className="mt-6 flex gap-2 justify-center w-full">
                 <Button

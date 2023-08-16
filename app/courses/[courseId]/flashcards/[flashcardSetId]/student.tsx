@@ -64,6 +64,13 @@ export default function StudentFlashcards() {
       }
     `);
 
+  const [turned, setTurned] = useState<Record<string, boolean>>({});
+  const [knew, setKnew] = useState<Record<string, boolean>>({});
+
+  const router = useRouter();
+
+  const [error, setError] = useState<any>(null);
+
   const flashcards = findContentsByIds[0];
   if (!flashcards) {
     return <Error statusCode={404} />;
@@ -71,13 +78,6 @@ export default function StudentFlashcards() {
   const currentFlashcard = flashcards.flashcardSet!.flashcards[currentIndex];
   const question = currentFlashcard.sides.find((x) => x.isQuestion);
   const answers = currentFlashcard.sides.filter((x) => !x.isQuestion);
-
-  const [turned, setTurned] = useState<Record<string, boolean>>({});
-  const [knew, setKnew] = useState<Record<string, boolean>>({});
-
-  const router = useRouter();
-
-  const [error, setError] = useState<any>(null);
 
   const nextCard = async () => {
     const knewAll = chain(currentFlashcard.sides)

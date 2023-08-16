@@ -1,5 +1,6 @@
 "use client";
 
+import { lecturerCreateChapterMutation } from "@/__generated__/lecturerCreateChapterMutation.graphql";
 import { lecturerCreateCourseMutation } from "@/__generated__/lecturerCreateCourseMutation.graphql";
 import { MultistepForm, StepInfo } from "@/components/MultistepForm";
 import {
@@ -33,12 +34,25 @@ export default function NewCourse() {
   const [startDate, setStartDate] = useState<Dayjs | null>(null);
   const [endDate, setEndDate] = useState<Dayjs | null>(null);
   const [publish, setPublish] = useState(false);
+  const [chapterCount, setChapterCount] = useState(12);
 
   const [createCourse, isCourseInFlight] =
     useMutation<lecturerCreateCourseMutation>(graphql`
       mutation lecturerCreateCourseMutation($course: CreateCourseInput!) {
         createCourse(input: $course) {
           id
+        }
+      }
+    `);
+
+  const [addChapter, isUpdating] =
+    useMutation<lecturerCreateChapterMutation>(graphql`
+      mutation lecturerCreateChapterMutation($chapter: CreateChapterInput!) {
+        createChapter(input: $chapter) {
+          id
+          course {
+            ...AddChapterModalFragment
+          }
         }
       }
     `);
@@ -54,8 +68,30 @@ export default function NewCourse() {
           published: publish,
         },
       },
-      onCompleted(response, errors) {
-        router.push(`/courses/${response.createCourse.id}`);
+      onCompleted(response) {
+        function _addChapter(num: number) {
+          addChapter({
+            variables: {
+              chapter: {
+                courseId: response.createCourse.id,
+                description: "",
+                number: num + 1,
+                title: `Chapter ${num + 1}`,
+                startDate: startDate!.toISOString(),
+                endDate: endDate!.toISOString(),
+              },
+            },
+            onCompleted() {
+              if (num < chapterCount - 1) {
+                _addChapter(num + 1);
+              } else {
+                router.push(`/courses/${response.createCourse.id}`);
+              }
+            },
+          });
+        }
+
+        _addChapter(0);
       },
     });
   }
@@ -79,6 +115,15 @@ export default function NewCourse() {
             variant="outlined"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
+            multiline
+          />{" "}
+          <TextField
+            className="w-80 lg:w-96"
+            label="Number of chapters"
+            variant="outlined"
+            type="number"
+            value={chapterCount}
+            onChange={(e) => setChapterCount(Number(e.target.value) ?? 1)}
             multiline
           />
         </>

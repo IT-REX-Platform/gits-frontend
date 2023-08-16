@@ -76,7 +76,10 @@ export function AddChapterModal({
     description: yup.string().optional().default(""),
     startDate: yup
       .date()
-      .min(max(course.chapters.elements.map((x) => new Date(x.endDate))))
+      .min(
+        max(course.chapters.elements.map((x) => new Date(x.endDate))),
+        "Course can't start before its predecessor"
+      )
       .required("Required"),
     endDate: yup.date().required("Required"),
     suggestedStartDate: yup.date().required("Required"),

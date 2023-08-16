@@ -43,6 +43,7 @@ import {
   useLazyLoadQuery,
   useMutation,
 } from "react-relay";
+import { ID } from "victory";
 
 export default function EditFlashcards() {
   const { flashcardSetId, courseId } = useParams();
@@ -86,11 +87,16 @@ export default function EditFlashcards() {
   const [error, setError] = useState<any>(null);
   const [addFlashcard, isAddingFlashcard] =
     useMutation<lecturerAddFlashcardMutation>(graphql`
-      mutation lecturerAddFlashcardMutation($flashcard: CreateFlashcardInput!) {
-        createFlashcard(input: $flashcard) {
-          __id
-          id
-          ...lecturerEditFlashcardFragment
+      mutation lecturerAddFlashcardMutation(
+        $flashcard: CreateFlashcardInput!
+        $assessmentId: UUID!
+      ) {
+        mutateFlashcardSet(assessmentId: $assessmentId) {
+          createFlashcard(input: $flashcard) {
+            __id
+            id
+            ...lecturerEditFlashcardFragment
+          }
         }
       }
     `);
@@ -118,18 +124,19 @@ export default function EditFlashcards() {
 
   function handleAddFlashcard(sides: FlashcardSideData[]) {
     const newFlashcard = {
-      setId: flashcardSetId,
       sides,
     };
 
     setAddFlashcardOpen(false);
     addFlashcard({
-      variables: { flashcard: newFlashcard },
+      variables: { assessmentId: flashcardSetId, flashcard: newFlashcard },
       onError: setError,
       updater(store, response) {
         // Get record of flashcard set and of the new flashcard
         const flashcardSetRecord = store.get(flashcardSet!.__id);
-        const newRecord = store.get(response.createFlashcard.__id);
+        const newRecord = store.get(
+          response.mutateFlashcardSet.createFlashcard!.__id
+        );
         if (!flashcardSetRecord || !newRecord) return;
 
         // Update the linked records of the flashcard set
@@ -230,6 +237,7 @@ export default function EditFlashcards() {
             title={`Card ${i + 1}/${flashcardSet.flashcards.length}`}
             onError={setError}
             _flashcard={flashcard}
+            _assessmentId={flashcardSetId}
           />
         ))}
         {isAddFlashcardOpen && (
@@ -267,10 +275,12 @@ function Flashcard({
   title,
   onError,
   _flashcard,
+  _assessmentId,
 }: {
   title: string;
   onError: (error: any) => void;
   _flashcard: lecturerEditFlashcardFragment$key;
+  _assessmentId: ID;
 }) {
   const flashcard = useFragment(
     graphql`
@@ -278,7 +288,9 @@ function Flashcard({
         id
         sides {
           label
-          text
+          text {
+            text
+          }
           isQuestion
         }
       }
@@ -291,9 +303,12 @@ function Flashcard({
     useMutation<lecturerEditFlashcardMutation>(graphql`
       mutation lecturerEditFlashcardMutation(
         $flashcard: UpdateFlashcardInput!
+        $assessmentId: UUID!
       ) {
-        updateFlashcard(input: $flashcard) {
-          ...lecturerEditFlashcardFragment
+        mutateFlashcardSet(assessmentId: $assessmentId) {
+          updateFlashcard(input: $flashcard) {
+            ...lecturerEditFlashcardFragment
+          }
         }
       }
     `);
@@ -308,7 +323,7 @@ function Flashcard({
     };
 
     updateFlashcard({
-      variables: { flashcard: newFlashcard },
+      variables: { assessmentId: _assessmentId, flashcard: newFlashcard },
       onError,
     });
   }
@@ -327,7 +342,7 @@ function Flashcard({
     };
 
     updateFlashcard({
-      variables: { flashcard: newFlashcard },
+      variables: { assessmentId: _assessmentId, flashcard: newFlashcard },
       onError,
       onCompleted() {
         setAddSideOpen(false);
@@ -408,7 +423,7 @@ function FlashcardSide({
         />
         <CardContent>
           <Typography variant="body2" color="textSecondary">
-            {side.text}
+            {side.text.text}
           </Typography>
         </CardContent>
       </Card>
@@ -423,7 +438,14 @@ function FlashcardSide({
   );
 }
 
-type FlashcardSideData = { label: string; text: string; isQuestion: boolean };
+type FlashcardSideData = {
+  label: string;
+  text: FlashcardSideDataMarkdown;
+  isQuestion: boolean;
+};
+type FlashcardSideDataMarkdown = {
+  text: string;
+};
 
 function EditSideModal({
   onClose,
@@ -435,10 +457,11 @@ function EditSideModal({
   side?: FlashcardSideData;
 }) {
   const [label, setLabel] = useState(side?.label ?? "");
-  const [text, setText] = useState(side?.text ?? "");
+  // Initialize the text state with an empty object of type FlashcardSideDataMarkdown
+  const [text, setText] = useState(side?.text ?? { text: "" });
   const [isQuestion, setIsQuestion] = useState(side?.isQuestion ?? false);
 
-  const valid = label.trim() != "" && text.trim() != "";
+  const valid = label.trim() != "" && text.text.trim() != "";
 
   return (
     <Dialog maxWidth="md" open onClose={onClose}>
@@ -459,9 +482,9 @@ function EditSideModal({
               className="w-96"
               label="Text"
               variant="outlined"
-              value={text}
-              error={side && text.trim() == ""}
-              onChange={(e) => setText(e.target.value)}
+              value={text.text} // Access the 'text' property of the 'text' state
+              error={side && text.text.trim() == ""}
+              onChange={(e) => setText({ ...text, text: e.target.value })} // Update only the 'text' property
               multiline
               required
             />

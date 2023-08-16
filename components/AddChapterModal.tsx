@@ -1,14 +1,12 @@
 import { useState } from "react";
 import { graphql, useFragment, useMutation } from "react-relay";
+import * as yup from "yup";
 
-import { DialogBase } from "./DialogBase";
-import {
-  ChapterData,
-  dialogSections,
-  validationSchema,
-} from "./dialogs/chapterDialog";
 import { AddChapterModalFragment$key } from "@/__generated__/AddChapterModalFragment.graphql";
 import { AddChapterModalMutation } from "@/__generated__/AddChapterModalMutation.graphql";
+import { max } from "lodash";
+import { DialogBase } from "./DialogBase";
+import { ChapterData, dialogSections } from "./dialogs/chapterDialog";
 
 export function AddChapterModal({
   open,
@@ -27,6 +25,7 @@ export function AddChapterModal({
           elements {
             id
             title
+            endDate
           }
         }
       }
@@ -71,6 +70,18 @@ export function AddChapterModal({
       },
     });
   }
+
+  const validationSchema: yup.ObjectSchema<ChapterData> = yup.object({
+    title: yup.string().required("Required"),
+    description: yup.string().optional().default(""),
+    startDate: yup
+      .date()
+      .min(max(course.chapters.elements.map((x) => new Date(x.endDate))))
+      .required("Required"),
+    endDate: yup.date().required("Required"),
+    suggestedStartDate: yup.date().required("Required"),
+    suggestedEndDate: yup.date().required("Required"),
+  });
 
   return (
     <DialogBase

@@ -1,6 +1,4 @@
-import { useState } from "react";
-import { graphql, useFragment, useMutation } from "react-relay";
-import dayjs, { Dayjs } from "dayjs";
+import { Edit } from "@mui/icons-material";
 import {
   Alert,
   Backdrop,
@@ -13,11 +11,13 @@ import {
   TextField,
 } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers";
-import { Edit } from "@mui/icons-material";
+import dayjs, { Dayjs } from "dayjs";
+import { useState } from "react";
+import { graphql, useFragment, useMutation } from "react-relay";
 
-import { Form, FormSection } from "./Form";
 import { EditChapterModalFragment$key } from "@/__generated__/EditChapterModalFragment.graphql";
 import { EditChapterModalMutation } from "@/__generated__/EditChapterModalMutation.graphql";
+import { Form, FormSection } from "./Form";
 
 export function EditChapterModal({
   _chapter,
@@ -38,6 +38,14 @@ export function EditChapterModal({
         suggestedEndDate
         course {
           id
+          chapters(sortBy: [], sortDirection: []) {
+            elements {
+              id
+              number
+              startDate
+              endDate
+            }
+          }
         }
         number
       }
@@ -73,12 +81,27 @@ export function EditChapterModal({
   );
 
   const [error, setError] = useState<any>(null);
+
+  const startDateValid =
+    startDate &&
+    chapter.course.chapters.elements
+      .filter((x) => x.number < chapter.number)
+      .every((x) => new Date(x.endDate) < startDate.toDate());
+
+  const endDateValid =
+    endDate &&
+    chapter.course.chapters.elements
+      .filter((x) => x.number > chapter.number)
+      .every((x) => new Date(x.startDate) > endDate.toDate());
+
   const valid =
     title !== "" &&
     startDate != null &&
     startDate.isValid() &&
     endDate != null &&
-    endDate.isValid();
+    endDate.isValid() &&
+    startDateValid &&
+    endDateValid;
 
   const [updateChapter, isUpdating] =
     useMutation<EditChapterModalMutation>(graphql`
@@ -156,7 +179,13 @@ export function EditChapterModal({
                 slotProps={{
                   textField: {
                     required: true,
-                    error: startDate == null || !startDate.isValid(),
+                    helperText: !startDateValid
+                      ? "Chapter can't start before it's predecessor ended"
+                      : "",
+                    error:
+                      startDate == null ||
+                      !startDate.isValid() ||
+                      !startDateValid,
                   },
                 }}
               />
@@ -168,8 +197,13 @@ export function EditChapterModal({
                 onChange={setEndDate}
                 slotProps={{
                   textField: {
+                    helperText: !startDateValid
+                      ? "Chapter can't end after it's predecessor started"
+                      : "",
+
                     required: true,
-                    error: endDate == null || !endDate.isValid(),
+                    error:
+                      endDate == null || !endDate.isValid() || !endDateValid,
                   },
                 }}
               />

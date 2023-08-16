@@ -1,4 +1,3 @@
-import * as yup from "yup";
 import { SectionOptions } from "../DialogBase";
 
 export type ChapterData = {
@@ -70,12 +69,3 @@ export const dialogSections: SectionOptions<ChapterData>[] = [
     ],
   },
 ];
-
-export const validationSchema: yup.ObjectSchema<ChapterData> = yup.object({
-  title: yup.string().required("Required"),
-  description: yup.string().optional().default(""),
-  startDate: yup.date().required("Required"),
-  endDate: yup.date().required("Required"),
-  suggestedStartDate: yup.date().required("Required"),
-  suggestedEndDate: yup.date().required("Required"),
-});

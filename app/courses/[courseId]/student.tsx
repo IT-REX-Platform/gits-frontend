@@ -92,8 +92,6 @@ export default function StudentCoursePage() {
               number
               startDate
               endDate
-              suggestedStartDate
-              suggestedEndDate
               contents {
                 ...ContentLinkFragment
 
@@ -286,11 +284,9 @@ export default function StudentCoursePage() {
           <section key={chapter.id} className="mt-6">
             <ChapterHeader
               title={chapter.title}
-              subtitle={`${dayjs(
-                chapter.suggestedStartDate ?? chapter.startDate
-              ).format("D. MMMM")} – ${dayjs(
-                chapter.suggestedEndDate ?? chapter.endDate
-              ).format("D. MMMM")}`}
+              subtitle={`${dayjs(chapter.startDate).format(
+                "D. MMMM"
+              )} – ${dayjs(chapter.endDate).format("D. MMMM")}`}
               progress={chapterProgress}
             />
             <ChapterContent>

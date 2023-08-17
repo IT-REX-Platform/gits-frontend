@@ -1,30 +1,91 @@
 "use client";
 import { lecturerLecturerCourseIdQuery } from "@/__generated__/lecturerLecturerCourseIdQuery.graphql";
-import { Button, IconButton, Typography } from "@mui/material";
+import {
+  Alert,
+  Button,
+  Checkbox,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  FormControlLabel,
+  IconButton,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+  Switch,
+  Typography,
+} from "@mui/material";
 import Error from "next/error";
-import { useParams } from "next/navigation";
-import { graphql, useLazyLoadQuery } from "react-relay";
+import { useParams, useRouter } from "next/navigation";
+import {
+  graphql,
+  useFragment,
+  useLazyLoadQuery,
+  useMutation,
+} from "react-relay";
 
 import { MediaRecordSelector$key } from "@/__generated__/MediaRecordSelector.graphql";
+import { lecturerAddStageContentModal$key } from "@/__generated__/lecturerAddStageContentModal.graphql";
+import { lecturerEditChapterModalMutation } from "@/__generated__/lecturerEditChapterModalMutation.graphql";
+import { AddChapterModal } from "@/components/AddChapterModal";
+import { AddFlashcardSetModal } from "@/components/AddFlashcardSetModal";
+import { AddSectionButton } from "@/components/AddSectionButton";
+import { AddStageButton } from "@/components/AddStageButton";
 import { ChapterContent } from "@/components/ChapterContent";
 import { ChapterHeader } from "@/components/ChapterHeader";
 import { Content, ContentLink, ProgressFrame } from "@/components/Content";
-import { Add, RemoveRedEye, Settings } from "@mui/icons-material";
-import dayjs from "dayjs";
-import { orderBy } from "lodash";
-import { useState } from "react";
-import { MediaContentModal } from "../../../components/MediaContentModal";
-import { Section, SectionContent, SectionHeader } from "@/components/Section";
-import { Stage } from "@/components/Stage";
-import { AddFlashcardSetModal } from "@/components/AddFlashcardSetModal";
-import { AddChapterModal } from "@/components/AddChapterModal";
+import { DeleteStageButton } from "@/components/DeleteStageButton";
 import { EditChapterModal } from "@/components/EditChapterModal";
 import { EditCourseModal } from "@/components/EditCourseModal";
-import { AddFlashcardSetModalFragment$key } from "@/__generated__/AddFlashcardSetModalFragment.graphql";
-import { AddSectionButton } from "@/components/AddSectionButton";
 import EditSectionButton from "@/components/EditSectionButton";
-import { AddStageButton } from "@/components/AddStageButton";
-import { DeleteStageButton } from "@/components/DeleteStageButton";
+import { Section, SectionContent, SectionHeader } from "@/components/Section";
+import { Stage } from "@/components/Stage";
+import { Add, ArrowForward, RemoveRedEye, Settings } from "@mui/icons-material";
+import dayjs from "dayjs";
+import { orderBy } from "lodash";
+import { useEffect, useState } from "react";
+import { MediaContentModal } from "../../../components/MediaContentModal";
+
+graphql`
+  fragment lecturerSectionFragment on Section {
+    id
+    name
+    stages {
+      ...lecturerStageFragment @relay(mask: false)
+    }
+  }
+`;
+
+graphql`
+  fragment lecturerStageFragment on Stage {
+    optionalContentsProgress
+    requiredContentsProgress
+    id
+    position
+    requiredContents {
+      ...ContentLinkFragment
+
+      userProgressData {
+        nextLearnDate
+      }
+      __typename
+      id
+    }
+
+    optionalContents {
+      ...ContentLinkFragment
+
+      userProgressData {
+        nextLearnDate
+      }
+      __typename
+      id
+    }
+  }
+`;
 
 export default function LecturerCoursePage() {
   // Get course id from url
@@ -51,6 +112,7 @@ export default function LecturerCoursePage() {
                 __id
                 ...EditChapterModalFragment
                 ...AddFlashcardSetModalFragment
+                ...lecturerAddStageContentModal
                 id
                 title
                 number
@@ -58,14 +120,8 @@ export default function LecturerCoursePage() {
                 endDate
                 suggestedStartDate
                 suggestedEndDate
-                contents {
-                  ...ContentLinkFragment
-
-                  userProgressData {
-                    nextLearnDate
-                  }
-                  __typename
-                  id
+                sections {
+                  ...lecturerSectionFragment @relay(mask: false)
                 }
               }
             }
@@ -155,30 +211,61 @@ export default function LecturerCoursePage() {
           />
 
           <ChapterContent>
-            <Section>
-              <SectionHeader action={<EditSectionButton />}></SectionHeader>
-              <SectionContent>
-                <Stage progress={0}>
-                  {chapter.contents.map((content) => (
-                    <ContentLink key={content.id} _content={content} />
-                  ))}
-                  <div className="mt-4 flex flex-col items-start">
-                    <AddFlashcardSetButton _chapter={chapter} />
-                    <AddMediaButton
-                      _mediaRecords={query}
-                      chapterId={chapter.id}
+            {chapter.sections.map((section) => (
+              <Section key={section.id}>
+                <SectionHeader
+                  action={
+                    <EditSectionButton
+                      name={section.name}
+                      sectionId={section.id}
                     />
-                  </div>
-                  <div className="mt-2">
-                    <DeleteStageButton />
-                  </div>
-                </Stage>
-                <Stage progress={0}>
-                  <AddStageButton />
-                </Stage>
-              </SectionContent>
-            </Section>
-            <AddSectionButton />
+                  }
+                >
+                  {section.name}
+                </SectionHeader>
+                <SectionContent>
+                  {orderBy(section.stages, (x) => x.position, "asc").map(
+                    (stage) => (
+                      <Stage
+                        progress={stage.requiredContentsProgress}
+                        key={section.id}
+                      >
+                        {stage.requiredContents.map((content) => (
+                          <ContentLink key={content.id} _content={content} />
+                        ))}
+                        {stage.optionalContents.map((content) => (
+                          <ContentLink key={content.id} _content={content} />
+                        ))}
+                        <div className="mt-4 flex flex-col items-start">
+                          <AddContentModal
+                            stageId={stage.id}
+                            chapterId={chapter.id}
+                            _mediaRecords={query}
+                            _chapter={chapter}
+                            optionalRecords={stage.optionalContents.map(
+                              (x) => x.id
+                            )}
+                            requiredRecords={stage.requiredContents.map(
+                              (x) => x.id
+                            )}
+                          />
+                        </div>
+                        <div className="mt-2">
+                          <DeleteStageButton
+                            stageId={stage.id}
+                            sectionId={section.id}
+                          />
+                        </div>
+                      </Stage>
+                    )
+                  )}
+                  <Stage progress={0}>
+                    <AddStageButton sectionId={section.id} />
+                  </Stage>
+                </SectionContent>
+              </Section>
+            ))}
+            <AddSectionButton chapterId={chapter.id} />
           </ChapterContent>
         </section>
       ))}
@@ -186,14 +273,90 @@ export default function LecturerCoursePage() {
   );
 }
 
-function AddMediaButton({
+function AddContentModal({
   chapterId,
+  stageId,
+  _chapter,
   _mediaRecords,
+  optionalRecords: _optionalRecords,
+  requiredRecords: _requiredRecords,
 }: {
   chapterId: string;
+  stageId: string;
   _mediaRecords: MediaRecordSelector$key;
+  _chapter: lecturerAddStageContentModal$key;
+
+  optionalRecords: string[];
+  requiredRecords: string[];
 }) {
+  const [openMediaModal, setOpenMediaModal] = useState(false);
+  const [openFlashcardModal, setOpenFlashcardModal] = useState(false);
+
   const [openModal, setOpenModal] = useState(false);
+
+  const chapter = useFragment(
+    graphql`
+      fragment lecturerAddStageContentModal on Chapter {
+        ...AddFlashcardSetModalFragment
+        contents {
+          id
+          metadata {
+            name
+          }
+          ... on FlashcardSetAssessment {
+            __typename
+          }
+          ... on MediaContent {
+            __typename
+          }
+          ... on QuizAssessment {
+            __typename
+          }
+        }
+      }
+    `,
+    _chapter
+  );
+
+  const [optionalRecords, setOptionalRecords] = useState(_optionalRecords);
+  const [requiredRecords, setRequiredRecords] = useState(_requiredRecords);
+
+  const [updateStage] = useMutation<lecturerEditChapterModalMutation>(graphql`
+    mutation lecturerEditChapterModalMutation($stage: UpdateStageInput!) {
+      updateStage(input: $stage) {
+        id
+        ...lecturerStageFragment
+      }
+    }
+  `);
+
+  useEffect(() => {
+    setOptionalRecords(_optionalRecords);
+  }, [_optionalRecords]);
+
+  useEffect(() => {
+    setRequiredRecords(_requiredRecords);
+  }, [_requiredRecords]);
+
+  const router = useRouter();
+
+  const [error, setError] = useState<any>(null);
+
+  const submit = () => {
+    updateStage({
+      variables: {
+        stage: {
+          id: stageId,
+          requiredContents: optionalRecords,
+          optionalContents: requiredRecords,
+        },
+      },
+      onError: setError,
+      onCompleted() {
+        setOpenModal(false);
+      },
+    });
+  };
 
   return (
     <>
@@ -201,33 +364,147 @@ function AddMediaButton({
         Add media
       </Button>
 
+      <Dialog
+        maxWidth="lg"
+        open={openModal}
+        onClose={() => setOpenModal(false)}
+      >
+        <DialogTitle>Select media</DialogTitle>
+        <DialogContent sx={{ paddingX: 0 }}>
+          {error?.source.errors.map((err: any, i: number) => (
+            <Alert
+              key={i}
+              severity="error"
+              sx={{ minWidth: 400, maxWidth: 800, width: "fit-content" }}
+              onClose={() => setError(null)}
+            >
+              {err.message}
+            </Alert>
+          ))}
+
+          <List className="min-w-[500px]">
+            {chapter.contents.map((content) => {
+              const optional = optionalRecords.find((x) => x === content.id);
+              const required = requiredRecords.find((x) => x === content.id);
+              const toggle =
+                optional || required
+                  ? () => {
+                      setOptionalRecords(
+                        optionalRecords.filter((x) => x !== content.id)
+                      );
+                      setRequiredRecords(
+                        requiredRecords.filter((x) => x !== content.id)
+                      );
+                    }
+                  : () => {
+                      setRequiredRecords([...requiredRecords, content.id]);
+                    };
+
+              const checked = optional || required;
+
+              const toggleOptional = optional
+                ? () => {
+                    setOptionalRecords(
+                      optionalRecords.filter((x) => x !== content.id)
+                    );
+                    setRequiredRecords([...requiredRecords, content.id]);
+                  }
+                : () => {
+                    setOptionalRecords([...optionalRecords, content.id]);
+                    setRequiredRecords(
+                      requiredRecords.filter((x) => x !== content.id)
+                    );
+                  };
+
+              return (
+                <ListItem
+                  key={content.id}
+                  secondaryAction={
+                    <div className="mr-2 flex gap-x-3">
+                      {checked && (
+                        <FormControlLabel
+                          control={
+                            <Switch
+                              checked={!!required}
+                              onClick={toggleOptional}
+                            />
+                          }
+                          label={required ? "Required" : "Optional"}
+                        />
+                      )}
+
+                      <IconButton
+                        edge="end"
+                        onClick={() =>
+                          router.push(
+                            content.__typename === "FlashcardSetAssessment"
+                              ? `flashcards/${content.id}`
+                              : content.__typename === "MediaContent"
+                              ? `media/${content.id}`
+                              : content.__typename === "QuizAssessment"
+                              ? `quizzes/${content.id}`
+                              : ""
+                          )
+                        }
+                      >
+                        <ArrowForward />
+                      </IconButton>
+                    </div>
+                  }
+                  disablePadding
+                >
+                  <ListItemButton onClick={toggle}>
+                    <ListItemIcon>
+                      <Checkbox
+                        edge="start"
+                        checked={!!checked}
+                        tabIndex={-1}
+                        disableRipple
+                      />
+                    </ListItemIcon>
+
+                    <ListItemText primary={content.metadata.name} />
+                  </ListItemButton>
+                </ListItem>
+              );
+            })}
+          </List>
+        </DialogContent>
+
+        <DialogContent>
+          {/* add flashcard button */}
+          <Button
+            onClick={() => setOpenFlashcardModal(true)}
+            variant="text"
+            className="mt-4"
+            startIcon={<Add />}
+          >
+            Add Flashcards
+          </Button>
+          <Button
+            onClick={() => setOpenMediaModal(true)}
+            variant="text"
+            className="mt-4"
+            startIcon={<Add />}
+          >
+            Add Media
+          </Button>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={submit}>Ok</Button>
+        </DialogActions>
+      </Dialog>
+
       <MediaContentModal
         chapterId={chapterId}
-        isOpen={openModal}
-        onClose={() => setOpenModal(false)}
+        isOpen={openMediaModal}
+        onClose={() => setOpenMediaModal(false)}
         _mediaRecords={_mediaRecords}
       />
-    </>
-  );
-}
-
-function AddFlashcardSetButton({
-  _chapter,
-}: {
-  _chapter: AddFlashcardSetModalFragment$key;
-}) {
-  const [openModal, setOpenModal] = useState(false);
-
-  return (
-    <>
-      <Button startIcon={<Add />} onClick={() => setOpenModal(true)}>
-        Add flashcards
-      </Button>
-
-      {openModal && (
+      {openFlashcardModal && (
         <AddFlashcardSetModal
-          onClose={() => setOpenModal(false)}
-          _chapter={_chapter}
+          onClose={() => setOpenFlashcardModal(false)}
+          _chapter={chapter}
         />
       )}
     </>

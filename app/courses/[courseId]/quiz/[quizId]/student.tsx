@@ -1,23 +1,25 @@
 "use client";
 
 import { studentQuizQuery } from "@/__generated__/studentQuizQuery.graphql";
+import {
+  QuestionCompletedInput,
+  studentQuizTrackCompletedMutation,
+} from "@/__generated__/studentQuizTrackCompletedMutation.graphql";
 import { Heading } from "@/components/Heading";
 import {
+  Alert,
   Button,
   Checkbox,
-  FormGroup,
-  FormControlLabel,
-  IconButton,
   Dialog,
   DialogTitle,
+  FormControlLabel,
+  FormGroup,
   Typography,
 } from "@mui/material";
 import Error from "next/error";
-import QuestionMarkIcon from "@mui/icons-material/QuestionMark";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { graphql, useLazyLoadQuery } from "react-relay";
-import { is } from "date-fns/locale";
+import { graphql, useLazyLoadQuery, useMutation } from "react-relay";
 
 type UserAnswers = (number | null)[];
 
@@ -28,13 +30,38 @@ export default function StudentQuiz() {
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [infoDialogOpen, setInfoDialogOpen] = useState(false);
+  const [usedHint, setUsedHint] = useState(false);
   const [checkAnswers, setCheckAnswers] = useState(false);
   const [userAnswers, setUserAnswers] = useState<UserAnswers>([]);
+  const [error, setError] = useState<any>(null);
 
   useEffect(() => {
     // Reset user answers when the currentIndex changes
     setUserAnswers([]);
+    setUsedHint(false);
   }, [currentIndex]);
+
+  const [trackCompleted, loading] =
+    useMutation<studentQuizTrackCompletedMutation>(
+      graphql`
+        mutation studentQuizTrackCompletedMutation(
+          $input: QuizCompletedInput!
+        ) {
+          logQuizCompleted(input: $input) {
+            assessment {
+              userProgressData {
+                lastLearnDate
+                nextLearnDate
+              }
+            }
+          }
+        }
+      `
+    );
+
+  const [completedInput, setCompletedInput] = useState<
+    QuestionCompletedInput[]
+  >([]);
 
   // Fetch quiz data
   const { contentsByIds } = useLazyLoadQuery<studentQuizQuery>(
@@ -112,8 +139,26 @@ export default function StudentQuiz() {
       currentIndex + 1 < (quiz?.selectedQuestions.length ?? 0)
     ) {
       setCheckAnswers(false);
+      setCompletedInput([
+        ...completedInput,
+        {
+          questionId: currentQuestion.id,
+          usedHint,
+          correct: !!currentQuestion.answers?.every(
+            (x, idx) => x.correct || !userAnswers.includes(idx)
+          ),
+        },
+      ]);
       setCurrentIndex(currentIndex + 1);
     } else {
+      trackCompleted({
+        variables: {
+          input: {
+            quizId: contentsByIds[0].id,
+            completedQuestions: completedInput,
+          },
+        },
+      });
       router.push(`/courses/${courseId}`);
     }
   };
@@ -133,6 +178,16 @@ export default function StudentQuiz() {
 
   return (
     <main>
+      {error?.source.errors.map((err: any, i: number) => (
+        <Alert
+          key={i}
+          severity="error"
+          sx={{ minWidth: 400, maxWidth: 800, width: "fit-content" }}
+          onClose={() => setError(null)}
+        >
+          {err.message}
+        </Alert>
+      ))}
       <Heading title={contentsByIds[0].metadata.name} backButton />
       <InfoDialog
         open={infoDialogOpen}
@@ -140,6 +195,7 @@ export default function StudentQuiz() {
         title={questionText!}
         hint={currentQuestion.hint!}
       />
+
       <div className="w-full border-b border-b-gray-300 mt-6 flex justify-center">
         <div className="bg-white -mb-[9px] px-3 text-xs text-gray-600">
           {currentIndex + 1}/{quiz?.selectedQuestions.length ?? 0}
@@ -151,7 +207,10 @@ export default function StudentQuiz() {
       <div className="w-full border-b border-b-gray-300 mt-6 flex justify-center mb-6">
         <div>
           <Button
-            onClick={() => setInfoDialogOpen(true)}
+            onClick={() => {
+              setInfoDialogOpen(true);
+              setUsedHint(true);
+            }}
             sx={{ color: "grey" }}
           >
             Hint

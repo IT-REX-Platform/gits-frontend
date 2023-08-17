@@ -2,6 +2,7 @@
 
 import { lecturerLecturerDashboardQuery } from "@/__generated__/lecturerLecturerDashboardQuery.graphql";
 import {
+  Add,
   ArrowForwardIos,
   Check,
   Refresh,
@@ -21,6 +22,7 @@ import {
   Typography,
 } from "@mui/material";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useLazyLoadQuery } from "react-relay";
 import { graphql } from "relay-runtime";
 
@@ -46,6 +48,8 @@ export default function LecturerPage() {
     .filter((x) => x.role === "TUTOR")
     .map((x) => x.course);
 
+  const { push } = useRouter();
+
   return (
     <main>
       <Typography variant="h1" gutterBottom>
@@ -55,8 +59,15 @@ export default function LecturerPage() {
         My Courses
       </Typography>
 
+      <Button
+        startIcon={<Add />}
+        className="float-right"
+        onClick={() => push("/courses/create")}
+      >
+        Add Course
+      </Button>
+
       <div className="grid grid-cols-2 lg:grid-cols-3 gap-8 mt-8">
-        {/* MOCK */}
         {courses.map((course) => (
           <Card variant="outlined" className="h-full" key={course.id}>
             <CardContent>

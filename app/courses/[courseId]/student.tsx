@@ -3,10 +3,12 @@ import { studentCourseIdQuery } from "@/__generated__/studentCourseIdQuery.graph
 import {
   Alert,
   Button,
-  Dialog,
-  DialogTitle,
   IconButton,
+  Tooltip,
+  TooltipProps,
   Typography,
+  styled,
+  tooltipClasses,
 } from "@mui/material";
 import { chain, orderBy } from "lodash";
 import Error from "next/error";
@@ -27,19 +29,19 @@ import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 
 import { studentCourseLeaveMutation } from "@/__generated__/studentCourseLeaveMutation.graphql";
+import { studentCoursePageSectionFragment$key } from "@/__generated__/studentCoursePageSectionFragment.graphql";
+import { studentCoursePageStageFragment$key } from "@/__generated__/studentCoursePageStageFragment.graphql";
 import { ChapterContent } from "@/components/ChapterContent";
 import { ChapterHeader } from "@/components/ChapterHeader";
 import { ContentLink } from "@/components/Content";
 import { RewardScores } from "@/components/RewardScores";
+import { Section, SectionContent } from "@/components/Section";
+import { Stage, StageBarrier } from "@/components/Stage";
 import { Info } from "@mui/icons-material";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import dayjs from "dayjs";
 import Link from "next/link";
 import { useState } from "react";
-import { Section, SectionContent } from "@/components/Section";
-import { Stage, StageBarrier } from "@/components/Stage";
-import { studentCoursePageSectionFragment$key } from "@/__generated__/studentCoursePageSectionFragment.graphql";
-import { studentCoursePageStageFragment$key } from "@/__generated__/studentCoursePageStageFragment.graphql";
 
 interface Data {
   name: string;
@@ -56,13 +58,11 @@ export default function StudentCoursePage() {
   const id = params.courseId;
 
   const router = useRouter();
-  // Info dialog
-  const [infoDialogOpen, setInfoDialogOpen] = useState(false);
   const [error, setError] = useState<any>(null);
 
   // Fetch course data
   const {
-    coursesById,
+    coursesByIds,
     scoreboard,
     currentUserInfo: { id: userId },
   } = useLazyLoadQuery<studentCourseIdQuery>(
@@ -78,7 +78,7 @@ export default function StudentCoursePage() {
           id
         }
 
-        coursesById(ids: [$id]) {
+        coursesByIds(ids: [$id]) {
           id
           title
           description
@@ -125,7 +125,7 @@ export default function StudentCoursePage() {
   `);
 
   // Show 404 error page if id was not found
-  if (coursesById.length == 0) {
+  if (coursesByIds.length == 0) {
     return <Error statusCode={404} title="Course could not be found." />;
   }
 
@@ -135,7 +135,7 @@ export default function StudentCoursePage() {
     .map((element) => createData(element.user.userName, element.powerScore));
 
   // Extract course
-  const course = coursesById[0];
+  const course = coursesByIds[0];
 
   const nextFlashcard = chain(course.chapters.elements)
     .flatMap((x) => x.contents)
@@ -167,9 +167,18 @@ export default function StudentCoursePage() {
       ))}
       <div className="flex gap-4 items-center">
         <Typography variant="h1">{course.title}</Typography>
-        <IconButton onClick={() => setInfoDialogOpen(true)}>
-          <Info />
-        </IconButton>
+        <LightTooltip
+          title={
+            <>
+              <p className="text-slate-600 mb-1">Beschreibung</p>
+              <p>{course.description}</p>
+            </>
+          }
+        >
+          <IconButton>
+            <Info />
+          </IconButton>
+        </LightTooltip>
 
         <div className="flex-1"></div>
 
@@ -209,14 +218,8 @@ export default function StudentCoursePage() {
           Leave course
         </Button>
       </div>
-      <InfoDialog
-        open={infoDialogOpen}
-        title={course.title}
-        description={course.description}
-        onClose={() => setInfoDialogOpen(false)}
-      />
       <div className="grid grid-cols-2 items-start">
-        <div className="w-fit my-12">
+        <div className="object-cover my-12">
           <div className="pl-8 pr-10 py-6 border-4 border-slate-200 rounded-3xl">
             <RewardScores _scores={course.rewardScores} courseId={course.id} />
           </div>
@@ -228,9 +231,9 @@ export default function StudentCoursePage() {
             Full history
           </Button>
         </div>
-        <div>
+        <div className="mx-5">
           <TableContainer component={Paper} className="mt-12 mb-2">
-            <Table sx={{ minWidth: 650 }} size="small">
+            <Table size="small">
               <TableHead>
                 <TableRow>
                   <TableCell>Student Name</TableCell>
@@ -410,6 +413,7 @@ function StudentStage({
 
   return (
     <Stage progress={progress}>
+      <div></div>
       {stage.requiredContents.map((content) => (
         <ContentLink key={content.id} _content={content} />
       ))}
@@ -417,23 +421,18 @@ function StudentStage({
   );
 }
 
-function InfoDialog({
-  title,
-  description,
-  open,
-  onClose,
-}: {
-  title: string;
-  description: string;
-  open: boolean;
-  onClose: () => void;
-}) {
-  return (
-    <Dialog onClose={onClose} open={open}>
-      <DialogTitle>{title}</DialogTitle>
-      <Typography variant="body1" sx={{ padding: 3, paddingTop: 0 }}>
-        {description}
-      </Typography>
-    </Dialog>
-  );
-}
+const LightTooltip = styled(({ className, ...props }: TooltipProps) => (
+  <Tooltip {...props} classes={{ popper: className }} />
+))(({ theme }) => ({
+  [`& .${tooltipClasses.tooltip}`]: {
+    backgroundColor: theme.palette.common.white,
+    color: "rgba(0, 0, 0, 0.87)",
+    boxShadow: theme.shadows[1],
+    fontSize: 14,
+    paddingLeft: 18,
+    paddingRight: 18,
+    paddingTop: 10,
+    paddingBottom: 10,
+    fontWeight: "normal",
+  },
+}));

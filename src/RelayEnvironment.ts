@@ -1,3 +1,4 @@
+import { useAuth } from "react-oidc-context";
 import {
   Environment,
   FetchFunction,
@@ -5,12 +6,13 @@ import {
   RecordSource,
   Store,
 } from "relay-runtime";
+useAuth;
 
 const HTTP_ENDPOINT =
   process.env.NEXT_PUBLIC_BACKEND_URL ?? "http://localhost:8080/graphql";
 
-function createRelayEnvironment(token: string | undefined) {
-  const fetchFn: FetchFunction = async (request, variables) => {
+function createFetchFn(token: string | undefined): FetchFunction {
+  return async (request, variables) => {
     const headers: Record<string, string> = {
       Accept:
         "application/graphql-response+json; charset=utf-8, application/json; charset=utf-8",
@@ -31,30 +33,29 @@ function createRelayEnvironment(token: string | undefined) {
 
     return await resp.json();
   };
-
-  return new Environment({
-    network: Network.create(fetchFn),
-    store: new Store(new RecordSource()),
-  });
 }
 
-let relayEnvironment: Environment | undefined;
-let relayEnvironmentToken: string | undefined;
+let relayStore: Store | undefined;
 
 export function initRelayEnvironment(token: string | undefined) {
-  // const environment = relayEnvironment ?? createRelayEnvironment(token);
-
   // For SSG and SSR always create a new Relay environment.
   if (typeof window === "undefined") {
-    return createRelayEnvironment(token);
+    return new Environment({
+      network: Network.create(createFetchFn(token)),
+      store: new Store(new RecordSource()),
+    });
   }
 
   // Create the Relay environment once in the client
   // and then reuse it.
-  if (!relayEnvironment || relayEnvironmentToken !== token) {
-    relayEnvironment = createRelayEnvironment(token);
-    relayEnvironmentToken = token;
+
+  // init env
+  if (!relayStore) {
+    relayStore = new Store(new RecordSource());
   }
 
-  return relayEnvironment;
+  return new Environment({
+    network: Network.create(createFetchFn(token)),
+    store: relayStore,
+  });
 }

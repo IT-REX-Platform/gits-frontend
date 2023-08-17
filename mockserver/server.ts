@@ -152,7 +152,7 @@ export const schema = createSchema({
         return courses;
       },
 
-      coursesById(parent, args: { ids: string[] }) {
+      coursesByIds(parent, args: { ids: string[] }) {
         return courses.filter((course) => args.ids.includes(course.id));
       },
     },

@@ -37,8 +37,8 @@ import { useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { useFragment, useMutation } from "react-relay";
 import { graphql } from "relay-runtime";
-import { MediaRecordTypeSelector } from "./MediaRecordTypeSelector";
 import { MediaRecordIcon } from "./MediaRecordIcon";
+import { MediaRecordTypeSelector } from "./MediaRecordTypeSelector";
 
 export function MediaRecordSelector({
   _mediaRecords,
@@ -46,21 +46,21 @@ export function MediaRecordSelector({
   setSelectedRecords,
 }: {
   _mediaRecords: MediaRecordSelector$key;
-  selectedRecords: MediaRecordSelector$data["mediaRecords"];
+  selectedRecords: MediaRecordSelector$data["userMediaRecords"];
   setSelectedRecords: (
     val:
-      | MediaRecordSelector$data["mediaRecords"]
+      | MediaRecordSelector$data["userMediaRecords"]
       | ((
-          val: MediaRecordSelector$data["mediaRecords"]
-        ) => MediaRecordSelector$data["mediaRecords"])
+          val: MediaRecordSelector$data["userMediaRecords"]
+        ) => MediaRecordSelector$data["userMediaRecords"])
   ) => void;
 }) {
   const [error, setError] = useState<any>(null);
 
-  const { mediaRecords } = useFragment(
+  const { userMediaRecords } = useFragment(
     graphql`
       fragment MediaRecordSelector on Query {
-        mediaRecords {
+        userMediaRecords {
           id
           __id
           uploadUrl
@@ -139,11 +139,11 @@ export function MediaRecordSelector({
         },
         updater(store, data) {
           const rootStore = store.getRoot();
-          const mediaRecords = rootStore.getLinkedRecords("mediaRecords");
+          const mediaRecords = rootStore.getLinkedRecords("userMediaRecords");
           const newRecord = store.get(data.createMediaRecord.id);
           rootStore.setLinkedRecords(
             [...(mediaRecords ?? []), newRecord!],
-            "mediaRecords"
+            "userMediaRecords"
           );
         },
       });
@@ -195,7 +195,7 @@ export function MediaRecordSelector({
 
   const [search, setSearch] = useState("");
 
-  const filteredMedia = mediaRecords.filter(
+  const filteredMedia = userMediaRecords.filter(
     (x) => !search || x.name.toLowerCase().includes(search.toLowerCase())
   );
 
@@ -328,7 +328,7 @@ export function MediaRecordSelector({
 
       <div className="w-full">
         <List>
-          {mediaRecords
+          {userMediaRecords
             .filter((x) => selectedRecords.some((y) => y.id === x.id))
             .map((record) => (
               <ListItem

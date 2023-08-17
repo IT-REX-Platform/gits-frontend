@@ -1,5 +1,3 @@
-import { useState } from "react";
-import { graphql, useFragment, useMutation } from "react-relay";
 import {
   Alert,
   Backdrop,
@@ -10,23 +8,25 @@ import {
   DialogContent,
   DialogTitle,
 } from "@mui/material";
+import { useState } from "react";
+import { graphql, useFragment, useMutation } from "react-relay";
 
-import { Form } from "./Form";
-import {
-  ContentMetadataFormSection,
-  ContentMetadataPayload,
-} from "./ContentMetadataFormSection";
-import {
-  AssessmentMetadataFormSection,
-  AssessmentMetadataPayload,
-} from "./AssessmentMetadataFormSection";
 import {
   AddFlashcardSetModalAssessmentMutation,
   ContentType,
   SkillType,
 } from "@/__generated__/AddFlashcardSetModalAssessmentMutation.graphql";
-import { AddFlashcardSetModalMutation } from "@/__generated__/AddFlashcardSetModalMutation.graphql";
 import { AddFlashcardSetModalFragment$key } from "@/__generated__/AddFlashcardSetModalFragment.graphql";
+import { AddFlashcardSetModalMutation } from "@/__generated__/AddFlashcardSetModalMutation.graphql";
+import {
+  AssessmentMetadataFormSection,
+  AssessmentMetadataPayload,
+} from "./AssessmentMetadataFormSection";
+import {
+  ContentMetadataFormSection,
+  ContentMetadataPayload,
+} from "./ContentMetadataFormSection";
+import { Form } from "./Form";
 
 export function AddFlashcardSetModal({
   onClose,

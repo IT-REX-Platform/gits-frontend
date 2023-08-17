@@ -1,30 +1,65 @@
 "use client";
 import { lecturerLecturerCourseIdQuery } from "@/__generated__/lecturerLecturerCourseIdQuery.graphql";
-import { Button, IconButton, Typography } from "@mui/material";
+import { IconButton, Typography } from "@mui/material";
 import Error from "next/error";
 import { useParams } from "next/navigation";
 import { graphql, useLazyLoadQuery } from "react-relay";
 
-import { MediaRecordSelector$key } from "@/__generated__/MediaRecordSelector.graphql";
+import { AddChapterModal } from "@/components/AddChapterModal";
+import { AddSectionButton } from "@/components/AddSectionButton";
+import { AddStageButton } from "@/components/AddStageButton";
 import { ChapterContent } from "@/components/ChapterContent";
 import { ChapterHeader } from "@/components/ChapterHeader";
 import { Content, ContentLink, ProgressFrame } from "@/components/Content";
+import { DeleteStageButton } from "@/components/DeleteStageButton";
+import { EditChapterModal } from "@/components/EditChapterModal";
+import { EditCourseModal } from "@/components/EditCourseModal";
+import EditSectionButton from "@/components/EditSectionButton";
+import { Section, SectionContent, SectionHeader } from "@/components/Section";
+import { Stage } from "@/components/Stage";
 import { Add, RemoveRedEye, Settings } from "@mui/icons-material";
 import dayjs from "dayjs";
 import { orderBy } from "lodash";
 import { useState } from "react";
-import { MediaContentModal } from "../../../components/MediaContentModal";
-import { Section, SectionContent, SectionHeader } from "@/components/Section";
-import { Stage } from "@/components/Stage";
-import { AddFlashcardSetModal } from "@/components/AddFlashcardSetModal";
-import { AddChapterModal } from "@/components/AddChapterModal";
-import { EditChapterModal } from "@/components/EditChapterModal";
-import { EditCourseModal } from "@/components/EditCourseModal";
-import { AddFlashcardSetModalFragment$key } from "@/__generated__/AddFlashcardSetModalFragment.graphql";
-import { AddSectionButton } from "@/components/AddSectionButton";
-import EditSectionButton from "@/components/EditSectionButton";
-import { AddStageButton } from "@/components/AddStageButton";
-import { DeleteStageButton } from "@/components/DeleteStageButton";
+import { AddContentModal } from "../../../components/AddContentModal";
+
+graphql`
+  fragment lecturerSectionFragment on Section {
+    id
+    name
+    stages {
+      ...lecturerStageFragment @relay(mask: false)
+    }
+  }
+`;
+
+graphql`
+  fragment lecturerStageFragment on Stage {
+    optionalContentsProgress
+    requiredContentsProgress
+    id
+    position
+    requiredContents {
+      ...ContentLinkFragment
+
+      userProgressData {
+        nextLearnDate
+      }
+      __typename
+      id
+    }
+
+    optionalContents {
+      ...ContentLinkFragment
+
+      userProgressData {
+        nextLearnDate
+      }
+      __typename
+      id
+    }
+  }
+`;
 
 export default function LecturerCoursePage() {
   // Get course id from url
@@ -51,6 +86,7 @@ export default function LecturerCoursePage() {
                 __id
                 ...EditChapterModalFragment
                 ...AddFlashcardSetModalFragment
+                ...AddContentModalFragment
                 id
                 title
                 number
@@ -58,14 +94,8 @@ export default function LecturerCoursePage() {
                 endDate
                 suggestedStartDate
                 suggestedEndDate
-                contents {
-                  ...ContentLinkFragment
-
-                  userProgressData {
-                    nextLearnDate
-                  }
-                  __typename
-                  id
+                sections {
+                  ...lecturerSectionFragment @relay(mask: false)
                 }
               }
             }
@@ -155,81 +185,64 @@ export default function LecturerCoursePage() {
           />
 
           <ChapterContent>
-            <Section>
-              <SectionHeader action={<EditSectionButton />}></SectionHeader>
-              <SectionContent>
-                <Stage progress={0}>
-                  {chapter.contents.map((content) => (
-                    <ContentLink key={content.id} _content={content} />
-                  ))}
-                  <div className="mt-4 flex flex-col items-start">
-                    <AddFlashcardSetButton _chapter={chapter} />
-                    <AddMediaButton
-                      _mediaRecords={query}
-                      chapterId={chapter.id}
+            {chapter.sections.map((section) => (
+              <Section key={section.id}>
+                <SectionHeader
+                  action={
+                    <EditSectionButton
+                      name={section.name}
+                      sectionId={section.id}
                     />
-                  </div>
-                  <div className="mt-2">
-                    <DeleteStageButton />
-                  </div>
-                </Stage>
-                <Stage progress={0}>
-                  <AddStageButton />
-                </Stage>
-              </SectionContent>
-            </Section>
-            <AddSectionButton />
+                  }
+                >
+                  {section.name}
+                </SectionHeader>
+                <SectionContent>
+                  {orderBy(section.stages, (x) => x.position, "asc").map(
+                    (stage) => (
+                      <Stage
+                        progress={stage.requiredContentsProgress}
+                        key={section.id}
+                      >
+                        {stage.requiredContents.map((content) => (
+                          <ContentLink key={content.id} _content={content} />
+                        ))}
+                        {stage.optionalContents.map((content) => (
+                          <ContentLink key={content.id} _content={content} />
+                        ))}
+                        <div className="mt-4 flex flex-col items-start">
+                          <AddContentModal
+                            stageId={stage.id}
+                            chapterId={chapter.id}
+                            _mediaRecords={query}
+                            _chapter={chapter}
+                            optionalRecords={stage.optionalContents.map(
+                              (x) => x.id
+                            )}
+                            requiredRecords={stage.requiredContents.map(
+                              (x) => x.id
+                            )}
+                          />
+                        </div>
+                        <div className="mt-2">
+                          <DeleteStageButton
+                            stageId={stage.id}
+                            sectionId={section.id}
+                          />
+                        </div>
+                      </Stage>
+                    )
+                  )}
+                  <Stage progress={0}>
+                    <AddStageButton sectionId={section.id} />
+                  </Stage>
+                </SectionContent>
+              </Section>
+            ))}
+            <AddSectionButton chapterId={chapter.id} />
           </ChapterContent>
         </section>
       ))}
     </main>
-  );
-}
-
-function AddMediaButton({
-  chapterId,
-  _mediaRecords,
-}: {
-  chapterId: string;
-  _mediaRecords: MediaRecordSelector$key;
-}) {
-  const [openModal, setOpenModal] = useState(false);
-
-  return (
-    <>
-      <Button startIcon={<Add />} onClick={() => setOpenModal(true)}>
-        Add media
-      </Button>
-
-      <MediaContentModal
-        chapterId={chapterId}
-        isOpen={openModal}
-        onClose={() => setOpenModal(false)}
-        _mediaRecords={_mediaRecords}
-      />
-    </>
-  );
-}
-
-function AddFlashcardSetButton({
-  _chapter,
-}: {
-  _chapter: AddFlashcardSetModalFragment$key;
-}) {
-  const [openModal, setOpenModal] = useState(false);
-
-  return (
-    <>
-      <Button startIcon={<Add />} onClick={() => setOpenModal(true)}>
-        Add flashcards
-      </Button>
-
-      {openModal && (
-        <AddFlashcardSetModal
-          onClose={() => setOpenModal(false)}
-          _chapter={_chapter}
-        />
-      )}
-    </>
   );
 }

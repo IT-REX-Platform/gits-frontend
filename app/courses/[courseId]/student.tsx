@@ -107,6 +107,11 @@ export default function StudentCoursePage() {
                   type
                 }
               }
+
+              sections {
+                id
+                ...studentCoursePageSectionFragment
+              }
             }
           }
         }
@@ -294,16 +299,10 @@ export default function StudentCoursePage() {
               progress={chapterProgress}
             />
             <ChapterContent>
-              <Section done={chapterProgress == 100}>
-                <SectionContent>
-                  <Stage progress={chapterProgress}>
-                    {chapter.contents.map((content) => (
-                      <ContentLink key={content.id} _content={content} />
-                    ))}
-                  </Stage>
-                </SectionContent>
-              </Section>
-            </ChapterContent>
+              {chapter.sections.map((section) => (
+                <StudentSection key={section.id} _section={section} />
+              ))}
+            </ChapterContent>{" "}
           </section>
         );
       })}

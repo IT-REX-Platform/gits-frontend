@@ -1,6 +1,6 @@
 "use client";
 import { Typography } from "@mui/material";
-import { ReactElement } from "react";
+import { ReactElement, ReactNode } from "react";
 
 export function FormDivider() {
   return <hr className="col-span-2 my-2" />;
@@ -11,7 +11,7 @@ export function FormSection({
   children,
 }: {
   title: string;
-  children: ReactElement | ReactElement[];
+  children?: ReactNode;
 }) {
   return (
     <>

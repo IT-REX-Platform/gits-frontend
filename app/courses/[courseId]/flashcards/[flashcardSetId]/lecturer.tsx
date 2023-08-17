@@ -2,16 +2,9 @@ import { lecturerAddFlashcardMutation } from "@/__generated__/lecturerAddFlashca
 import { lecturerDeleteFlashcardContentMutation } from "@/__generated__/lecturerDeleteFlashcardContentMutation.graphql";
 import { lecturerEditFlashcardFragment$key } from "@/__generated__/lecturerEditFlashcardFragment.graphql";
 import { lecturerEditFlashcardMutation } from "@/__generated__/lecturerEditFlashcardMutation.graphql";
-import { lecturerEditFlashcardSetModalFragment$key } from "@/__generated__/lecturerEditFlashcardSetModalFragment.graphql";
 import { lecturerEditFlashcardsQuery } from "@/__generated__/lecturerEditFlashcardsQuery.graphql";
-import {
-  AssessmentMetadataFormSection,
-  AssessmentMetadataPayload,
-} from "@/components/AssessmentMetadataFormSection";
-import {
-  ContentMetadataFormSection,
-  ContentMetadataPayload,
-} from "@/components/ContentMetadataFormSection";
+import { AssessmentMetadataPayload } from "@/components/AssessmentMetadataFormSection";
+import { ContentMetadataPayload } from "@/components/ContentMetadataFormSection";
 import { Form, FormSection } from "@/components/Form";
 import { Heading } from "@/components/Heading";
 import { Add, Delete, Edit, Help, QuestionAnswer } from "@mui/icons-material";
@@ -44,6 +37,7 @@ import {
   useMutation,
 } from "react-relay";
 import { ID } from "victory";
+import { EditFlashcardSetModal } from "../../../../../components/EditFlashcardSetModal";
 
 export default function EditFlashcards() {
   const { flashcardSetId, courseId } = useParams();
@@ -74,7 +68,7 @@ export default function EditFlashcards() {
               }
             }
           }
-          ...lecturerEditFlashcardSetModalFragment
+          ...EditFlashcardSetModalFragment
         }
       }
     `,
@@ -505,70 +499,6 @@ function EditSideModal({
         <Button
           disabled={!valid}
           onClick={() => onSubmit({ label, text, isQuestion })}
-        >
-          Save
-        </Button>
-      </DialogActions>
-    </Dialog>
-  );
-}
-
-function EditFlashcardSetModal({
-  onClose,
-  onSubmit,
-  _content,
-}: {
-  onClose: () => void;
-  onSubmit: (
-    metadata: ContentMetadataPayload,
-    assessmentMetadata: AssessmentMetadataPayload
-  ) => void;
-  _content: lecturerEditFlashcardSetModalFragment$key;
-}) {
-  const content = useFragment(
-    graphql`
-      fragment lecturerEditFlashcardSetModalFragment on Content {
-        metadata {
-          name
-          suggestedDate
-          rewardPoints
-        }
-        ... on Assessment {
-          assessmentMetadata {
-            skillType
-            skillPoints
-          }
-        }
-      }
-    `,
-    _content
-  );
-
-  const [metadata, setMetadata] = useState<ContentMetadataPayload | null>(null);
-  const [assessmentMetadata, setAssessmentMetadata] =
-    useState<AssessmentMetadataPayload | null>(null);
-  const valid = metadata != null && assessmentMetadata != null;
-
-  return (
-    <Dialog maxWidth="md" open onClose={onClose}>
-      <DialogTitle>Edit flashcard set</DialogTitle>
-      <DialogContent>
-        <Form>
-          <ContentMetadataFormSection
-            metadata={content.metadata}
-            onChange={setMetadata}
-          />
-          <AssessmentMetadataFormSection
-            metadata={content.assessmentMetadata}
-            onChange={setAssessmentMetadata}
-          />
-        </Form>
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={onClose}>Cancel</Button>
-        <Button
-          disabled={!valid}
-          onClick={() => onSubmit(metadata!, assessmentMetadata!)}
         >
           Save
         </Button>

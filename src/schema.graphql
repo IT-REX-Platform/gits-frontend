@@ -770,55 +770,15 @@ type MultipleChoiceQuestion implements Question {
   hint: String
 }
 
-# Mutations for the flashcard service. Provides mutations for creating, updating, and deleting flashcard as well as
-# creating and deleting flashcard sets. To update a flashcard set, update, delete, and create flashcards individually.
 type Mutation {
-  # Creates a new media record
-  createMediaRecord(input: CreateMediaRecordInput!): MediaRecord!
-
-  # Updates an existing media record with the given UUID
-  updateMediaRecord(input: UpdateMediaRecordInput!): MediaRecord!
-
-  # Deletes the media record with the given UUID
-  deleteMediaRecord(id: UUID!): UUID!
-
-  # Allows multiple media records to be linked/added to a content.
-  linkMediaRecordsWithContent(
-    contentId: UUID!
-    mediaRecordIds: [UUID!]!
-  ): [MediaRecord!]!
-
-  # Logs that a media has been worked on by the current user.
-  # See https://gits-enpro.readthedocs.io/en/latest/dev-manuals/gamification/userProgress.html
+  # ONLY FOR TESTING PURPOSES. DO NOT USE IN FRONTEND. WILL BE REMOVED.
   #
-  # Possible side effects:
-  # When all media records of a content have been worked on by a user,
-  # a user-progress event is emitted for the content.
-  logMediaRecordWorkedOn(mediaRecordId: UUID!): MediaRecord!
-
-  # registers a user to a course with a role
-  createMembership(input: CourseMembershipInput!): CourseMembership!
-
-  # updates the role of a user in a course
-  updateMembership(input: CourseMembershipInput!): CourseMembership!
-
-  # deletes user course link
-  deleteMembership(input: CourseMembershipInput!): CourseMembership!
-
-  # Create a quiz.
-  createQuiz(assessmentId: UUID!, input: CreateQuizInput!): Quiz!
-
-  # Modify a quiz.
-  mutateQuiz(assessmentId: UUID!): QuizMutation!
-
-  # Delete a quiz.
-  deleteQuiz(assessmentId: UUID!): UUID!
-    @deprecated(
-      reason: "Only for development, will be removed in production. Use deleteAssessment in contents service instead."
-    )
-
-  # Log that a multiple choice quiz is completed.
-  logQuizCompleted(input: QuizCompletedInput!): Quiz!
+  # Triggers the recalculation of the reward score of the user.
+  # This is done automatically at some time in the night.
+  #
+  # The purpose of this mutation is to allow testing of the reward score and demonstrate the functionality.
+  recalculateScores(courseId: UUID!, userId: UUID!): RewardScores!
+    @deprecated(reason: "Only for testing purposes. Will be removed.")
 
   # Creates a new course with the given input and returns the created course.
   createCourse(input: CreateCourseInput!): Course!
@@ -840,15 +800,6 @@ type Mutation {
 
   # Deletes an existing chapter, throws an error if no chapter with the given id exists.
   deleteChapter(id: UUID!): UUID!
-
-  # ONLY FOR TESTING PURPOSES. DO NOT USE IN FRONTEND. WILL BE REMOVED.
-  #
-  # Triggers the recalculation of the reward score of the user.
-  # This is done automatically at some time in the night.
-  #
-  # The purpose of this mutation is to allow testing of the reward score and demonstrate the functionality.
-  recalculateScores(courseId: UUID!, userId: UUID!): RewardScores!
-    @deprecated(reason: "Only for testing purposes. Will be removed.")
 
   # Create new media content
   createMediaContent(input: CreateMediaContentInput!): MediaContent!
@@ -892,6 +843,38 @@ type Mutation {
   # update Order of Stages within a Section
   updateStageOrder(input: StageOrderInput!): Section!
 
+  # Creates a new media record
+  createMediaRecord(input: CreateMediaRecordInput!): MediaRecord!
+
+  # Updates an existing media record with the given UUID
+  updateMediaRecord(input: UpdateMediaRecordInput!): MediaRecord!
+
+  # Deletes the media record with the given UUID
+  deleteMediaRecord(id: UUID!): UUID!
+
+  # Allows multiple media records to be linked/added to a content.
+  linkMediaRecordsWithContent(
+    contentId: UUID!
+    mediaRecordIds: [UUID!]!
+  ): [MediaRecord!]!
+
+  # Logs that a media has been worked on by the current user.
+  # See https://gits-enpro.readthedocs.io/en/latest/dev-manuals/gamification/userProgress.html
+  #
+  # Possible side effects:
+  # When all media records of a content have been worked on by a user,
+  # a user-progress event is emitted for the content.
+  logMediaRecordWorkedOn(mediaRecordId: UUID!): MediaRecord!
+
+  # registers a user to a course with a role
+  createMembership(input: CourseMembershipInput!): CourseMembership!
+
+  # updates the role of a user in a course
+  updateMembership(input: CourseMembershipInput!): CourseMembership!
+
+  # deletes user course link
+  deleteMembership(input: CourseMembershipInput!): CourseMembership!
+
   # Creates a new flashcard set.
   createFlashcardSet(input: CreateFlashcardSetInput!): FlashcardSet!
 
@@ -908,17 +891,38 @@ type Mutation {
   # Logs that a user has learned a flashcard.
   logFlashcardLearned(input: LogFlashcardLearnedInput!): Flashcard!
 
+  # Create a quiz.
+  createQuiz(assessmentId: UUID!, input: CreateQuizInput!): Quiz!
+
+  # Modify a quiz.
+  mutateQuiz(assessmentId: UUID!): QuizMutation!
+
+  # Delete a quiz.
+  deleteQuiz(assessmentId: UUID!): UUID!
+    @deprecated(
+      reason: "Only for development, will be removed in production. Use deleteAssessment in contents service instead."
+    )
+
+  # Log that a multiple choice quiz is completed.
+  logQuizCompleted(input: QuizCompletedInput!): Quiz!
+
   # Creates a new media content and links the given media records to it.
   createMediaContentAndLinkRecords(
     contentInput: CreateMediaContentInput!
     mediaRecordIds: [UUID!]!
   ): MediaContent!
 
-  # Creates a new quiz assessment and links the given quiz to it.
+  # Creates a new quiz assessment and a new, linked quiz with the given properties.
   createQuizAssessment(
     assessmentInput: CreateAssessmentInput!
     quizInput: CreateQuizInput!
   ): QuizAssessment!
+
+  # Creates a new flashcard set assessment and a new, linked flashcard set with the given properties.
+  createFlashcardSetAssessment(
+    assessmentInput: CreateAssessmentInput!
+    flashcardSetInput: CreateFlashcardSetInput!
+  ): FlashcardSetAssessment
 }
 
 # Specifies the page size and page number for paginated results.
@@ -976,6 +980,70 @@ type PublicUserInfo {
 }
 
 type Query {
+  # Get the reward score of the current user for the specified course.
+  userCourseRewardScores(courseId: UUID!): RewardScores!
+
+  # Get the reward score of the specified user for the specified course.
+  courseRewardScoresForUser(courseId: UUID!, userId: UUID!): RewardScores!
+
+  # Gets the power scores for each user in the course, ordered by power score descending.
+  scoreboard(courseId: UUID!): [ScoreboardItem!]!
+
+  # Get a list of courses. Can be filtered, sorted and paginated.
+  courses(
+    filter: CourseFilter
+
+    # The fields to sort by.
+    # Throws an error if no field with the given name exists.
+    sortBy: [String!]
+
+    # The sort direction for each field. If not specified, defaults to ASC.
+    sortDirection: [SortDirection!]! = [ASC]
+    pagination: Pagination
+  ): CoursePayload!
+
+  # Returns the courses with the given ids.
+  coursesByIds(ids: [UUID!]!): [Course!]!
+
+  # Returns the chapters with the given ids.
+  chaptersByIds(ids: [UUID!]!): [Chapter!]!
+
+  # Returns a set of Resource Objects for the given resource ids, containing a
+  # list of all course IDs for a resource and its availability in the course.
+  resourceById(ids: [UUID!]!): [CourseResourceAssociation!]!
+
+  # Get the list of chapters for a course. Can be filtered, sorted and paginated.
+  # Throws an error if the course does not exist.
+  # The default sort order is by chapter number.
+  chapters(
+    courseId: UUID!
+    filter: ChapterFilter
+
+    # The fields to sort by. The default sort order is by chapter number.
+    # Throws an error if no field with the given name exists.
+    sortBy: [String!]! = []
+
+    # The sort direction for each field. If not specified, defaults to ASC.
+    sortDirection: [SortDirection!]! = [ASC]
+    pagination: Pagination
+  ): ChapterPayload!
+
+  # get all contents
+  contents: ContentPayload!
+
+  # Get contents by ids. Throws an error if any of the ids are not found.
+  contentsByIds(ids: [UUID!]!): [Content!]!
+
+  # Get contents by ids. If any of the given ids are not found, the corresponding element in the result list will be null.
+  findContentsByIds(ids: [UUID!]!): [Content]!
+
+  # get contents by chapter ids. Returns a list containing sublists, where each sublist contains all contents
+  # associated with that chapter
+  contentsByChapterIds(chapterIds: [UUID!]!): [[Content!]!]!
+
+  # Retrieves all existing sections for multiple chapters.
+  sectionsByChapterIds(chapterIds: [UUID!]!): [[Section!]!]!
+
   # Returns the media records with the given IDs. Throws an error if a MediaRecord corresponding to a given ID
   # cannot be found.
   mediaRecordsByIds(ids: [UUID!]!): [MediaRecord!]!
@@ -1020,6 +1088,13 @@ type Query {
   # Only available to privileged users.
   userInfoBatched(ids: [UUID!]!): [UserInfo!]!
 
+  # Get flashcards by their ids
+  flashcardsByIds(ids: [UUID!]!): [Flashcard!]!
+
+  # Get flashcard sets by their assessment ids.
+  # Returns a list of flashcard sets in the same order as the provided ids.
+  flashcardSetsByAssessmentIds(assessmentIds: [UUID!]!): [FlashcardSet!]!
+
   # Get quiz by assessment ID.
   # If any of the assessment IDs are not found, the corresponding quiz will be null.
   findQuizzesByAssessmentIds(assessmentIds: [UUID!]!): [Quiz]!
@@ -1029,77 +1104,6 @@ type Query {
     @deprecated(
       reason: "In the production system, you shouldn't be able to get all quizzes."
     )
-
-  # Get a list of courses. Can be filtered, sorted and paginated.
-  courses(
-    filter: CourseFilter
-
-    # The fields to sort by.
-    # Throws an error if no field with the given name exists.
-    sortBy: [String!]
-
-    # The sort direction for each field. If not specified, defaults to ASC.
-    sortDirection: [SortDirection!]! = [ASC]
-    pagination: Pagination
-  ): CoursePayload!
-
-  # Returns the courses with the given ids.
-  coursesByIds(ids: [UUID!]!): [Course!]!
-
-  # Returns the chapters with the given ids.
-  chaptersByIds(ids: [UUID!]!): [Chapter!]!
-
-  # Returns a set of Resource Objects for the given resource ids, containing a
-  # list of all course IDs for a resource and its availability in the course.
-  resourceById(ids: [UUID!]!): [CourseResourceAssociation!]!
-
-  # Get the list of chapters for a course. Can be filtered, sorted and paginated.
-  # Throws an error if the course does not exist.
-  # The default sort order is by chapter number.
-  chapters(
-    courseId: UUID!
-    filter: ChapterFilter
-
-    # The fields to sort by. The default sort order is by chapter number.
-    # Throws an error if no field with the given name exists.
-    sortBy: [String!]! = []
-
-    # The sort direction for each field. If not specified, defaults to ASC.
-    sortDirection: [SortDirection!]! = [ASC]
-    pagination: Pagination
-  ): ChapterPayload!
-
-  # Get the reward score of the current user for the specified course.
-  userCourseRewardScores(courseId: UUID!): RewardScores!
-
-  # Get the reward score of the specified user for the specified course.
-  courseRewardScoresForUser(courseId: UUID!, userId: UUID!): RewardScores!
-
-  # Gets the power scores for each user in the course, ordered by power score descending.
-  scoreboard(courseId: UUID!): [ScoreboardItem!]!
-
-  # get all contents
-  contents: ContentPayload!
-
-  # Get contents by ids. Throws an error if any of the ids are not found.
-  contentsByIds(ids: [UUID!]!): [Content!]!
-
-  # Get contents by ids. If any of the given ids are not found, the corresponding element in the result list will be null.
-  findContentsByIds(ids: [UUID!]!): [Content]!
-
-  # get contents by chapter ids. Returns a list containing sublists, where each sublist contains all contents
-  # associated with that chapter
-  contentsByChapterIds(chapterIds: [UUID!]!): [[Content!]!]!
-
-  # Retrieves all existing sections for multiple chapters.
-  sectionsByChapterIds(chapterIds: [UUID!]!): [[Section!]!]!
-
-  # Get flashcards by their ids
-  flashcardsByIds(ids: [UUID!]!): [Flashcard!]!
-
-  # Get flashcard sets by their assessment ids.
-  # Returns a list of flashcard sets in the same order as the provided ids.
-  flashcardSetsByAssessmentIds(assessmentIds: [UUID!]!): [FlashcardSet!]!
 }
 
 # Generic question interface.
@@ -1378,8 +1382,19 @@ type Stage {
   # List of Content that is labeled as required content
   requiredContents: [Content!]!
 
+  # Percentage of User Progress made to required Content
+  requiredContentsProgress: Float!
+
   # List of Content that is labeled as optional content
   optionalContents: [Content!]!
+
+  # Percentage of Progress made to optional Content
+  optionalContentsProgress: Float!
+}
+
+type StageContentProgress {
+  contents: [Content!]!
+  progress: Float!
 }
 
 input StageOrderInput {

@@ -1193,14 +1193,30 @@ type QuizAssessment implements Assessment & Content {
 }
 
 input QuizCompletedInput {
-  # ID of the quiz.
+  """
+  ID of the quiz.
+  """
   quizId: UUID!
 
-  # Number of questions the user answered correctly.
-  numberOfCorrectAnswers: Int!
+  """
+  List of questions that were answered in the quiz.
+  """
+  completedQuestions: [QuestionCompletedInput!]!
+}
 
-  # Number of hints the user requested.
-  numberOfHintsUsed: Int!
+input QuestionCompletedInput {
+  """
+  ID of the question.
+  """
+  questionId: UUID!
+  """
+  true when question was answered correctly
+  """
+  correct: Boolean!
+  """
+  true when a hint was used for the question
+  """
+  usedHint: Boolean!
 }
 
 type QuizMutation {

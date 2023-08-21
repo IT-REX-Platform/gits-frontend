@@ -109,7 +109,18 @@ export default function EditFlashcards() {
       }
     }
   `);
-  const isUpdating = isAddingFlashcard || isUpdatingFlashcardSet;
+
+  const [deleteFlashcard, isDeleting] = useMutation(graphql`
+    mutation lecturerDeleteFlashcardMutation(
+      $flashcardId: UUID!
+      $assessmentId: UUID!
+    ) {
+      mutateFlashcardSet(assessmentId: $assessmentId) {
+        deleteFlashcard(id: $flashcardId)
+      }
+    }
+  `);
+  const isUpdating = isAddingFlashcard || isUpdatingFlashcardSet || isDeleting;
 
   if (contentsByIds.length == 0) {
     return <Error statusCode={404} />;
@@ -147,6 +158,16 @@ export default function EditFlashcards() {
           "flashcards"
         );
       },
+    });
+  }
+
+  function handleDeleteFlashcard(flashcardId: ID) {
+    deleteFlashcard({
+      variables: {
+        flashcardId: flashcardId,
+        assessmentId: flashcardSetId,
+      },
+      onError: setError,
     });
   }
 
@@ -232,13 +253,24 @@ export default function EditFlashcards() {
       )}
       <div className="mt-8 flex flex-col gap-6">
         {flashcardSet.flashcards.map((flashcard, i) => (
-          <Flashcard
-            key={flashcard.id}
-            title={`Card ${i + 1}/${flashcardSet.flashcards.length}`}
-            onError={setError}
-            _flashcard={flashcard}
-            _assessmentId={flashcardSetId}
-          />
+          <div>
+            <Flashcard
+              key={flashcard.id}
+              title={`Card ${i + 1}/${flashcardSet.flashcards.length}`}
+              onError={setError}
+              _flashcard={flashcard}
+              _assessmentId={flashcardSetId}
+            />
+            <Button
+              sx={{ right: 0, color: "red" }}
+              startIcon={<Delete />}
+              onClick={() => {
+                handleDeleteFlashcard(flashcard.id);
+              }}
+            >
+              Delete Flashcard
+            </Button>
+          </div>
         ))}
         {isAddFlashcardOpen && (
           <LocalFlashcard

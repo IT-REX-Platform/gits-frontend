@@ -15,6 +15,7 @@ import {
 import { Form, FormSection } from "@/components/Form";
 import { Heading } from "@/components/Heading";
 import { Add, Delete, Edit, Help, QuestionAnswer } from "@mui/icons-material";
+import ClearIcon from "@mui/icons-material/Clear";
 import {
   Alert,
   Backdrop,
@@ -168,6 +169,19 @@ export default function EditFlashcards() {
         assessmentId: flashcardSetId,
       },
       onError: setError,
+      updater(store) {
+        // Get record of flashcard set
+        const flashcardSetRecord = store.get(flashcardSet!.__id);
+        if (!flashcardSetRecord) return;
+
+        // Update the linked records of the flashcard set
+        const flashcardRecords =
+          flashcardSetRecord.getLinkedRecords("flashcards") ?? [];
+        flashcardSetRecord.setLinkedRecords(
+          flashcardRecords.filter((x) => x.getDataID() !== flashcardId),
+          "flashcards"
+        );
+      },
     });
   }
 
@@ -324,6 +338,7 @@ function Flashcard({
             text
           }
           isQuestion
+          isAnswer
         }
       }
     `,
@@ -349,8 +364,9 @@ function Flashcard({
     const newFlashcard = {
       id: flashcard.id,
       sides: flashcard.sides.map((side, i) => {
-        const { label, text, isQuestion } = i == idx ? editedSide : side;
-        return { label, text, isQuestion };
+        const { label, text, isQuestion, isAnswer } =
+          i == idx ? editedSide : side;
+        return { label, text, isQuestion, isAnswer };
       }),
     };
 
@@ -364,10 +380,11 @@ function Flashcard({
     const newFlashcard = {
       id: flashcard.id,
       sides: [
-        ...flashcard.sides.map(({ label, text, isQuestion }) => ({
+        ...flashcard.sides.map(({ label, text, isQuestion, isAnswer }) => ({
           label,
           text,
           isQuestion,
+          isAnswer,
         })),
         newSide,
       ],
@@ -390,11 +407,16 @@ function Flashcard({
         </Typography>
         <div className="flex flex-wrap gap-2">
           {flashcard.sides.map((side, i) => (
-            <FlashcardSide
-              key={`${flashcard.id}-${i}`}
-              side={side}
-              onChange={(data) => handleEditFlashcardSide(i, data)}
-            />
+            <div>
+              <IconButton>
+                <ClearIcon />
+              </IconButton>
+              <FlashcardSide
+                key={`${flashcard.id}-${i}`}
+                side={side}
+                onChange={(data) => handleEditFlashcardSide(i, data)}
+              />
+            </div>
           ))}
         </div>
         <Button
@@ -474,6 +496,7 @@ type FlashcardSideData = {
   label: string;
   text: FlashcardSideDataMarkdown;
   isQuestion: boolean;
+  isAnswer: boolean;
 };
 type FlashcardSideDataMarkdown = {
   text: string;
@@ -492,6 +515,7 @@ function EditSideModal({
   // Initialize the text state with an empty object of type FlashcardSideDataMarkdown
   const [text, setText] = useState(side?.text ?? { text: "" });
   const [isQuestion, setIsQuestion] = useState(side?.isQuestion ?? false);
+  const [isAnswer, setIsAnswer] = useState(side?.isAnswer ?? false);
 
   const valid = label.trim() != "" && text.text.trim() != "";
 
@@ -529,6 +553,15 @@ function EditSideModal({
                 />
               }
             />
+            <FormControlLabel
+              label="Answer"
+              control={
+                <Checkbox
+                  checked={isAnswer}
+                  onChange={(e) => setIsAnswer(e.target.checked)}
+                />
+              }
+            />
           </FormSection>
         </Form>
       </DialogContent>
@@ -536,7 +569,7 @@ function EditSideModal({
         <Button onClick={onClose}>Cancel</Button>
         <Button
           disabled={!valid}
-          onClick={() => onSubmit({ label, text, isQuestion })}
+          onClick={() => onSubmit({ label, text, isQuestion, isAnswer })}
         >
           Save
         </Button>

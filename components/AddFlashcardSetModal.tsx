@@ -71,11 +71,15 @@ export function AddFlashcardSetModal({
     `);
   const [createFlashcardSet, isCreatingFlashcardSet] =
     useMutation<AddFlashcardSetModalMutation>(graphql`
-      mutation AddFlashcardSetModalMutation($assessmentId: UUID!) {
-        createFlashcardSet(
-          input: { assessmentId: $assessmentId, flashcards: [] }
+      mutation AddFlashcardSetModalMutation(
+        $assessmentInput: CreateAssessmentInput!
+        $input: CreateFlashcardSetInput!
+      ) {
+        createFlashcardSetAssessment(
+          assessmentInput: $assessmentInput
+          flashcardSetInput: $input
         ) {
-          assessmentId
+          __id
         }
       }
     `);
@@ -94,13 +98,17 @@ export function AddFlashcardSetModal({
         skillType: assessmentMetadata!.skillType as SkillType,
       },
     };
+    const flashcardSet = {
+      flashcards: [],
+    };
     createAssessment({
       variables: { assessment },
       onError: setError,
       onCompleted(response) {
         createFlashcardSet({
           variables: {
-            assessmentId: response.createAssessment.id,
+            assessmentInput: assessment,
+            input: flashcardSet,
           },
           onError: setError,
           updater(store) {

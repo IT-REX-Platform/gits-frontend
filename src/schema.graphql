@@ -5,94 +5,37 @@ directive @specifiedBy(
 ) on SCALAR
 
 #  see also https://github.com/graphql-java/graphql-java-extended-validation/blob/master/README.md
-directive @DecimalMax(
-  value: String!
-  inclusive: Boolean! = true
-  message: String = "graphql.validation.DecimalMax.message"
-) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+directive @DecimalMax(value: String!, inclusive: Boolean! = true, message: String = "graphql.validation.DecimalMax.message") on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
 
-directive @DecimalMin(
-  value: String!
-  inclusive: Boolean! = true
-  message: String = "graphql.validation.DecimalMin.message"
-) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+directive @DecimalMin(value: String!, inclusive: Boolean! = true, message: String = "graphql.validation.DecimalMin.message") on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
 
-directive @Max(
-  value: Int! = 2147483647
-  message: String = "graphql.validation.Max.message"
-) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+directive @Max(value: Int! = 2147483647, message: String = "graphql.validation.Max.message") on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
 
-directive @Min(
-  value: Int! = 0
-  message: String = "graphql.validation.Min.message"
-) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+directive @Min(value: Int! = 0, message: String = "graphql.validation.Min.message") on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
 
-directive @Negative(
-  message: String = "graphql.validation.Negative.message"
-) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+directive @Negative(message: String = "graphql.validation.Negative.message") on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
 
-directive @NegativeOrZero(
-  message: String = "graphql.validation.NegativeOrZero.message"
-) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+directive @NegativeOrZero(message: String = "graphql.validation.NegativeOrZero.message") on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
 
-directive @NotBlank(
-  message: String = "graphql.validation.NotBlank.message"
-) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+directive @NotBlank(message: String = "graphql.validation.NotBlank.message") on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
 
-directive @NotEmpty(
-  message: String = "graphql.validation.NotEmpty.message"
-) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+directive @NotEmpty(message: String = "graphql.validation.NotEmpty.message") on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
 
-directive @ContainerNotEmpty(
-  message: String = "graphql.validation.ContainerNotEmpty.message"
-) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+directive @ContainerNotEmpty(message: String = "graphql.validation.ContainerNotEmpty.message") on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
 
-directive @Pattern(
-  regexp: String! = ".*"
-  message: String = "graphql.validation.Pattern.message"
-) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+directive @Pattern(regexp: String! = ".*", message: String = "graphql.validation.Pattern.message") on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
 
-directive @Positive(
-  message: String = "graphql.validation.Positive.message"
-) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+directive @Positive(message: String = "graphql.validation.Positive.message") on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
 
-directive @PositiveOrZero(
-  message: String = "graphql.validation.PositiveOrZero.message"
-) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+directive @PositiveOrZero(message: String = "graphql.validation.PositiveOrZero.message") on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
 
-directive @Range(
-  min: Int = 0
-  max: Int = 2147483647
-  message: String = "graphql.validation.Range.message"
-) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+directive @Range(min: Int = 0, max: Int = 2147483647, message: String = "graphql.validation.Range.message") on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
 
-directive @Size(
-  min: Int = 0
-  max: Int = 2147483647
-  message: String = "graphql.validation.Size.message"
-) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+directive @Size(min: Int = 0, max: Int = 2147483647, message: String = "graphql.validation.Size.message") on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
 
-directive @ContainerSize(
-  min: Int = 0
-  max: Int = 2147483647
-  message: String = "graphql.validation.ContainerSize.message"
-) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+directive @ContainerSize(min: Int = 0, max: Int = 2147483647, message: String = "graphql.validation.ContainerSize.message") on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
 
-directive @resolveTo(
-  requiredSelectionSet: String
-  sourceName: String!
-  sourceTypeName: String!
-  sourceFieldName: String!
-  sourceSelectionSet: String
-  sourceArgs: ResolveToSourceArgs
-  keyField: String
-  keysArg: String
-  pubsubTopic: String
-  filterBy: String
-  additionalArgs: ResolveToSourceArgs
-  result: String
-  resultType: String
-) on FIELD_DEFINITION
+directive @resolveTo(requiredSelectionSet: String, sourceName: String!, sourceTypeName: String!, sourceFieldName: String!, sourceSelectionSet: String, sourceArgs: ResolveToSourceArgs, keyField: String, keysArg: String, pubsubTopic: String, filterBy: String, additionalArgs: ResolveToSourceArgs, result: String, resultType: String) on FIELD_DEFINITION
 
 interface Assessment {
   # Assessment metadata
@@ -268,6 +211,12 @@ type Course {
   # Published state of the course. If the course is published, it is visible to users.
   published: Boolean!
 
+  # The year in which the term starts.
+  startYear: Int
+
+  # The division of the academic calendar in which the term takes place.
+  yearDivision: YearDivision
+
   # Chapters of the course. Can be filtered and sorted.
   chapters(
     filter: ChapterFilter
@@ -409,35 +358,22 @@ input CreateCourseInput {
 
   # Published status of the course.
   published: Boolean!
+
+  # The year in which the term starts.
+  startYear: Int
+
+  # The division of the academic calendar in which the term takes place.
+  yearDivision: YearDivision
 }
 
 input CreateFlashcardInput {
   # List of sides of this flashcard. Must be at least two sides.
-  sides: [CreateFlashcardSideInput!]!
-}
-
-input CreateFlashcardInSetInput {
-  # List of sides of this flashcard. Must be at least two sides.
-  sides: [CreateFlashcardSideInput!]!
+  sides: [FlashcardSideInput!]!
 }
 
 input CreateFlashcardSetInput {
-  # The uuid of the assessment this flashcard set belongs to.
-  assessmentId: UUID!
-
   # List of flashcards in this set.
-  flashcards: [CreateFlashcardInSetInput!]!
-}
-
-input CreateFlashcardSideInput {
-  # Text of this flashcard side. This can be markdown. Max length is 3000 characters.
-  text: ResourceMarkdownInput!
-
-  # Label of this flashcard side. E.g. "Front" or "Back", or "Question" or "Answer".
-  label: String!
-
-  # Whether this side is a question, i.e. should be shown to the user to guess the other sides or not.
-  isQuestion: Boolean!
+  flashcards: [CreateFlashcardInput!]!
 }
 
 # Input for creating new media content. Media specific fields are stored in the Media Service.
@@ -617,6 +553,25 @@ type FlashcardSide {
 
   # Whether this side is a question, i.e. should be shown to the user to guess the other sides or not.
   isQuestion: Boolean!
+
+  # Whether this side is also an answer. Some Flashcards can have their sides be
+  # used as both questions or answers for the other sides
+  isAnswer: Boolean!
+}
+
+input FlashcardSideInput {
+  # Text of this flashcard side. This can be markdown. Max length is 3000 characters.
+  text: ResourceMarkdownInput!
+
+  # Label of this flashcard side. E.g. "Front" or "Back", or "Question" or "Answer".
+  label: String!
+
+  # Whether this side is a question, i.e. should be shown to the user to guess the other sides or not.
+  isQuestion: Boolean!
+
+  # Whether this side is also an answer. Some Flashcards can have their sides be
+  # used as both questions or answers for the other sides
+  isAnswer: Boolean!
 }
 
 # Filter for integer values.
@@ -771,14 +726,34 @@ type MultipleChoiceQuestion implements Question {
 }
 
 type Mutation {
-  # ONLY FOR TESTING PURPOSES. DO NOT USE IN FRONTEND. WILL BE REMOVED.
+  # Creates a new media record
+  createMediaRecord(input: CreateMediaRecordInput!): MediaRecord!
+
+  # Updates an existing media record with the given UUID
+  updateMediaRecord(input: UpdateMediaRecordInput!): MediaRecord!
+
+  # Deletes the media record with the given UUID
+  deleteMediaRecord(id: UUID!): UUID!
+
+  # Allows multiple media records to be linked/added to a content.
+  linkMediaRecordsWithContent(contentId: UUID!, mediaRecordIds: [UUID!]!): [MediaRecord!]!
+
+  # Logs that a media has been worked on by the current user.
+  # See https://gits-enpro.readthedocs.io/en/latest/dev-manuals/gamification/userProgress.html
   #
-  # Triggers the recalculation of the reward score of the user.
-  # This is done automatically at some time in the night.
-  #
-  # The purpose of this mutation is to allow testing of the reward score and demonstrate the functionality.
-  recalculateScores(courseId: UUID!, userId: UUID!): RewardScores!
-    @deprecated(reason: "Only for testing purposes. Will be removed.")
+  # Possible side effects:
+  # When all media records of a content have been worked on by a user,
+  # a user-progress event is emitted for the content.
+  logMediaRecordWorkedOn(mediaRecordId: UUID!): MediaRecord!
+
+  # registers a user to a course with a role
+  createMembership(input: CourseMembershipInput!): CourseMembership!
+
+  # updates the role of a user in a course
+  updateMembership(input: CourseMembershipInput!): CourseMembership!
+
+  # deletes user course link
+  deleteMembership(input: CourseMembershipInput!): CourseMembership!
 
   # Creates a new course with the given input and returns the created course.
   createCourse(input: CreateCourseInput!): Course!
@@ -800,6 +775,18 @@ type Mutation {
 
   # Deletes an existing chapter, throws an error if no chapter with the given id exists.
   deleteChapter(id: UUID!): UUID!
+
+  # Create a quiz.
+  createQuiz(assessmentId: UUID!, input: CreateQuizInput!): Quiz!
+
+  # Modify a quiz.
+  mutateQuiz(assessmentId: UUID!): QuizMutation!
+
+  # Delete a quiz.
+  deleteQuiz(assessmentId: UUID!): UUID! @deprecated(reason: "Only for development, will be removed in production. Use deleteAssessment in contents service instead.")
+
+  # Log that a multiple choice quiz is completed.
+  logQuizCompleted(input: QuizCompletedInput!): Quiz!
 
   # Create new media content
   createMediaContent(input: CreateMediaContentInput!): MediaContent!
@@ -843,47 +830,12 @@ type Mutation {
   # update Order of Stages within a Section
   updateStageOrder(input: StageOrderInput!): Section!
 
-  # Creates a new media record
-  createMediaRecord(input: CreateMediaRecordInput!): MediaRecord!
-
-  # Updates an existing media record with the given UUID
-  updateMediaRecord(input: UpdateMediaRecordInput!): MediaRecord!
-
-  # Deletes the media record with the given UUID
-  deleteMediaRecord(id: UUID!): UUID!
-
-  # Allows multiple media records to be linked/added to a content.
-  linkMediaRecordsWithContent(
-    contentId: UUID!
-    mediaRecordIds: [UUID!]!
-  ): [MediaRecord!]!
-
-  # Logs that a media has been worked on by the current user.
-  # See https://gits-enpro.readthedocs.io/en/latest/dev-manuals/gamification/userProgress.html
-  #
-  # Possible side effects:
-  # When all media records of a content have been worked on by a user,
-  # a user-progress event is emitted for the content.
-  logMediaRecordWorkedOn(mediaRecordId: UUID!): MediaRecord!
-
-  # registers a user to a course with a role
-  createMembership(input: CourseMembershipInput!): CourseMembership!
-
-  # updates the role of a user in a course
-  updateMembership(input: CourseMembershipInput!): CourseMembership!
-
-  # deletes user course link
-  deleteMembership(input: CourseMembershipInput!): CourseMembership!
-
   # Creates a new flashcard set.
-  createFlashcardSet(input: CreateFlashcardSetInput!): FlashcardSet!
+  createFlashcardSet(assessmentId: UUID!, input: CreateFlashcardSetInput!): FlashcardSet!
 
   # Deletes a flashcard set. Throws an error if the flashcard set does not exist.
   # The contained flashcards are deleted as well.
-  deleteFlashcardSet(input: UUID!): UUID!
-    @deprecated(
-      reason: "Only for development, will be removed in production. Use deleteAssessment in contents service instead."
-    )
+  deleteFlashcardSet(input: UUID!): UUID! @deprecated(reason: "Only for development, will be removed in production. Use deleteAssessment in contents service instead.")
 
   # Modify a flashcard set.
   mutateFlashcardSet(assessmentId: UUID!): FlashcardSetMutation!
@@ -891,38 +843,22 @@ type Mutation {
   # Logs that a user has learned a flashcard.
   logFlashcardLearned(input: LogFlashcardLearnedInput!): Flashcard!
 
-  # Create a quiz.
-  createQuiz(assessmentId: UUID!, input: CreateQuizInput!): Quiz!
-
-  # Modify a quiz.
-  mutateQuiz(assessmentId: UUID!): QuizMutation!
-
-  # Delete a quiz.
-  deleteQuiz(assessmentId: UUID!): UUID!
-    @deprecated(
-      reason: "Only for development, will be removed in production. Use deleteAssessment in contents service instead."
-    )
-
-  # Log that a multiple choice quiz is completed.
-  logQuizCompleted(input: QuizCompletedInput!): Quiz!
+  # ONLY FOR TESTING PURPOSES. DO NOT USE IN FRONTEND. WILL BE REMOVED.
+  #
+  # Triggers the recalculation of the reward score of the user.
+  # This is done automatically at some time in the night.
+  #
+  # The purpose of this mutation is to allow testing of the reward score and demonstrate the functionality.
+  recalculateScores(courseId: UUID!, userId: UUID!): RewardScores! @deprecated(reason: "Only for testing purposes. Will be removed.")
 
   # Creates a new media content and links the given media records to it.
-  createMediaContentAndLinkRecords(
-    contentInput: CreateMediaContentInput!
-    mediaRecordIds: [UUID!]!
-  ): MediaContent!
+  createMediaContentAndLinkRecords(contentInput: CreateMediaContentInput!, mediaRecordIds: [UUID!]!): MediaContent!
 
   # Creates a new quiz assessment and a new, linked quiz with the given properties.
-  createQuizAssessment(
-    assessmentInput: CreateAssessmentInput!
-    quizInput: CreateQuizInput!
-  ): QuizAssessment!
+  createQuizAssessment(assessmentInput: CreateAssessmentInput!, quizInput: CreateQuizInput!): QuizAssessment!
 
   # Creates a new flashcard set assessment and a new, linked flashcard set with the given properties.
-  createFlashcardSetAssessment(
-    assessmentInput: CreateAssessmentInput!
-    flashcardSetInput: CreateFlashcardSetInput!
-  ): FlashcardSetAssessment
+  createFlashcardSetAssessment(assessmentInput: CreateAssessmentInput!, flashcardSetInput: CreateFlashcardSetInput!): FlashcardSetAssessment
 }
 
 # Specifies the page size and page number for paginated results.
@@ -980,14 +916,35 @@ type PublicUserInfo {
 }
 
 type Query {
-  # Get the reward score of the current user for the specified course.
-  userCourseRewardScores(courseId: UUID!): RewardScores!
+  # Returns the media records with the given IDs. Throws an error if a MediaRecord corresponding to a given ID
+  # cannot be found.
+  mediaRecordsByIds(ids: [UUID!]!): [MediaRecord!]!
 
-  # Get the reward score of the specified user for the specified course.
-  courseRewardScoresForUser(courseId: UUID!, userId: UUID!): RewardScores!
+  # Like mediaRecordsByIds() returns the media records with the given IDs, but instead of throwing an error if an ID
+  # cannot be found, it instead returns NULL for that media record.
+  findMediaRecordsByIds(ids: [UUID!]!): [MediaRecord]!
 
-  # Gets the power scores for each user in the course, ordered by power score descending.
-  scoreboard(courseId: UUID!): [ScoreboardItem!]!
+  # Returns all media records of the system.
+  mediaRecords: [MediaRecord!]! @deprecated(reason: "In production there should probably be no way to get all media records of the system.")
+
+  # Returns all media records which the current user created.
+  userMediaRecords: [MediaRecord!]!
+
+  # Returns the media records associated the given content IDs as a list of lists where each sublist contains
+  # the media records associated with the content ID at the same index in the input list
+  mediaRecordsByContentIds(contentIds: [UUID!]!): [[MediaRecord!]!]!
+
+  # Gets the publicly available information for a list of users with the specified IDs.
+  # If a user does not exist, null is returned for that user.
+  findPublicUserInfos(ids: [UUID!]!): [PublicUserInfo]!
+
+  # Gets the user information of the currently authorized user.
+  currentUserInfo: UserInfo!
+
+  # Gets all of the users' information for a list of users with the specified IDs.
+  # Only available to privileged users.
+  # If a user does not exist, null is returned for that user.
+  findUserInfos(ids: [UUID!]!): [UserInfo]!
 
   # Get a list of courses. Can be filtered, sorted and paginated.
   courses(
@@ -1028,6 +985,13 @@ type Query {
     pagination: Pagination
   ): ChapterPayload!
 
+  # Get quiz by assessment ID.
+  # If any of the assessment IDs are not found, the corresponding quiz will be null.
+  findQuizzesByAssessmentIds(assessmentIds: [UUID!]!): [Quiz]!
+
+  # Get all quizzes.
+  quizzes: [Quiz!]! @deprecated(reason: "In the production system, you shouldn't be able to get all quizzes.")
+
   # get all contents
   contents: ContentPayload!
 
@@ -1044,50 +1008,6 @@ type Query {
   # Retrieves all existing sections for multiple chapters.
   sectionsByChapterIds(chapterIds: [UUID!]!): [[Section!]!]!
 
-  # Returns the media records with the given IDs. Throws an error if a MediaRecord corresponding to a given ID
-  # cannot be found.
-  mediaRecordsByIds(ids: [UUID!]!): [MediaRecord!]!
-
-  # Like mediaRecordsByIds() returns the media records with the given IDs, but instead of throwing an error if an ID
-  # cannot be found, it instead returns NULL for that media record.
-  findMediaRecordsByIds(ids: [UUID!]!): [MediaRecord]!
-
-  # Returns all media records of the system.
-  mediaRecords: [MediaRecord!]!
-    @deprecated(
-      reason: "In production there should probably be no way to get all media records of the system."
-    )
-
-  # Returns all media records which the current user created.
-  userMediaRecords: [MediaRecord!]!
-
-  # Returns the media records associated the given content IDs as a list of lists where each sublist contains
-  # the media records associated with the content ID at the same index in the input list
-  mediaRecordsByContentIds(contentIds: [UUID!]!): [[MediaRecord!]!]!
-
-  # Retrieves a list of course memberships for a user ID
-  courseMemberships(id: UUID!): [CourseMembership!]
-
-  # Retrieves a list of course memberships for each user in a list of user IDs
-  courseMembershipsBatched(ids: [UUID!]!): [[CourseMembership!]!]!
-
-  # Gets the publicly available information for a user with the specified ID.
-  publicUserInfo(id: UUID!): PublicUserInfo!
-
-  # Gets the publicly available information for a list of users with the specified IDs.
-  publicUserInfoBatched(ids: [UUID!]!): [PublicUserInfo!]!
-
-  # Gets the user information of the currently authorized user.
-  currentUserInfo: UserInfo!
-
-  # Gets all of the user information of the specified user.
-  # Only available to the user themselves and privileged users.
-  userInfo(id: UUID!): UserInfo!
-
-  # Gets all of the users' information for a list of users with the specified IDs.
-  # Only available to privileged users.
-  userInfoBatched(ids: [UUID!]!): [UserInfo!]!
-
   # Get flashcards by their ids
   flashcardsByIds(ids: [UUID!]!): [Flashcard!]!
 
@@ -1095,15 +1015,14 @@ type Query {
   # Returns a list of flashcard sets in the same order as the provided ids.
   flashcardSetsByAssessmentIds(assessmentIds: [UUID!]!): [FlashcardSet!]!
 
-  # Get quiz by assessment ID.
-  # If any of the assessment IDs are not found, the corresponding quiz will be null.
-  findQuizzesByAssessmentIds(assessmentIds: [UUID!]!): [Quiz]!
+  # Get the reward score of the current user for the specified course.
+  userCourseRewardScores(courseId: UUID!): RewardScores!
 
-  # Get all quizzes.
-  quizzes: [Quiz!]!
-    @deprecated(
-      reason: "In the production system, you shouldn't be able to get all quizzes."
-    )
+  # Get the reward score of the specified user for the specified course.
+  courseRewardScoresForUser(courseId: UUID!, userId: UUID!): RewardScores!
+
+  # Gets the power scores for each user in the course, ordered by power score descending.
+  scoreboard(courseId: UUID!): [ScoreboardItem!]!
 }
 
 # Generic question interface.
@@ -1120,6 +1039,17 @@ interface Question {
 
   # Optional hint for the question, can be markdown.
   hint: String
+}
+
+input QuestionCompletedInput {
+  # ID of the question.
+  questionId: UUID!
+
+  # true when question was answered correctly
+  correct: Boolean!
+
+  # true when a hint was used for the question
+  usedHint: Boolean!
 }
 
 enum QuestionPoolingMode {
@@ -1193,30 +1123,11 @@ type QuizAssessment implements Assessment & Content {
 }
 
 input QuizCompletedInput {
-  """
-  ID of the quiz.
-  """
+  # ID of the quiz.
   quizId: UUID!
 
-  """
-  List of questions that were answered in the quiz.
-  """
+  # List of questions that were answered in the quiz.
   completedQuestions: [QuestionCompletedInput!]!
-}
-
-input QuestionCompletedInput {
-  """
-  ID of the question.
-  """
-  questionId: UUID!
-  """
-  true when question was answered correctly
-  """
-  correct: Boolean!
-  """
-  true when a hint was used for the question
-  """
-  usedHint: Boolean!
 }
 
 type QuizMutation {
@@ -1244,9 +1155,7 @@ type QuizMutation {
 
   # Set the number of questions that are randomly selected from the list of questions.
   # Will only be considered if questionPoolingMode is RANDOM.
-  setNumberOfRandomlySelectedQuestions(
-    numberOfRandomlySelectedQuestions: Int!
-  ): Quiz!
+  setNumberOfRandomlySelectedQuestions(numberOfRandomlySelectedQuestions: Int!): Quiz!
 }
 
 scalar ResolveToSourceArgs
@@ -1259,7 +1168,7 @@ type ResourceMarkdown {
   referencedMediaRecordIds: [UUID!]!
 
   # Resolved MediaRecords referenced in the ResourceMarkdown text in order.
-  # A MediaRecord might be NULL if the referenced MediaRecord no longer exists.
+  # A MediaRecord might be NULL if the referenced MediaRecord no longer exists. 
   referencedMediaRecords: [MediaRecord]!
 }
 
@@ -1354,7 +1263,7 @@ type ScoreboardItem {
 
   # The power score of the user.
   powerScore: Int!
-  user: PublicUserInfo!
+  user: PublicUserInfo
 }
 
 # Representation of a Section
@@ -1525,18 +1434,7 @@ input UpdateFlashcardInput {
   id: UUID!
 
   # List of sides of this flashcard. Must be at least two sides.
-  sides: [UpdateFlashcardSideInput!]!
-}
-
-input UpdateFlashcardSideInput {
-  # Text of this flashcard side. This can be markdown. Max length is 3000 characters.
-  text: ResourceMarkdownInput!
-
-  # Label of this flashcard side. E.g. "Front" or "Back", or "Question" or "Answer".
-  label: String!
-
-  # Whether this side is a question, i.e. should be shown to the user to guess the other sides or not.
-  isQuestion: Boolean!
+  sides: [FlashcardSideInput!]!
 }
 
 input UpdateMediaContentInput {
@@ -1602,8 +1500,6 @@ type UserInfo {
   userName: String!
   firstName: String!
   lastName: String!
-
-  # The course memberships of the user.
   courseMemberships: [CourseMembership!]!
 }
 
@@ -1629,10 +1525,29 @@ type UserProgressData {
   # This is null if the user has not completed the content item once.
   nextLearnDate: DateTime
 
-  # The last time the content was learned.
+  # The last time the content was learned successfully.
   # This is null if the user has not completed the content item once.
   lastLearnDate: DateTime
+
+  # True if the user has completed the content item at least once successfully.
+  isLearned: Boolean!
+
+  # True if the assessment is due for review.
+  isDueForReview: Boolean!
 }
 
 # A universally unique identifier compliant UUID Scalar
 scalar UUID
+
+# The division of the academic year.
+enum YearDivision {
+  FIRST_SEMESTER
+  SECOND_SEMESTER
+  FIRST_TRIMESTER
+  SECOND_TRIMESTER
+  THIRD_TRIMESTER
+  FIRST_QUARTER
+  SECOND_QUARTER
+  THIRD_QUARTER
+  FOURTH_QUARTER
+}

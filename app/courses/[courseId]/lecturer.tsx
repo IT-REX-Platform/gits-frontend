@@ -234,7 +234,11 @@ export default function LecturerCoursePage() {
                           <ContentLink key={content.id} _content={content} />
                         ))}
                         {stage.optionalContents.map((content) => (
-                          <ContentLink key={content.id} _content={content} />
+                          <ContentLink
+                            key={content.id}
+                            _content={content}
+                            optional
+                          />
                         ))}
                         <div className="mt-4 flex flex-col items-start">
                           <AddContentModal

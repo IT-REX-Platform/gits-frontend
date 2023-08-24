@@ -35,7 +35,7 @@ import { ChapterContent } from "@/components/ChapterContent";
 import { ChapterHeader } from "@/components/ChapterHeader";
 import { ContentLink } from "@/components/Content";
 import { RewardScores } from "@/components/RewardScores";
-import { Section, SectionContent } from "@/components/Section";
+import { Section, SectionContent, SectionHeader } from "@/components/Section";
 import { Stage, StageBarrier } from "@/components/Stage";
 import { Info } from "@mui/icons-material";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
@@ -339,17 +339,16 @@ function StudentSection({
   // Workaround until the backend calculates the progress
   const stageComplete = stages.map(
     (stage) =>
-      (stage.requiredContents.length > 0 &&
-        stage.requiredContents.filter(
-          (content) => content.userProgressData.lastLearnDate != null
-        ).length == stage.requiredContents.length) ||
-      (stage.requiredContents.length == 0 && stage.optionalContents.length > 0)
+      stage.requiredContents.filter(
+        (content) => content.userProgressData.lastLearnDate != null
+      ).length == stage.requiredContents.length
   );
   const sectionComplete =
     stages.length > 0 ? stageComplete[stages.length - 1] : false;
 
   return (
     <Section done={sectionComplete}>
+      <SectionHeader>{section.name}</SectionHeader>
       <SectionContent>
         {section.stages.map((stage, i) => (
           <>
@@ -404,13 +403,15 @@ function StudentStage({
             (content) => content.userProgressData.lastLearnDate != null
           ).length) /
         stage.requiredContents.length
-      : 0;
+      : 100;
 
   return (
     <Stage progress={progress}>
-      <div></div>
       {stage.requiredContents.map((content) => (
         <ContentLink key={content.id} _content={content} />
+      ))}
+      {stage.optionalContents.map((content) => (
+        <ContentLink key={content.id} _content={content} optional />
       ))}
     </Stage>
   );

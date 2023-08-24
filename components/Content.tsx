@@ -23,6 +23,7 @@ import {
 } from "@mui/icons-material";
 import {
   Button,
+  Chip,
   CircularProgress,
   Dialog,
   DialogActions,
@@ -34,15 +35,29 @@ import {
 } from "@mui/material";
 import dayjs from "dayjs";
 import { useParams, useRouter } from "next/navigation";
-import { MouseEventHandler, ReactElement, ReactNode, useState } from "react";
+import {
+  MouseEventHandler,
+  ReactElement,
+  ReactNode,
+  createContext,
+  useContext,
+  useState,
+} from "react";
 import { graphql, useFragment, useMutation } from "react-relay";
 import colors from "tailwindcss/colors";
 
+const ContentLinkProps = createContext({
+  disabled: false,
+  optional: false,
+});
+
 export function ContentLink({
   disabled = false,
+  optional = false,
   _content,
 }: {
   disabled?: boolean;
+  optional?: boolean;
   _content: ContentLinkFragment$key;
 }) {
   const content = useFragment(
@@ -60,25 +75,30 @@ export function ContentLink({
     _content
   );
 
-  switch (content.metadata.type) {
-    case "MEDIA":
-      return <MediaContent disabled={disabled} _media={content} />;
-    case "FLASHCARDS":
-      return <FlashcardContent disabled={disabled} _flashcard={content} />;
-    case "QUIZ":
-      return <QuizContent disabled={disabled} _quiz={content} />;
+  function getContentNode() {
+    switch (content.metadata.type) {
+      case "MEDIA":
+        return <MediaContent _media={content} />;
+      case "FLASHCARDS":
+        return <FlashcardContent _flashcard={content} />;
+      case "QUIZ":
+        return <QuizContent _quiz={content} />;
+    }
+    return null;
   }
 
-  return null;
+  return (
+    <ContentLinkProps.Provider value={{ disabled, optional }}>
+      {getContentNode()}
+    </ContentLinkProps.Provider>
+  );
 }
 
 export function MediaContent({
-  disabled = false,
   recordId,
   replace = false,
   _media,
 }: {
-  disabled?: boolean;
   recordId?: string;
   replace?: boolean;
   _media: ContentMediaFragment$key;
@@ -113,7 +133,6 @@ export function MediaContent({
         chapterId={media.metadata.chapterId}
         type="Invalid content"
         title={media.metadata.name}
-        disabled={disabled}
       />
     );
   }
@@ -135,34 +154,15 @@ export function MediaContent({
 
   switch (record.type) {
     case "VIDEO":
-      return (
-        <VideoContent
-          title={title}
-          disabled={disabled}
-          onClick={onClick}
-          _media={media}
-        />
-      );
+      return <VideoContent title={title} onClick={onClick} _media={media} />;
     case "PRESENTATION":
       return (
-        <PresentationContent
-          title={title}
-          disabled={disabled}
-          onClick={onClick}
-          _media={media}
-        />
+        <PresentationContent title={title} onClick={onClick} _media={media} />
       );
     case "DOCUMENT":
-      return (
-        <DocumentContent
-          title={title}
-          disabled={disabled}
-          onClick={onClick}
-          _media={media}
-        />
-      );
+      return <DocumentContent title={title} onClick={onClick} _media={media} />;
     case "URL":
-      return <UrlContent title={title} disabled={disabled} />;
+      return <UrlContent title={title} />;
     default:
       return (
         <InvalidContent
@@ -170,7 +170,6 @@ export function MediaContent({
           chapterId={media.metadata.chapterId}
           type="Unknown content type"
           title={title}
-          disabled={disabled}
         />
       );
   }
@@ -178,15 +177,14 @@ export function MediaContent({
 
 export function VideoContent({
   title,
-  disabled = false,
   onClick,
   _media,
 }: {
   title: string;
-  disabled?: boolean;
   onClick: () => void;
   _media: ContentVideoFragment$key;
 }) {
+  const { disabled } = useContext(ContentLinkProps);
   const media = useFragment(
     graphql`
       fragment ContentVideoFragment on MediaContent {
@@ -203,8 +201,8 @@ export function VideoContent({
     <Content
       type="Video"
       title={title}
-      disabled={disabled}
       className="hover:bg-sky-100 rounded-full"
+      color={disabled ? colors.gray[100] : colors.sky[200]}
       onClick={onClick}
       icon={
         <ArrowRight
@@ -226,36 +224,37 @@ export function VideoContent({
 
 export function DeletedContent() {
   return (
-    <Content
-      title="Deleted content"
-      className="rounded-xl"
-      disabled
-      icon={
-        <DeleteForever
-          sx={{
-            fontSize: "1.875rem",
-            color: "text.disabled",
-          }}
-        />
-      }
-      iconFrame={<StaticFrame color="bg-gray-100" />}
-    />
+    <ContentLinkProps.Provider value={{ disabled: true, optional: false }}>
+      <Content
+        title="Deleted content"
+        className="rounded-xl"
+        color={colors.gray[100]}
+        icon={
+          <DeleteForever
+            sx={{
+              fontSize: "1.875rem",
+              color: "text.disabled",
+            }}
+          />
+        }
+        iconFrame={<StaticFrame color="bg-gray-100" />}
+      />
+    </ContentLinkProps.Provider>
   );
 }
 
 export function InvalidContent({
   type,
   title,
-  disabled = false,
   id,
   chapterId,
 }: {
   type: string;
   title: string;
-  disabled?: boolean;
   id: string;
   chapterId: string;
 }) {
+  const { disabled } = useContext(ContentLinkProps);
   const [del, deleting] = useMutation<ContentInvalidDeleteMutation>(graphql`
     mutation ContentInvalidDeleteMutation($id: UUID!) {
       deleteContent(id: $id)
@@ -271,8 +270,8 @@ export function InvalidContent({
     <Content
       type={type}
       title={title}
-      disabled={disabled}
       className="hover:bg-gray-100 rounded-xl"
+      color={disabled ? colors.gray[100] : colors.gray[300]}
       action={
         pageView === PageView.Lecturer ? (
           <IconButton
@@ -317,15 +316,14 @@ export function InvalidContent({
 
 export function PresentationContent({
   title,
-  disabled = false,
   onClick,
   _media,
 }: {
   title: string;
-  disabled?: boolean;
   onClick: () => void;
   _media: ContentPresentationFragment$key;
 }) {
+  const { disabled } = useContext(ContentLinkProps);
   const media = useFragment(
     graphql`
       fragment ContentPresentationFragment on MediaContent {
@@ -342,8 +340,8 @@ export function PresentationContent({
     <Content
       type="Slides"
       title={title}
-      disabled={disabled}
       className="hover:bg-violet-100 rounded-full"
+      color={disabled ? colors.gray[100] : colors.violet[200]}
       onClick={onClick}
       icon={
         <PersonalVideo
@@ -365,15 +363,14 @@ export function PresentationContent({
 
 export function DocumentContent({
   title,
-  disabled = false,
   onClick,
   _media,
 }: {
   title: string;
-  disabled?: boolean;
   onClick: () => void;
   _media: ContentDocumentFragment$key;
 }) {
+  const { disabled } = useContext(ContentLinkProps);
   const media = useFragment(
     graphql`
       fragment ContentDocumentFragment on MediaContent {
@@ -390,8 +387,8 @@ export function DocumentContent({
     <Content
       type="Document"
       title={title}
-      disabled={disabled}
       className="hover:bg-indigo-100 rounded-full"
+      color={disabled ? colors.gray[100] : colors.indigo[200]}
       onClick={onClick}
       icon={
         <Description
@@ -411,19 +408,14 @@ export function DocumentContent({
   );
 }
 
-export function UrlContent({
-  title,
-  disabled = false,
-}: {
-  title: string;
-  disabled?: boolean;
-}) {
+export function UrlContent({ title }: { title: string }) {
+  const { disabled } = useContext(ContentLinkProps);
   return (
     <Content
       type="Url"
       title={title}
-      disabled={disabled}
       className="hover:bg-slate-100 rounded-xl"
+      color={disabled ? colors.gray[100] : colors.gray[400]}
       icon={
         <Language
           sx={{
@@ -490,10 +482,8 @@ function EarlyRepeatWarnModal({
 
 export function FlashcardContent({
   _flashcard,
-  disabled,
 }: {
   _flashcard: ContentFlashcardFragment$key;
-  disabled?: boolean;
 }) {
   const { courseId } = useParams();
   const flashcard = useFragment(
@@ -514,6 +504,7 @@ export function FlashcardContent({
   );
 
   const [showWarnModal, setShowWarnModal] = useState(false);
+  const { disabled } = useContext(ContentLinkProps);
 
   const [pageView] = usePageView();
 
@@ -530,8 +521,8 @@ export function FlashcardContent({
       <Content
         type="Flashcards"
         title={flashcard.metadata.name}
-        disabled={disabled}
         className="hover:bg-emerald-100 rounded-full"
+        color={disabled ? colors.gray[100] : colors.emerald[200]}
         onClick={() => {
           if (
             pageView === PageView.Student &&
@@ -562,13 +553,7 @@ export function FlashcardContent({
   );
 }
 
-export function QuizContent({
-  _quiz,
-  disabled,
-}: {
-  _quiz: ContentQuizFragment$key;
-  disabled?: boolean;
-}) {
+export function QuizContent({ _quiz }: { _quiz: ContentQuizFragment$key }) {
   const { courseId } = useParams();
   const quiz = useFragment(
     graphql`
@@ -587,6 +572,7 @@ export function QuizContent({
   );
   const [showWarnModal, setShowWarnModal] = useState(false);
   const [pageView] = usePageView();
+  const { disabled } = useContext(ContentLinkProps);
 
   const { push } = useRouter();
   const href = `/courses/${courseId}/quiz/${quiz.id}`;
@@ -603,8 +589,8 @@ export function QuizContent({
       <Content
         type="Quiz"
         title={quiz.metadata.name}
-        disabled={disabled}
         className="hover:bg-emerald-100 rounded-full"
+        color={disabled ? colors.gray[100] : colors.emerald[200]}
         onClick={() => {
           if (
             pageView === PageView.Student &&
@@ -637,19 +623,19 @@ export function QuizContent({
 
 export function MaterialContent({
   title,
-  disabled = false,
   onClick = undefined,
 }: {
   title: string;
   disabled?: boolean;
   onClick?: MouseEventHandler<HTMLButtonElement> | undefined;
 }) {
+  const { disabled } = useContext(ContentLinkProps);
   return (
     <Content
       type="Download"
       title={title}
-      disabled={disabled}
       className="hover:bg-amber-100 rounded-xl"
+      color={disabled ? colors.gray[100] : colors.amber[600]}
       onClick={onClick}
       icon={
         <Download
@@ -667,8 +653,8 @@ export function Content({
   type,
   title,
   icon,
+  color,
   iconFrame,
-  disabled = false,
   className = "",
   onClick = undefined,
   action,
@@ -676,12 +662,13 @@ export function Content({
   type?: string;
   title: string;
   icon: ReactElement;
+  color?: string;
   iconFrame: ReactElement;
-  disabled?: boolean;
   className?: string;
   onClick?: MouseEventHandler<HTMLButtonElement> | undefined;
   action?: ReactNode;
 }) {
+  const { disabled, optional } = useContext(ContentLinkProps);
   return (
     <button
       disabled={disabled}
@@ -695,21 +682,21 @@ export function Content({
         <div className="absolute">{icon}</div>
       </div>
       <div className="group-hover:group-enabled:translate-x-0.5">
-        {type && (
-          <Typography
-            variant="overline"
-            fontWeight={400}
-            color={disabled ? "text.disabled" : ""}
-          >
-            {type}
-          </Typography>
-        )}
+        <div className="flex items-center gap-1.5 -ml-1">
+          {type && (
+            <Chip
+              className="!h-5 !text-xs"
+              label={type}
+              sx={{ backgroundColor: color }}
+            />
+          )}
+          {optional && <Chip className="!h-5 !text-xs" label="optional" />}
+        </div>
         <Typography
           variant="subtitle1"
           fontSize="1.25rem"
           fontWeight="500"
           color={disabled ? "text.disabled" : ""}
-          sx={type ? { marginTop: -1.8, paddingBottom: 0.4 } : undefined}
         >
           {title}
         </Typography>

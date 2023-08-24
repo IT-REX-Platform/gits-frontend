@@ -57,7 +57,7 @@ export function ChapterHeader({
         <ChapterProgress progress={chapterProgress} />
       </div>
       <div className="flex justify-between items-center flex-grow">
-        <div className="pr-8">
+        <div className="pr-8 flex flex-col items-start">
           <div className="flex gap-2 items-center">
             <Typography variant="h2" onClick={(e) => e.stopPropagation()}>
               {chapter.title}

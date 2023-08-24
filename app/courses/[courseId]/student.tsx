@@ -291,17 +291,9 @@ function StudentChapter({
         id
         title
         number
-        startDate
-        endDate
         suggestedStartDate
         suggestedEndDate
-
-        contents {
-          userProgressData {
-            lastLearnDate
-          }
-        }
-
+        ...ChapterHeaderFragment
         sections {
           id
           ...studentCoursePageSectionFragment
@@ -314,23 +306,10 @@ function StudentChapter({
     dayjs().isBetween(chapter.suggestedStartDate, chapter.suggestedEndDate)
   );
 
-  const chapterProgress =
-    chapter.contents.length > 0
-      ? (100 *
-          chapter.contents.filter(
-            (content) => content.userProgressData.lastLearnDate != null
-          ).length) /
-        chapter.contents.length
-      : 0;
-
   return (
     <section>
       <ChapterHeader
-        title={chapter.title}
-        subtitle={`${dayjs(chapter.startDate).format("D. MMMM")} – ${dayjs(
-          chapter.endDate
-        ).format("D. MMMM")}`}
-        progress={chapterProgress}
+        _chapter={chapter}
         expanded={expanded}
         onExpandClick={() => setExpanded((curr) => !curr)}
       />

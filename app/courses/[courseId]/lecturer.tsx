@@ -113,13 +113,10 @@ export default function LecturerCoursePage() {
                 ...EditChapterButtonFragment
                 ...AddFlashcardSetModalFragment
                 ...lecturerAddStageContentModal
+                ...ChapterHeaderFragment
                 id
                 title
                 number
-                startDate
-                endDate
-                suggestedStartDate
-                suggestedEndDate
                 sections {
                   ...lecturerSectionFragment @relay(mask: false)
                 }
@@ -197,17 +194,8 @@ export default function LecturerCoursePage() {
       {orderBy(course.chapters.elements, (x) => x.number).map((chapter) => (
         <section key={chapter.id} className="mb-6">
           <ChapterHeader
-            title={
-              <div className="flex gap-2">
-                {chapter.title} <EditChapterButton _chapter={chapter} />
-              </div>
-            }
-            subtitle={`${dayjs(
-              chapter.suggestedStartDate ?? chapter.startDate
-            ).format("D. MMMM")} – ${dayjs(
-              chapter.suggestedEndDate ?? chapter.endDate
-            ).format("D. MMMM")}`}
-            progress={0}
+            _chapter={chapter}
+            action={<EditChapterButton _chapter={chapter} />}
           />
 
           <ChapterContent>

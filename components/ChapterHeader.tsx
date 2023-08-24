@@ -1,22 +1,48 @@
 "use client";
 import { Done, ExpandLess, ExpandMore } from "@mui/icons-material";
 import { CircularProgress, IconButton, Typography } from "@mui/material";
-import { MouseEvent, ReactNode } from "react";
+import { ReactNode } from "react";
 import { SkillLevels } from "./SkillLevels";
+import { graphql, useFragment } from "react-relay";
+import { ChapterHeaderFragment$key } from "@/__generated__/ChapterHeaderFragment.graphql";
+import dayjs from "dayjs";
 
 export function ChapterHeader({
-  progress,
-  title,
-  subtitle,
+  _chapter,
   expanded,
+  action,
   onExpandClick,
 }: {
+  _chapter: ChapterHeaderFragment$key;
   expanded?: boolean;
-  progress: number;
-  title: ReactNode;
-  subtitle: string;
+  action?: ReactNode;
   onExpandClick?: () => void;
 }) {
+  const chapter = useFragment(
+    graphql`
+      fragment ChapterHeaderFragment on Chapter {
+        title
+        suggestedStartDate
+        suggestedEndDate
+        contents {
+          userProgressData {
+            lastLearnDate
+          }
+        }
+      }
+    `,
+    _chapter
+  );
+
+  const chapterProgress =
+    chapter.contents.length > 0
+      ? (100 *
+          chapter.contents.filter(
+            (content) => content.userProgressData.lastLearnDate != null
+          ).length) /
+        chapter.contents.length
+      : 0;
+
   return (
     <div
       className="flex items-center py-4 pl-8 pr-12 -mx-8 mb-8 bg-gradient-to-r from-slate-100 to-slate-50"
@@ -28,15 +54,19 @@ export function ChapterHeader({
         </IconButton>
       )}
       <div className="mr-8">
-        <ChapterProgress progress={progress} />
+        <ChapterProgress progress={chapterProgress} />
       </div>
       <div className="flex justify-between items-center flex-grow">
         <div className="pr-8">
-          <Typography variant="h2" onClick={(e) => e.stopPropagation()}>
-            {title}
-          </Typography>
+          <div className="flex gap-2 items-center">
+            <Typography variant="h2" onClick={(e) => e.stopPropagation()}>
+              {chapter.title}
+            </Typography>
+            {action}
+          </div>
           <Typography variant="subtitle1" onClick={(e) => e.stopPropagation()}>
-            {subtitle}
+            {dayjs(chapter.suggestedStartDate).format("D. MMMM")} –{" "}
+            {dayjs(chapter.suggestedEndDate).format("D. MMMM")}
           </Typography>
         </div>
         <div onClick={(e) => e.stopPropagation()}>

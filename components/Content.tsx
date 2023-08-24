@@ -697,6 +697,7 @@ export function Content({
           fontSize="1.25rem"
           fontWeight="500"
           color={disabled ? "text.disabled" : ""}
+          sx={{ marginBottom: -0.5 }}
         >
           {title}
         </Typography>

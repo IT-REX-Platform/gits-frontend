@@ -1,12 +1,14 @@
+import * as yup from "yup";
 import { SectionOptions } from "../DialogBase";
+import { Dayjs } from "dayjs";
 
 export type ChapterData = {
   title: string;
   description: string;
-  startDate: Date | null;
-  endDate: Date | null;
-  suggestedStartDate: Date | null;
-  suggestedEndDate: Date | null;
+  startDate: Dayjs | null;
+  endDate: Dayjs | null;
+  suggestedStartDate: Dayjs | null;
+  suggestedEndDate: Dayjs | null;
 };
 
 export const dialogSections: SectionOptions<ChapterData>[] = [
@@ -69,3 +71,25 @@ export const dialogSections: SectionOptions<ChapterData>[] = [
     ],
   },
 ];
+
+// @ts-ignore
+export const validationSchema: (
+  predecessorStart?: string
+) => yup.ObjectSchema<ChapterData> = (predecessorStart) =>
+  yup.object({
+    title: yup.string().required("Required"),
+    description: yup.string().required("Required"),
+    startDate:
+      predecessorStart != null
+        ? yup
+            .date()
+            .required("Required")
+            .min(
+              predecessorStart,
+              "Chapter can't start before it's predecessor"
+            )
+        : yup.date().required("Required"),
+    endDate: yup.date().required("Required"),
+    suggestedStartDate: yup.date().required("Required"),
+    suggestedEndDate: yup.date().required("Required"),
+  });

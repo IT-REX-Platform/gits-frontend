@@ -38,7 +38,6 @@ import { ChapterContent } from "@/components/ChapterContent";
 import { ChapterHeader } from "@/components/ChapterHeader";
 import { Content, ContentLink, ProgressFrame } from "@/components/Content";
 import { DeleteStageButton } from "@/components/DeleteStageButton";
-import { EditChapterModal } from "@/components/EditChapterModal";
 import { EditCourseModal } from "@/components/EditCourseModal";
 import EditSectionButton from "@/components/EditSectionButton";
 import { Section, SectionContent, SectionHeader } from "@/components/Section";
@@ -48,6 +47,7 @@ import dayjs from "dayjs";
 import { orderBy } from "lodash";
 import { useEffect, useState } from "react";
 import { MediaContentModal } from "../../../components/MediaContentModal";
+import EditChapterButton from "@/components/EditChapterButton";
 
 graphql`
   fragment lecturerSectionFragment on Section {
@@ -110,7 +110,7 @@ export default function LecturerCoursePage() {
             chapters {
               elements {
                 __id
-                ...EditChapterModalFragment
+                ...EditChapterButtonFragment
                 ...AddFlashcardSetModalFragment
                 ...lecturerAddStageContentModal
                 id
@@ -199,7 +199,7 @@ export default function LecturerCoursePage() {
           <ChapterHeader
             title={
               <div className="flex gap-2">
-                {chapter.title} <EditChapterModal _chapter={chapter} />
+                {chapter.title} <EditChapterButton _chapter={chapter} />
               </div>
             }
             subtitle={`${dayjs(
@@ -228,7 +228,7 @@ export default function LecturerCoursePage() {
                     (stage) => (
                       <Stage
                         progress={stage.requiredContentsProgress}
-                        key={section.id}
+                        key={stage.id}
                       >
                         {stage.requiredContents.map((content) => (
                           <ContentLink key={content.id} _content={content} />

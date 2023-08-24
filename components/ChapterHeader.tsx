@@ -1,7 +1,7 @@
 "use client";
 import { Done, ExpandLess, ExpandMore } from "@mui/icons-material";
 import { CircularProgress, IconButton, Typography } from "@mui/material";
-import { ReactNode } from "react";
+import { MouseEvent, ReactNode } from "react";
 import { SkillLevels } from "./SkillLevels";
 
 export function ChapterHeader({
@@ -18,9 +18,12 @@ export function ChapterHeader({
   onExpandClick?: () => void;
 }) {
   return (
-    <div className="flex items-center py-4 pl-8 pr-12 -mx-8 mb-8 bg-gradient-to-r from-slate-100 to-slate-50">
+    <div
+      className="flex items-center py-4 pl-8 pr-12 -mx-8 mb-8 bg-gradient-to-r from-slate-100 to-slate-50"
+      onClick={onExpandClick}
+    >
       {expanded !== undefined && (
-        <IconButton className="!-ml-2 !mr-4" onClick={onExpandClick}>
+        <IconButton className="!-ml-2 !mr-4">
           {expanded ? <ExpandLess /> : <ExpandMore />}
         </IconButton>
       )}
@@ -29,10 +32,16 @@ export function ChapterHeader({
       </div>
       <div className="flex justify-between items-center flex-grow">
         <div className="pr-8">
-          <Typography variant="h2">{title}</Typography>
-          <Typography variant="subtitle1">{subtitle}</Typography>
+          <Typography variant="h2" onClick={(e) => e.stopPropagation()}>
+            {title}
+          </Typography>
+          <Typography variant="subtitle1" onClick={(e) => e.stopPropagation()}>
+            {subtitle}
+          </Typography>
         </div>
-        <SkillLevels />
+        <div onClick={(e) => e.stopPropagation()}>
+          <SkillLevels />
+        </div>
       </div>
     </div>
   );

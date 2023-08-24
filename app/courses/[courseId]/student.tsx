@@ -3,6 +3,7 @@ import { studentCourseIdQuery } from "@/__generated__/studentCourseIdQuery.graph
 import {
   Alert,
   Button,
+  Collapse,
   IconButton,
   Tooltip,
   TooltipProps,
@@ -40,8 +41,12 @@ import { Stage, StageBarrier } from "@/components/Stage";
 import { Info } from "@mui/icons-material";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import dayjs from "dayjs";
+import isBetween from "dayjs/plugin/isBetween";
 import Link from "next/link";
 import { useState } from "react";
+import { studentCoursePageChapterFragment$key } from "@/__generated__/studentCoursePageChapterFragment.graphql";
+
+dayjs.extend(isBetween);
 
 interface Data {
   name: string;
@@ -88,10 +93,8 @@ export default function StudentCoursePage() {
           chapters {
             elements {
               id
-              title
               number
-              startDate
-              endDate
+              ...studentCoursePageChapterFragment
               contents {
                 ...ContentLinkFragment
 
@@ -104,11 +107,6 @@ export default function StudentCoursePage() {
                 metadata {
                   type
                 }
-              }
-
-              sections {
-                id
-                ...studentCoursePageSectionFragment
               }
             }
           }
@@ -275,34 +273,77 @@ export default function StudentCoursePage() {
         </div>
       </section>
 
-      {orderBy(course.chapters.elements, (x) => x.number).map((chapter) => {
-        const chapterProgress =
-          chapter.contents.length > 0
-            ? (100 *
-                chapter.contents.filter(
-                  (content) => content.userProgressData.lastLearnDate != null
-                ).length) /
-              chapter.contents.length
-            : 0;
-
-        return (
-          <section key={chapter.id} className="mt-6">
-            <ChapterHeader
-              title={chapter.title}
-              subtitle={`${dayjs(chapter.startDate).format(
-                "D. MMMM"
-              )} – ${dayjs(chapter.endDate).format("D. MMMM")}`}
-              progress={chapterProgress}
-            />
-            <ChapterContent>
-              {chapter.sections.map((section) => (
-                <StudentSection key={section.id} _section={section} />
-              ))}
-            </ChapterContent>{" "}
-          </section>
-        );
-      })}
+      {orderBy(course.chapters.elements, (x) => x.number).map((chapter) => (
+        <StudentChapter key={chapter.id} _chapter={chapter} />
+      ))}
     </main>
+  );
+}
+
+function StudentChapter({
+  _chapter,
+}: {
+  _chapter: studentCoursePageChapterFragment$key;
+}) {
+  const chapter = useFragment(
+    graphql`
+      fragment studentCoursePageChapterFragment on Chapter {
+        id
+        title
+        number
+        startDate
+        endDate
+        suggestedStartDate
+        suggestedEndDate
+
+        contents {
+          userProgressData {
+            lastLearnDate
+          }
+        }
+
+        sections {
+          id
+          ...studentCoursePageSectionFragment
+        }
+      }
+    `,
+    _chapter
+  );
+  const [expanded, setExpanded] = useState(
+    dayjs().isBetween(chapter.suggestedStartDate, chapter.suggestedEndDate)
+  );
+
+  const chapterProgress =
+    chapter.contents.length > 0
+      ? (100 *
+          chapter.contents.filter(
+            (content) => content.userProgressData.lastLearnDate != null
+          ).length) /
+        chapter.contents.length
+      : 0;
+
+  return (
+    <section>
+      <ChapterHeader
+        title={chapter.title}
+        subtitle={`${dayjs(chapter.startDate).format("D. MMMM")} – ${dayjs(
+          chapter.endDate
+        ).format("D. MMMM")}`}
+        progress={chapterProgress}
+        expanded={expanded}
+        onExpandClick={() => setExpanded((curr) => !curr)}
+      />
+      <Collapse in={expanded}>
+        <div className="mb-6">
+          <ChapterContent>
+            {chapter.sections.map((section) => (
+              <StudentSection key={section.id} _section={section} />
+            ))}
+          </ChapterContent>{" "}
+        </div>
+      </Collapse>
+    </section>
   );
 }
 

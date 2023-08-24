@@ -1,6 +1,6 @@
 "use client";
-import { Done } from "@mui/icons-material";
-import { CircularProgress, Typography } from "@mui/material";
+import { Done, ExpandLess, ExpandMore } from "@mui/icons-material";
+import { CircularProgress, IconButton, Typography } from "@mui/material";
 import { ReactNode } from "react";
 import { SkillLevels } from "./SkillLevels";
 
@@ -8,14 +8,23 @@ export function ChapterHeader({
   progress,
   title,
   subtitle,
+  expanded,
+  onExpandClick,
 }: {
+  expanded?: boolean;
   progress: number;
   title: ReactNode;
   subtitle: string;
+  onExpandClick?: () => void;
 }) {
   return (
     <div className="flex items-center py-4 pl-8 pr-12 -mx-8 mb-8 bg-gradient-to-r from-slate-100 to-slate-50">
-      <div className="mr-10">
+      {expanded !== undefined && (
+        <IconButton className="!-ml-2 !mr-4" onClick={onExpandClick}>
+          {expanded ? <ExpandLess /> : <ExpandMore />}
+        </IconButton>
+      )}
+      <div className="mr-8">
         <ChapterProgress progress={progress} />
       </div>
       <div className="flex justify-between items-center flex-grow">

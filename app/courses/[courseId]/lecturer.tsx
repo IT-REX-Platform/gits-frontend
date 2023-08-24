@@ -195,7 +195,7 @@ export default function LecturerCoursePage() {
       />
 
       {orderBy(course.chapters.elements, (x) => x.number).map((chapter) => (
-        <section key={chapter.id} className="mt-6">
+        <section key={chapter.id} className="mb-6">
           <ChapterHeader
             title={
               <div className="flex gap-2">

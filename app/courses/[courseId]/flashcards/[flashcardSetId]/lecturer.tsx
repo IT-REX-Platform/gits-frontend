@@ -267,7 +267,7 @@ export default function EditFlashcards() {
       )}
       <div className="mt-8 flex flex-col gap-6">
         {flashcardSet.flashcards.map((flashcard, i) => (
-          <div>
+          <>
             <Flashcard
               key={flashcard.id}
               title={`Card ${i + 1}/${flashcardSet.flashcards.length}`}
@@ -284,7 +284,7 @@ export default function EditFlashcards() {
             >
               Delete Flashcard
             </Button>
-          </div>
+          </>
         ))}
         {isAddFlashcardOpen && (
           <LocalFlashcard
@@ -419,7 +419,7 @@ function Flashcard({
         </Typography>
         <div className="flex flex-wrap gap-2">
           {flashcard.sides.map((side, i) => (
-            <div>
+            <>
               <IconButton
                 onClick={() => handleDeleteFlashcardSide(i)}
                 sx={{ float: "right" }}
@@ -431,7 +431,7 @@ function Flashcard({
                 side={side}
                 onChange={(data) => handleEditFlashcardSide(i, data)}
               />
-            </div>
+            </>
           ))}
         </div>
         <Button
@@ -532,7 +532,8 @@ function EditSideModal({
   const [isQuestion, setIsQuestion] = useState(side?.isQuestion ?? false);
   const [isAnswer, setIsAnswer] = useState(side?.isAnswer ?? false);
 
-  const valid = label.trim() != "" && text.text.trim() != "";
+  const valid =
+    label.trim() != "" && text.text.trim() != "" && (isQuestion || isAnswer);
 
   return (
     <Dialog maxWidth="md" open onClose={onClose}>

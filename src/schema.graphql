@@ -5,37 +5,94 @@ directive @specifiedBy(
 ) on SCALAR
 
 #  see also https://github.com/graphql-java/graphql-java-extended-validation/blob/master/README.md
-directive @DecimalMax(value: String!, inclusive: Boolean! = true, message: String = "graphql.validation.DecimalMax.message") on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+directive @DecimalMax(
+  value: String!
+  inclusive: Boolean! = true
+  message: String = "graphql.validation.DecimalMax.message"
+) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
 
-directive @DecimalMin(value: String!, inclusive: Boolean! = true, message: String = "graphql.validation.DecimalMin.message") on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+directive @DecimalMin(
+  value: String!
+  inclusive: Boolean! = true
+  message: String = "graphql.validation.DecimalMin.message"
+) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
 
-directive @Max(value: Int! = 2147483647, message: String = "graphql.validation.Max.message") on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+directive @Max(
+  value: Int! = 2147483647
+  message: String = "graphql.validation.Max.message"
+) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
 
-directive @Min(value: Int! = 0, message: String = "graphql.validation.Min.message") on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+directive @Min(
+  value: Int! = 0
+  message: String = "graphql.validation.Min.message"
+) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
 
-directive @Negative(message: String = "graphql.validation.Negative.message") on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+directive @Negative(
+  message: String = "graphql.validation.Negative.message"
+) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
 
-directive @NegativeOrZero(message: String = "graphql.validation.NegativeOrZero.message") on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+directive @NegativeOrZero(
+  message: String = "graphql.validation.NegativeOrZero.message"
+) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
 
-directive @NotBlank(message: String = "graphql.validation.NotBlank.message") on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+directive @NotBlank(
+  message: String = "graphql.validation.NotBlank.message"
+) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
 
-directive @NotEmpty(message: String = "graphql.validation.NotEmpty.message") on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+directive @NotEmpty(
+  message: String = "graphql.validation.NotEmpty.message"
+) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
 
-directive @ContainerNotEmpty(message: String = "graphql.validation.ContainerNotEmpty.message") on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+directive @ContainerNotEmpty(
+  message: String = "graphql.validation.ContainerNotEmpty.message"
+) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
 
-directive @Pattern(regexp: String! = ".*", message: String = "graphql.validation.Pattern.message") on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+directive @Pattern(
+  regexp: String! = ".*"
+  message: String = "graphql.validation.Pattern.message"
+) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
 
-directive @Positive(message: String = "graphql.validation.Positive.message") on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+directive @Positive(
+  message: String = "graphql.validation.Positive.message"
+) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
 
-directive @PositiveOrZero(message: String = "graphql.validation.PositiveOrZero.message") on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+directive @PositiveOrZero(
+  message: String = "graphql.validation.PositiveOrZero.message"
+) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
 
-directive @Range(min: Int = 0, max: Int = 2147483647, message: String = "graphql.validation.Range.message") on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+directive @Range(
+  min: Int = 0
+  max: Int = 2147483647
+  message: String = "graphql.validation.Range.message"
+) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
 
-directive @Size(min: Int = 0, max: Int = 2147483647, message: String = "graphql.validation.Size.message") on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+directive @Size(
+  min: Int = 0
+  max: Int = 2147483647
+  message: String = "graphql.validation.Size.message"
+) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
 
-directive @ContainerSize(min: Int = 0, max: Int = 2147483647, message: String = "graphql.validation.ContainerSize.message") on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+directive @ContainerSize(
+  min: Int = 0
+  max: Int = 2147483647
+  message: String = "graphql.validation.ContainerSize.message"
+) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
 
-directive @resolveTo(requiredSelectionSet: String, sourceName: String!, sourceTypeName: String!, sourceFieldName: String!, sourceSelectionSet: String, sourceArgs: ResolveToSourceArgs, keyField: String, keysArg: String, pubsubTopic: String, filterBy: String, additionalArgs: ResolveToSourceArgs, result: String, resultType: String) on FIELD_DEFINITION
+directive @resolveTo(
+  requiredSelectionSet: String
+  sourceName: String!
+  sourceTypeName: String!
+  sourceFieldName: String!
+  sourceSelectionSet: String
+  sourceArgs: ResolveToSourceArgs
+  keyField: String
+  keysArg: String
+  pubsubTopic: String
+  filterBy: String
+  additionalArgs: ResolveToSourceArgs
+  result: String
+  resultType: String
+) on FIELD_DEFINITION
 
 interface Assessment {
   # Assessment metadata
@@ -736,7 +793,10 @@ type Mutation {
   deleteMediaRecord(id: UUID!): UUID!
 
   # Allows multiple media records to be linked/added to a content.
-  linkMediaRecordsWithContent(contentId: UUID!, mediaRecordIds: [UUID!]!): [MediaRecord!]!
+  linkMediaRecordsWithContent(
+    contentId: UUID!
+    mediaRecordIds: [UUID!]!
+  ): [MediaRecord!]!
 
   # Logs that a media has been worked on by the current user.
   # See https://gits-enpro.readthedocs.io/en/latest/dev-manuals/gamification/userProgress.html
@@ -783,7 +843,10 @@ type Mutation {
   mutateQuiz(assessmentId: UUID!): QuizMutation!
 
   # Delete a quiz.
-  deleteQuiz(assessmentId: UUID!): UUID! @deprecated(reason: "Only for development, will be removed in production. Use deleteAssessment in contents service instead.")
+  deleteQuiz(assessmentId: UUID!): UUID!
+    @deprecated(
+      reason: "Only for development, will be removed in production. Use deleteAssessment in contents service instead."
+    )
 
   # Log that a multiple choice quiz is completed.
   logQuizCompleted(input: QuizCompletedInput!): Quiz!
@@ -831,11 +894,17 @@ type Mutation {
   updateStageOrder(input: StageOrderInput!): Section!
 
   # Creates a new flashcard set.
-  createFlashcardSet(assessmentId: UUID!, input: CreateFlashcardSetInput!): FlashcardSet!
+  createFlashcardSet(
+    assessmentId: UUID!
+    input: CreateFlashcardSetInput!
+  ): FlashcardSet!
 
   # Deletes a flashcard set. Throws an error if the flashcard set does not exist.
   # The contained flashcards are deleted as well.
-  deleteFlashcardSet(input: UUID!): UUID! @deprecated(reason: "Only for development, will be removed in production. Use deleteAssessment in contents service instead.")
+  deleteFlashcardSet(input: UUID!): UUID!
+    @deprecated(
+      reason: "Only for development, will be removed in production. Use deleteAssessment in contents service instead."
+    )
 
   # Modify a flashcard set.
   mutateFlashcardSet(assessmentId: UUID!): FlashcardSetMutation!
@@ -849,16 +918,26 @@ type Mutation {
   # This is done automatically at some time in the night.
   #
   # The purpose of this mutation is to allow testing of the reward score and demonstrate the functionality.
-  recalculateScores(courseId: UUID!, userId: UUID!): RewardScores! @deprecated(reason: "Only for testing purposes. Will be removed.")
+  recalculateScores(courseId: UUID!, userId: UUID!): RewardScores!
+    @deprecated(reason: "Only for testing purposes. Will be removed.")
 
   # Creates a new media content and links the given media records to it.
-  createMediaContentAndLinkRecords(contentInput: CreateMediaContentInput!, mediaRecordIds: [UUID!]!): MediaContent!
+  createMediaContentAndLinkRecords(
+    contentInput: CreateMediaContentInput!
+    mediaRecordIds: [UUID!]!
+  ): MediaContent!
 
   # Creates a new quiz assessment and a new, linked quiz with the given properties.
-  createQuizAssessment(assessmentInput: CreateAssessmentInput!, quizInput: CreateQuizInput!): QuizAssessment!
+  createQuizAssessment(
+    assessmentInput: CreateAssessmentInput!
+    quizInput: CreateQuizInput!
+  ): QuizAssessment!
 
   # Creates a new flashcard set assessment and a new, linked flashcard set with the given properties.
-  createFlashcardSetAssessment(assessmentInput: CreateAssessmentInput!, flashcardSetInput: CreateFlashcardSetInput!): FlashcardSetAssessment
+  createFlashcardSetAssessment(
+    assessmentInput: CreateAssessmentInput!
+    flashcardSetInput: CreateFlashcardSetInput!
+  ): FlashcardSetAssessment
 }
 
 # Specifies the page size and page number for paginated results.
@@ -925,7 +1004,10 @@ type Query {
   findMediaRecordsByIds(ids: [UUID!]!): [MediaRecord]!
 
   # Returns all media records of the system.
-  mediaRecords: [MediaRecord!]! @deprecated(reason: "In production there should probably be no way to get all media records of the system.")
+  mediaRecords: [MediaRecord!]!
+    @deprecated(
+      reason: "In production there should probably be no way to get all media records of the system."
+    )
 
   # Returns all media records which the current user created.
   userMediaRecords: [MediaRecord!]!
@@ -990,7 +1072,10 @@ type Query {
   findQuizzesByAssessmentIds(assessmentIds: [UUID!]!): [Quiz]!
 
   # Get all quizzes.
-  quizzes: [Quiz!]! @deprecated(reason: "In the production system, you shouldn't be able to get all quizzes.")
+  quizzes: [Quiz!]!
+    @deprecated(
+      reason: "In the production system, you shouldn't be able to get all quizzes."
+    )
 
   # get all contents
   contents: ContentPayload!
@@ -1155,7 +1240,9 @@ type QuizMutation {
 
   # Set the number of questions that are randomly selected from the list of questions.
   # Will only be considered if questionPoolingMode is RANDOM.
-  setNumberOfRandomlySelectedQuestions(numberOfRandomlySelectedQuestions: Int!): Quiz!
+  setNumberOfRandomlySelectedQuestions(
+    numberOfRandomlySelectedQuestions: Int!
+  ): Quiz!
 }
 
 scalar ResolveToSourceArgs
@@ -1168,7 +1255,7 @@ type ResourceMarkdown {
   referencedMediaRecordIds: [UUID!]!
 
   # Resolved MediaRecords referenced in the ResourceMarkdown text in order.
-  # A MediaRecord might be NULL if the referenced MediaRecord no longer exists. 
+  # A MediaRecord might be NULL if the referenced MediaRecord no longer exists.
   referencedMediaRecords: [MediaRecord]!
 }
 

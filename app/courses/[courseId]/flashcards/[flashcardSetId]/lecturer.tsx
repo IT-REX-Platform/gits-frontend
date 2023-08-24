@@ -376,6 +376,18 @@ function Flashcard({
     });
   }
 
+  function handleDeleteFlashcardSide(idx: number) {
+    const newFlashcard = {
+      id: flashcard.id,
+      sides: flashcard.sides.filter((_, i) => i != idx),
+    };
+
+    updateFlashcard({
+      variables: { assessmentId: _assessmentId, flashcard: newFlashcard },
+      onError,
+    });
+  }
+
   function handleAddSideSubmit(newSide: FlashcardSideData) {
     const newFlashcard = {
       id: flashcard.id,
@@ -408,7 +420,10 @@ function Flashcard({
         <div className="flex flex-wrap gap-2">
           {flashcard.sides.map((side, i) => (
             <div>
-              <IconButton>
+              <IconButton
+                onClick={() => handleDeleteFlashcardSide(i)}
+                sx={{ float: "right" }}
+              >
                 <ClearIcon />
               </IconButton>
               <FlashcardSide

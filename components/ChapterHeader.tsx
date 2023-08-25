@@ -1,29 +1,77 @@
 "use client";
-import { Done } from "@mui/icons-material";
-import { CircularProgress, Typography } from "@mui/material";
+import { Done, ExpandLess, ExpandMore } from "@mui/icons-material";
+import { CircularProgress, IconButton, Typography } from "@mui/material";
 import { ReactNode } from "react";
 import { SkillLevels } from "./SkillLevels";
+import { graphql, useFragment } from "react-relay";
+import { ChapterHeaderFragment$key } from "@/__generated__/ChapterHeaderFragment.graphql";
+import dayjs from "dayjs";
 
 export function ChapterHeader({
-  progress,
-  title,
-  subtitle,
+  _chapter,
+  expanded,
+  action,
+  onExpandClick,
 }: {
-  progress: number;
-  title: ReactNode;
-  subtitle: string;
+  _chapter: ChapterHeaderFragment$key;
+  expanded?: boolean;
+  action?: ReactNode;
+  onExpandClick?: () => void;
 }) {
+  const chapter = useFragment(
+    graphql`
+      fragment ChapterHeaderFragment on Chapter {
+        title
+        suggestedStartDate
+        suggestedEndDate
+        contents {
+          userProgressData {
+            lastLearnDate
+          }
+        }
+      }
+    `,
+    _chapter
+  );
+
+  const chapterProgress =
+    chapter.contents.length > 0
+      ? (100 *
+          chapter.contents.filter(
+            (content) => content.userProgressData.lastLearnDate != null
+          ).length) /
+        chapter.contents.length
+      : 0;
+
   return (
-    <div className="flex items-center py-4 pl-8 pr-12 -mx-8 mb-8 bg-gradient-to-r from-slate-100 to-slate-50">
-      <div className="mr-10">
-        <ChapterProgress progress={progress} />
+    <div
+      className="flex items-center py-4 pl-8 pr-12 -mx-8 mb-8 bg-gradient-to-r from-slate-100 to-slate-50"
+      onClick={onExpandClick}
+    >
+      {expanded !== undefined && (
+        <IconButton className="!-ml-2 !mr-4">
+          {expanded ? <ExpandLess /> : <ExpandMore />}
+        </IconButton>
+      )}
+      <div className="mr-8">
+        <ChapterProgress progress={chapterProgress} />
       </div>
       <div className="flex justify-between items-center flex-grow">
-        <div className="pr-8">
-          <Typography variant="h2">{title}</Typography>
-          <Typography variant="subtitle1">{subtitle}</Typography>
+        <div className="pr-8 flex flex-col items-start">
+          <div className="flex gap-2 items-center">
+            <Typography variant="h2" onClick={(e) => e.stopPropagation()}>
+              {chapter.title}
+            </Typography>
+            {action}
+          </div>
+          <Typography variant="subtitle1" onClick={(e) => e.stopPropagation()}>
+            {dayjs(chapter.suggestedStartDate).format("D. MMMM")} –{" "}
+            {dayjs(chapter.suggestedEndDate).format("D. MMMM")}
+          </Typography>
         </div>
-        <SkillLevels />
+        <div onClick={(e) => e.stopPropagation()}>
+          <SkillLevels />
+        </div>
       </div>
     </div>
   );

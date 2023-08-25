@@ -267,7 +267,7 @@ export default function EditFlashcards() {
       )}
       <div className="mt-8 flex flex-col gap-6">
         {flashcardSet.flashcards.map((flashcard, i) => (
-          <>
+          <div key={i}>
             <Flashcard
               key={flashcard.id}
               title={`Card ${i + 1}/${flashcardSet.flashcards.length}`}
@@ -276,7 +276,7 @@ export default function EditFlashcards() {
               _assessmentId={flashcardSetId}
             />
             <Button
-              sx={{ right: 0, color: "red" }}
+              sx={{ float: "left", color: "red" }}
               startIcon={<Delete />}
               onClick={() => {
                 handleDeleteFlashcard(flashcard.id);
@@ -284,7 +284,7 @@ export default function EditFlashcards() {
             >
               Delete Flashcard
             </Button>
-          </>
+          </div>
         ))}
         {isAddFlashcardOpen && (
           <LocalFlashcard
@@ -420,17 +420,17 @@ function Flashcard({
         <div className="flex flex-wrap gap-2">
           {flashcard.sides.map((side, i) => (
             <>
+              <FlashcardSide
+                key={`${flashcard.id}-${i}`}
+                side={side}
+                onChange={(data) => handleEditFlashcardSide(i, data)}
+              />
               <IconButton
                 onClick={() => handleDeleteFlashcardSide(i)}
                 sx={{ float: "right" }}
               >
                 <ClearIcon />
               </IconButton>
-              <FlashcardSide
-                key={`${flashcard.id}-${i}`}
-                side={side}
-                onChange={(data) => handleEditFlashcardSide(i, data)}
-              />
             </>
           ))}
         </div>

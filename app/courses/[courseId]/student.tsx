@@ -3,6 +3,7 @@ import { studentCourseIdQuery } from "@/__generated__/studentCourseIdQuery.graph
 import {
   Alert,
   Button,
+  Collapse,
   IconButton,
   Tooltip,
   TooltipProps,
@@ -35,13 +36,17 @@ import { ChapterContent } from "@/components/ChapterContent";
 import { ChapterHeader } from "@/components/ChapterHeader";
 import { ContentLink } from "@/components/Content";
 import { RewardScores } from "@/components/RewardScores";
-import { Section, SectionContent } from "@/components/Section";
+import { Section, SectionContent, SectionHeader } from "@/components/Section";
 import { Stage, StageBarrier } from "@/components/Stage";
 import { Info } from "@mui/icons-material";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import dayjs from "dayjs";
+import isBetween from "dayjs/plugin/isBetween";
 import Link from "next/link";
 import { useState } from "react";
+import { studentCoursePageChapterFragment$key } from "@/__generated__/studentCoursePageChapterFragment.graphql";
+
+dayjs.extend(isBetween);
 
 interface Data {
   name: string;
@@ -88,10 +93,8 @@ export default function StudentCoursePage() {
           chapters {
             elements {
               id
-              title
               number
-              startDate
-              endDate
+              ...studentCoursePageChapterFragment
               contents {
                 ...ContentLinkFragment
 
@@ -104,11 +107,6 @@ export default function StudentCoursePage() {
                 metadata {
                   type
                 }
-              }
-
-              sections {
-                id
-                ...studentCoursePageSectionFragment
               }
             }
           }
@@ -275,34 +273,56 @@ export default function StudentCoursePage() {
         </div>
       </section>
 
-      {orderBy(course.chapters.elements, (x) => x.number).map((chapter) => {
-        const chapterProgress =
-          chapter.contents.length > 0
-            ? (100 *
-                chapter.contents.filter(
-                  (content) => content.userProgressData.lastLearnDate != null
-                ).length) /
-              chapter.contents.length
-            : 0;
-
-        return (
-          <section key={chapter.id} className="mt-6">
-            <ChapterHeader
-              title={chapter.title}
-              subtitle={`${dayjs(chapter.startDate).format(
-                "D. MMMM"
-              )} – ${dayjs(chapter.endDate).format("D. MMMM")}`}
-              progress={chapterProgress}
-            />
-            <ChapterContent>
-              {chapter.sections.map((section) => (
-                <StudentSection key={section.id} _section={section} />
-              ))}
-            </ChapterContent>{" "}
-          </section>
-        );
-      })}
+      {orderBy(course.chapters.elements, (x) => x.number).map((chapter) => (
+        <StudentChapter key={chapter.id} _chapter={chapter} />
+      ))}
     </main>
+  );
+}
+
+function StudentChapter({
+  _chapter,
+}: {
+  _chapter: studentCoursePageChapterFragment$key;
+}) {
+  const chapter = useFragment(
+    graphql`
+      fragment studentCoursePageChapterFragment on Chapter {
+        id
+        title
+        number
+        suggestedStartDate
+        suggestedEndDate
+        ...ChapterHeaderFragment
+        sections {
+          id
+          ...studentCoursePageSectionFragment
+        }
+      }
+    `,
+    _chapter
+  );
+  const [expanded, setExpanded] = useState(
+    dayjs().isBetween(chapter.suggestedStartDate, chapter.suggestedEndDate)
+  );
+
+  return (
+    <section>
+      <ChapterHeader
+        _chapter={chapter}
+        expanded={expanded}
+        onExpandClick={() => setExpanded((curr) => !curr)}
+      />
+      <Collapse in={expanded}>
+        <div className="mb-6">
+          <ChapterContent>
+            {chapter.sections.map((section) => (
+              <StudentSection key={section.id} _section={section} />
+            ))}
+          </ChapterContent>{" "}
+        </div>
+      </Collapse>
+    </section>
   );
 }
 
@@ -339,17 +359,16 @@ function StudentSection({
   // Workaround until the backend calculates the progress
   const stageComplete = stages.map(
     (stage) =>
-      (stage.requiredContents.length > 0 &&
-        stage.requiredContents.filter(
-          (content) => content.userProgressData.lastLearnDate != null
-        ).length == stage.requiredContents.length) ||
-      (stage.requiredContents.length == 0 && stage.optionalContents.length > 0)
+      stage.requiredContents.filter(
+        (content) => content.userProgressData.lastLearnDate != null
+      ).length == stage.requiredContents.length
   );
   const sectionComplete =
     stages.length > 0 ? stageComplete[stages.length - 1] : false;
 
   return (
     <Section done={sectionComplete}>
+      <SectionHeader>{section.name}</SectionHeader>
       <SectionContent>
         {section.stages.map((stage, i) => (
           <>
@@ -404,13 +423,15 @@ function StudentStage({
             (content) => content.userProgressData.lastLearnDate != null
           ).length) /
         stage.requiredContents.length
-      : 0;
+      : 100;
 
   return (
     <Stage progress={progress}>
-      <div></div>
       {stage.requiredContents.map((content) => (
         <ContentLink key={content.id} _content={content} />
+      ))}
+      {stage.optionalContents.map((content) => (
+        <ContentLink key={content.id} _content={content} optional />
       ))}
     </Stage>
   );

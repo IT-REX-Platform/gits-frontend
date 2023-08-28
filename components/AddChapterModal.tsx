@@ -1,12 +1,15 @@
 import { useState } from "react";
 import { graphql, useFragment, useMutation } from "react-relay";
-import * as yup from "yup";
 
 import { AddChapterModalFragment$key } from "@/__generated__/AddChapterModalFragment.graphql";
 import { AddChapterModalMutation } from "@/__generated__/AddChapterModalMutation.graphql";
-import { max } from "lodash";
 import { DialogBase } from "./DialogBase";
-import { ChapterData, dialogSections } from "./dialogs/chapterDialog";
+import {
+  ChapterData,
+  dialogSections,
+  validationSchema,
+} from "./dialogs/chapterDialog";
+import lodash from "lodash";
 
 export function AddChapterModal({
   open,
@@ -25,15 +28,13 @@ export function AddChapterModal({
           elements {
             id
             title
-            endDate
+            startDate
           }
         }
       }
     `,
     _course
   );
-
-  const [error, setError] = useState<any>(null);
 
   const [addChapter, isUpdating] = useMutation<AddChapterModalMutation>(graphql`
     mutation AddChapterModalMutation($chapter: CreateChapterInput!) {
@@ -71,20 +72,10 @@ export function AddChapterModal({
     });
   }
 
-  const validationSchema: yup.ObjectSchema<ChapterData> = yup.object({
-    title: yup.string().required("Required"),
-    description: yup.string().optional().default(""),
-    startDate: yup
-      .date()
-      .min(
-        max(course.chapters.elements.map((x) => new Date(x.endDate))),
-        "Course can't start before its predecessor"
-      )
-      .required("Required"),
-    endDate: yup.date().required("Required"),
-    suggestedStartDate: yup.date().required("Required"),
-    suggestedEndDate: yup.date().required("Required"),
-  });
+  const [error, setError] = useState<any>(null);
+  const predecessorStart = lodash.max(
+    course.chapters.elements.map((x) => x.startDate)
+  );
 
   return (
     <DialogBase
@@ -99,7 +90,7 @@ export function AddChapterModal({
         suggestedStartDate: null,
         suggestedEndDate: null,
       }}
-      validationSchema={validationSchema}
+      validationSchema={validationSchema(predecessorStart)}
       onClose={onClose}
       onSubmit={handleSubmit}
       clearError={() => setError(null)}

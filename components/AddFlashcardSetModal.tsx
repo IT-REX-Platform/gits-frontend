@@ -73,7 +73,8 @@ export function AddFlashcardSetModal({
     useMutation<AddFlashcardSetModalMutation>(graphql`
       mutation AddFlashcardSetModalMutation($assessmentId: UUID!) {
         createFlashcardSet(
-          input: { assessmentId: $assessmentId, flashcards: [] }
+          input: { flashcards: [] }
+          assessmentId: $assessmentId
         ) {
           assessmentId
         }

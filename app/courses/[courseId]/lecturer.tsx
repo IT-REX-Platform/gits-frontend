@@ -77,6 +77,7 @@ export default function LecturerCoursePage() {
           ...MediaRecordSelector
 
           coursesByIds(ids: $id) {
+            id
             title
             description
             ...AddChapterModalFragment
@@ -212,6 +213,7 @@ export default function LecturerCoursePage() {
                         ))}
                         <div className="mt-4 flex flex-col items-start">
                           <AddContentModal
+                            courseId={course.id}
                             stageId={stage.id}
                             chapterId={chapter.id}
                             _mediaRecords={query}

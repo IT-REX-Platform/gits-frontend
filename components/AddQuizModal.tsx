@@ -5,11 +5,10 @@ import {
   QuestionPoolingMode,
 } from "@/__generated__/AddQuizModalMutation.graphql";
 import { Form, FormSection } from "@/components/Form";
+import { LoadingButton } from "@mui/lab";
 import {
   Alert,
-  Backdrop,
   Button,
-  CircularProgress,
   Dialog,
   DialogActions,
   DialogContent,
@@ -32,8 +31,8 @@ import {
 const defaultInput = {
   multipleChoiceQuestions: [],
   questionPoolingMode: "RANDOM",
-  requiredCorrectAnswers: 0,
-  numberOfRandomlySelectedQuestions: 0,
+  requiredCorrectAnswers: 4,
+  numberOfRandomlySelectedQuestions: 5,
 } as const;
 
 export function AddQuizModal({
@@ -43,7 +42,7 @@ export function AddQuizModal({
 }: {
   onClose: () => void;
   isOpen: boolean;
-  chapterId?: string;
+  chapterId: string;
 }) {
   const [mutate, loading] = useMutation<AddQuizModalMutation>(graphql`
     mutation AddQuizModalMutation(
@@ -79,7 +78,13 @@ export function AddQuizModal({
   function handleSubmit() {
     mutate({
       variables: {
-        quizInput: input,
+        quizInput: {
+          ...input,
+          numberOfRandomlySelectedQuestions:
+            input.questionPoolingMode === "ORDERED"
+              ? null
+              : input.numberOfRandomlySelectedQuestions,
+        },
         assessmentInput: {
           metadata: { ...metadata!, type: "QUIZ", chapterId, tagNames: [] },
           assessmentMetadata: assessmentMetadata!,
@@ -88,6 +93,7 @@ export function AddQuizModal({
       onCompleted() {
         onClose();
       },
+      onError: setError,
       updater(store, data) {
         // Get record of chapter and of the new assignment
         const chapterRecord = store.get(chapterId);
@@ -175,15 +181,16 @@ export function AddQuizModal({
             )}
           </FormSection>
         </Form>
-        <Backdrop open={loading} sx={{ zIndex: "modal" }}>
-          <CircularProgress />
-        </Backdrop>
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose}>Cancel</Button>
-        <Button disabled={!valid} onClick={handleSubmit}>
+        <LoadingButton
+          loading={loading}
+          disabled={!valid}
+          onClick={handleSubmit}
+        >
           Add
-        </Button>
+        </LoadingButton>
       </DialogActions>
     </Dialog>
   );

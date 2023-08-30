@@ -3,7 +3,8 @@ import { AddContentModalFragment$key } from "@/__generated__/AddContentModalFrag
 import { AddContentModalUpdateStageMutation } from "@/__generated__/AddContentModalUpdateStageMutation.graphql";
 import { MediaRecordSelector$key } from "@/__generated__/MediaRecordSelector.graphql";
 import { AddFlashcardSetModal } from "@/components/AddFlashcardSetModal";
-import { Add, ArrowForward } from "@mui/icons-material";
+import { Add, Edit } from "@mui/icons-material";
+import { LoadingButton } from "@mui/lab";
 import {
   Alert,
   Button,
@@ -34,6 +35,7 @@ export function AddContentModal({
   _mediaRecords,
   optionalRecords: _optionalRecords,
   requiredRecords: _requiredRecords,
+  courseId,
 }: {
   chapterId: string;
   stageId: string;
@@ -42,6 +44,7 @@ export function AddContentModal({
 
   optionalRecords: string[];
   requiredRecords: string[];
+  courseId: string;
 }) {
   const [openMediaModal, setOpenMediaModal] = useState(false);
   const [openFlashcardModal, setOpenFlashcardModal] = useState(false);
@@ -53,6 +56,17 @@ export function AddContentModal({
     graphql`
       fragment AddContentModalFragment on Chapter {
         ...AddFlashcardSetModalFragment
+        sections {
+          stages {
+            id
+            optionalContents {
+              id
+            }
+            requiredContents {
+              id
+            }
+          }
+        }
         contents {
           id
           metadata {
@@ -76,14 +90,15 @@ export function AddContentModal({
   const [optionalRecords, setOptionalRecords] = useState(_optionalRecords);
   const [requiredRecords, setRequiredRecords] = useState(_requiredRecords);
 
-  const [updateStage] = useMutation<AddContentModalUpdateStageMutation>(graphql`
-    mutation AddContentModalUpdateStageMutation($stage: UpdateStageInput!) {
-      updateStage(input: $stage) {
-        id
-        ...lecturerStageFragment
+  const [updateStage, loading] =
+    useMutation<AddContentModalUpdateStageMutation>(graphql`
+      mutation AddContentModalUpdateStageMutation($stage: UpdateStageInput!) {
+        updateStage(input: $stage) {
+          id
+          ...lecturerStageFragment
+        }
       }
-    }
-  `);
+    `);
 
   useEffect(() => {
     setOptionalRecords(_optionalRecords);
@@ -102,8 +117,8 @@ export function AddContentModal({
       variables: {
         stage: {
           id: stageId,
-          requiredContents: optionalRecords,
-          optionalContents: requiredRecords,
+          requiredContents: requiredRecords,
+          optionalContents: optionalRecords,
         },
       },
       onError: setError,
@@ -116,7 +131,7 @@ export function AddContentModal({
   return (
     <>
       <Button startIcon={<Add />} onClick={() => setOpenModal(true)}>
-        Add media
+        Add content
       </Button>
 
       <Dialog
@@ -124,7 +139,7 @@ export function AddContentModal({
         open={openModal}
         onClose={() => setOpenModal(false)}
       >
-        <DialogTitle>Select media</DialogTitle>
+        <DialogTitle>Select content</DialogTitle>
         <DialogContent sx={{ paddingX: 0 }}>
           {error?.source.errors.map((err: any, i: number) => (
             <Alert
@@ -141,6 +156,16 @@ export function AddContentModal({
             {chapter.contents.map((content) => {
               const optional = optionalRecords.find((x) => x === content.id);
               const required = requiredRecords.find((x) => x === content.id);
+
+              const partOfOtherStage = chapter.sections
+                .flatMap((s) => s.stages)
+                .filter((s) => s.id !== stageId)
+                .some(
+                  (s) =>
+                    s.optionalContents.some((c) => c.id === content.id) ||
+                    s.requiredContents.some((c) => c.id === content.id)
+                );
+
               const toggle =
                 optional || required
                   ? () => {
@@ -193,22 +218,22 @@ export function AddContentModal({
                         onClick={() =>
                           router.push(
                             content.__typename === "FlashcardSetAssessment"
-                              ? `flashcards/${content.id}`
+                              ? `/courses/${courseId}/flashcards/${content.id}`
                               : content.__typename === "MediaContent"
-                              ? `media/${content.id}`
+                              ? `/courses/${courseId}/media/${content.id}`
                               : content.__typename === "QuizAssessment"
-                              ? `quizzes/${content.id}`
+                              ? `/courses/${courseId}/quiz/${content.id}`
                               : ""
                           )
                         }
                       >
-                        <ArrowForward />
+                        <Edit fontSize="small" />
                       </IconButton>
                     </div>
                   }
                   disablePadding
                 >
-                  <ListItemButton onClick={toggle}>
+                  <ListItemButton onClick={toggle} disabled={partOfOtherStage}>
                     <ListItemIcon>
                       <Checkbox
                         edge="start"
@@ -218,7 +243,12 @@ export function AddContentModal({
                       />
                     </ListItemIcon>
 
-                    <ListItemText primary={content.metadata.name} />
+                    <ListItemText
+                      primary={content.metadata.name}
+                      secondary={
+                        partOfOtherStage ? "Already part of another stage" : ""
+                      }
+                    />
                   </ListItemButton>
                 </ListItem>
               );
@@ -254,7 +284,9 @@ export function AddContentModal({
           </Button>
         </DialogContent>
         <DialogActions>
-          <Button onClick={submit}>Ok</Button>
+          <LoadingButton loading={loading} onClick={submit}>
+            Ok
+          </LoadingButton>
         </DialogActions>
       </Dialog>
 

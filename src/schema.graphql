@@ -141,6 +141,45 @@ input AssessmentMetadataInput {
   initialLearningInterval: Int
 }
 
+input AssociationInput {
+  # Text of the left side of the association, can be markdown.
+  left: String!
+
+  # Text of the right side of the association, can be markdown.
+  right: String!
+
+  # Feedback for the association when the user selects a wrong answer, can be markdown.
+  feedback: ResourceMarkdownInput
+}
+
+# Association question, i.e., a question where the user has to assign the correct right side to each left side.
+type AssociationQuestion implements Question {
+  # Text to display above the association question, can be markdown.
+  text: ResourceMarkdown!
+
+  # List of correct associations.
+  correctAssociations: [SingleAssociation!]!
+
+  # Computed list of all the left sides of the associations, shuffled.
+  leftSide: [String!]!
+
+  # Computed list of all the right sides of the associations, shuffled.
+  rightSide: [String!]!
+
+  # Unique identifier of the question.
+  id: UUID!
+
+  # Number of the question, i.e., the position of the question in the list of questions.
+  # Only relevant if questionPoolingMode is ORDERED.
+  number: Int!
+
+  # Type of the question.
+  type: QuestionType!
+
+  # Optional hint for the question, can be markdown.
+  hint: ResourceMarkdown
+}
+
 # A chapter is a part of a course.
 type Chapter {
   # UUID of the chapter, generated automatically
@@ -192,6 +231,67 @@ input ChapterFilter {
 type ChapterPayload {
   elements: [Chapter!]!
   pagination: PaginationInfo!
+}
+
+type ClozeBlankElement {
+  # The correct answer for the blank.
+  correctAnswer: String!
+
+  # Feedback for the blank when the user selects a wrong answer, can be markdown.
+  feedback: ResourceMarkdown
+}
+
+union ClozeElement = ClozeTextElement | ClozeBlankElement
+
+input ClozeElementInput {
+  # Type of the element.
+  type: ClozeElementType!
+
+  # Text of the element. Only used for TEXT type.
+  text: ResourceMarkdownInput
+
+  # The correct answer for the blank. Only used for BLANK type.
+  correctAnswer: String
+
+  # Feedback for the blank when the user selects a wrong answer, can be markdown. Only used for BLANK type.
+  feedback: ResourceMarkdownInput
+}
+
+enum ClozeElementType {
+  TEXT
+  BLANK
+}
+
+type ClozeQuestion implements Question {
+  # The elements of the cloze question.
+  clozeElements: [ClozeElement!]!
+
+  # Addtional wrong answers for the blanks.
+  additionalWrongAnswers: [String!]!
+
+  # All selectable answers for the blanks (computed). This contains the correct answers as well as wrong answers.
+  allBlanks: [String!]!
+
+  # Whether the blanks must be answered in free text or by selecting the correct answer from a list.
+  showBlanksList: Boolean!
+
+  # Unique identifier of the question.
+  id: UUID!
+
+  # Number of the question, i.e., the position of the question in the list of questions.
+  # Only relevant if questionPoolingMode is ORDERED.
+  number: Int!
+
+  # Type of the question.
+  type: QuestionType!
+
+  # Optional hint for the question, can be markdown.
+  hint: ResourceMarkdown
+}
+
+type ClozeTextElement {
+  # Text of the element, can be markdown.
+  text: ResourceMarkdown!
 }
 
 interface Content {
@@ -268,6 +368,12 @@ type Course {
   # Published state of the course. If the course is published, it is visible to users.
   published: Boolean!
 
+  # The year in which the term starts.
+  startYear: Int
+
+  # The division of the academic calendar in which the term takes place.
+  yearDivision: YearDivision
+
   # Chapters of the course. Can be filtered and sorted.
   chapters(
     filter: ChapterFilter
@@ -339,6 +445,21 @@ input CreateAssessmentInput {
   assessmentMetadata: AssessmentMetadataInput!
 }
 
+input CreateAssociationQuestionInput {
+  # Number of the question, used for ordering.
+  # This can be omitted, in which case a number, one higher than the highest number of the existing questions, will be used.
+  number: Int
+
+  # Text of the question, can be markdown.
+  text: ResourceMarkdownInput!
+
+  # List of associations.
+  associations: [AssociationInput!]!
+
+  # Optional hint for the question, can be markdown.
+  hint: ResourceMarkdownInput
+}
+
 # Input type for creating chapters.
 input CreateChapterInput {
   # Title of the chapter, maximum length is 255 characters, must not be blank.
@@ -369,6 +490,24 @@ input CreateChapterInput {
   # ID of the course the chapter belongs to.
   # Must be a UUID of an existing course.
   courseId: UUID!
+}
+
+input CreateClozeQuestionInput {
+  # Number of the question, used for ordering.
+  # This can be omitted, in which case a number, one higher than the highest number of the existing questions, will be used.
+  number: Int
+
+  # List of cloze elements.
+  clozeElements: [ClozeElementInput!]!
+
+  # List of additional wrong answers.
+  additionalWrongAnswers: [String!]! = []
+
+  # If true, the list of possible answers will be shown to the user.
+  showBlanksList: Boolean! = true
+
+  # Optional hint for the question, can be markdown.
+  hint: ResourceMarkdownInput
 }
 
 input CreateContentMetadataInput {
@@ -409,35 +548,43 @@ input CreateCourseInput {
 
   # Published status of the course.
   published: Boolean!
+
+  # The year in which the term starts.
+  startYear: Int
+
+  # The division of the academic calendar in which the term takes place.
+  yearDivision: YearDivision
+}
+
+input CreateExactAnswerQuestionInput {
+  # Number of the question, used for ordering.
+  # This can be omitted, in which case a number, one higher than the highest number of the existing questions, will be used.
+  number: Int
+
+  # Text of the question, can be markdown.
+  text: ResourceMarkdownInput!
+
+  # If the answer is case sensitive. If true, the answer is checked case sensitive.
+  caseSensitive: Boolean! = false
+
+  # A list of possible correct answers.
+  correctAnswers: [String!]!
+
+  # Feedback for the question when the user enters a wrong answer, can be markdown.
+  feedback: ResourceMarkdownInput
+
+  # Optional hint for the question, can be markdown.
+  hint: ResourceMarkdownInput
 }
 
 input CreateFlashcardInput {
   # List of sides of this flashcard. Must be at least two sides.
-  sides: [CreateFlashcardSideInput!]!
-}
-
-input CreateFlashcardInSetInput {
-  # List of sides of this flashcard. Must be at least two sides.
-  sides: [CreateFlashcardSideInput!]!
+  sides: [FlashcardSideInput!]!
 }
 
 input CreateFlashcardSetInput {
-  # The uuid of the assessment this flashcard set belongs to.
-  assessmentId: UUID!
-
   # List of flashcards in this set.
-  flashcards: [CreateFlashcardInSetInput!]!
-}
-
-input CreateFlashcardSideInput {
-  # Text of this flashcard side. This can be markdown. Max length is 3000 characters.
-  text: ResourceMarkdownInput!
-
-  # Label of this flashcard side. E.g. "Front" or "Back", or "Question" or "Answer".
-  label: String!
-
-  # Whether this side is a question, i.e. should be shown to the user to guess the other sides or not.
-  isQuestion: Boolean!
+  flashcards: [CreateFlashcardInput!]!
 }
 
 # Input for creating new media content. Media specific fields are stored in the Media Service.
@@ -463,13 +610,34 @@ input CreateMultipleChoiceQuestionInput {
   number: Int
 
   # Text of the question, can be markdown.
-  text: String!
+  text: ResourceMarkdownInput!
 
   # List of answers.
   answers: [MultipleChoiceAnswerInput!]!
 
   # Optional hint for the question, can be markdown.
-  hint: String
+  hint: ResourceMarkdownInput
+}
+
+input CreateNumericQuestionInput {
+  # Number of the question, used for ordering.
+  # This can be omitted, in which case a number, one higher than the highest number of the existing questions, will be used.
+  number: Int
+
+  # Text of the question, can be markdown.
+  text: ResourceMarkdownInput!
+
+  # The correct answer for the question.
+  correctAnswer: Float!
+
+  # The allowed deviation from the correct answer.
+  tolerance: Float!
+
+  # Feedback for the question when the user enters a wrong answer, can be markdown.
+  feedback: ResourceMarkdownInput
+
+  # Optional hint for the question, can be markdown.
+  hint: ResourceMarkdownInput
 }
 
 input CreateQuizInput {
@@ -490,9 +658,6 @@ input CreateQuizInput {
   #
   # If this is null or not set, the behavior is the same as if it was equal to the number of questions.
   numberOfRandomlySelectedQuestions: Int
-
-  # List of multiple choice questions.
-  multipleChoiceQuestions: [CreateMultipleChoiceQuestionInput!]! = []
 }
 
 input CreateSectionInput {
@@ -501,6 +666,21 @@ input CreateSectionInput {
 
   # name given to Section
   name: String!
+}
+
+input CreateSelfAssessmentQuestionInput {
+  # Number of the question, used for ordering.
+  # This can be omitted, in which case a number, one higher than the highest number of the existing questions, will be used.
+  number: Int
+
+  # Text of the question, can be markdown.
+  text: ResourceMarkdownInput!
+
+  # A possible correct answer to the question.
+  solutionSuggestion: ResourceMarkdownInput!
+
+  # Optional hint for the question, can be markdown.
+  hint: ResourceMarkdownInput
 }
 
 # An RFC-3339 compliant Full Date Scalar
@@ -517,6 +697,36 @@ input DateTimeFilter {
 
   # If specified, filters for dates before the specified value.
   before: DateTime
+}
+
+# A question with a clear, correct answer that can be automatically checked.
+# Differs from self-assessment questions in that the user has to enter one of the correct answers and
+# the answer is checked automatically.
+type ExactAnswerQuestion implements Question {
+  # Text of the question, can be markdown.
+  text: ResourceMarkdown!
+
+  # A list of possible correct answers. The user has to enter one of these answers.
+  correctAnswers: [String!]!
+
+  # If the answer is case sensitive. If true, the answer is checked case sensitive.
+  caseSensitive: Boolean!
+
+  # Feedback for the question when the user enters a wrong answer, can be markdown.
+  feedback: ResourceMarkdown
+
+  # Unique identifier of the question.
+  id: UUID!
+
+  # Number of the question, i.e., the position of the question in the list of questions.
+  # Only relevant if questionPoolingMode is ORDERED.
+  number: Int!
+
+  # Type of the question.
+  type: QuestionType!
+
+  # Optional hint for the question, can be markdown.
+  hint: ResourceMarkdown
 }
 
 # A flashcard is a set of two or more sides. Each side has a label and a text.
@@ -591,7 +801,7 @@ type FlashcardSetAssessment implements Assessment & Content {
   progressDataForUser(userId: UUID!): UserProgressData!
 
   # The FlashcardSet of the assessment.
-  flashcardSet: FlashcardSet!
+  flashcardSet: FlashcardSet
 }
 
 type FlashcardSetMutation {
@@ -617,6 +827,25 @@ type FlashcardSide {
 
   # Whether this side is a question, i.e. should be shown to the user to guess the other sides or not.
   isQuestion: Boolean!
+
+  # Whether this side is also an answer. Some Flashcards can have their sides be
+  # used as both questions or answers for the other sides
+  isAnswer: Boolean!
+}
+
+input FlashcardSideInput {
+  # Text of this flashcard side. This can be markdown. Max length is 3000 characters.
+  text: ResourceMarkdownInput!
+
+  # Label of this flashcard side. E.g. "Front" or "Back", or "Question" or "Answer".
+  label: String!
+
+  # Whether this side is a question, i.e. should be shown to the user to guess the other sides or not.
+  isQuestion: Boolean!
+
+  # Whether this side is also an answer. Some Flashcards can have their sides be
+  # used as both questions or answers for the other sides
+  isAnswer: Boolean!
 }
 
 # Filter for integer values.
@@ -725,30 +954,30 @@ enum MediaType {
 
 type MultipleChoiceAnswer {
   # Text of the answer, can be markdown.
-  text: String!
+  answerText: ResourceMarkdown!
 
   # Whether the answer is correct or not.
   correct: Boolean!
 
   # Feedback for when the user selects this answer, can be markdown.
-  feedback: String
+  feedback: ResourceMarkdown
 }
 
 input MultipleChoiceAnswerInput {
   # Text of the answer, can be markdown.
-  text: String!
+  answerText: ResourceMarkdownInput!
 
   # Whether the answer is correct or not.
   correct: Boolean!
 
   # Feedback for when the user selects this answer, can be markdown.
-  feedback: String
+  feedback: ResourceMarkdownInput
 }
 
 # Multiple choice question, i.e., a question with multiple answers of which the user has to select the correct ones.
 type MultipleChoiceQuestion implements Question {
   # Text of the question, can be markdown.
-  text: String!
+  text: ResourceMarkdown!
 
   # List of answers.
   answers: [MultipleChoiceAnswer!]!
@@ -767,18 +996,18 @@ type MultipleChoiceQuestion implements Question {
   type: QuestionType!
 
   # Optional hint for the question, can be markdown.
-  hint: String
+  hint: ResourceMarkdown
 }
 
 type Mutation {
-  # ONLY FOR TESTING PURPOSES. DO NOT USE IN FRONTEND. WILL BE REMOVED.
-  #
-  # Triggers the recalculation of the reward score of the user.
-  # This is done automatically at some time in the night.
-  #
-  # The purpose of this mutation is to allow testing of the reward score and demonstrate the functionality.
-  recalculateScores(courseId: UUID!, userId: UUID!): RewardScores!
-    @deprecated(reason: "Only for testing purposes. Will be removed.")
+  # registers a user to a course with a role
+  createMembership(input: CourseMembershipInput!): CourseMembership!
+
+  # updates the role of a user in a course
+  updateMembership(input: CourseMembershipInput!): CourseMembership!
+
+  # deletes user course link
+  deleteMembership(input: CourseMembershipInput!): CourseMembership!
 
   # Creates a new course with the given input and returns the created course.
   createCourse(input: CreateCourseInput!): Course!
@@ -800,6 +1029,34 @@ type Mutation {
 
   # Deletes an existing chapter, throws an error if no chapter with the given id exists.
   deleteChapter(id: UUID!): UUID!
+
+  # Creates a new flashcard set.
+  createFlashcardSet(
+    assessmentId: UUID!
+    input: CreateFlashcardSetInput!
+  ): FlashcardSet!
+
+  # Deletes a flashcard set. Throws an error if the flashcard set does not exist.
+  # The contained flashcards are deleted as well.
+  deleteFlashcardSet(input: UUID!): UUID!
+    @deprecated(
+      reason: "Only for development, will be removed in production. Use deleteAssessment in contents service instead."
+    )
+
+  # Modify a flashcard set.
+  mutateFlashcardSet(assessmentId: UUID!): FlashcardSetMutation!
+
+  # Logs that a user has learned a flashcard.
+  logFlashcardLearned(input: LogFlashcardLearnedInput!): Flashcard!
+
+  # ONLY FOR TESTING PURPOSES. DO NOT USE IN FRONTEND. WILL BE REMOVED.
+  #
+  # Triggers the recalculation of the skill level of the user.
+  # This is done automatically at some time in the night.
+  #
+  # The purpose of this mutation is to allow testing of the reward score and demonstrate the functionality.
+  recalculateLevels(chapterId: UUID!, userId: UUID!): SkillLevels!
+    @deprecated(reason: "Only for testing purposes. Will be removed.")
 
   # Create new media content
   createMediaContent(input: CreateMediaContentInput!): MediaContent!
@@ -843,6 +1100,15 @@ type Mutation {
   # update Order of Stages within a Section
   updateStageOrder(input: StageOrderInput!): Section!
 
+  # ONLY FOR TESTING PURPOSES. DO NOT USE IN FRONTEND. WILL BE REMOVED.
+  #
+  # Triggers the recalculation of the reward score of the user.
+  # This is done automatically at some time in the night.
+  #
+  # The purpose of this mutation is to allow testing of the reward score and demonstrate the functionality.
+  recalculateScores(courseId: UUID!, userId: UUID!): RewardScores!
+    @deprecated(reason: "Only for testing purposes. Will be removed.")
+
   # Creates a new media record
   createMediaRecord(input: CreateMediaRecordInput!): MediaRecord!
 
@@ -865,31 +1131,6 @@ type Mutation {
   # When all media records of a content have been worked on by a user,
   # a user-progress event is emitted for the content.
   logMediaRecordWorkedOn(mediaRecordId: UUID!): MediaRecord!
-
-  # registers a user to a course with a role
-  createMembership(input: CourseMembershipInput!): CourseMembership!
-
-  # updates the role of a user in a course
-  updateMembership(input: CourseMembershipInput!): CourseMembership!
-
-  # deletes user course link
-  deleteMembership(input: CourseMembershipInput!): CourseMembership!
-
-  # Creates a new flashcard set.
-  createFlashcardSet(input: CreateFlashcardSetInput!): FlashcardSet!
-
-  # Deletes a flashcard set. Throws an error if the flashcard set does not exist.
-  # The contained flashcards are deleted as well.
-  deleteFlashcardSet(input: UUID!): UUID!
-    @deprecated(
-      reason: "Only for development, will be removed in production. Use deleteAssessment in contents service instead."
-    )
-
-  # Modify a flashcard set.
-  mutateFlashcardSet(assessmentId: UUID!): FlashcardSetMutation!
-
-  # Logs that a user has learned a flashcard.
-  logFlashcardLearned(input: LogFlashcardLearnedInput!): Flashcard!
 
   # Create a quiz.
   createQuiz(assessmentId: UUID!, input: CreateQuizInput!): Quiz!
@@ -923,6 +1164,33 @@ type Mutation {
     assessmentInput: CreateAssessmentInput!
     flashcardSetInput: CreateFlashcardSetInput!
   ): FlashcardSetAssessment
+}
+
+type NumericQuestion implements Question {
+  # Text of the question, can be markdown.
+  text: ResourceMarkdown!
+
+  # The correct answer to the question.
+  correctAnswer: Float!
+
+  # The tolerance for the correct answer. The user's answer is correct if it is within the tolerance of the correct answer.
+  tolerance: Float!
+
+  # Feedback for the question when the user enters a wrong answer, can be markdown.
+  feedback: ResourceMarkdown
+
+  # Unique identifier of the question.
+  id: UUID!
+
+  # Number of the question, i.e., the position of the question in the list of questions.
+  # Only relevant if questionPoolingMode is ORDERED.
+  number: Int!
+
+  # Type of the question.
+  type: QuestionType!
+
+  # Optional hint for the question, can be markdown.
+  hint: ResourceMarkdown
 }
 
 # Specifies the page size and page number for paginated results.
@@ -980,14 +1248,17 @@ type PublicUserInfo {
 }
 
 type Query {
-  # Get the reward score of the current user for the specified course.
-  userCourseRewardScores(courseId: UUID!): RewardScores!
+  # Gets the publicly available information for a list of users with the specified IDs.
+  # If a user does not exist, null is returned for that user.
+  findPublicUserInfos(ids: [UUID!]!): [PublicUserInfo]!
 
-  # Get the reward score of the specified user for the specified course.
-  courseRewardScoresForUser(courseId: UUID!, userId: UUID!): RewardScores!
+  # Gets the user information of the currently authorized user.
+  currentUserInfo: UserInfo!
 
-  # Gets the power scores for each user in the course, ordered by power score descending.
-  scoreboard(courseId: UUID!): [ScoreboardItem!]!
+  # Gets all of the users' information for a list of users with the specified IDs.
+  # Only available to privileged users.
+  # If a user does not exist, null is returned for that user.
+  findUserInfos(ids: [UUID!]!): [UserInfo]!
 
   # Get a list of courses. Can be filtered, sorted and paginated.
   courses(
@@ -1028,6 +1299,22 @@ type Query {
     pagination: Pagination
   ): ChapterPayload!
 
+  # Get flashcards by their ids
+  flashcardsByIds(ids: [UUID!]!): [Flashcard!]!
+
+  # Get flashcard sets by their assessment ids.
+  # Returns a list of flashcard sets in the same order as the provided ids.
+  # Each element is null if the corresponding id is not found.
+  findFlashcardSetsByAssessmentIds(assessmentIds: [UUID!]!): [FlashcardSet]!
+
+  # Get the skill levels of the current user for all skill types (Bloom taxonomy) in a chapter of a course.
+  # If chapterId is null, then the skill levels for the course are returned.
+  userSkillLevels(chapterId: UUID): SkillLevels!
+
+  # Get the skill levels of the specified user for all skill types (Bloom taxonomy) in a chapter of a course.
+  # If chapterId is null, then the skill levels for the course are returned.
+  skillLevelsForUser(chapterId: UUID, userId: UUID!): SkillLevels!
+
   # get all contents
   contents: ContentPayload!
 
@@ -1043,6 +1330,32 @@ type Query {
 
   # Retrieves all existing sections for multiple chapters.
   sectionsByChapterIds(chapterIds: [UUID!]!): [[Section!]!]!
+
+  # Generates user specific suggestions for multiple chapters.
+  #
+  # Only content that the user can access will be considered.
+  # The contents will be ranked by suggested date, with the most overdue or most urgent content first.
+  suggestionsByChapterIds(
+    # The ids of the chapters for which suggestions should be generated.
+    chapterIds: [UUID!]!
+
+    # The amount of suggestions to generate in total.
+    amount: Int!
+
+    # Only suggestions for these skill types will be generated.
+    # If no skill types are given, suggestions for all skill types will be generated,
+    # also containing suggestions for media content (which do not have a skill type).
+    skillTypes: [SkillType!]! = []
+  ): [Suggestion!]!
+
+  # Get the reward score of the current user for the specified course.
+  userCourseRewardScores(courseId: UUID!): RewardScores!
+
+  # Get the reward score of the specified user for the specified course.
+  courseRewardScoresForUser(courseId: UUID!, userId: UUID!): RewardScores!
+
+  # Gets the power scores for each user in the course, ordered by power score descending.
+  scoreboard(courseId: UUID!): [ScoreboardItem!]!
 
   # Returns the media records with the given IDs. Throws an error if a MediaRecord corresponding to a given ID
   # cannot be found.
@@ -1064,36 +1377,6 @@ type Query {
   # Returns the media records associated the given content IDs as a list of lists where each sublist contains
   # the media records associated with the content ID at the same index in the input list
   mediaRecordsByContentIds(contentIds: [UUID!]!): [[MediaRecord!]!]!
-
-  # Retrieves a list of course memberships for a user ID
-  courseMemberships(id: UUID!): [CourseMembership!]
-
-  # Retrieves a list of course memberships for each user in a list of user IDs
-  courseMembershipsBatched(ids: [UUID!]!): [[CourseMembership!]!]!
-
-  # Gets the publicly available information for a user with the specified ID.
-  publicUserInfo(id: UUID!): PublicUserInfo!
-
-  # Gets the publicly available information for a list of users with the specified IDs.
-  publicUserInfoBatched(ids: [UUID!]!): [PublicUserInfo!]!
-
-  # Gets the user information of the currently authorized user.
-  currentUserInfo: UserInfo!
-
-  # Gets all of the user information of the specified user.
-  # Only available to the user themselves and privileged users.
-  userInfo(id: UUID!): UserInfo!
-
-  # Gets all of the users' information for a list of users with the specified IDs.
-  # Only available to privileged users.
-  userInfoBatched(ids: [UUID!]!): [UserInfo!]!
-
-  # Get flashcards by their ids
-  flashcardsByIds(ids: [UUID!]!): [Flashcard!]!
-
-  # Get flashcard sets by their assessment ids.
-  # Returns a list of flashcard sets in the same order as the provided ids.
-  flashcardSetsByAssessmentIds(assessmentIds: [UUID!]!): [FlashcardSet!]!
 
   # Get quiz by assessment ID.
   # If any of the assessment IDs are not found, the corresponding quiz will be null.
@@ -1119,7 +1402,18 @@ interface Question {
   type: QuestionType!
 
   # Optional hint for the question, can be markdown.
-  hint: String
+  hint: ResourceMarkdown
+}
+
+input QuestionCompletedInput {
+  # ID of the question.
+  questionId: UUID!
+
+  # true when question was answered correctly
+  correct: Boolean!
+
+  # true when a hint was used for the question
+  usedHint: Boolean!
 }
 
 enum QuestionPoolingMode {
@@ -1133,6 +1427,11 @@ enum QuestionPoolingMode {
 # The type of a question.
 enum QuestionType {
   MULTIPLE_CHOICE
+  CLOZE
+  ASSOCIATION
+  EXACT_ANSWER
+  NUMERIC
+  SELF_ASSESSMENT
 }
 
 # A quiz is a set of questions that the user has to answer correctly to pass the quiz.
@@ -1196,11 +1495,8 @@ input QuizCompletedInput {
   # ID of the quiz.
   quizId: UUID!
 
-  # Number of questions the user answered correctly.
-  numberOfCorrectAnswers: Int!
-
-  # Number of hints the user requested.
-  numberOfHintsUsed: Int!
+  # List of questions that were answered in the quiz.
+  completedQuestions: [QuestionCompletedInput!]!
 }
 
 type QuizMutation {
@@ -1212,6 +1508,45 @@ type QuizMutation {
 
   # Update a multiple choice question in the quiz questions.
   updateMultipleChoiceQuestion(input: UpdateMultipleChoiceQuestionInput!): Quiz!
+
+  # Add a cloze question to the quiz questions, at the end of the list.
+  addClozeQuestion(input: CreateClozeQuestionInput!): Quiz!
+
+  # Update a cloze question in the quiz questions.
+  updateClozeQuestion(input: UpdateClozeQuestionInput!): Quiz!
+
+  # Add an association question to the quiz questions, at the end of the list.
+  addAssociationQuestion(input: CreateAssociationQuestionInput!): Quiz!
+    @deprecated(reason: "Not implemented yet")
+
+  # Update an association question in the quiz questions.
+  updateAssociationQuestion(input: UpdateAssociationQuestionInput!): Quiz!
+    @deprecated(reason: "Not implemented yet")
+
+  # Add an free text question with exact answer to the quiz questions, at the end of the list.
+  addExactAnswerQuestion(input: CreateExactAnswerQuestionInput!): Quiz!
+    @deprecated(reason: "Not implemented yet")
+
+  # Update an free text question with exact answer in the quiz questions.
+  updateExactAnswerQuestion(input: UpdateExactAnswerQuestionInput!): Quiz!
+    @deprecated(reason: "Not implemented yet")
+
+  # Add a numeric question to the quiz questions, at the end of the list.
+  addNumericQuestion(input: CreateNumericQuestionInput!): Quiz!
+    @deprecated(reason: "Not implemented yet")
+
+  # Update a numeric question in the quiz questions.
+  updateNumericQuestion(input: UpdateNumericQuestionInput!): Quiz!
+    @deprecated(reason: "Not implemented yet")
+
+  # Add a self assessment question to the quiz questions, at the end of the list.
+  addSelfAssessmentQuestion(input: CreateSelfAssessmentQuestionInput!): Quiz!
+    @deprecated(reason: "Not implemented yet")
+
+  # Update a self assessment question in the quiz questions.
+  updateSelfAssessmentQuestion(
+    input: UpdateSelfAssessmentQuestionInput!
+  ): Quiz! @deprecated(reason: "Not implemented yet")
 
   # Removes the question with the given number from the quiz.
   # This will also update the numbers of the following questions.
@@ -1338,7 +1673,7 @@ type ScoreboardItem {
 
   # The power score of the user.
   powerScore: Int!
-  user: PublicUserInfo!
+  user: PublicUserInfo
 }
 
 # Representation of a Section
@@ -1355,6 +1690,85 @@ type Section {
   # List of Stages contained in a Section
   stages: [Stage!]!
   chapter: Chapter!
+}
+
+# A single question with a free text answer field, where the answer is not automatically checked.
+# The user has to enter a solution and self-assess whether it is correct or not.
+# This is useful for questions where the answer is not clear-cut, e.g. when the user should explain a concept.
+type SelfAssessmentQuestion implements Question {
+  # Text of the question, can be markdown.
+  text: ResourceMarkdown!
+
+  # A possible correct answer to the question.
+  solutionSuggestion: ResourceMarkdown!
+
+  # Unique identifier of the question.
+  id: UUID!
+
+  # Number of the question, i.e., the position of the question in the list of questions.
+  # Only relevant if questionPoolingMode is ORDERED.
+  number: Int!
+
+  # Type of the question.
+  type: QuestionType!
+
+  # Optional hint for the question, can be markdown.
+  hint: ResourceMarkdown
+}
+
+type SingleAssociation {
+  # The left side of the association.
+  left: String!
+
+  # The right side of the association.
+  right: String!
+
+  # Feedback for the association when the user assigns a wrong answer, can be markdown.
+  feedback: ResourceMarkdown
+}
+
+# The skill level of a user.
+type SkillLevel {
+  # The value of the skill level.
+  # levels are between 0 and 100.
+  value: Float!
+
+  # A log of the changes to the skill level
+  log: [SkillLevelLogItem!]!
+}
+
+# An item in the skill level change log.
+type SkillLevelLogItem {
+  # The date when the skill level changed.
+  date: DateTime!
+
+  # The difference between the previous and the new skill level.
+  difference: Float!
+
+  # The old skill level.
+  oldValue: Float!
+
+  # The new skill level.
+  newValue: Float!
+
+  # The ids of the contents that are associated with the change.
+  associatedContentIds: [UUID!]!
+  associatedContents: [Content]!
+}
+
+# The four skill level of a user.
+type SkillLevels {
+  # remember represents how much user remember the concept
+  remember: SkillLevel!
+
+  # understand represents how well the user understands learned content.
+  understand: SkillLevel!
+
+  # apply represents the how well user applies the learned concept during assessment.
+  apply: SkillLevel!
+
+  # apply is how much user can evaluate information and draw conclusions
+  analyze: SkillLevel!
 }
 
 # Type of the assessment
@@ -1418,6 +1832,20 @@ input StringFilter {
   ignoreCase: Boolean! = false
 }
 
+# Represents a suggestion for a user to learn new content or review old content.
+type Suggestion {
+  # The content that is suggested to the user.
+  content: Content!
+
+  # The type of suggestion.
+  type: SuggestionType!
+}
+
+enum SuggestionType {
+  NEW_CONTENT
+  REPETITION
+}
+
 # An RFC-3339 compliant Full Time Scalar
 scalar Time
 
@@ -1430,6 +1858,20 @@ input UpdateAssessmentInput {
 
   # Assessment metadata
   assessmentMetadata: AssessmentMetadataInput!
+}
+
+input UpdateAssociationQuestionInput {
+  # UUID of the question to update.
+  id: UUID!
+
+  # Text of the question, can be markdown.
+  text: ResourceMarkdownInput!
+
+  # List of associations.
+  associations: [AssociationInput!]!
+
+  # Optional hint for the question, can be markdown.
+  hint: ResourceMarkdownInput
 }
 
 # Input type for updating chapters.
@@ -1462,6 +1904,23 @@ input UpdateChapterInput {
   # Suggested End date of the chapter, ISO 8601 format.
   # Must be after the Start Dates and before the End dates.
   suggestedEndDate: DateTime
+}
+
+input UpdateClozeQuestionInput {
+  # UUID of the question to update.
+  id: UUID!
+
+  # List of cloze elements.
+  clozeElements: [ClozeElementInput!]!
+
+  # List of additional wrong answers.
+  additionalWrongAnswers: [String!]!
+
+  # If true, the list of possible answers will be shown to the user.
+  showBlanksList: Boolean! = true
+
+  # Optional hint for the question, can be markdown.
+  hint: ResourceMarkdownInput
 }
 
 input UpdateContentMetadataInput {
@@ -1504,23 +1963,32 @@ input UpdateCourseInput {
   published: Boolean!
 }
 
+input UpdateExactAnswerQuestionInput {
+  # UUID of the question to update.
+  id: UUID!
+
+  # Text of the question, can be markdown.
+  text: ResourceMarkdownInput!
+
+  # A list of possible correct answers.
+  correctAnswers: [String!]!
+
+  # If the answer is case sensitive. If true, the answer is checked case sensitive.
+  caseSensitive: Boolean! = false
+
+  # Feedback for the question when the user enters a wrong answer, can be markdown.
+  feedback: ResourceMarkdownInput
+
+  # Optional hint for the question, can be markdown.
+  hint: ResourceMarkdownInput
+}
+
 input UpdateFlashcardInput {
   # Id of the flashcard to update.
   id: UUID!
 
   # List of sides of this flashcard. Must be at least two sides.
-  sides: [UpdateFlashcardSideInput!]!
-}
-
-input UpdateFlashcardSideInput {
-  # Text of this flashcard side. This can be markdown. Max length is 3000 characters.
-  text: ResourceMarkdownInput!
-
-  # Label of this flashcard side. E.g. "Front" or "Back", or "Question" or "Answer".
-  label: String!
-
-  # Whether this side is a question, i.e. should be shown to the user to guess the other sides or not.
-  isQuestion: Boolean!
+  sides: [FlashcardSideInput!]!
 }
 
 input UpdateMediaContentInput {
@@ -1550,13 +2018,33 @@ input UpdateMultipleChoiceQuestionInput {
   id: UUID!
 
   # Text of the question, can be markdown.
-  text: String!
+  text: ResourceMarkdownInput!
 
   # List of answers.
   answers: [MultipleChoiceAnswerInput!]!
 
   # Optional hint for the question, can be markdown.
-  hint: String
+  hint: ResourceMarkdownInput
+}
+
+input UpdateNumericQuestionInput {
+  # UUID of the question to update.
+  id: UUID!
+
+  # Text of the question, can be markdown.
+  text: ResourceMarkdownInput!
+
+  # The correct answer for the question.
+  correctAnswer: Float!
+
+  # The allowed deviation from the correct answer.
+  tolerance: Float!
+
+  # Feedback for the question when the user enters a wrong answer, can be markdown.
+  feedback: ResourceMarkdownInput
+
+  # Optional hint for the question, can be markdown.
+  hint: ResourceMarkdownInput
 }
 
 input UpdateSectionInput {
@@ -1565,6 +2053,20 @@ input UpdateSectionInput {
 
   # new name of the Section
   name: String!
+}
+
+input UpdateSelfAssessmentQuestionInput {
+  # UUID of the question to update.
+  id: UUID!
+
+  # Text of the question, can be markdown.
+  text: ResourceMarkdownInput!
+
+  # A possible correct answer to the question.
+  solutionSuggestion: ResourceMarkdownInput!
+
+  # Optional hint for the question, can be markdown.
+  hint: ResourceMarkdownInput
 }
 
 input UpdateStageInput {
@@ -1586,8 +2088,6 @@ type UserInfo {
   userName: String!
   firstName: String!
   lastName: String!
-
-  # The course memberships of the user.
   courseMemberships: [CourseMembership!]!
 }
 
@@ -1613,10 +2113,29 @@ type UserProgressData {
   # This is null if the user has not completed the content item once.
   nextLearnDate: DateTime
 
-  # The last time the content was learned.
+  # The last time the content was learned successfully.
   # This is null if the user has not completed the content item once.
   lastLearnDate: DateTime
+
+  # True if the user has completed the content item at least once successfully.
+  isLearned: Boolean!
+
+  # True if the assessment is due for review.
+  isDueForReview: Boolean!
 }
 
 # A universally unique identifier compliant UUID Scalar
 scalar UUID
+
+# The division of the academic year.
+enum YearDivision {
+  FIRST_SEMESTER
+  SECOND_SEMESTER
+  FIRST_TRIMESTER
+  SECOND_TRIMESTER
+  THIRD_TRIMESTER
+  FIRST_QUARTER
+  SECOND_QUARTER
+  THIRD_QUARTER
+  FOURTH_QUARTER
+}

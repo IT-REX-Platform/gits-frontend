@@ -1,16 +1,32 @@
-import { lecturerAddQuizQuestionMutation } from "@/__generated__/lecturerAddQuizQuestionMutation.graphql";
 import { lecturerDeleteQuizContentMutation } from "@/__generated__/lecturerDeleteQuizContentMutation.graphql";
 import { lecturerEditQuizQuery } from "@/__generated__/lecturerEditQuizQuery.graphql";
-import { AssessmentMetadataPayload } from "@/components/AssessmentMetadataFormSection";
-import { ContentMetadataPayload } from "@/components/ContentMetadataFormSection";
+import {
+  CreateMultipleChoiceQuestionInput,
+  lecturerQuizAddMultipleChoiceQuestionMutation,
+} from "@/__generated__/lecturerQuizAddMultipleChoiceQuestionMutation.graphql";
+import { Form, FormSection } from "@/components/Form";
 import { Heading } from "@/components/Heading";
+import { ResourceMarkdownEditor } from "@/components/ResourceMarkdownEditor";
 import { Add, Delete, Edit } from "@mui/icons-material";
-import { Alert, Backdrop, Button, CircularProgress } from "@mui/material";
-import Error from "next/error";
+import { LoadingButton } from "@mui/lab";
+import {
+  Alert,
+  Button,
+  Checkbox,
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  FormControlLabel,
+  FormGroup,
+  TextField,
+  Typography,
+} from "@mui/material";
+import { default as Error } from "next/error";
 import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
 import { graphql, useLazyLoadQuery, useMutation } from "react-relay";
-import { EditFlashcardSetModal } from "../../../../../components/EditFlashcardSetModal";
 
 export default function EditQuiz() {
   const { quizId, courseId } = useParams();
@@ -34,116 +50,59 @@ export default function EditQuiz() {
           }
           ... on QuizAssessment {
             quiz {
+              assessmentId
               questionPool {
                 id
                 ... on MultipleChoiceQuestion {
-                  text
-                  hint
+                  text {
+                    text
+                  }
+                  hint {
+                    text
+                  }
                   answers {
                     correct
-                    feedback
-                    text
+                    feedback {
+                      text
+                    }
+                    answerText {
+                      text
+                    }
                   }
                 }
               }
             }
           }
-          ...EditFlashcardSetModalFragment
         }
       }
     `,
     { id: quizId }
   );
 
-  const [isAddFlashcardOpen, setAddFlashcardOpen] = useState(false);
+  const [isAddQuizOpen, setAddQuizOpen] = useState(false);
   const [isEditSetOpen, setEditSetOpen] = useState(false);
 
-  const [error, setError] = useState<any>(null);
-  const [addFlashcard, isAddingFlashcard] =
-    useMutation<lecturerAddQuizQuestionMutation>(graphql`
-      mutation lecturerAddQuizQuestionMutation(
-        $flashcard: CreateFlashcardInput!
-        $assessmentId: UUID!
-      ) {
-        mutateQuiz(assessmentId: $assessmentId) {
-          addMultipleChoiceQuestion(input: $quiz) {
-            questionPool {
-              
-            }
-          }
-          
-        }
-      }
-    `);
-  const [updateFlashcardSet, isUpdatingFlashcardSet] = useMutation(graphql`
-    mutation lecturerEditFlashcardSetMutation(
-      $assessment: UpdateAssessmentInput!
-    ) {
-      updateAssessment(input: $assessment) {
-        id
-      }
-    }
-  `);
-  const isUpdating = isAddingFlashcard || isUpdatingFlashcardSet;
-
-  if (contentsByIds.length == 0) {
-    return <Error statusCode={404} />;
-  }
-
   const content = contentsByIds[0];
-  const flashcardSet = content.flashcardSet;
+  const quiz = content.quiz;
 
-  if (flashcardSet == null) {
+  if (!quiz) {
     return <Error statusCode={400} />;
   }
 
-  function handleAddFlashcard(sides: FlashcardSideData[]) {
-    const newFlashcard = {
-      sides,
-    };
+  const [error, setError] = useState<any>(null);
 
-    setAddFlashcardOpen(false);
-    addFlashcard({
-      variables: { assessmentId: flashcardSetId, flashcard: newFlashcard },
-      onError: setError,
-      updater(store, response) {
-        // Get record of flashcard set and of the new flashcard
-        const flashcardSetRecord = store.get(flashcardSet!.__id);
-        const newRecord = store.get(
-          response.mutateFlashcardSet.createFlashcard!.__id
-        );
-        if (!flashcardSetRecord || !newRecord) return;
-
-        // Update the linked records of the flashcard set
-        const flashcardRecords =
-          flashcardSetRecord.getLinkedRecords("flashcards") ?? [];
-        flashcardSetRecord.setLinkedRecords(
-          [...flashcardRecords, newRecord],
-          "flashcards"
-        );
-      },
-    });
-  }
-
-  function handleUpdateFlashcardSet(
-    metadata: ContentMetadataPayload,
-    assessmentMetadata: AssessmentMetadataPayload
-  ) {
-    const assessment = {
-      id: content.id,
-      metadata: {
-        ...metadata,
-        chapterId: content.metadata.chapterId,
-      },
-      assessmentMetadata,
-    };
-
-    setEditSetOpen(false);
-    updateFlashcardSet({
-      variables: { assessment },
-      onError: setError,
-    });
-  }
+  const [deleteQuestion, isDeleting] = useMutation(graphql`
+    mutation lecturerDeleteMultipleChoiceQuestionMutation(
+      $assessmentId: UUID!
+      $number: Int!
+    ) {
+      mutateQuiz(assessmentId: $assessmentId) {
+        removeQuestion(number: $number) {
+          assessmentId
+        }
+      }
+    }
+  `);
 
   return (
     <main>
@@ -157,7 +116,7 @@ export default function EditQuiz() {
               onClick={() => {
                 if (
                   confirm(
-                    "Do you really want to delete this flashcard set? This can't be undone."
+                    "Do you really want to delete this quiz? This can't be undone."
                   )
                 ) {
                   del({
@@ -205,43 +164,205 @@ export default function EditQuiz() {
           ))}
         </div>
       )}
-      <div className="mt-8 flex flex-col gap-6">
-        {flashcardSet.flashcards.map((flashcard, i) => (
-          <Flashcard
-            key={flashcard.id}
-            title={`Card ${i + 1}/${flashcardSet.flashcards.length}`}
-            onError={setError}
-            _flashcard={flashcard}
-            _assessmentId={flashcardSetId}
-          />
-        ))}
-        {isAddFlashcardOpen && (
-          <LocalFlashcard
-            onClose={() => setAddFlashcardOpen(false)}
-            onSubmit={handleAddFlashcard}
-          />
-        )}
+
+      {quiz.questionPool.map((question) => (
         <div>
-          {!isAddFlashcardOpen && (
-            <Button
-              startIcon={<Add />}
-              onClick={() => setAddFlashcardOpen(true)}
-            >
-              Add flashcard
-            </Button>
-          )}
+          <Typography variant="overline" color="textSecondary">
+            {question.text!.text}
+          </Typography>
+          <div className="flex flex-wrap gap-2">
+            <div className="flex justify-center gap-4">
+              <FormGroup>
+                {question.answers!.map((answer, index) => (
+                  <div key={index}>
+                    <FormControlLabel
+                      control={<Checkbox />}
+                      label={answer.answerText.text}
+                    />
+                  </div>
+                ))}
+              </FormGroup>
+            </div>
+          </div>
+          {/* <Button
+            sx={{ marginTop: 1 }}
+            startIcon={<Add />}
+            onClick={() => setAddSideOpen(true)}
+          >
+            Add side
+          </Button> */}
+        </div>
+      ))}
+      <div className="mt-8 flex flex-col gap-6">
+        <div>
+          <Button startIcon={<Add />} onClick={() => setAddQuizOpen(true)}>
+            Add quiz question
+          </Button>
         </div>
       </div>
-      <Backdrop open={isUpdating} sx={{ zIndex: "modal" }}>
-        <CircularProgress />
-      </Backdrop>
-      {isEditSetOpen && (
-        <EditFlashcardSetModal
-          onClose={() => setEditSetOpen(false)}
-          onSubmit={handleUpdateFlashcardSet}
-          _content={content}
-        />
-      )}
+
+      <AddMultipleChoiceQuestionModal
+        assessmentId={quiz.assessmentId}
+        onClose={() => setAddQuizOpen(false)}
+        open={isAddQuizOpen}
+      />
     </main>
+  );
+}
+
+function AddMultipleChoiceQuestionModal({
+  open,
+  onClose,
+  assessmentId,
+}: {
+  open: boolean;
+  onClose: () => void;
+  assessmentId: string;
+}) {
+  const [error, setError] = useState<any>(null);
+
+  const [addQuestion, isLoading] =
+    useMutation<lecturerQuizAddMultipleChoiceQuestionMutation>(graphql`
+      mutation lecturerQuizAddMultipleChoiceQuestionMutation(
+        $input: CreateMultipleChoiceQuestionInput!
+        $assessmentId: UUID!
+      ) {
+        mutateQuiz(assessmentId: $assessmentId) {
+          addMultipleChoiceQuestion(input: $input) {
+            assessmentId
+          }
+        }
+      }
+    `);
+
+  const defaultValues = {
+    answers: [],
+    text: { text: "" },
+    hint: { text: "" },
+  };
+
+  const [input, setInput] =
+    useState<CreateMultipleChoiceQuestionInput>(defaultValues);
+
+  const handleSubmit = () => {
+    addQuestion({
+      variables: { input, assessmentId },
+      onCompleted() {
+        setInput(defaultValues);
+        onClose();
+      },
+      onError: setError,
+    });
+  };
+
+  return (
+    <Dialog open={open} maxWidth="lg" onClose={onClose}>
+      <DialogTitle>Add multiple choice question</DialogTitle>
+      <DialogContent>
+        {error && (
+          <div className="flex flex-col gap-2 mt-8">
+            {error?.source?.errors.map((err: any, i: number) => (
+              <Alert key={i} severity="error" onClose={() => setError(null)}>
+                {err.message}
+              </Alert>
+            ))}
+          </div>
+        )}
+
+        <Form>
+          <FormSection title="Question">
+            <TextField
+              value={input.text}
+              onChange={(e) =>
+                setInput({ ...input, text: { text: e.target.value } })
+              }
+              className="w-96"
+              label="Title"
+              variant="outlined"
+              required
+            />
+
+            <TextField
+              value={input.hint}
+              onChange={(e) =>
+                setInput({ ...input, hint: { text: e.target.value } })
+              }
+              className="w-96"
+              label="Hint"
+              variant="outlined"
+              required
+            />
+          </FormSection>
+          {input.answers.map((answer, index) => (
+            <FormSection title={`Answer ${index + 1}`}>
+              <TextField
+                value={answer.answerText!.text}
+                onChange={(e) => {
+                  answer.answerText!.text = e.target.value;
+                  setInput({ ...input });
+                }}
+                className="w-96"
+                label="Text"
+                variant="outlined"
+                required
+              />
+              <TextField
+                value={answer.feedback}
+                onChange={(e) => {
+                  answer.feedback!.text = e.target.value;
+                  setInput({ ...input });
+                }}
+                className="w-96"
+                label="Feedback"
+                variant="outlined"
+                required
+              />
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    value={answer.correct}
+                    onChange={(e) => {
+                      answer.correct = !!e.target.value;
+                      setInput({ ...input });
+                    }}
+                  />
+                }
+                label="Correct"
+              />
+            </FormSection>
+          ))}
+
+          <ResourceMarkdownEditor />
+          <div className="flex w-full justify-end col-span-full">
+            <Button
+              onClick={() =>
+                setInput({
+                  ...input,
+                  answers: [
+                    ...input.answers,
+                    {
+                      correct: false,
+                      answerText: { text: "" },
+                      feedback: { text: "" },
+                    },
+                  ],
+                })
+              }
+              startIcon={<Add />}
+            >
+              Add Answer
+            </Button>
+          </div>
+        </Form>
+      </DialogContent>
+      <DialogActions>
+        <Button disabled={isLoading} onClick={onClose}>
+          Cancel
+        </Button>
+        <LoadingButton loading={isLoading} onClick={handleSubmit}>
+          Save
+        </LoadingButton>
+      </DialogActions>
+    </Dialog>
   );
 }

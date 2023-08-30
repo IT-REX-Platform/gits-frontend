@@ -1,30 +1,52 @@
+import { SkillLevelsFragment$key } from "@/__generated__/SkillLevelsFragment.graphql";
 import { Box, Tooltip } from "@mui/material";
 import { ReactNode } from "react";
+import { graphql, useFragment } from "react-relay";
 import colors from "tailwindcss/colors";
 
-export function SkillLevels({ className = "" }: { className?: string }) {
+export function SkillLevels({
+  className = "",
+  _skillLevels,
+}: {
+  className?: string;
+  _skillLevels: SkillLevelsFragment$key;
+}) {
+  const skillLevels = useFragment(
+    graphql`
+      fragment SkillLevelsFragment on SkillLevels {
+        remember {
+          value
+        }
+        understand {
+          value
+        }
+        apply {
+          value
+        }
+        analyze {
+          value
+        }
+      }
+    `,
+    _skillLevels
+  );
   return (
     <div
       className={`grid grid-flow-col auto-cols-fr gap-4 items-center ${className}`}
     >
-      <SkillLevel label="Remember" level={1} progress={10} />
-      <SkillLevel label="Understand" level={3} progress={45} />
-      <SkillLevel label="Apply" level={5} progress={70} />
-      <SkillLevel label="Analyze" level={7} progress={89} />
+      <SkillLevel label="Remember" value={skillLevels.remember.value} />
+      <SkillLevel label="Understand" value={skillLevels.understand.value} />
+      <SkillLevel label="Apply" value={skillLevels.apply.value} />
+      <SkillLevel label="Analyze" value={skillLevels.analyze.value} />
     </div>
   );
 }
 
-export function SkillLevel({
-  level,
-  label,
-  progress,
-}: {
-  level: number;
-  label: string;
-  progress: number;
-}) {
-  if (level <= 2) {
+export function SkillLevel({ value, label }: { value: number; label: string }) {
+  const level = Math.floor(value); // integer part is level
+  const progress = (value % 1) * 100; // decimal part is progress
+
+  if (level < 2) {
     return (
       <SkillLevelBase
         badge={
@@ -39,7 +61,7 @@ export function SkillLevel({
         tooltipClass="!bg-slate-500"
       />
     );
-  } else if (level <= 4) {
+  } else if (level < 4) {
     return (
       <SkillLevelBase
         badge={<SkillBadge color="#bf8970" level={level} progress={progress} />}
@@ -48,7 +70,7 @@ export function SkillLevel({
         tooltipClass="!bg-[#bf8970]"
       />
     );
-  } else if (level <= 6) {
+  } else if (level < 6) {
     return (
       <SkillLevelBase
         badge={<SkillBadge color="#c0c0c0" level={level} progress={progress} />}
@@ -57,7 +79,7 @@ export function SkillLevel({
         tooltipClass="!bg-[#c0c0c0]"
       />
     );
-  } else if (level <= 8) {
+  } else if (level < 8) {
     return (
       <SkillLevelBase
         badge={<SkillBadge color="#d4af37" level={level} progress={progress} />}

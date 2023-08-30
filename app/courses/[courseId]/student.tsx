@@ -11,7 +11,7 @@ import {
   styled,
   tooltipClasses,
 } from "@mui/material";
-import { chain, orderBy } from "lodash";
+import { chain, every, orderBy, some } from "lodash";
 import Error from "next/error";
 import { useParams, useRouter } from "next/navigation";
 import {
@@ -339,14 +339,7 @@ function StudentSection({
         stages {
           id
           position
-          requiredContents {
-            userProgressData {
-              lastLearnDate
-            }
-          }
-          optionalContents {
-            id
-          }
+          requiredContentsProgress
           ...studentCoursePageStageFragment
         }
       }
@@ -358,13 +351,9 @@ function StudentSection({
 
   // Workaround until the backend calculates the progress
   const stageComplete = stages.map(
-    (stage) =>
-      stage.requiredContents.filter(
-        (content) => content.userProgressData.lastLearnDate != null
-      ).length == stage.requiredContents.length
+    (stage) => stage.requiredContentsProgress === 100
   );
-  const sectionComplete =
-    stages.length > 0 ? stageComplete[stages.length - 1] : false;
+  const sectionComplete = every(section.stages, (_, idx) => stageComplete[idx]);
 
   return (
     <Section done={sectionComplete}>
@@ -380,7 +369,14 @@ function StudentSection({
               : stageComplete[i - 2] && !stageComplete[i - 1]) && (
               <StageBarrier />
             )}
-            <StudentStage key={stage.id} _stage={stage} />
+            <StudentStage
+              key={stage.id}
+              _stage={stage}
+              disabled={some(
+                section.stages.slice(0, i),
+                (_, idx) => !stageComplete[idx]
+              )}
+            />
           </>
         ))}
       </SectionContent>
@@ -389,49 +385,41 @@ function StudentSection({
 }
 
 function StudentStage({
+  disabled = false,
   _stage,
 }: {
+  disabled?: boolean;
   _stage: studentCoursePageStageFragment$key;
 }) {
   const stage = useFragment(
     graphql`
       fragment studentCoursePageStageFragment on Stage {
+        requiredContentsProgress
         requiredContents {
           ...ContentLinkFragment
           id
-          userProgressData {
-            lastLearnDate
-          }
         }
         optionalContents {
           ...ContentLinkFragment
           id
-          userProgressData {
-            lastLearnDate
-          }
         }
       }
     `,
     _stage
   );
 
-  // Workaround until the backend calculates the progress
-  const progress =
-    stage.requiredContents.length > 0
-      ? (100 *
-          stage.requiredContents.filter(
-            (content) => content.userProgressData.lastLearnDate != null
-          ).length) /
-        stage.requiredContents.length
-      : 100;
-
   return (
-    <Stage progress={progress}>
+    <Stage progress={disabled ? 0 : stage.requiredContentsProgress}>
       {stage.requiredContents.map((content) => (
-        <ContentLink key={content.id} _content={content} />
+        <ContentLink key={content.id} _content={content} disabled={disabled} />
       ))}
       {stage.optionalContents.map((content) => (
-        <ContentLink key={content.id} _content={content} optional />
+        <ContentLink
+          key={content.id}
+          _content={content}
+          optional
+          disabled={disabled}
+        />
       ))}
     </Stage>
   );

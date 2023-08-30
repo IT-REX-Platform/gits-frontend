@@ -353,6 +353,9 @@ function StudentSection({
   const stageComplete = stages.map(
     (stage) => stage.requiredContentsProgress === 100
   );
+  const stageDisabled = stages.map((_, i) =>
+    some(section.stages.slice(0, i), (_, idx) => !stageComplete[idx])
+  );
   const sectionComplete = every(section.stages, (_, idx) => stageComplete[idx]);
 
   return (
@@ -364,18 +367,13 @@ function StudentSection({
             {/* Show barrier if this is the first non-complete stage */}
             {(i == 0
               ? false
-              : i == 1
-              ? !stageComplete[0]
-              : stageComplete[i - 2] && !stageComplete[i - 1]) && (
+              : !stageComplete[i - 1] && !stageDisabled[i - 1]) && (
               <StageBarrier />
             )}
             <StudentStage
               key={stage.id}
               _stage={stage}
-              disabled={some(
-                section.stages.slice(0, i),
-                (_, idx) => !stageComplete[idx]
-              )}
+              disabled={stageDisabled[i]}
             />
           </>
         ))}

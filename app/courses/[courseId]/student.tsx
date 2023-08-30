@@ -39,6 +39,7 @@ import { RewardScores } from "@/components/RewardScores";
 import { Section, SectionContent, SectionHeader } from "@/components/Section";
 import { Stage, StageBarrier } from "@/components/Stage";
 import { Info } from "@mui/icons-material";
+import ExitToAppIcon from "@mui/icons-material/ExitToApp";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import dayjs from "dayjs";
 import isBetween from "dayjs/plugin/isBetween";
@@ -186,7 +187,8 @@ export default function StudentCoursePage() {
         <Button
           color="inherit"
           size="small"
-          variant="text"
+          variant="outlined"
+          endIcon={<ExitToAppIcon />}
           onClick={() => {
             if (
               confirm(
@@ -210,7 +212,7 @@ export default function StudentCoursePage() {
                   );
                 },
                 onCompleted() {
-                  router.push("/courses");
+                  router.push("/courses?leftCourse=true");
                 },
               });
             }

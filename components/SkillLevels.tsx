@@ -95,7 +95,7 @@ export function SkillLevel({ value, label }: { value: number; label: string }) {
           <SkillBadge
             color={colors.emerald[600]}
             level={level}
-            progress={progress}
+            progress={level >= 10 ? 100 : progress}
           />
         }
         label={label}

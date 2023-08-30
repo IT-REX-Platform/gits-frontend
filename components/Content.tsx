@@ -721,7 +721,7 @@ export function ProgressFrame({
   const progress = useFragment(
     graphql`
       fragment ContentProgressFrameFragment on UserProgressData {
-        lastLearnDate
+        isLearned
       }
     `,
     _progress
@@ -741,7 +741,7 @@ export function ProgressFrame({
       <CircularProgress
         className="absolute"
         variant="determinate"
-        value={progress.lastLearnDate != null ? 100 : 0}
+        value={progress.isLearned ? 100 : 0}
         thickness={3}
         size="4rem"
         sx={{ color }}

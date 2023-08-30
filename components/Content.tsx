@@ -741,7 +741,7 @@ export function ProgressFrame({
       <CircularProgress
         className="absolute"
         variant="determinate"
-        value={progress.isLearned ? 100 : 0}
+        value={progress?.isLearned === true ? 100 : 0}
         thickness={3}
         size="4rem"
         sx={{ color }}

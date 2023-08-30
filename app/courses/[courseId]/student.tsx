@@ -354,15 +354,15 @@ function StudentSection({
     (stage) => stage.requiredContentsProgress === 100
   );
   const stageDisabled = stages.map((_, i) =>
-    some(section.stages.slice(0, i), (_, idx) => !stageComplete[idx])
+    some(stages.slice(0, i), (_, idx) => !stageComplete[idx])
   );
-  const sectionComplete = every(section.stages, (_, idx) => stageComplete[idx]);
+  const sectionComplete = every(stages, (_, idx) => stageComplete[idx]);
 
   return (
     <Section done={sectionComplete}>
       <SectionHeader>{section.name}</SectionHeader>
       <SectionContent>
-        {section.stages.map((stage, i) => (
+        {stages.map((stage, i) => (
           <>
             {/* Show barrier if this is the first non-complete stage */}
             {(i == 0

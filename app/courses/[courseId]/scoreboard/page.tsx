@@ -93,17 +93,20 @@ export default function StickyHeadTable() {
 
   return (
     <div>
-      <Heading title={"Scoreboard"} backButton />
-      <div className="text-center">
-        <TextField
-          id="outlined-basic"
-          placeholder="Search by name"
-          variant="outlined"
-          value={searchTerm}
-          onChange={(x) => setSearchTerm(x.target.value)}
-        />
-      </div>
-      <TableContainer sx={{ maxHeight: "100%" }}>
+      <Heading
+        title={"Scoreboard"}
+        backButton
+        action={
+          <TextField
+            id="outlined-basic"
+            placeholder="Search by name"
+            variant="outlined"
+            value={searchTerm}
+            onChange={(x) => setSearchTerm(x.target.value)}
+          />
+        }
+      />
+      <TableContainer sx={{ maxHeight: "100%" }} className="mt-4">
         <Table stickyHeader aria-label="sticky table">
           <TableHead>
             <TableRow>

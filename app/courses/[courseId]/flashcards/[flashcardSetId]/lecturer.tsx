@@ -537,6 +537,7 @@ function EditFlashcardSetModal({
           assessmentMetadata {
             skillType
             skillPoints
+            initialLearningInterval
           }
         }
       }

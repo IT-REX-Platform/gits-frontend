@@ -6,6 +6,7 @@ import { ContentInvalidDeleteMutation } from "@/__generated__/ContentInvalidDele
 import { ContentLinkFragment$key } from "@/__generated__/ContentLinkFragment.graphql";
 import { ContentMediaFragment$key } from "@/__generated__/ContentMediaFragment.graphql";
 import { ContentPresentationFragment$key } from "@/__generated__/ContentPresentationFragment.graphql";
+import { ContentProgressFrameFragment$key } from "@/__generated__/ContentProgressFrameFragment.graphql";
 import { ContentQuizFragment$key } from "@/__generated__/ContentQuizFragment.graphql";
 import { ContentVideoFragment$key } from "@/__generated__/ContentVideoFragment.graphql";
 import { PageView, usePageView } from "@/src/currentView";
@@ -190,7 +191,7 @@ export function VideoContent({
       fragment ContentVideoFragment on MediaContent {
         id
         userProgressData {
-          lastLearnDate
+          ...ContentProgressFrameFragment
         }
       }
     `,
@@ -215,7 +216,7 @@ export function VideoContent({
       iconFrame={
         <ProgressFrame
           color={disabled ? colors.gray[100] : colors.sky[200]}
-          progress={media.userProgressData.lastLearnDate ? 100 : 0}
+          _progress={media.userProgressData}
         />
       }
     />
@@ -329,7 +330,7 @@ export function PresentationContent({
       fragment ContentPresentationFragment on MediaContent {
         id
         userProgressData {
-          lastLearnDate
+          ...ContentProgressFrameFragment
         }
       }
     `,
@@ -354,7 +355,7 @@ export function PresentationContent({
       iconFrame={
         <ProgressFrame
           color={disabled ? colors.gray[100] : colors.violet[200]}
-          progress={media.userProgressData.lastLearnDate ? 100 : 0}
+          _progress={media.userProgressData}
         />
       }
     />
@@ -376,7 +377,7 @@ export function DocumentContent({
       fragment ContentDocumentFragment on MediaContent {
         id
         userProgressData {
-          lastLearnDate
+          ...ContentProgressFrameFragment
         }
       }
     `,
@@ -401,7 +402,7 @@ export function DocumentContent({
       iconFrame={
         <ProgressFrame
           color={disabled ? colors.gray[100] : colors.indigo[200]}
-          progress={media.userProgressData.lastLearnDate ? 100 : 0}
+          _progress={media.userProgressData}
         />
       }
     />
@@ -497,6 +498,7 @@ export function FlashcardContent({
         userProgressData {
           nextLearnDate
           ...ContentEarlyRepeatFragment
+          ...ContentProgressFrameFragment
         }
       }
     `,
@@ -545,7 +547,7 @@ export function FlashcardContent({
         iconFrame={
           <ProgressFrame
             color={disabled ? colors.gray[100] : colors.emerald[200]}
-            progress={disabled ? 0 : 0}
+            _progress={flashcard.userProgressData}
           />
         }
       />
@@ -565,6 +567,7 @@ export function QuizContent({ _quiz }: { _quiz: ContentQuizFragment$key }) {
         userProgressData {
           nextLearnDate
           ...ContentEarlyRepeatFragment
+          ...ContentProgressFrameFragment
         }
       }
     `,
@@ -613,7 +616,7 @@ export function QuizContent({ _quiz }: { _quiz: ContentQuizFragment$key }) {
         iconFrame={
           <ProgressFrame
             color={disabled ? colors.gray[100] : colors.emerald[200]}
-            progress={disabled ? 0 : 0}
+            _progress={quiz.userProgressData}
           />
         }
       />
@@ -710,11 +713,19 @@ export function Content({
 
 export function ProgressFrame({
   color,
-  progress,
+  _progress,
 }: {
   color: string;
-  progress: number;
+  _progress: ContentProgressFrameFragment$key;
 }) {
+  const progress = useFragment(
+    graphql`
+      fragment ContentProgressFrameFragment on UserProgressData {
+        isLearned
+      }
+    `,
+    _progress
+  );
   return (
     <>
       <div
@@ -730,7 +741,7 @@ export function ProgressFrame({
       <CircularProgress
         className="absolute"
         variant="determinate"
-        value={progress}
+        value={progress?.isLearned === true ? 100 : 0}
         thickness={3}
         size="4rem"
         sx={{ color }}

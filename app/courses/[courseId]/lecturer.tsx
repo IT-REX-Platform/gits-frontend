@@ -214,10 +214,7 @@ export default function LecturerCoursePage() {
                 <SectionContent>
                   {orderBy(section.stages, (x) => x.position, "asc").map(
                     (stage) => (
-                      <Stage
-                        progress={stage.requiredContentsProgress}
-                        key={stage.id}
-                      >
+                      <Stage progress={0} key={stage.id}>
                         {stage.requiredContents.map((content) => (
                           <ContentLink key={content.id} _content={content} />
                         ))}

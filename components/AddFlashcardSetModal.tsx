@@ -73,7 +73,8 @@ export function AddFlashcardSetModal({
     useMutation<AddFlashcardSetModalMutation>(graphql`
       mutation AddFlashcardSetModalMutation($assessmentId: UUID!) {
         createFlashcardSet(
-          input: { assessmentId: $assessmentId, flashcards: [] }
+          assessmentId: $assessmentId
+          input: { flashcards: [] }
         ) {
           assessmentId
         }
@@ -92,6 +93,8 @@ export function AddFlashcardSetModal({
       assessmentMetadata: {
         ...assessmentMetadata!,
         skillType: assessmentMetadata!.skillType as SkillType,
+        initialLearningInterval: assessmentMetadata!
+          .initialLearningInterval as number,
       },
     };
     createAssessment({

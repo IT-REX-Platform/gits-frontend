@@ -80,36 +80,52 @@ export default function StudentQuiz() {
               assessmentId
               questionPool {
                 ... on MultipleChoiceQuestion {
-                  text
-                  answers {
+                  text {
                     text
+                  }
+                  answers {
+                    answerText {
+                      text
+                    }
                     correct
-                    feedback
+                    feedback {
+                      text
+                    }
                   }
                   numberOfCorrectAnswers
                 }
                 id
                 number
                 type
-                hint
+                hint {
+                  text
+                }
               }
               requiredCorrectAnswers
               questionPoolingMode
               numberOfRandomlySelectedQuestions
               selectedQuestions {
                 ... on MultipleChoiceQuestion {
-                  text
-                  answers {
+                  text {
                     text
+                  }
+                  answers {
+                    answerText {
+                      text
+                    }
                     correct
-                    feedback
+                    feedback {
+                      text
+                    }
                   }
                   numberOfCorrectAnswers
                 }
                 id
                 number
                 type
-                hint
+                hint {
+                  text
+                }
               }
             }
           }
@@ -192,8 +208,8 @@ export default function StudentQuiz() {
       <InfoDialog
         open={infoDialogOpen}
         onClose={() => setInfoDialogOpen(false)}
-        title={questionText!}
-        hint={currentQuestion.hint!}
+        title={questionText!.text}
+        hint={currentQuestion.hint!.text}
       />
 
       <div className="w-full border-b border-b-gray-300 mt-6 flex justify-center">
@@ -202,7 +218,7 @@ export default function StudentQuiz() {
         </div>
       </div>
 
-      <div className="mt-6 text-center text-gray-600">{questionText}</div>
+      <div className="mt-6 text-center text-gray-600">{questionText?.text}</div>
 
       <div className="w-full border-b border-b-gray-300 mt-6 flex justify-center mb-6">
         <div>
@@ -240,7 +256,7 @@ export default function StudentQuiz() {
                     checked={userAnswers.includes(index)}
                   />
                 }
-                label={answer.text}
+                label={answer.answerText.text}
               />
             </div>
           ))}

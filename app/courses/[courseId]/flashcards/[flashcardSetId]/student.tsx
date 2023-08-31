@@ -3,6 +3,7 @@
 import { studentFlashcardLogProgressMutation } from "@/__generated__/studentFlashcardLogProgressMutation.graphql";
 import { studentFlashcardsQuery } from "@/__generated__/studentFlashcardsQuery.graphql";
 import { Heading } from "@/components/Heading";
+import { RenderRichText } from "@/components/RichTextEditor";
 import { Check, Close, Loop } from "@mui/icons-material";
 import { Alert, Button, CircularProgress } from "@mui/material";
 import { motion } from "framer-motion";
@@ -10,7 +11,6 @@ import { chain } from "lodash";
 import Error from "next/error";
 import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
-import ReactMarkdown from "react-markdown";
 import { graphql, useLazyLoadQuery, useMutation } from "react-relay";
 
 export default function StudentFlashcards() {
@@ -40,8 +40,7 @@ export default function StudentFlashcards() {
                     isQuestion
                     label
                     text {
-                      text
-                      referencedMediaRecordIds
+                      ...RichTextEditorFragment
                     }
                   }
                 }
@@ -134,7 +133,7 @@ export default function StudentFlashcards() {
       </div>
 
       <div className="mt-6 text-center text-gray-600">
-        {question?.text.text}
+        {question?.text && <RenderRichText value={question.text} />}
       </div>
 
       <div className="w-full border-b border-b-gray-300 mt-6 flex justify-center mb-6"></div>
@@ -176,7 +175,7 @@ export default function StudentFlashcards() {
               initial={false}
               transition={{ duration: 0.09, delay: 0.05 }}
             >
-              <ReactMarkdown>{answer.text.text}</ReactMarkdown>
+              <RenderRichText value={answer.text} />
 
               <div className="mt-6 flex gap-2 justify-center w-full">
                 <Button

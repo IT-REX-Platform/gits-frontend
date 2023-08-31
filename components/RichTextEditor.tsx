@@ -561,7 +561,11 @@ function Element(props: RenderElementProps) {
   }
 }
 
-function RenderMediaRecord({ attributes, element }: RenderElementProps) {
+function RenderMediaRecord({
+  attributes,
+  element,
+  children,
+}: RenderElementProps) {
   const { mediaRecordsByIds } =
     useLazyLoadQuery<RichTextEditorMediaRecordQuery>(
       graphql`
@@ -574,10 +578,13 @@ function RenderMediaRecord({ attributes, element }: RenderElementProps) {
       { id: (element as any).id }
     );
   const inner = (
-    <ContentMediaDisplay
-      _record={mediaRecordsByIds[0]}
-      onProgressChange={() => {}}
-    />
+    <>
+      {children}
+      <ContentMediaDisplay
+        _record={mediaRecordsByIds[0]}
+        onProgressChange={() => {}}
+      />
+    </>
   );
 
   try {

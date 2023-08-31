@@ -117,12 +117,12 @@ export function MultipleChoiceQuestionModal({
     ? cloneDeep({
         answers:
           existingQuestion.answers?.map((x) => ({
-            answerText: x.answerText,
+            answerText: { text: x.answerText.text },
             correct: x.correct,
-            feedback: x.feedback,
+            feedback: { text: x.feedback?.text ?? "" },
           })) ?? [],
-        text: existingQuestion.text!,
-        hint: existingQuestion.hint!,
+        text: { text: existingQuestion.text!.text },
+        hint: { text: existingQuestion.hint!.text },
       })
     : {
         answers: [

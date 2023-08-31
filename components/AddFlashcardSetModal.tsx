@@ -93,6 +93,8 @@ export function AddFlashcardSetModal({
       assessmentMetadata: {
         ...assessmentMetadata!,
         skillType: assessmentMetadata!.skillType as SkillType,
+        initialLearningInterval: assessmentMetadata!
+          .initialLearningInterval as number,
       },
     };
     createAssessment({

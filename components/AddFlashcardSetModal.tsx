@@ -97,17 +97,13 @@ export function AddFlashcardSetModal({
           .initialLearningInterval as number,
       },
     };
-    const flashcardSet = {
-      flashcards: [],
-    };
     createAssessment({
       variables: { assessment },
       onError: setError,
       onCompleted(response) {
         createFlashcardSet({
           variables: {
-            assessmentInput: assessment,
-            input: flashcardSet,
+            assessmentId: assessment,
           },
           onError: setError,
           updater(store) {

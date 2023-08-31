@@ -134,7 +134,9 @@ export default function StudentCoursePage() {
   // Extract scoreboard
   const rows: Data[] = scoreboard
     .slice(0, 3)
-    .map((element) => createData(element.user.userName, element.powerScore));
+    .map((element) =>
+      createData(element.user?.userName ?? "Unknown", element.powerScore)
+    );
 
   // Extract course
   const course = coursesByIds[0];

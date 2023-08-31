@@ -81,7 +81,7 @@ export default function StickyHeadTable() {
   const rows: Data[] = scoreboard.map((element, index) =>
     createData(
       `${index + 1}`,
-      capitalizeFirstLetter(element.user!.userName),
+      capitalizeFirstLetter(element.user?.userName ?? "Unknown"),
       element.powerScore
     )
   );

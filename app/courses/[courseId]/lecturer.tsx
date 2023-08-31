@@ -36,18 +36,18 @@ import { AddSectionButton } from "@/components/AddSectionButton";
 import { AddStageButton } from "@/components/AddStageButton";
 import { ChapterContent } from "@/components/ChapterContent";
 import { ChapterHeader } from "@/components/ChapterHeader";
-import { Content, ContentLink, ProgressFrame } from "@/components/Content";
+import { ContentLink } from "@/components/Content";
 import { DeleteStageButton } from "@/components/DeleteStageButton";
 import { EditCourseModal } from "@/components/EditCourseModal";
 import EditSectionButton from "@/components/EditSectionButton";
 import { Section, SectionContent, SectionHeader } from "@/components/Section";
 import { Stage } from "@/components/Stage";
-import { Add, ArrowForward, RemoveRedEye, Settings } from "@mui/icons-material";
-import dayjs from "dayjs";
+import { Add, ArrowForward, Settings } from "@mui/icons-material";
 import { orderBy } from "lodash";
 import { useEffect, useState } from "react";
 import { MediaContentModal } from "../../../components/MediaContentModal";
 import EditChapterButton from "@/components/EditChapterButton";
+import { Heading } from "@/components/Heading";
 
 graphql`
   fragment lecturerSectionFragment on Section {
@@ -148,48 +148,29 @@ export default function LecturerCoursePage() {
         <AddChapterModal open _course={course} onClose={handleCloseModal} />
       )}
 
-      <div className="flex w-full gap-4 items-center justify-between">
-        <Typography variant="h1">{course.title}</Typography>
-        <IconButton onClick={() => setInfoDialogOpen(true)}>
-          <Settings />
-        </IconButton>
-      </div>
+      <Heading
+        title={course.title}
+        action={
+          <div className="flex gap-4 items-center">
+            <Button startIcon={<Add />} onClick={() => setOpenModal(true)}>
+              Add chapter
+            </Button>
+            <IconButton onClick={() => setInfoDialogOpen(true)}>
+              <Settings />
+            </IconButton>
+          </div>
+        }
+      />
+
       <EditCourseModal
         _course={course}
         open={infoDialogOpen}
         onClose={() => setInfoDialogOpen(false)}
       />
 
-      <Content
-        title="See overall student progress"
-        className="hover:bg-gray-100 rounded-full mt-12 mb-12"
-        icon={
-          <RemoveRedEye
-            sx={{
-              fontSize: "2rem",
-              color: "text.secondary",
-            }}
-          />
-        }
-        iconFrame={<ProgressFrame color="lightblue" progress={0} />}
-      />
-
-      <Typography variant="body2">{course.description}</Typography>
-
-      <Content
-        title="Add new chapter"
-        className="hover:bg-gray-100 rounded-full my-16"
-        onClick={() => setOpenModal(true)}
-        icon={
-          <Add
-            sx={{
-              fontSize: "2rem",
-              color: "text.secondary",
-            }}
-          />
-        }
-        iconFrame={<ProgressFrame color="lightblue" progress={0} />}
-      />
+      <Typography variant="body2" className="!mt-8 !mb-10">
+        {course.description}
+      </Typography>
 
       {orderBy(course.chapters.elements, (x) => x.number).map((chapter) => (
         <section key={chapter.id} className="mb-6">

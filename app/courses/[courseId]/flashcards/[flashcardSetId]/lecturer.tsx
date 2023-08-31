@@ -419,18 +419,15 @@ function Flashcard({
         </Typography>
         <div className="flex flex-wrap gap-2">
           {flashcard.sides.map((side, i) => (
-            <div key={i} className="flex-wrap-reverse">
-              <IconButton
-                onClick={() => handleDeleteFlashcardSide(i)}
-                sx={{ float: "right" }}
-              >
-                <ClearIcon />
-              </IconButton>
+            <div key={i} className="flex items-center">
               <FlashcardSide
                 key={`${flashcard.id}-${i}`}
                 side={side}
                 onChange={(data) => handleEditFlashcardSide(i, data)}
               />
+              <IconButton onClick={() => handleDeleteFlashcardSide(i)}>
+                <ClearIcon />
+              </IconButton>
             </div>
           ))}
         </div>

@@ -209,7 +209,7 @@ export default function StudentQuiz() {
         open={infoDialogOpen}
         onClose={() => setInfoDialogOpen(false)}
         title={questionText!.text}
-        hint={currentQuestion.hint!.text}
+        hint={currentQuestion.hint?.text ?? null}
       />
 
       <div className="w-full border-b border-b-gray-300 mt-6 flex justify-center">
@@ -288,7 +288,7 @@ function InfoDialog({
   onClose,
 }: {
   title: string;
-  hint: string;
+  hint: string | null;
   open: boolean;
   onClose: () => void;
 }) {

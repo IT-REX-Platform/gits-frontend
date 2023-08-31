@@ -76,7 +76,7 @@ export function AddFlashcardSetModal({
           assessmentId: $assessmentId
           input: { flashcards: [] }
         ) {
-          assessmentId
+          __id
         }
       }
     `);
@@ -103,7 +103,7 @@ export function AddFlashcardSetModal({
       onCompleted(response) {
         createFlashcardSet({
           variables: {
-            assessmentId: response.createAssessment.id,
+            assessmentId: assessment,
           },
           onError: setError,
           updater(store) {

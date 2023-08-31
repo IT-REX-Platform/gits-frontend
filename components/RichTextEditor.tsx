@@ -639,7 +639,7 @@ function Leaf({
 export function RenderRichText({
   value,
 }: {
-  value: RichTextEditorFragment$key;
+  value: RichTextEditorFragment$key | undefined;
 }) {
   const data = useFragment(
     graphql`
@@ -647,8 +647,11 @@ export function RenderRichText({
         text
       }
     `,
-    value
+    value ?? null
   );
+
+  if (!data) return null;
+
   const parsed = parseFromString(data.text);
 
   return (

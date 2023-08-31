@@ -49,17 +49,21 @@ export default function EditQuiz() {
                   number
                   text {
                     text
+                    ...RichTextEditorFragment
                   }
                   hint {
                     text
+                    ...RichTextEditorFragment
                   }
                   answers {
                     correct
                     feedback {
                       text
+                      ...RichTextEditorFragment
                     }
                     answerText {
                       text
+                      ...RichTextEditorFragment
                     }
                   }
                 }
@@ -154,7 +158,7 @@ export default function EditQuiz() {
       {quiz.questionPool.map((question, index) => (
         <div key={question.id} className="my-3 py-3 border-b">
           <div className="flex items-center justify-between w-full">
-            <RenderRichText value={question.text?.text ?? ""}></RenderRichText>
+            <RenderRichText value={question.text}></RenderRichText>
             <div className="flex">
               <IconButton
                 onClick={() => {
@@ -211,7 +215,7 @@ export default function EditQuiz() {
                       }
                       label={
                         <RenderRichText
-                          value={answer.answerText.text}
+                          value={answer.answerText}
                         ></RenderRichText>
                       }
                     />
@@ -249,162 +253,5 @@ export default function EditQuiz() {
         }
       />
     </main>
-  );
-}
-
-function AddMultipleChoiceQuestionModal({
-  open,
-  onClose,
-  assessmentId,
-}: {
-  open: boolean;
-  onClose: () => void;
-  assessmentId: string;
-}) {
-  const [error, setError] = useState<any>(null);
-
-  const [addQuestion, isLoading] =
-    useMutation<lecturerQuizAddMultipleChoiceQuestionMutation>(graphql`
-      mutation lecturerQuizAddMultipleChoiceQuestionMutation(
-        $input: CreateMultipleChoiceQuestionInput!
-        $assessmentId: UUID!
-      ) {
-        mutateQuiz(assessmentId: $assessmentId) {
-          addMultipleChoiceQuestion(input: $input) {
-            assessmentId
-          }
-        }
-      }
-    `);
-
-  const defaultValues = {
-    answers: [],
-    text: { text: "" },
-    hint: { text: "" },
-  };
-
-  const [input, setInput] =
-    useState<CreateMultipleChoiceQuestionInput>(defaultValues);
-
-  const handleSubmit = () => {
-    addQuestion({
-      variables: { input, assessmentId },
-      onCompleted() {
-        setInput(defaultValues);
-        onClose();
-      },
-      onError: setError,
-    });
-  };
-
-  return (
-    <Dialog open={open} maxWidth="lg" onClose={onClose}>
-      <DialogTitle>Add multiple choice question</DialogTitle>
-      <DialogContent>
-        {error && (
-          <div className="flex flex-col gap-2 mt-8">
-            {error?.source?.errors.map((err: any, i: number) => (
-              <Alert key={i} severity="error" onClose={() => setError(null)}>
-                {err.message}
-              </Alert>
-            ))}
-          </div>
-        )}
-
-        <Form>
-          <FormSection title="Question">
-            <TextField
-              value={input.text}
-              onChange={(e) =>
-                setInput({ ...input, text: { text: e.target.value } })
-              }
-              className="w-96"
-              label="Title"
-              variant="outlined"
-              required
-            />
-
-            <TextField
-              value={input.hint}
-              onChange={(e) =>
-                setInput({ ...input, hint: { text: e.target.value } })
-              }
-              className="w-96"
-              label="Hint"
-              variant="outlined"
-              required
-            />
-          </FormSection>
-          {input.answers.map((answer, index) => (
-            <FormSection title={`Answer ${index + 1}`}>
-              <TextField
-                value={answer.answerText!.text}
-                onChange={(e) => {
-                  answer.answerText!.text = e.target.value;
-                  setInput({ ...input });
-                }}
-                className="w-96"
-                label="Text"
-                variant="outlined"
-                required
-              />
-              <TextField
-                value={answer.feedback}
-                onChange={(e) => {
-                  answer.feedback!.text = e.target.value;
-                  setInput({ ...input });
-                }}
-                className="w-96"
-                label="Feedback"
-                variant="outlined"
-                required
-              />
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    value={answer.correct}
-                    onChange={(e) => {
-                      answer.correct = !!e.target.value;
-                      setInput({ ...input });
-                    }}
-                  />
-                }
-                label="Correct"
-              />
-            </FormSection>
-          ))}
-
-          <ResourceMarkdownEditor />
-          <div className="flex w-full justify-end col-span-full">
-            <Button
-              onClick={() =>
-                setInput({
-                  ...input,
-                  answers: [
-                    ...input.answers,
-                    {
-                      correct: false,
-                      answerText: { text: "" },
-                      feedback: { text: "" },
-                    },
-                  ],
-                })
-              }
-              startIcon={<Add />}
-            >
-              Add Answer
-            </Button>
-          </div>
-        </Form>
-      </DialogContent>
-      <DialogActions>
-        <Button disabled={isLoading} onClick={onClose}>
-          Cancel
-        </Button>
-        <LoadingButton loading={isLoading} onClick={handleSubmit}>
-          Save
-        </LoadingButton>
-      </DialogActions>
-    </Dialog>
   );
 }

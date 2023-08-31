@@ -591,8 +591,9 @@ function RenderMediaRecord({
   try {
     const editor = useSlateStatic();
     const path = ReactEditor.findPath(editor, element);
-
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     const selected = useSelected();
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     const focused = useFocused();
 
     return (

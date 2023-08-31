@@ -336,8 +336,8 @@ function AddContentModal({
       variables: {
         stage: {
           id: stageId,
-          requiredContents: optionalRecords,
-          optionalContents: requiredRecords,
+          requiredContents: requiredRecords,
+          optionalContents: optionalRecords,
         },
       },
       onError: setError,

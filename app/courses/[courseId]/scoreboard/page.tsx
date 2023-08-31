@@ -1,6 +1,7 @@
 "use client";
 import { pageScoreboardQuery } from "@/__generated__/pageScoreboardQuery.graphql";
 import { Heading } from "@/components/Heading";
+import { TextField } from "@mui/material";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
@@ -47,6 +48,7 @@ function capitalizeFirstLetter(str: string): string {
 export default function StickyHeadTable() {
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
+  const [searchTerm, setSearchTerm] = React.useState("");
 
   const params = useParams();
   const courseId = params.courseId;
@@ -79,15 +81,32 @@ export default function StickyHeadTable() {
   const rows: Data[] = scoreboard.map((element, index) =>
     createData(
       `${index + 1}`,
-      capitalizeFirstLetter(element.user?.userName ?? ""),
+      capitalizeFirstLetter(element.user?.userName ?? "Unknown"),
       element.powerScore
     )
   );
 
+  const filteredRows = rows.filter(
+    (x) =>
+      !searchTerm || x.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
     <div>
-      <Heading title={"Scoreboard"} backButton />
-      <TableContainer sx={{ maxHeight: "100%" }}>
+      <Heading
+        title={"Scoreboard"}
+        backButton
+        action={
+          <TextField
+            id="outlined-basic"
+            placeholder="Search by name"
+            variant="outlined"
+            value={searchTerm}
+            onChange={(x) => setSearchTerm(x.target.value)}
+          />
+        }
+      />
+      <TableContainer sx={{ maxHeight: "100%" }} className="mt-4">
         <Table stickyHeader aria-label="sticky table">
           <TableHead>
             <TableRow>
@@ -96,8 +115,6 @@ export default function StickyHeadTable() {
                   key={column.id}
                   align={column.align}
                   style={{ minWidth: column.minWidth }}
-                  //sx={{ backgroundColor: "#90a4ae" }}
-                  //className="border-solid border-2"
                 >
                   {column.label}
                 </TableCell>
@@ -105,7 +122,7 @@ export default function StickyHeadTable() {
             </TableRow>
           </TableHead>
           <TableBody>
-            {rows
+            {filteredRows
               .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
               .map((row) => {
                 return (
@@ -113,11 +130,7 @@ export default function StickyHeadTable() {
                     {columns.map((column) => {
                       const value = row[column.id];
                       return (
-                        <TableCell
-                          key={column.id}
-                          align={column.align}
-                          //className="border-solid border-2"
-                        >
+                        <TableCell key={column.id} align={column.align}>
                           {value}
                         </TableCell>
                       );

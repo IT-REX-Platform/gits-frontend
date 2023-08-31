@@ -8,6 +8,7 @@ import { ContentMetadataPayload } from "@/components/ContentMetadataFormSection"
 import { Form, FormSection } from "@/components/Form";
 import { Heading } from "@/components/Heading";
 import { Add, Delete, Edit, Help, QuestionAnswer } from "@mui/icons-material";
+import ClearIcon from "@mui/icons-material/Clear";
 import {
   Alert,
   Backdrop,
@@ -103,7 +104,18 @@ export default function EditFlashcards() {
       }
     }
   `);
-  const isUpdating = isAddingFlashcard || isUpdatingFlashcardSet;
+
+  const [deleteFlashcard, isDeleting] = useMutation(graphql`
+    mutation lecturerDeleteFlashcardMutation(
+      $flashcardId: UUID!
+      $assessmentId: UUID!
+    ) {
+      mutateFlashcardSet(assessmentId: $assessmentId) {
+        deleteFlashcard(id: $flashcardId)
+      }
+    }
+  `);
+  const isUpdating = isAddingFlashcard || isUpdatingFlashcardSet || isDeleting;
 
   if (contentsByIds.length == 0) {
     return <Error statusCode={404} />;
@@ -138,6 +150,29 @@ export default function EditFlashcards() {
           flashcardSetRecord.getLinkedRecords("flashcards") ?? [];
         flashcardSetRecord.setLinkedRecords(
           [...flashcardRecords, newRecord],
+          "flashcards"
+        );
+      },
+    });
+  }
+
+  function handleDeleteFlashcard(flashcardId: ID) {
+    deleteFlashcard({
+      variables: {
+        flashcardId: flashcardId,
+        assessmentId: flashcardSetId,
+      },
+      onError: setError,
+      updater(store) {
+        // Get record of flashcard set
+        const flashcardSetRecord = store.get(flashcardSet!.__id);
+        if (!flashcardSetRecord) return;
+
+        // Update the linked records of the flashcard set
+        const flashcardRecords =
+          flashcardSetRecord.getLinkedRecords("flashcards") ?? [];
+        flashcardSetRecord.setLinkedRecords(
+          flashcardRecords.filter((x) => x.getDataID() !== flashcardId),
           "flashcards"
         );
       },
@@ -226,13 +261,24 @@ export default function EditFlashcards() {
       )}
       <div className="mt-8 flex flex-col gap-6">
         {flashcardSet.flashcards.map((flashcard, i) => (
-          <Flashcard
-            key={flashcard.id}
-            title={`Card ${i + 1}/${flashcardSet.flashcards.length}`}
-            onError={setError}
-            _flashcard={flashcard}
-            _assessmentId={flashcardSetId}
-          />
+          <div key={i}>
+            <Flashcard
+              key={flashcard.id}
+              title={`Card ${i + 1}/${flashcardSet.flashcards.length}`}
+              onError={setError}
+              _flashcard={flashcard}
+              _assessmentId={flashcardSetId}
+            />
+            <Button
+              sx={{ float: "left", color: "red" }}
+              startIcon={<Delete />}
+              onClick={() => {
+                handleDeleteFlashcard(flashcard.id);
+              }}
+            >
+              Delete Flashcard
+            </Button>
+          </div>
         ))}
         {isAddFlashcardOpen && (
           <LocalFlashcard
@@ -286,6 +332,7 @@ function Flashcard({
             text
           }
           isQuestion
+          isAnswer
         }
       }
     `,
@@ -311,9 +358,22 @@ function Flashcard({
     const newFlashcard = {
       id: flashcard.id,
       sides: flashcard.sides.map((side, i) => {
-        const { label, text, isQuestion } = i == idx ? editedSide : side;
-        return { label, text, isQuestion };
+        const { label, text, isQuestion, isAnswer } =
+          i == idx ? editedSide : side;
+        return { label, text, isQuestion, isAnswer };
       }),
+    };
+
+    updateFlashcard({
+      variables: { assessmentId: _assessmentId, flashcard: newFlashcard },
+      onError,
+    });
+  }
+
+  function handleDeleteFlashcardSide(idx: number) {
+    const newFlashcard = {
+      id: flashcard.id,
+      sides: flashcard.sides.filter((_, i) => i != idx),
     };
 
     updateFlashcard({
@@ -326,10 +386,11 @@ function Flashcard({
     const newFlashcard = {
       id: flashcard.id,
       sides: [
-        ...flashcard.sides.map(({ label, text, isQuestion }) => ({
+        ...flashcard.sides.map(({ label, text, isQuestion, isAnswer }) => ({
           label,
           text,
           isQuestion,
+          isAnswer,
         })),
         newSide,
       ],
@@ -352,11 +413,16 @@ function Flashcard({
         </Typography>
         <div className="flex flex-wrap gap-2">
           {flashcard.sides.map((side, i) => (
-            <FlashcardSide
-              key={`${flashcard.id}-${i}`}
-              side={side}
-              onChange={(data) => handleEditFlashcardSide(i, data)}
-            />
+            <div key={i} className="flex items-center">
+              <FlashcardSide
+                key={`${flashcard.id}-${i}`}
+                side={side}
+                onChange={(data) => handleEditFlashcardSide(i, data)}
+              />
+              <IconButton onClick={() => handleDeleteFlashcardSide(i)}>
+                <ClearIcon />
+              </IconButton>
+            </div>
           ))}
         </div>
         <Button
@@ -436,6 +502,7 @@ type FlashcardSideData = {
   label: string;
   text: FlashcardSideDataMarkdown;
   isQuestion: boolean;
+  isAnswer: boolean;
 };
 type FlashcardSideDataMarkdown = {
   text: string;
@@ -454,8 +521,10 @@ function EditSideModal({
   // Initialize the text state with an empty object of type FlashcardSideDataMarkdown
   const [text, setText] = useState(side?.text ?? { text: "" });
   const [isQuestion, setIsQuestion] = useState(side?.isQuestion ?? false);
+  const [isAnswer, setIsAnswer] = useState(side?.isAnswer ?? false);
 
-  const valid = label.trim() != "" && text.text.trim() != "";
+  const valid =
+    label.trim() != "" && text.text.trim() != "" && (isQuestion || isAnswer);
 
   return (
     <Dialog maxWidth="md" open onClose={onClose}>
@@ -491,6 +560,15 @@ function EditSideModal({
                 />
               }
             />
+            <FormControlLabel
+              label="Answer"
+              control={
+                <Checkbox
+                  checked={isAnswer}
+                  onChange={(e) => setIsAnswer(e.target.checked)}
+                />
+              }
+            />
           </FormSection>
         </Form>
       </DialogContent>
@@ -498,7 +576,7 @@ function EditSideModal({
         <Button onClick={onClose}>Cancel</Button>
         <Button
           disabled={!valid}
-          onClick={() => onSubmit({ label, text, isQuestion })}
+          onClick={() => onSubmit({ label, text, isQuestion, isAnswer })}
         >
           Save
         </Button>

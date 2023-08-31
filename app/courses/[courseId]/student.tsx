@@ -3,6 +3,7 @@ import { studentCourseIdQuery } from "@/__generated__/studentCourseIdQuery.graph
 import {
   Alert,
   Button,
+  Collapse,
   IconButton,
   Tooltip,
   TooltipProps,
@@ -10,7 +11,7 @@ import {
   styled,
   tooltipClasses,
 } from "@mui/material";
-import { chain, orderBy } from "lodash";
+import { chain, every, orderBy, some } from "lodash";
 import Error from "next/error";
 import { useParams, useRouter } from "next/navigation";
 import {
@@ -29,19 +30,24 @@ import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 
 import { studentCourseLeaveMutation } from "@/__generated__/studentCourseLeaveMutation.graphql";
+import { studentCoursePageChapterFragment$key } from "@/__generated__/studentCoursePageChapterFragment.graphql";
 import { studentCoursePageSectionFragment$key } from "@/__generated__/studentCoursePageSectionFragment.graphql";
 import { studentCoursePageStageFragment$key } from "@/__generated__/studentCoursePageStageFragment.graphql";
 import { ChapterContent } from "@/components/ChapterContent";
 import { ChapterHeader } from "@/components/ChapterHeader";
 import { ContentLink } from "@/components/Content";
 import { RewardScores } from "@/components/RewardScores";
-import { Section, SectionContent } from "@/components/Section";
+import { Section, SectionContent, SectionHeader } from "@/components/Section";
 import { Stage, StageBarrier } from "@/components/Stage";
 import { Info } from "@mui/icons-material";
+import ExitToAppIcon from "@mui/icons-material/ExitToApp";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import dayjs from "dayjs";
+import isBetween from "dayjs/plugin/isBetween";
 import Link from "next/link";
 import { useState } from "react";
+
+dayjs.extend(isBetween);
 
 interface Data {
   name: string;
@@ -93,12 +99,8 @@ export default function StudentCoursePage() {
           chapters {
             elements {
               id
-              title
               number
-              startDate
-              endDate
-              suggestedStartDate
-              suggestedEndDate
+              ...studentCoursePageChapterFragment
               contents {
                 ...ContentLinkFragment
 
@@ -111,11 +113,6 @@ export default function StudentCoursePage() {
                 metadata {
                   type
                 }
-              }
-
-              sections {
-                id
-                ...studentCoursePageSectionFragment
               }
             }
           }
@@ -143,7 +140,7 @@ export default function StudentCoursePage() {
   const rows: Data[] = scoreboard
     .slice(0, 3)
     .map((element) =>
-      createData(element.user?.userName ?? "", element.powerScore)
+      createData(element.user?.userName ?? "Unknown", element.powerScore)
     );
 
   // Extract course
@@ -197,7 +194,8 @@ export default function StudentCoursePage() {
         <Button
           color="inherit"
           size="small"
-          variant="text"
+          variant="outlined"
+          endIcon={<ExitToAppIcon />}
           onClick={() => {
             if (
               confirm(
@@ -221,7 +219,7 @@ export default function StudentCoursePage() {
                   );
                 },
                 onCompleted() {
-                  router.push("/courses");
+                  router.push("/courses?leftCourse=true");
                 },
               });
             }
@@ -284,36 +282,56 @@ export default function StudentCoursePage() {
         </div>
       </section>
 
-      {orderBy(course.chapters.elements, (x) => x.number).map((chapter) => {
-        const chapterProgress =
-          chapter.contents.length > 0
-            ? (100 *
-                chapter.contents.filter(
-                  (content) => content.userProgressData.lastLearnDate != null
-                ).length) /
-              chapter.contents.length
-            : 0;
-
-        return (
-          <section key={chapter.id} className="mt-6">
-            <ChapterHeader
-              title={chapter.title}
-              subtitle={`${dayjs(
-                chapter.suggestedStartDate ?? chapter.startDate
-              ).format("D. MMMM")} – ${dayjs(
-                chapter.suggestedEndDate ?? chapter.endDate
-              ).format("D. MMMM")}`}
-              progress={chapterProgress}
-            />
-            <ChapterContent>
-              {chapter.sections.map((section) => (
-                <StudentSection key={section.id} _section={section} />
-              ))}
-            </ChapterContent>{" "}
-          </section>
-        );
-      })}
+      {orderBy(course.chapters.elements, (x) => x.number).map((chapter) => (
+        <StudentChapter key={chapter.id} _chapter={chapter} />
+      ))}
     </main>
+  );
+}
+
+function StudentChapter({
+  _chapter,
+}: {
+  _chapter: studentCoursePageChapterFragment$key;
+}) {
+  const chapter = useFragment(
+    graphql`
+      fragment studentCoursePageChapterFragment on Chapter {
+        id
+        title
+        number
+        suggestedStartDate
+        suggestedEndDate
+        ...ChapterHeaderFragment
+        sections {
+          id
+          ...studentCoursePageSectionFragment
+        }
+      }
+    `,
+    _chapter
+  );
+  const [expanded, setExpanded] = useState(
+    dayjs().isBetween(chapter.suggestedStartDate, chapter.suggestedEndDate)
+  );
+
+  return (
+    <section>
+      <ChapterHeader
+        _chapter={chapter}
+        expanded={expanded}
+        onExpandClick={() => setExpanded((curr) => !curr)}
+      />
+      <Collapse in={expanded}>
+        <div className="mb-6">
+          <ChapterContent>
+            {chapter.sections.map((section) => (
+              <StudentSection key={section.id} _section={section} />
+            ))}
+          </ChapterContent>{" "}
+        </div>
+      </Collapse>
+    </section>
   );
 }
 
@@ -330,14 +348,7 @@ function StudentSection({
         stages {
           id
           position
-          requiredContents {
-            userProgressData {
-              lastLearnDate
-            }
-          }
-          optionalContents {
-            id
-          }
+          requiredContentsProgress
           ...studentCoursePageStageFragment
         }
       }
@@ -349,30 +360,30 @@ function StudentSection({
 
   // Workaround until the backend calculates the progress
   const stageComplete = stages.map(
-    (stage) =>
-      (stage.requiredContents.length > 0 &&
-        stage.requiredContents.filter(
-          (content) => content.userProgressData.lastLearnDate != null
-        ).length == stage.requiredContents.length) ||
-      (stage.requiredContents.length == 0 && stage.optionalContents.length > 0)
+    (stage) => stage.requiredContentsProgress === 100
   );
-  const sectionComplete =
-    stages.length > 0 ? stageComplete[stages.length - 1] : false;
+  const stageDisabled = stages.map((_, i) =>
+    some(stages.slice(0, i), (_, idx) => !stageComplete[idx])
+  );
+  const sectionComplete = every(stages, (_, idx) => stageComplete[idx]);
 
   return (
     <Section done={sectionComplete}>
+      <SectionHeader>{section.name}</SectionHeader>
       <SectionContent>
-        {section.stages.map((stage, i) => (
+        {stages.map((stage, i) => (
           <>
             {/* Show barrier if this is the first non-complete stage */}
             {(i == 0
               ? false
-              : i == 1
-              ? !stageComplete[0]
-              : stageComplete[i - 2] && !stageComplete[i - 1]) && (
+              : !stageComplete[i - 1] && !stageDisabled[i - 1]) && (
               <StageBarrier />
             )}
-            <StudentStage key={stage.id} _stage={stage} />
+            <StudentStage
+              key={stage.id}
+              _stage={stage}
+              disabled={stageDisabled[i]}
+            />
           </>
         ))}
       </SectionContent>
@@ -381,47 +392,41 @@ function StudentSection({
 }
 
 function StudentStage({
+  disabled = false,
   _stage,
 }: {
+  disabled?: boolean;
   _stage: studentCoursePageStageFragment$key;
 }) {
   const stage = useFragment(
     graphql`
       fragment studentCoursePageStageFragment on Stage {
+        requiredContentsProgress
         requiredContents {
           ...ContentLinkFragment
           id
-          userProgressData {
-            lastLearnDate
-          }
         }
         optionalContents {
           ...ContentLinkFragment
           id
-          userProgressData {
-            lastLearnDate
-          }
         }
       }
     `,
     _stage
   );
 
-  // Workaround until the backend calculates the progress
-  const progress =
-    stage.requiredContents.length > 0
-      ? (100 *
-          stage.requiredContents.filter(
-            (content) => content.userProgressData.lastLearnDate != null
-          ).length) /
-        stage.requiredContents.length
-      : 0;
-
   return (
-    <Stage progress={progress}>
-      <div></div>
+    <Stage progress={disabled ? 0 : stage.requiredContentsProgress}>
       {stage.requiredContents.map((content) => (
-        <ContentLink key={content.id} _content={content} />
+        <ContentLink key={content.id} _content={content} disabled={disabled} />
+      ))}
+      {stage.optionalContents.map((content) => (
+        <ContentLink
+          key={content.id}
+          _content={content}
+          optional
+          disabled={disabled}
+        />
       ))}
     </Stage>
   );

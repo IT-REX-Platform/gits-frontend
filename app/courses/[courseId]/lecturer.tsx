@@ -1,6 +1,6 @@
 "use client";
 import { lecturerLecturerCourseIdQuery } from "@/__generated__/lecturerLecturerCourseIdQuery.graphql";
-import { IconButton, Typography } from "@mui/material";
+import { Button, IconButton, Typography } from "@mui/material";
 import Error from "next/error";
 import { useParams } from "next/navigation";
 import { graphql, useLazyLoadQuery } from "react-relay";
@@ -10,15 +10,15 @@ import { AddSectionButton } from "@/components/AddSectionButton";
 import { AddStageButton } from "@/components/AddStageButton";
 import { ChapterContent } from "@/components/ChapterContent";
 import { ChapterHeader } from "@/components/ChapterHeader";
-import { Content, ContentLink, ProgressFrame } from "@/components/Content";
+import { ContentLink } from "@/components/Content";
 import { DeleteStageButton } from "@/components/DeleteStageButton";
-import { EditChapterModal } from "@/components/EditChapterModal";
+import EditChapterButton from "@/components/EditChapterButton";
 import { EditCourseModal } from "@/components/EditCourseModal";
 import EditSectionButton from "@/components/EditSectionButton";
+import { Heading } from "@/components/Heading";
 import { Section, SectionContent, SectionHeader } from "@/components/Section";
 import { Stage } from "@/components/Stage";
-import { Add, RemoveRedEye, Settings } from "@mui/icons-material";
-import dayjs from "dayjs";
+import { Add, Settings } from "@mui/icons-material";
 import { orderBy } from "lodash";
 import { useState } from "react";
 import { AddContentModal } from "../../../components/AddContentModal";
@@ -85,16 +85,14 @@ export default function LecturerCoursePage() {
             chapters {
               elements {
                 __id
-                ...EditChapterModalFragment
+                ...EditChapterButtonFragment
                 ...AddFlashcardSetModalFragment
                 ...AddContentModalFragment
+                ...lecturerAddStageContentModal
+                ...ChapterHeaderFragment
                 id
                 title
                 number
-                startDate
-                endDate
-                suggestedStartDate
-                suggestedEndDate
                 sections {
                   ...lecturerSectionFragment @relay(mask: false)
                 }
@@ -126,63 +124,35 @@ export default function LecturerCoursePage() {
         <AddChapterModal open _course={course} onClose={handleCloseModal} />
       )}
 
-      <div className="flex w-full gap-4 items-center justify-between">
-        <Typography variant="h1">{course.title}</Typography>
-        <IconButton onClick={() => setInfoDialogOpen(true)}>
-          <Settings />
-        </IconButton>
-      </div>
+      <Heading
+        title={course.title}
+        action={
+          <div className="flex gap-4 items-center">
+            <Button startIcon={<Add />} onClick={() => setOpenModal(true)}>
+              Add chapter
+            </Button>
+            <IconButton onClick={() => setInfoDialogOpen(true)}>
+              <Settings />
+            </IconButton>
+          </div>
+        }
+      />
+
       <EditCourseModal
         _course={course}
         open={infoDialogOpen}
         onClose={() => setInfoDialogOpen(false)}
       />
 
-      <Content
-        title="See overall student progress"
-        className="hover:bg-gray-100 rounded-full mt-12 mb-12"
-        icon={
-          <RemoveRedEye
-            sx={{
-              fontSize: "2rem",
-              color: "text.secondary",
-            }}
-          />
-        }
-        iconFrame={<ProgressFrame color="lightblue" progress={0} />}
-      />
-
-      <Typography variant="body2">{course.description}</Typography>
-
-      <Content
-        title="Add new chapter"
-        className="hover:bg-gray-100 rounded-full my-16"
-        onClick={() => setOpenModal(true)}
-        icon={
-          <Add
-            sx={{
-              fontSize: "2rem",
-              color: "text.secondary",
-            }}
-          />
-        }
-        iconFrame={<ProgressFrame color="lightblue" progress={0} />}
-      />
+      <Typography variant="body2" className="!mt-8 !mb-10">
+        {course.description}
+      </Typography>
 
       {orderBy(course.chapters.elements, (x) => x.number).map((chapter) => (
-        <section key={chapter.id} className="mt-6">
+        <section key={chapter.id} className="mb-6">
           <ChapterHeader
-            title={
-              <div className="flex gap-2">
-                {chapter.title} <EditChapterModal _chapter={chapter} />
-              </div>
-            }
-            subtitle={`${dayjs(
-              chapter.suggestedStartDate ?? chapter.startDate
-            ).format("D. MMMM")} – ${dayjs(
-              chapter.suggestedEndDate ?? chapter.endDate
-            ).format("D. MMMM")}`}
-            progress={0}
+            _chapter={chapter}
+            action={<EditChapterButton _chapter={chapter} />}
           />
 
           <ChapterContent>
@@ -201,15 +171,16 @@ export default function LecturerCoursePage() {
                 <SectionContent>
                   {orderBy(section.stages, (x) => x.position, "asc").map(
                     (stage) => (
-                      <Stage
-                        progress={stage.requiredContentsProgress}
-                        key={section.id}
-                      >
+                      <Stage progress={0} key={stage.id}>
                         {stage.requiredContents.map((content) => (
                           <ContentLink key={content.id} _content={content} />
                         ))}
                         {stage.optionalContents.map((content) => (
-                          <ContentLink key={content.id} _content={content} />
+                          <ContentLink
+                            key={content.id}
+                            _content={content}
+                            optional
+                          />
                         ))}
                         <div className="mt-4 flex flex-col items-start">
                           <AddContentModal

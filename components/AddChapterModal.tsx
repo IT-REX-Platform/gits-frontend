@@ -1,14 +1,15 @@
 import { useState } from "react";
 import { graphql, useFragment, useMutation } from "react-relay";
 
+import { AddChapterModalFragment$key } from "@/__generated__/AddChapterModalFragment.graphql";
+import { AddChapterModalMutation } from "@/__generated__/AddChapterModalMutation.graphql";
 import { DialogBase } from "./DialogBase";
 import {
   ChapterData,
   dialogSections,
   validationSchema,
 } from "./dialogs/chapterDialog";
-import { AddChapterModalFragment$key } from "@/__generated__/AddChapterModalFragment.graphql";
-import { AddChapterModalMutation } from "@/__generated__/AddChapterModalMutation.graphql";
+import lodash from "lodash";
 
 export function AddChapterModal({
   open,
@@ -27,14 +28,13 @@ export function AddChapterModal({
           elements {
             id
             title
+            startDate
           }
         }
       }
     `,
     _course
   );
-
-  const [error, setError] = useState<any>(null);
 
   const [addChapter, isUpdating] = useMutation<AddChapterModalMutation>(graphql`
     mutation AddChapterModalMutation($chapter: CreateChapterInput!) {
@@ -72,6 +72,11 @@ export function AddChapterModal({
     });
   }
 
+  const [error, setError] = useState<any>(null);
+  const predecessorStart = lodash.max(
+    course.chapters.elements.map((x) => x.startDate)
+  );
+
   return (
     <DialogBase
       open={open}
@@ -85,7 +90,7 @@ export function AddChapterModal({
         suggestedStartDate: null,
         suggestedEndDate: null,
       }}
-      validationSchema={validationSchema}
+      validationSchema={validationSchema(predecessorStart)}
       onClose={onClose}
       onSubmit={handleSubmit}
       clearError={() => setError(null)}

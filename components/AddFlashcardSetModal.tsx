@@ -76,7 +76,7 @@ export function AddFlashcardSetModal({
           input: { flashcards: [] }
           assessmentId: $assessmentId
         ) {
-          assessmentId
+          __id
         }
       }
     `);
@@ -93,6 +93,8 @@ export function AddFlashcardSetModal({
       assessmentMetadata: {
         ...assessmentMetadata!,
         skillType: assessmentMetadata!.skillType as SkillType,
+        initialLearningInterval: assessmentMetadata!
+          .initialLearningInterval as number,
       },
     };
     createAssessment({
@@ -101,7 +103,7 @@ export function AddFlashcardSetModal({
       onCompleted(response) {
         createFlashcardSet({
           variables: {
-            assessmentId: response.createAssessment.id,
+            assessmentId: assessment,
           },
           onError: setError,
           updater(store) {

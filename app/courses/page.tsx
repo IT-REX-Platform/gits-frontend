@@ -1,6 +1,7 @@
 "use client";
 
 import { pageCourseJoinMutation } from "@/__generated__/pageCourseJoinMutation.graphql";
+import { pageCourseListItemFragment$key } from "@/__generated__/pageCourseListItemFragment.graphql";
 import { pageCourseListQuery } from "@/__generated__/pageCourseListQuery.graphql";
 import { pageCourseUpdateMembershipMutation } from "@/__generated__/pageCourseUpdateMembershipMutation.graphql";
 import { PageView, usePageView } from "@/src/currentView";
@@ -12,14 +13,21 @@ import {
   List,
   ListItem,
   ListItemButton,
+  ListItemIcon,
   ListItemSecondaryAction,
   ListItemText,
   TextField,
   Typography,
 } from "@mui/material";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { graphql, useLazyLoadQuery, useMutation } from "react-relay";
+import dayjs from "dayjs";
+import { useRouter, useSearchParams } from "next/navigation";
+import { ReactNode, useState } from "react";
+import {
+  graphql,
+  useFragment,
+  useLazyLoadQuery,
+  useMutation,
+} from "react-relay";
 
 export default function StudentCourseList() {
   const [pageView] = usePageView();
@@ -35,6 +43,8 @@ export default function StudentCourseList() {
             id
             title
             description
+            startYear
+            ...pageCourseListItemFragment
           }
         }
         currentUserInfo {
@@ -66,8 +76,17 @@ export default function StudentCourseList() {
     (x) =>
       !search ||
       x.title.toLowerCase().includes(search.toLowerCase()) ||
-      x.description.toLowerCase().includes(search.toLowerCase())
+      x.description.toLowerCase().includes(search.toLowerCase()) ||
+      (x.startYear && x.startYear.toString().includes(search))
   );
+  const myCourseIds = filteredCourses
+    .filter(
+      (course) =>
+        courseIdsAlreadyJoined.includes(course.id) &&
+        (pageView === PageView.Student ||
+          courseIdsAlreadyJoinedAsLecturer.includes(course.id))
+    )
+    .map((course) => course.id);
 
   const [join] = useMutation<pageCourseJoinMutation>(graphql`
     mutation pageCourseJoinMutation($input: CourseMembershipInput!) {
@@ -100,13 +119,23 @@ export default function StudentCourseList() {
   const [error, setError] = useState<any>(null);
 
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const [leftCourse, setLeftCourse] = useState(searchParams.has("leftCourse"));
 
   return (
     <main>
       <Typography variant="h1" gutterBottom>
         Course Catalog
       </Typography>
-
+      {leftCourse && (
+        <Alert
+          severity="info"
+          variant="filled"
+          onClose={() => setLeftCourse(false)}
+        >
+          You have successfully left the course!
+        </Alert>
+      )}
       {error?.source.errors.map((err: any, i: number) => (
         <Alert
           key={i}
@@ -129,36 +158,33 @@ export default function StudentCourseList() {
         />
       </div>
 
+      <Typography variant="h2">My courses</Typography>
       <List>
-        {filteredCourses.map((course) => (
-          <ListItem key={course.id} disablePadding>
-            <ListItemButton
-              disableRipple={!courseIdsAlreadyJoined.includes(course.id)}
-              onClick={
-                courseIdsAlreadyJoined.includes(course.id)
-                  ? () => router.push(`/courses/${course.id}`)
-                  : undefined
-              }
-            >
-              <ListItemText
-                primary={
-                  <div className="flex items-center gap-2">
-                    {pageView !== PageView.Lecturer &&
-                      courseIdsAlreadyJoinedAsLecturer.includes(course.id) && (
-                        <Chip
-                          variant="outlined"
-                          color="info"
-                          size="small"
-                          label="Lecturer"
-                        ></Chip>
-                      )}
-                    {course.title}
-                  </div>
-                }
-                secondary={course.description}
-              />
-              <ListItemSecondaryAction>
-                {((pageView === PageView.Lecturer &&
+        {filteredCourses
+          .filter((course) => myCourseIds.includes(course.id))
+          .map((course) => (
+            <CourseListItem
+              key={course.id}
+              _course={course}
+              joined
+              lecturer={courseIdsAlreadyJoinedAsLecturer.includes(course.id)}
+            />
+          ))}
+      </List>
+
+      <Typography variant="h2" className="!mt-8">
+        All courses
+      </Typography>
+      <List>
+        {filteredCourses
+          .filter((course) => !myCourseIds.includes(course.id))
+          .map((course) => (
+            <CourseListItem
+              key={course.id}
+              _course={course}
+              lecturer={courseIdsAlreadyJoinedAsLecturer.includes(course.id)}
+              action={
+                ((pageView === PageView.Lecturer &&
                   !courseIdsAlreadyJoinedAsLecturer.includes(course.id)) ||
                   !courseIdsAlreadyJoined.includes(course.id)) && (
                   <Button
@@ -211,12 +237,73 @@ export default function StudentCourseList() {
                         : "Promote to lecturer"
                       : "Join course"}
                   </Button>
-                )}
-              </ListItemSecondaryAction>
-            </ListItemButton>
-          </ListItem>
-        ))}
+                )
+              }
+            />
+          ))}
       </List>
     </main>
+  );
+}
+
+function CourseListItem({
+  _course,
+  joined = false,
+  lecturer = false,
+  action,
+}: {
+  _course: pageCourseListItemFragment$key;
+  joined?: boolean;
+  lecturer?: boolean;
+  action?: ReactNode;
+}) {
+  const router = useRouter();
+  const [pageView] = usePageView();
+
+  const course = useFragment(
+    graphql`
+      fragment pageCourseListItemFragment on Course {
+        id
+        title
+        description
+        startDate
+        startYear
+      }
+    `,
+    _course
+  );
+
+  const year = course.startYear ?? dayjs(course.startDate).year();
+
+  return (
+    <ListItem disablePadding>
+      <ListItemButton
+        disableRipple={!joined}
+        onClick={
+          joined ? () => router.push(`/courses/${course.id}`) : undefined
+        }
+      >
+        <ListItemIcon className="!min-w-[4.5rem]">
+          <Chip label={year} className="!border-gray-400"></Chip>
+        </ListItemIcon>
+        <ListItemText
+          primary={
+            <div className="flex items-center gap-2">
+              {course.title}
+              {pageView !== PageView.Lecturer && lecturer && (
+                <Chip
+                  variant="outlined"
+                  color="info"
+                  size="small"
+                  label="Lecturer"
+                ></Chip>
+              )}
+            </div>
+          }
+          secondary={course.description}
+        />
+        <ListItemSecondaryAction>{action}</ListItemSecondaryAction>
+      </ListItemButton>
+    </ListItem>
   );
 }

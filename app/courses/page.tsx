@@ -19,6 +19,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+import dayjs from "dayjs";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ReactNode, useState } from "react";
 import {
@@ -265,11 +266,14 @@ function CourseListItem({
         id
         title
         description
+        startDate
         startYear
       }
     `,
     _course
   );
+
+  const year = course.startYear ?? dayjs(course.startDate).year();
 
   return (
     <ListItem disablePadding>
@@ -279,11 +283,9 @@ function CourseListItem({
           joined ? () => router.push(`/courses/${course.id}`) : undefined
         }
       >
-        {course.startYear && (
-          <ListItemIcon className="!min-w-[4.5rem]">
-            <Chip label={course.startYear} className="!border-gray-400"></Chip>
-          </ListItemIcon>
-        )}
+        <ListItemIcon className="!min-w-[4.5rem]">
+          <Chip label={year} className="!border-gray-400"></Chip>
+        </ListItemIcon>
         <ListItemText
           primary={
             <div className="flex items-center gap-2">

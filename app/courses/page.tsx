@@ -17,7 +17,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { graphql, useLazyLoadQuery, useMutation } from "react-relay";
 
@@ -100,13 +100,23 @@ export default function StudentCourseList() {
   const [error, setError] = useState<any>(null);
 
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const [leftCourse, setLeftCourse] = useState(searchParams.has("leftCourse"));
 
   return (
     <main>
       <Typography variant="h1" gutterBottom>
         Course Catalog
       </Typography>
-
+      {leftCourse && (
+        <Alert
+          severity="info"
+          variant="filled"
+          onClose={() => setLeftCourse(false)}
+        >
+          You have successfully left the course!
+        </Alert>
+      )}
       {error?.source.errors.map((err: any, i: number) => (
         <Alert
           key={i}

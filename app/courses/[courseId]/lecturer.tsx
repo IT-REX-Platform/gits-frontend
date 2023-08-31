@@ -38,7 +38,6 @@ import { ChapterContent } from "@/components/ChapterContent";
 import { ChapterHeader } from "@/components/ChapterHeader";
 import { Content, ContentLink, ProgressFrame } from "@/components/Content";
 import { DeleteStageButton } from "@/components/DeleteStageButton";
-import { EditChapterModal } from "@/components/EditChapterModal";
 import { EditCourseModal } from "@/components/EditCourseModal";
 import EditSectionButton from "@/components/EditSectionButton";
 import { Section, SectionContent, SectionHeader } from "@/components/Section";
@@ -48,6 +47,7 @@ import dayjs from "dayjs";
 import { orderBy } from "lodash";
 import { useEffect, useState } from "react";
 import { MediaContentModal } from "../../../components/MediaContentModal";
+import EditChapterButton from "@/components/EditChapterButton";
 
 graphql`
   fragment lecturerSectionFragment on Section {
@@ -110,16 +110,13 @@ export default function LecturerCoursePage() {
             chapters {
               elements {
                 __id
-                ...EditChapterModalFragment
+                ...EditChapterButtonFragment
                 ...AddFlashcardSetModalFragment
                 ...lecturerAddStageContentModal
+                ...ChapterHeaderFragment
                 id
                 title
                 number
-                startDate
-                endDate
-                suggestedStartDate
-                suggestedEndDate
                 sections {
                   ...lecturerSectionFragment @relay(mask: false)
                 }
@@ -195,19 +192,10 @@ export default function LecturerCoursePage() {
       />
 
       {orderBy(course.chapters.elements, (x) => x.number).map((chapter) => (
-        <section key={chapter.id} className="mt-6">
+        <section key={chapter.id} className="mb-6">
           <ChapterHeader
-            title={
-              <div className="flex gap-2">
-                {chapter.title} <EditChapterModal _chapter={chapter} />
-              </div>
-            }
-            subtitle={`${dayjs(
-              chapter.suggestedStartDate ?? chapter.startDate
-            ).format("D. MMMM")} – ${dayjs(
-              chapter.suggestedEndDate ?? chapter.endDate
-            ).format("D. MMMM")}`}
-            progress={0}
+            _chapter={chapter}
+            action={<EditChapterButton _chapter={chapter} />}
           />
 
           <ChapterContent>
@@ -226,15 +214,16 @@ export default function LecturerCoursePage() {
                 <SectionContent>
                   {orderBy(section.stages, (x) => x.position, "asc").map(
                     (stage) => (
-                      <Stage
-                        progress={stage.requiredContentsProgress}
-                        key={section.id}
-                      >
+                      <Stage progress={0} key={stage.id}>
                         {stage.requiredContents.map((content) => (
                           <ContentLink key={content.id} _content={content} />
                         ))}
                         {stage.optionalContents.map((content) => (
-                          <ContentLink key={content.id} _content={content} />
+                          <ContentLink
+                            key={content.id}
+                            _content={content}
+                            optional
+                          />
                         ))}
                         <div className="mt-4 flex flex-col items-start">
                           <AddContentModal

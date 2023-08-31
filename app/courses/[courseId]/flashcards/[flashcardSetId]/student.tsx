@@ -3,7 +3,6 @@
 import { studentFlashcardLogProgressMutation } from "@/__generated__/studentFlashcardLogProgressMutation.graphql";
 import { studentFlashcardsQuery } from "@/__generated__/studentFlashcardsQuery.graphql";
 import { Heading } from "@/components/Heading";
-import { RenderRichText } from "@/components/RichTextEditor";
 import { Check, Close, Loop } from "@mui/icons-material";
 import { Alert, Button, CircularProgress } from "@mui/material";
 import { motion } from "framer-motion";
@@ -40,7 +39,8 @@ export default function StudentFlashcards() {
                     isQuestion
                     label
                     text {
-                      ...RichTextEditorFragment
+                      text
+                      referencedMediaRecordIds
                     }
                   }
                 }
@@ -133,7 +133,7 @@ export default function StudentFlashcards() {
       </div>
 
       <div className="mt-6 text-center text-gray-600">
-        {question?.text && <RenderRichText value={question.text} />}
+        {question?.text.text}
       </div>
 
       <div className="w-full border-b border-b-gray-300 mt-6 flex justify-center mb-6"></div>
@@ -175,7 +175,7 @@ export default function StudentFlashcards() {
               initial={false}
               transition={{ duration: 0.09, delay: 0.05 }}
             >
-              <RenderRichText value={answer.text} />
+              {answer.text.text}
 
               <div className="mt-6 flex gap-2 justify-center w-full">
                 <Button

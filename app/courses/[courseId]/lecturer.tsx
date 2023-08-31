@@ -88,7 +88,6 @@ export default function LecturerCoursePage() {
                 ...EditChapterButtonFragment
                 ...AddFlashcardSetModalFragment
                 ...AddContentModalFragment
-                ...lecturerAddStageContentModal
                 ...ChapterHeaderFragment
                 id
                 title

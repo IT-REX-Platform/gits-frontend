@@ -87,6 +87,7 @@ export default function StudentCoursePage() {
         coursesByIds(ids: [$id]) {
           suggestions(amount: 4) {
             content {
+              id
               ...ContentLinkFragment
             }
           }
@@ -277,7 +278,7 @@ export default function StudentCoursePage() {
         <Typography variant="h2">Up next</Typography>
         <div className="mt-8 gap-8 grid gap-x-12 gap-y-4 grid-cols-[max-content] xl:grid-cols-[repeat(2,max-content)] 2xl:grid-cols-[repeat(3,max-content)]">
           {course.suggestions.map((x) => (
-            <ContentLink _content={x.content} />
+            <ContentLink key={x.content.id} _content={x.content} />
           ))}
         </div>
       </section>

@@ -145,7 +145,8 @@ export function RichTextEditor({
     []
   );
   const debouncedOnChange = useCallback(
-    debounce((e: Descendant[]) => onChange(JSON.stringify(e)), 400),
+    (e: Descendant[]) =>
+      debounce((e: Descendant[]) => onChange(JSON.stringify(e)), 400)(e),
     [onChange]
   );
 

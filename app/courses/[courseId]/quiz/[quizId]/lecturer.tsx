@@ -82,10 +82,6 @@ export default function EditQuiz() {
   const content = contentsByIds[0];
   const quiz = content.quiz;
 
-  if (!quiz) {
-    return <Error statusCode={400} />;
-  }
-
   const [error, setError] = useState<any>(null);
 
   const [deleteQuestion, isDeleting] =
@@ -101,6 +97,9 @@ export default function EditQuiz() {
         }
       }
     `);
+  if (!quiz) {
+    return <Error statusCode={400} />;
+  }
 
   return (
     <main>

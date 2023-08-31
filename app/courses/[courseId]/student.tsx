@@ -79,6 +79,11 @@ export default function StudentCoursePage() {
         }
 
         coursesByIds(ids: [$id]) {
+          suggestions(amount: 4) {
+            content {
+              ...ContentLinkFragment
+            }
+          }
           id
           title
           description
@@ -137,7 +142,9 @@ export default function StudentCoursePage() {
   // Extract scoreboard
   const rows: Data[] = scoreboard
     .slice(0, 3)
-    .map((element) => createData(element.user.userName, element.powerScore));
+    .map((element) =>
+      createData(element.user?.userName ?? "", element.powerScore)
+    );
 
   // Extract course
   const course = coursesByIds[0];
@@ -271,9 +278,9 @@ export default function StudentCoursePage() {
       <section className="mt-8 mb-20">
         <Typography variant="h2">Up next</Typography>
         <div className="mt-8 gap-8 grid gap-x-12 gap-y-4 grid-cols-[max-content] xl:grid-cols-[repeat(2,max-content)] 2xl:grid-cols-[repeat(3,max-content)]">
-          {nextFlashcard && <ContentLink _content={nextFlashcard} />}
-          {nextQuiz && <ContentLink _content={nextQuiz} />}
-          {nextVideo && <ContentLink _content={nextVideo} />}
+          {course.suggestions.map((x) => (
+            <ContentLink _content={x.content} />
+          ))}
         </div>
       </section>
 

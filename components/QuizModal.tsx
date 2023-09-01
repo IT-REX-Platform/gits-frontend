@@ -140,7 +140,7 @@ export function QuizModal({
                 })
               }
               className="w-96"
-              label="Reward points"
+              label="Required correct answers"
               variant="outlined"
               required
               type="number"

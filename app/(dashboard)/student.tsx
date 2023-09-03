@@ -88,7 +88,9 @@ export default function StudentPage() {
                     component="div"
                     className="shrink text-ellipsis overflow-hidden whitespace-nowrap "
                   >
-                    {course.title}
+                    <Link href={{ pathname: `/courses/${course.id}` }}>
+                      <Button size="small">{course.title}</Button>
+                    </Link>
                   </Typography>
                 </div>
               </CardContent>
@@ -135,11 +137,11 @@ export default function StudentPage() {
               </List>
               <Divider />
 
-              <CardActions>
+              {/* <CardActions>
                 <Link href={{ pathname: `/courses/${course.id}` }}>
                   <Button size="small">Continue</Button>
                 </Link>
-              </CardActions>
+              </CardActions> */}
             </Card>
           ))}
         </div>

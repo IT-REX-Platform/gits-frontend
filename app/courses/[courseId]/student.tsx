@@ -46,6 +46,7 @@ import dayjs from "dayjs";
 import isBetween from "dayjs/plugin/isBetween";
 import Link from "next/link";
 import { useState } from "react";
+import { Suggestion } from "@/components/Suggestion";
 
 dayjs.extend(isBetween);
 
@@ -86,9 +87,9 @@ export default function StudentCoursePage() {
 
         coursesByIds(ids: [$id]) {
           suggestions(amount: 4) {
+            ...SuggestionFragment
             content {
               id
-              ...ContentLinkFragment
             }
           }
           id
@@ -276,9 +277,9 @@ export default function StudentCoursePage() {
 
       <section className="mt-8 mb-20">
         <Typography variant="h2">Up next</Typography>
-        <div className="mt-8 gap-8 grid gap-x-12 gap-y-4 grid-cols-[max-content] xl:grid-cols-[repeat(2,max-content)] 2xl:grid-cols-[repeat(3,max-content)]">
+        <div className="mt-8 gap-8 flex flex-wrap">
           {course.suggestions.map((x) => (
-            <ContentLink key={x.content.id} _content={x.content} />
+            <Suggestion key={x.content.id} _suggestion={x} />
           ))}
         </div>
       </section>

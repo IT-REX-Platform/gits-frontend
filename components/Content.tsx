@@ -49,16 +49,18 @@ import colors from "tailwindcss/colors";
 
 const ContentLinkProps = createContext({
   disabled: false,
-  optional: false,
+  chips: [] as ReactNode[],
 });
 
 export function ContentLink({
   disabled = false,
   optional = false,
+  extra_chips = [],
   _content,
 }: {
   disabled?: boolean;
   optional?: boolean;
+  extra_chips?: ReactNode[];
   _content: ContentLinkFragment$key;
 }) {
   const content = useFragment(
@@ -88,8 +90,15 @@ export function ContentLink({
     return null;
   }
 
+  const chips = [
+    optional ? (
+      <Chip key="optional" className="!h-5 !text-xs" label="optional" />
+    ) : undefined,
+    ...extra_chips,
+  ];
+
   return (
-    <ContentLinkProps.Provider value={{ disabled, optional }}>
+    <ContentLinkProps.Provider value={{ disabled, chips }}>
       {getContentNode()}
     </ContentLinkProps.Provider>
   );
@@ -225,7 +234,7 @@ export function VideoContent({
 
 export function DeletedContent() {
   return (
-    <ContentLinkProps.Provider value={{ disabled: true, optional: false }}>
+    <ContentLinkProps.Provider value={{ disabled: true, chips: [] }}>
       <Content
         title="Deleted content"
         className="rounded-xl"
@@ -671,7 +680,7 @@ export function Content({
   onClick?: MouseEventHandler<HTMLButtonElement> | undefined;
   action?: ReactNode;
 }) {
-  const { disabled, optional } = useContext(ContentLinkProps);
+  const { disabled, chips } = useContext(ContentLinkProps);
   return (
     <button
       disabled={disabled}
@@ -693,7 +702,7 @@ export function Content({
               sx={{ backgroundColor: color }}
             />
           )}
-          {optional && <Chip className="!h-5 !text-xs" label="optional" />}
+          {chips}
         </div>
         <Typography
           variant="subtitle1"

@@ -11,7 +11,7 @@ import {
   styled,
   tooltipClasses,
 } from "@mui/material";
-import { chain, every, orderBy, some } from "lodash";
+import { every, orderBy, some } from "lodash";
 import Error from "next/error";
 import { useParams, useRouter } from "next/navigation";
 import {
@@ -43,12 +43,9 @@ import { Info } from "@mui/icons-material";
 import ExitToAppIcon from "@mui/icons-material/ExitToApp";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import dayjs from "dayjs";
-import isBetween from "dayjs/plugin/isBetween";
 import Link from "next/link";
 import { useState } from "react";
 import { Suggestion } from "@/components/Suggestion";
-
-dayjs.extend(isBetween);
 
 interface Data {
   name: string;
@@ -147,22 +144,6 @@ export default function StudentCoursePage() {
 
   // Extract course
   const course = coursesByIds[0];
-
-  const nextFlashcard = chain(course.chapters.elements)
-    .flatMap((x) => x.contents)
-    .filter((x) => x.metadata.type === "FLASHCARDS")
-    .minBy((x) => new Date(x.userProgressData.nextLearnDate))
-    .value();
-  const nextQuiz = chain(course.chapters.elements)
-    .flatMap((x) => x.contents)
-    .filter((x) => x.metadata.type === "QUIZ")
-    .minBy((x) => new Date(x.userProgressData.nextLearnDate))
-    .value();
-  const nextVideo = chain(course.chapters.elements)
-    .flatMap((x) => x.contents)
-    .filter((x) => x.metadata.type === "MEDIA")
-    .minBy((x) => new Date(x.userProgressData.nextLearnDate))
-    .value();
 
   return (
     <main>

@@ -3,24 +3,10 @@
 import { studentStudentQuery } from "@/__generated__/studentStudentQuery.graphql";
 import { CourseCard } from "@/components/CourseCard";
 import {
-  ArrowForwardIos,
-  Check,
-  Refresh,
-  Visibility,
-} from "@mui/icons-material";
-import {
   Box,
   Button,
-  Card,
-  CardContent,
-  CircularProgress,
-  Divider,
   FormControl,
   InputLabel,
-  List,
-  ListItemButton,
-  ListItemIcon,
-  ListItemText,
   MenuItem,
   Select,
   SelectChangeEvent,
@@ -49,6 +35,7 @@ export default function StudentPage() {
               startDate
               startYear
               yearDivision
+              ...CourseCardFragment
             }
           }
         }
@@ -140,7 +127,7 @@ export default function StudentPage() {
       ) : (
         <div className="grid grid-cols-2 lg:grid-cols-3 gap-8 mt-8">
           {filteredCourses.map((course) => (
-            <CourseCard key={course.id} courses={course} />
+            <CourseCard key={course.id} _course={course} />
           ))}
         </div>
       )}
@@ -162,7 +149,7 @@ export default function StudentPage() {
             </div>
             <div className="grid grid-cols-2 lg:grid-cols-3 gap-8 mt-8">
               {notFocusesdcourses.map((course) => (
-                <CourseCard key={course.id} courses={course} />
+                <CourseCard key={course.id} _course={course} />
               ))}
             </div>
           </>

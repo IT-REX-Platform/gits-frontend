@@ -61,30 +61,12 @@ export default function StudentPage() {
     (course) => course.course
   );
   const [filteredCourses, setFilteredCourses] = useState(courses);
-  const notFocusesdcourses = courses;
-
-  /* if (sortBy === "title") {
-    courses.sort((a, b) => a.title.localeCompare(b.title));
-  }
-  if (sortBy === "startYear") {
-    //TODO: Change startDate.year() to startYear
-    courses.filter((course) => course.startDate.year() === currentYear);
-    notFocusesdcourses.sort((a, b) => a.startDate.year() - b.startDate.year());
-    notFocusesdcourses.filter(
-      (course) => course.startDate.year() !== currentYear
-    );
-  }
-  if (sortBy === "yearDivison") {
-    courses.filter(
-      (course) =>
-        course.yearDivision === "FIRST_SEMESTER" ||
-        course.yearDivision === "SECOND_SEMESTER"
-    );
-  } */
+  const [notFocusesdcourses, setNotFocusesdcourses] = useState(courses);
 
   const handleChange = (event: SelectChangeEvent<String>) => {
     const selectedSort = event.target.value as String;
     setSortBy(selectedSort);
+    setShowAllCourses(false);
 
     // Update filteredCourses based on the selected sorting criteria
     if (selectedSort === "title") {
@@ -94,18 +76,33 @@ export default function StudentPage() {
       );
     } else if (selectedSort === "startYear") {
       // Filter courses that match the currentYear
-      setFilteredCourses(
-        courses.filter((course) => course.startYear === currentYear)
+      const filtered = courses.filter(
+        (course) => course.startYear === currentYear
       );
+      filtered.sort((a, b) => b.startDate - a.startDate);
+      setFilteredCourses(filtered);
+      const notFocused = courses.filter(
+        (course) => course.startYear !== currentYear
+      );
+      notFocused.sort((a, b) => b.startDate - a.startDate);
+      setNotFocusesdcourses(notFocused);
     } else if (selectedSort === "yearDivision") {
-      // Filter courses with specific yearDivision criteria (e.g., FIRST_SEMESTER or SECOND_SEMESTER)
-      setFilteredCourses(
-        courses.filter(
-          (course) =>
-            course.yearDivision === "FIRST_SEMESTER" ||
-            course.yearDivision === "SECOND_SEMESTER"
-        )
+      // Filter and sort courses with specific yearDivision criteria (e.g., FIRST_SEMESTER or SECOND_SEMESTER)
+      const filtered = courses.filter(
+        (course) =>
+          course.yearDivision === "FIRST_SEMESTER" &&
+          course.yearDivision !== null
       );
+      filtered.sort((a, b) => b.startDate - a.startDate);
+      setFilteredCourses(filtered);
+
+      const notFocused = courses.filter(
+        (course) =>
+          course.yearDivision === "SECOND_SEMESTER" &&
+          course.yearDivision !== null
+      );
+      notFocused.sort((a, b) => b.startDate - a.startDate);
+      setNotFocusesdcourses(notFocused);
     }
   };
 
@@ -178,6 +175,7 @@ export default function StudentPage() {
                     <Link href={{ pathname: `/courses/${course.id}` }}>
                       <Button size="small">{course.title}</Button>
                     </Link>
+                    {dayjs(course.startDate).year().toString()}
                   </Typography>
                 </div>
               </CardContent>
@@ -231,90 +229,99 @@ export default function StudentPage() {
         notFocusesdcourses.length > 0 &&
         sortBy !== "" &&
         sortBy !== "title" && (
-          <Button onClick={handleButton}>Show All Courses</Button>
-        )}
-      {showAllCourses && notFocusesdcourses.length > 0 && (
-        <>
-          <Button onClick={handleButton}>Show All Courses</Button>
-          <div className="grid grid-cols-2 lg:grid-cols-3 gap-8 mt-8">
-            {notFocusesdcourses.map((course) => (
-              <Card variant="outlined" className="h-full" key={course.id}>
-                <CardContent>
-                  <div className="flex gap-4 items-center">
-                    <div className="aspect-square min-w-[40px] grid">
-                      <CircularProgress
-                        variant="determinate"
-                        value={100}
-                        sx={{
-                          color: (theme) => theme.palette.grey[200],
-                        }}
-                        className="col-start-1 row-start-1"
-                      />
-                      <CircularProgress
-                        variant="determinate"
-                        value={45}
-                        color="success"
-                        className="col-start-1 row-start-1"
-                      />
-                    </div>
-                    <Typography
-                      variant="h6"
-                      component="div"
-                      className="shrink text-ellipsis overflow-hidden whitespace-nowrap "
-                    >
-                      <Link href={{ pathname: `/courses/${course.id}` }}>
-                        <Button size="small">{course.title}</Button>
-                      </Link>
-                    </Typography>
-                  </div>
-                </CardContent>
-
-                <Divider />
-                <List>
-                  <ListItemButton>
-                    <ListItemIcon>
-                      <Visibility />
-                    </ListItemIcon>
-                    <ListItemText
-                      primary="Watch the next video"
-                      secondary="Chapter 4: Interfaces"
-                    />
-                    <ListItemIcon>
-                      <ArrowForwardIos fontSize="small" />
-                    </ListItemIcon>
-                  </ListItemButton>
-                  <ListItemButton>
-                    <ListItemIcon>
-                      <Check />
-                    </ListItemIcon>
-                    <ListItemText
-                      primary="Solve the Quiz"
-                      secondary="Chapter 4: Interfaces"
-                    />
-                    <ListItemIcon>
-                      <ArrowForwardIos fontSize="small" />
-                    </ListItemIcon>
-                  </ListItemButton>
-
-                  <ListItemButton>
-                    <ListItemIcon>
-                      <Refresh />
-                    </ListItemIcon>
-                    <ListItemText
-                      primary="Refresh your Knowledge"
-                      secondary="Chapter 1-3"
-                    />
-                    <ListItemIcon>
-                      <ArrowForwardIos fontSize="small" />
-                    </ListItemIcon>
-                  </ListItemButton>
-                </List>
-                <Divider />
-              </Card>
-            ))}
+          <div className="flex flex-col items-center">
+            <Button onClick={handleButton}>Show All Courses</Button>
           </div>
-        </>
-      )}
+        )}
+      {showAllCourses &&
+        notFocusesdcourses.length > 0 &&
+        sortBy !== "" &&
+        sortBy !== "title" && (
+          <>
+            <div className="flex flex-col items-center">
+              <Button onClick={handleButton}>Hide All Courses</Button>
+            </div>
+            <div className="grid grid-cols-2 lg:grid-cols-3 gap-8 mt-8">
+              {notFocusesdcourses.map((course) => (
+                <Card variant="outlined" className="h-full" key={course.id}>
+                  <CardContent>
+                    <div className="flex gap-4 items-center">
+                      <div className="aspect-square min-w-[40px] grid">
+                        <CircularProgress
+                          variant="determinate"
+                          value={100}
+                          sx={{
+                            color: (theme) => theme.palette.grey[200],
+                          }}
+                          className="col-start-1 row-start-1"
+                        />
+                        <CircularProgress
+                          variant="determinate"
+                          value={45}
+                          color="success"
+                          className="col-start-1 row-start-1"
+                        />
+                      </div>
+                      <Typography
+                        variant="h6"
+                        component="div"
+                        className="shrink text-ellipsis overflow-hidden whitespace-nowrap "
+                      >
+                        <Link href={{ pathname: `/courses/${course.id}` }}>
+                          <Button size="small">{course.title}</Button>
+                        </Link>
+                        {dayjs(course.startDate).year().toString() +
+                          course.yearDivision}
+                      </Typography>
+                    </div>
+                  </CardContent>
+
+                  <Divider />
+                  <List>
+                    <ListItemButton>
+                      <ListItemIcon>
+                        <Visibility />
+                      </ListItemIcon>
+                      <ListItemText
+                        primary="Watch the next video"
+                        secondary="Chapter 4: Interfaces"
+                      />
+                      <ListItemIcon>
+                        <ArrowForwardIos fontSize="small" />
+                      </ListItemIcon>
+                    </ListItemButton>
+                    <ListItemButton>
+                      <ListItemIcon>
+                        <Check />
+                      </ListItemIcon>
+                      <ListItemText
+                        primary="Solve the Quiz"
+                        secondary="Chapter 4: Interfaces"
+                      />
+                      <ListItemIcon>
+                        <ArrowForwardIos fontSize="small" />
+                      </ListItemIcon>
+                    </ListItemButton>
+
+                    <ListItemButton>
+                      <ListItemIcon>
+                        <Refresh />
+                      </ListItemIcon>
+                      <ListItemText
+                        primary="Refresh your Knowledge"
+                        secondary="Chapter 1-3"
+                      />
+                      <ListItemIcon>
+                        <ArrowForwardIos fontSize="small" />
+                      </ListItemIcon>
+                    </ListItemButton>
+                  </List>
+                  <Divider />
+                </Card>
+              ))}
+            </div>
+          </>
+        )}
     </main>
   );
 }

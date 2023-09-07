@@ -182,15 +182,15 @@ export default function NewCourse() {
                 onChange={handleChange}
                 label={"Year Divison"}
               >
-                <MenuItem value={"FIRST_SEMESTER"}>FIRST_SEMESTER</MenuItem>
-                <MenuItem value={"SECOND_SEMESTER"}>SECOND_SEMESTER</MenuItem>
-                <MenuItem value={"FIRST_TRIMESTER"}>FIRST_TRIMESTER</MenuItem>
-                <MenuItem value={"SECOND_TRIMESTER"}>SECOND_TRIMESTER</MenuItem>
-                <MenuItem value={"THIRD_TRIMESTER"}>THIRD_TRIMESTER</MenuItem>
-                <MenuItem value={"FIRST_QUARTER"}>FIRST_QUARTER</MenuItem>
-                <MenuItem value={"SECOND_QUARTER"}>SECOND_QUARTER</MenuItem>
-                <MenuItem value={"THIRD_QUARTER"}>THIRD_QUARTER</MenuItem>
-                <MenuItem value={"FOURTH_QUARTER"}>FOURTH_QUARTER</MenuItem>
+                <MenuItem value={"FIRST_SEMESTER"}>Winter semester</MenuItem>
+                <MenuItem value={"SECOND_SEMESTER"}>Summer semester</MenuItem>
+                <MenuItem value={"FIRST_TRIMESTER"}>1st Trimester</MenuItem>
+                <MenuItem value={"SECOND_TRIMESTER"}>2nd Trimester</MenuItem>
+                <MenuItem value={"THIRD_TRIMESTER"}>3rd Trimester</MenuItem>
+                <MenuItem value={"FIRST_QUARTER"}>1st Quarter</MenuItem>
+                <MenuItem value={"SECOND_QUARTER"}>2nd Quarter</MenuItem>
+                <MenuItem value={"THIRD_QUARTER"}>3rd Quarter</MenuItem>
+                <MenuItem value={"FOURTH_QUARTER"}>4th Quarter</MenuItem>
               </Select>
             </FormControl>
           </Box>

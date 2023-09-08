@@ -6,8 +6,10 @@ import { SuggestionFragment$key } from "@/__generated__/SuggestionFragment.graph
 
 export function Suggestion({
   _suggestion,
+  small = false,
 }: {
   _suggestion: SuggestionFragment$key;
+  small?: boolean;
 }) {
   const suggestion = useFragment(
     graphql`
@@ -21,16 +23,18 @@ export function Suggestion({
     _suggestion
   );
 
+  const extra_chips =
+    suggestion.type === "NEW_CONTENT"
+      ? [{ key: "new", label: "new" }]
+      : suggestion.type === "REPETITION"
+      ? [{ key: "repeat", label: "repeat" }]
+      : [];
+
   return (
     <ContentLink
       _content={suggestion.content}
-      extra_chips={[
-        suggestion.type === "NEW_CONTENT" ? (
-          <Chip key="new" className="!h-5 !text-xs" label="new" />
-        ) : suggestion.type === "REPETITION" ? (
-          <Chip key="repeat" className="!h-5 !text-xs" label="repeat" />
-        ) : undefined,
-      ]}
+      extra_chips={extra_chips}
+      size={small ? "small" : "normal"}
     />
   );
 }

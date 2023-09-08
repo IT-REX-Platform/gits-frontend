@@ -47,20 +47,30 @@ import {
 import { graphql, useFragment, useMutation } from "react-relay";
 import colors from "tailwindcss/colors";
 
+export type ContentSize = "small" | "normal";
+export type ContentChip = {
+  key: string;
+  label: string;
+  color?: string;
+};
+
 const ContentLinkProps = createContext({
   disabled: false,
-  chips: [] as ReactNode[],
+  chips: [] as ContentChip[],
+  size: "normal" as ContentSize,
 });
 
 export function ContentLink({
   disabled = false,
   optional = false,
   extra_chips = [],
+  size = "normal",
   _content,
 }: {
   disabled?: boolean;
   optional?: boolean;
-  extra_chips?: ReactNode[];
+  extra_chips?: ContentChip[];
+  size?: ContentSize;
   _content: ContentLinkFragment$key;
 }) {
   const content = useFragment(
@@ -91,14 +101,12 @@ export function ContentLink({
   }
 
   const chips = [
-    optional ? (
-      <Chip key="optional" className="!h-5 !text-xs" label="optional" />
-    ) : undefined,
+    ...(optional ? [{ key: "optional", label: "optional" }] : []),
     ...extra_chips,
   ];
 
   return (
-    <ContentLinkProps.Provider value={{ disabled, chips }}>
+    <ContentLinkProps.Provider value={{ disabled, chips, size }}>
       {getContentNode()}
     </ContentLinkProps.Provider>
   );
@@ -211,13 +219,13 @@ export function VideoContent({
     <Content
       type="Video"
       title={title}
-      className="hover:bg-sky-100 rounded-full"
+      className="hover:bg-sky-100"
       color={disabled ? colors.gray[100] : colors.sky[200]}
       onClick={onClick}
       icon={
         <ArrowRight
+          className="!w-3/4 !h-3/4"
           sx={{
-            fontSize: "2.5rem",
             color: disabled ? "text.disabled" : "text.secondary",
           }}
         />
@@ -232,22 +240,23 @@ export function VideoContent({
   );
 }
 
-export function DeletedContent() {
+export function DeletedContent({ size = "normal" }: { size?: ContentSize }) {
   return (
-    <ContentLinkProps.Provider value={{ disabled: true, chips: [] }}>
+    <ContentLinkProps.Provider value={{ disabled: true, chips: [], size }}>
       <Content
         title="Deleted content"
-        className="rounded-xl"
+        className="!bg-transparent"
         color={colors.gray[100]}
         icon={
           <DeleteForever
+            className="!w-1/2 !h-1/2"
             sx={{
-              fontSize: "1.875rem",
               color: "text.disabled",
             }}
           />
         }
         iconFrame={<StaticFrame color="bg-gray-100" />}
+        square
       />
     </ContentLinkProps.Provider>
   );
@@ -280,7 +289,7 @@ export function InvalidContent({
     <Content
       type={type}
       title={title}
-      className="hover:bg-gray-100 rounded-xl"
+      className="hover:bg-gray-100"
       color={disabled ? colors.gray[100] : colors.gray[300]}
       action={
         pageView === PageView.Lecturer ? (
@@ -311,8 +320,8 @@ export function InvalidContent({
       }
       icon={
         <QuestionMark
+          className="!w-1/2 !h-1/2"
           sx={{
-            fontSize: "1.875rem",
             color: disabled ? "text.disabled" : "text.secondary",
           }}
         />
@@ -320,6 +329,7 @@ export function InvalidContent({
       iconFrame={
         <StaticFrame color={disabled ? "bg-gray-100" : "bg-gray-300"} />
       }
+      square
     />
   );
 }
@@ -350,13 +360,13 @@ export function PresentationContent({
     <Content
       type="Slides"
       title={title}
-      className="hover:bg-violet-100 rounded-full"
+      className="hover:bg-violet-100"
       color={disabled ? colors.gray[100] : colors.violet[200]}
       onClick={onClick}
       icon={
         <PersonalVideo
+          className="!w-1/2 !h-1/2"
           sx={{
-            fontSize: "1.875rem",
             color: disabled ? "text.disabled" : "text.secondary",
           }}
         />
@@ -397,13 +407,13 @@ export function DocumentContent({
     <Content
       type="Document"
       title={title}
-      className="hover:bg-indigo-100 rounded-full"
+      className="hover:bg-indigo-100"
       color={disabled ? colors.gray[100] : colors.indigo[200]}
       onClick={onClick}
       icon={
         <Description
+          className="!w-1/2 !h-1/2"
           sx={{
-            fontSize: "1.875rem",
             color: disabled ? "text.disabled" : "text.secondary",
           }}
         />
@@ -424,12 +434,12 @@ export function UrlContent({ title }: { title: string }) {
     <Content
       type="Url"
       title={title}
-      className="hover:bg-slate-100 rounded-xl"
+      className="hover:bg-slate-100"
       color={disabled ? colors.gray[100] : colors.gray[400]}
       icon={
         <Language
+          className="!w-1/2 !h-1/2"
           sx={{
-            fontSize: "1.875rem",
             color: disabled ? "text.disabled" : "white",
           }}
         />
@@ -437,6 +447,7 @@ export function UrlContent({ title }: { title: string }) {
       iconFrame={
         <StaticFrame color={disabled ? "bg-gray-100" : "bg-gray-400"} />
       }
+      square
     />
   );
 }
@@ -532,7 +543,7 @@ export function FlashcardContent({
       <Content
         type="Flashcards"
         title={flashcard.metadata.name}
-        className="hover:bg-emerald-100 rounded-full"
+        className="hover:bg-emerald-100"
         color={disabled ? colors.gray[100] : colors.emerald[200]}
         onClick={() => {
           if (
@@ -547,8 +558,8 @@ export function FlashcardContent({
         }}
         icon={
           <QuestionAnswerRounded
+            className="!w-1/2 !h-1/2"
             sx={{
-              fontSize: "2rem",
               color: disabled ? "text.disabled" : "text.secondary",
             }}
           />
@@ -601,7 +612,7 @@ export function QuizContent({ _quiz }: { _quiz: ContentQuizFragment$key }) {
       <Content
         type="Quiz"
         title={quiz.metadata.name}
-        className="hover:bg-emerald-100 rounded-full"
+        className="hover:bg-emerald-100"
         color={disabled ? colors.gray[100] : colors.emerald[200]}
         onClick={() => {
           if (
@@ -616,8 +627,8 @@ export function QuizContent({ _quiz }: { _quiz: ContentQuizFragment$key }) {
         }}
         icon={
           <Quiz
+            className="!w-[47%] !h-[47%]"
             sx={{
-              fontSize: "2rem",
               color: disabled ? "text.disabled" : "text.secondary",
             }}
           />
@@ -646,7 +657,7 @@ export function MaterialContent({
     <Content
       type="Download"
       title={title}
-      className="hover:bg-amber-100 rounded-xl"
+      className="hover:bg-amber-100"
       color={disabled ? colors.gray[100] : colors.amber[600]}
       onClick={onClick}
       icon={
@@ -657,6 +668,7 @@ export function MaterialContent({
       iconFrame={
         <StaticFrame color={disabled ? "bg-gray-100" : "bg-amber-600"} />
       }
+      square
     />
   );
 }
@@ -670,6 +682,7 @@ export function Content({
   className = "",
   onClick = undefined,
   action,
+  square = false,
 }: {
   type?: string;
   title: string;
@@ -679,37 +692,59 @@ export function Content({
   className?: string;
   onClick?: MouseEventHandler<HTMLButtonElement> | undefined;
   action?: ReactNode;
+  square?: boolean;
 }) {
-  const { disabled, chips } = useContext(ContentLinkProps);
+  const { disabled, chips, size } = useContext(ContentLinkProps);
+  const chips_ = [
+    ...(type ? [{ key: "type", label: type, color }] : []),
+    ...chips,
+  ];
+
+  const gap = size == "small" ? "gap-2" : "gap-4";
+  const rounding = !square
+    ? "rounded-full"
+    : size == "small"
+    ? "rounded"
+    : "rounded-xl";
+  const cursor = !disabled ? "cursor-pointer" : "cursor-default";
+  const frameSize = size == "small" ? "w-10 h-10" : "w-16 h-16";
+
   return (
     <button
       disabled={disabled}
-      className={`group flex items-center text-left gap-4 pr-3 hover:disabled:bg-gray-50 ${
-        !disabled ? "cursor-pointer" : "cursor-default"
-      } ${className}`}
+      className={`group flex items-center text-left ${gap} pr-3 hover:disabled:bg-gray-50 ${cursor} ${rounding} ${className}`}
       onClick={onClick}
     >
-      <div className="w-16 h-16 relative flex justify-center items-center group-hover:group-enabled:scale-105">
+      <div
+        className={`${frameSize} relative flex justify-center items-center group-hover:group-enabled:scale-105`}
+      >
         {iconFrame}
-        <div className="absolute">{icon}</div>
+        <div className="absolute flex justify-center">{icon}</div>
       </div>
       <div className="group-hover:group-enabled:translate-x-0.5">
-        <div className="flex items-center gap-1.5 -ml-1">
-          {type && (
+        <div
+          className={`flex items-center ${
+            size == "small" ? "gap-1 -ml-0.5" : "gap-1.5 -ml-1"
+          }`}
+        >
+          {chips_.map((chip) => (
             <Chip
-              className="!h-5 !text-xs"
-              label={type}
-              sx={{ backgroundColor: color }}
+              key={chip.key}
+              className={
+                size == "small" ? "!h-3.5 !text-[0.6rem]" : "!h-5 text-xs"
+              }
+              label={chip.label}
+              sx={{ backgroundColor: chip.color }}
+              classes={{ label: size == "small" ? "!px-2 mt-[0.1rem]" : "" }}
             />
-          )}
-          {chips}
+          ))}
         </div>
         <Typography
           variant="subtitle1"
-          fontSize="1.25rem"
+          fontSize={size == "small" ? "0.8rem" : "1.25rem"}
           fontWeight="500"
           color={disabled ? "text.disabled" : ""}
-          sx={{ marginBottom: -0.5 }}
+          sx={size == "small" ? { lineHeight: 1.5 } : { marginBottom: -0.5 }}
         >
           {title}
         </Typography>
@@ -738,12 +773,12 @@ export function ProgressFrame({
   return (
     <>
       <div
-        className={`absolute w-16 h-16 rounded-full bg-white box-content group-hover:border-4 group-hover:border-white`}
+        className={`absolute w-full h-full rounded-full bg-white box-content group-hover:border-4 group-hover:border-white`}
       ></div>
       <CircularProgress
         variant="determinate"
         value={100}
-        size="4rem"
+        size="100%"
         thickness={3}
         sx={{ color: "grey.100" }}
       />
@@ -752,11 +787,11 @@ export function ProgressFrame({
         variant="determinate"
         value={progress?.isLearned === true ? 100 : 0}
         thickness={3}
-        size="4rem"
+        size="100%"
         sx={{ color }}
       />
       <div
-        className={`absolute w-12 h-12 rounded-full`}
+        className={`absolute w-3/4 h-3/4 rounded-full`}
         style={{ backgroundColor: color }}
       ></div>
     </>
@@ -764,5 +799,5 @@ export function ProgressFrame({
 }
 
 function StaticFrame({ color }: { color?: string }) {
-  return <div className={`w-12 h-12 rounded ${color ?? ""}`}></div>;
+  return <div className={`w-4/5 h-4/5 rounded ${color ?? ""}`}></div>;
 }

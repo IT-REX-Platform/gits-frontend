@@ -11,7 +11,6 @@ import {
   Box,
   Button,
   Card,
-  CardActions,
   CardContent,
   CircularProgress,
   Divider,
@@ -86,7 +85,7 @@ export default function StudentPage() {
       );
       notFocused.sort((a, b) => b.startDate - a.startDate);
       setNotFocusesdcourses(notFocused);
-    } else if (selectedSort === "yearDivision") {
+    } /* else if (selectedSort === "yearDivision") {
       // Filter and sort courses with specific yearDivision criteria (e.g., FIRST_SEMESTER or SECOND_SEMESTER)
       const filtered = courses.filter(
         (course) =>
@@ -103,7 +102,7 @@ export default function StudentPage() {
       );
       notFocused.sort((a, b) => b.startDate - a.startDate);
       setNotFocusesdcourses(notFocused);
-    }
+    } */
   };
 
   const handleButton = () => {
@@ -122,7 +121,7 @@ export default function StudentPage() {
           <Select value={sortBy} onChange={handleChange} label={"Sort By"}>
             <MenuItem value={"title"}>Alphabetically</MenuItem>
             <MenuItem value={"startYear"}>Year</MenuItem>
-            <MenuItem value={"yearDivison"}>Year Division</MenuItem>
+            {/* <MenuItem value={"yearDivison"}>Year Division</MenuItem> */}
           </Select>
         </FormControl>
       </Box>

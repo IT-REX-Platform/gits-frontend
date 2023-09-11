@@ -174,7 +174,6 @@ export default function StudentPage() {
                     <Link href={{ pathname: `/courses/${course.id}` }}>
                       <Button size="small">{course.title}</Button>
                     </Link>
-                    {dayjs(course.startDate).year().toString()}
                   </Typography>
                 </div>
               </CardContent>
@@ -269,8 +268,6 @@ export default function StudentPage() {
                         <Link href={{ pathname: `/courses/${course.id}` }}>
                           <Button size="small">{course.title}</Button>
                         </Link>
-                        {dayjs(course.startDate).year().toString() +
-                          course.yearDivision}
                       </Typography>
                     </div>
                   </CardContent>

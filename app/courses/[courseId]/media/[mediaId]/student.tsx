@@ -272,7 +272,6 @@ export function DownloadButton({
   function downloadFile(url: string, fileName: string) {
     fetch(url, {
       method: "get",
-      mode: "no-cors",
       referrerPolicy: "no-referrer",
     })
       .then((res) => res.blob())

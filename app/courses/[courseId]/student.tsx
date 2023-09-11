@@ -30,6 +30,7 @@ import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 
 import { studentCourseLeaveMutation } from "@/__generated__/studentCourseLeaveMutation.graphql";
+import { studentCoursePageChapterFragment$key } from "@/__generated__/studentCoursePageChapterFragment.graphql";
 import { studentCoursePageSectionFragment$key } from "@/__generated__/studentCoursePageSectionFragment.graphql";
 import { studentCoursePageStageFragment$key } from "@/__generated__/studentCoursePageStageFragment.graphql";
 import { ChapterContent } from "@/components/ChapterContent";
@@ -45,7 +46,6 @@ import dayjs from "dayjs";
 import isBetween from "dayjs/plugin/isBetween";
 import Link from "next/link";
 import { useState } from "react";
-import { studentCoursePageChapterFragment$key } from "@/__generated__/studentCoursePageChapterFragment.graphql";
 
 dayjs.extend(isBetween);
 
@@ -85,6 +85,12 @@ export default function StudentCoursePage() {
         }
 
         coursesByIds(ids: [$id]) {
+          suggestions(amount: 4) {
+            content {
+              id
+              ...ContentLinkFragment
+            }
+          }
           id
           title
           description
@@ -271,9 +277,9 @@ export default function StudentCoursePage() {
       <section className="mt-8 mb-20">
         <Typography variant="h2">Up next</Typography>
         <div className="mt-8 gap-8 grid gap-x-12 gap-y-4 grid-cols-[max-content] xl:grid-cols-[repeat(2,max-content)] 2xl:grid-cols-[repeat(3,max-content)]">
-          {nextFlashcard && <ContentLink _content={nextFlashcard} />}
-          {nextQuiz && <ContentLink _content={nextQuiz} />}
-          {nextVideo && <ContentLink _content={nextVideo} />}
+          {course.suggestions.map((x) => (
+            <ContentLink key={x.content.id} _content={x.content} />
+          ))}
         </div>
       </section>
 

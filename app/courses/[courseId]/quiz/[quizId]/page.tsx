@@ -1,8 +1,8 @@
 "use client";
 
 import { PageView, usePageView } from "@/src/currentView";
+import EditQuiz from "./lecturer";
 import StudentQuiz from "./student";
-import Error from "next/error";
 //import EditQuiz from "./lecturer";
 
 export default function CoursePage() {
@@ -11,6 +11,6 @@ export default function CoursePage() {
     case PageView.Student:
       return <StudentQuiz />;
     case PageView.Lecturer:
-      return <Error statusCode={404} />;
+      return <EditQuiz />;
   }
 }

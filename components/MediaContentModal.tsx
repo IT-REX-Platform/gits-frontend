@@ -4,6 +4,7 @@ import { MediaContentModalCreateMutation } from "@/__generated__/MediaContentMod
 import { MediaContentModalUpdateMutation } from "@/__generated__/MediaContentModalUpdateMutation.graphql";
 import { MediaRecordSelector$key } from "@/__generated__/MediaRecordSelector.graphql";
 import { Form, FormSection } from "@/components/Form";
+import { Add, Delete } from "@mui/icons-material";
 import {
   Alert,
   Backdrop,
@@ -13,12 +14,19 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  IconButton,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
   TextField,
 } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers";
+
 import dayjs, { Dayjs } from "dayjs";
 import { useState } from "react";
 import { graphql, useFragment, useMutation } from "react-relay";
+import { MediaRecordIcon } from "./MediaRecordIcon";
 import { MediaRecordSelector } from "./MediaRecordSelector";
 
 export function MediaContentModal({
@@ -202,6 +210,7 @@ export function MediaContentModal({
       });
     }
   }
+  const [recordSelectorOpen, setRecordSelectorOpen] = useState(false);
 
   return (
     <Dialog maxWidth="lg" open={isOpen} onClose={onClose}>
@@ -248,10 +257,50 @@ export function MediaContentModal({
           </FormSection>
           <FormSection title="Media files">
             <MediaRecordSelector
+              isOpen={recordSelectorOpen}
+              onClose={() => setRecordSelectorOpen(false)}
+              mode="multiple"
               _mediaRecords={_mediaRecords}
               selectedRecords={selectedRecords}
               setSelectedRecords={setSelectedRecords}
             />
+
+            <div className="w-full">
+              <List>
+                {selectedRecords.map((record) => (
+                  <ListItem
+                    key={record.id}
+                    secondaryAction={
+                      <IconButton
+                        onClick={() =>
+                          setSelectedRecords(
+                            selectedRecords.filter((x) => x !== record.id)
+                          )
+                        }
+                        edge="end"
+                        aria-label="delete"
+                      >
+                        <Delete />
+                      </IconButton>
+                    }
+                  >
+                    <ListItemIcon>
+                      <MediaRecordIcon type={record.type} />
+                    </ListItemIcon>
+                    <ListItemText primary={record.name} />
+                  </ListItem>
+                ))}
+              </List>
+
+              <Button
+                onClick={() => setRecordSelectorOpen(true)}
+                startIcon={<Add />}
+                size="small"
+                className="float-right"
+              >
+                Add Files
+              </Button>
+            </div>
           </FormSection>
         </Form>
         <Backdrop open={isAdding || isUpdating} sx={{ zIndex: "modal" }}>

@@ -1,6 +1,6 @@
 "use client";
 import { Typography } from "@mui/material";
-import { ReactElement } from "react";
+import { ReactElement, ReactNode } from "react";
 
 export function FormDivider() {
   return <hr className="col-span-2 my-2" />;
@@ -11,7 +11,7 @@ export function FormSection({
   children,
 }: {
   title: string;
-  children: ReactElement | ReactElement[];
+  children?: ReactNode;
 }) {
   return (
     <>
@@ -36,11 +36,7 @@ export function FormActions({
   );
 }
 
-export function Form({
-  children,
-}: {
-  children: ReactElement | ReactElement[];
-}) {
+export function Form({ children }: { children: ReactNode }) {
   return (
     <div className="grid grid-cols-[max-content_auto] gap-3 gap-x-24 w-fit">
       {children}

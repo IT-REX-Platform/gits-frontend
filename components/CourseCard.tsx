@@ -8,6 +8,7 @@ import {
   Button,
   Card,
   CardContent,
+  Chip,
   CircularProgress,
   Divider,
   Link,
@@ -17,6 +18,7 @@ import {
   ListItemText,
   Typography,
 } from "@mui/material";
+import dayjs from "dayjs";
 
 type CourseType = {
   readonly id: any;
@@ -52,7 +54,10 @@ export function CourseCard({ courses }: { courses: CourseType }) {
             className="shrink text-ellipsis overflow-hidden whitespace-nowrap "
           >
             <Link href={`/courses/${courses.id}`} underline="none">
-              <Button size="small">{courses.title}</Button>
+              <Chip label={dayjs(courses.startDate).year()}></Chip>
+              <Button size="small" sx={{ fontSize: "11px" }}>
+                {courses.title}
+              </Button>
             </Link>
           </Typography>
         </div>

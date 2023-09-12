@@ -1,12 +1,12 @@
 import { graphql, useFragment } from "react-relay";
 import { RenderRichText } from "../RichTextEditor";
-import { ReactElement, useEffect, useState } from "react";
+import { ReactElement, useEffect, useRef, useState } from "react";
 import { QuestionDivider } from "./QuestionDivider";
 import { ClozeQuestionFragment$key } from "@/__generated__/ClozeQuestionFragment.graphql";
-import { reverse } from "lodash";
 import { useDrag, useDrop } from "react-dnd";
 import { RichTextEditorFragment$key } from "@/__generated__/RichTextEditorFragment.graphql";
-import { Box, Tooltip } from "@mui/material";
+import { Box, TextField, Tooltip, colors } from "@mui/material";
+import { AutosizeByText } from "../AutosizeByText";
 
 export function ClozeQuestion({
   _question,
@@ -40,6 +40,7 @@ export function ClozeQuestion({
         }
 
         allBlanks
+        showBlanksList
 
         ...QuestionDividerFragment
       }
@@ -86,14 +87,29 @@ export function ClozeQuestion({
               disabled={!feedbackMode}
               correctAnswer={element.correctAnswer}
             >
-              <ClozeElementBlank
-                value={selectedAnswers[i] ?? ""}
-                correctAnswer={element.correctAnswer}
-                feedbackMode={feedbackMode}
-                onChange={(value) =>
-                  handleBlankChange(i, value, value === element.correctAnswer)
-                }
-              />
+              {question.showBlanksList ? (
+                <ClozeElementBlank
+                  value={selectedAnswers[i] ?? ""}
+                  correctAnswer={element.correctAnswer}
+                  feedbackMode={feedbackMode}
+                  onChange={(value) =>
+                    handleBlankChange(i, value, value === element.correctAnswer)
+                  }
+                />
+              ) : (
+                <ClozeElementBlankFreetext
+                  value={selectedAnswers[i] ?? ""}
+                  correctAnswer={element.correctAnswer}
+                  feedbackMode={feedbackMode}
+                  onChange={(value) =>
+                    handleBlankChange(
+                      i,
+                      value,
+                      value.trim() === element.correctAnswer
+                    )
+                  }
+                />
+              )}
             </FeedbackTooltip>
           ) : undefined
         )}
@@ -102,18 +118,77 @@ export function ClozeQuestion({
       <QuestionDivider _question={question} onHint={onHint} />
 
       {/* Answer options */}
-      <div className="flex justify-center">
-        <div className="max-w-sm flex justify-center gap-4 flex-wrap">
-          {question.allBlanks.map((value, i) => (
-            <ClozeElementValue
-              key={i}
-              value={value}
-              used={Object.values(selectedAnswers).includes(value)}
-              feedbackMode={feedbackMode}
-            />
-          ))}
+      {question.showBlanksList && (
+        <div className="flex justify-center">
+          <div className="max-w-sm flex justify-center gap-4 flex-wrap">
+            {question.allBlanks.map((value, i) => (
+              <ClozeElementValue
+                key={i}
+                value={value}
+                used={Object.values(selectedAnswers).includes(value)}
+                feedbackMode={feedbackMode}
+              />
+            ))}
+          </div>
         </div>
-      </div>
+      )}
+    </div>
+  );
+}
+
+function ClozeElementBlankFreetext({
+  value,
+  correctAnswer,
+  feedbackMode,
+  onChange,
+}: {
+  value: string;
+  correctAnswer: string;
+  feedbackMode: boolean;
+  onChange: (value: string) => void;
+}) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const color = feedbackMode
+    ? value.trim() === correctAnswer
+      ? colors.green[600]
+      : colors.red[600]
+    : undefined;
+
+  return (
+    <div className="inline-block mb-1">
+      <AutosizeByText
+        className="mx-1 -mb-1.5 min-w-[3rem]"
+        value={value}
+        fontRef={inputRef}
+        offset={12}
+      >
+        <TextField
+          value={value}
+          variant="standard"
+          size="small"
+          fullWidth
+          inputRef={inputRef}
+          disabled={feedbackMode}
+          sx={{
+            "& .MuiInput-input": {
+              textAlign: "center",
+              paddingBottom: 0,
+              color,
+            },
+            "& .MuiInput-input.Mui-disabled": { WebkitTextFillColor: color },
+            "& .MuiInput-underline.Mui-disabled:before": {
+              borderBottomStyle: "solid",
+            },
+            ...(feedbackMode
+              ? {
+                  "& .MuiInput-underline:before": { borderBottomColor: color },
+                  "& .MuiInput-underline:after": { borderBottomColor: color },
+                }
+              : {}),
+          }}
+          onChange={(e) => onChange(e.target.value)}
+        />
+      </AutosizeByText>
     </div>
   );
 }
@@ -166,7 +241,7 @@ function ClozeElementBlank({
     return (
       <span
         ref={!feedbackMode ? (node) => drag(drop(node)) : undefined}
-        className={`border-b mx-1 select-none ${cursor} ${color}`}
+        className={`inline-block border-b p-1 mx-1 select-none ${cursor} ${color}`}
       >
         {value}
       </span>
@@ -176,8 +251,10 @@ function ClozeElementBlank({
   return (
     <span
       ref={!feedbackMode ? drop : undefined}
-      className={`inline-block h-5 w-12 mx-1 -mb-0.5 border-b ${color}`}
-    ></span>
+      className={`inline-block border-b w-12 p-1 mx-1 select-none ${color}`}
+    >
+      &nbsp;
+    </span>
   );
 }
 

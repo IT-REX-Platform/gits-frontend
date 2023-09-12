@@ -249,6 +249,8 @@ export function ContentMediaDisplay({
           url={mediaRecord.downloadUrl}
         />
       );
+    case "IMAGE":
+      return <img src={mediaRecord.downloadUrl}></img>;
     default:
       return <>Unsupported media type</>;
   }

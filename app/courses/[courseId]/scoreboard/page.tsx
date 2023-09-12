@@ -1,5 +1,7 @@
 "use client";
-import * as React from "react";
+import { pageScoreboardQuery } from "@/__generated__/pageScoreboardQuery.graphql";
+import { Heading } from "@/components/Heading";
+import { TextField } from "@mui/material";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
@@ -8,10 +10,8 @@ import TableHead from "@mui/material/TableHead";
 import TablePagination from "@mui/material/TablePagination";
 import TableRow from "@mui/material/TableRow";
 import { useParams } from "next/navigation";
+import * as React from "react";
 import { graphql, useLazyLoadQuery } from "react-relay";
-import { pageScoreboardQuery } from "@/__generated__/pageScoreboardQuery.graphql";
-import { Heading } from "@/components/Heading";
-import { TextField } from "@mui/material";
 
 interface Column {
   id: "place" | "name" | "power";

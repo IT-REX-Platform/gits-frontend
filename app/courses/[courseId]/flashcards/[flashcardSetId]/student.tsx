@@ -10,7 +10,6 @@ import { chain } from "lodash";
 import Error from "next/error";
 import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
-import ReactMarkdown from "react-markdown";
 import { graphql, useLazyLoadQuery, useMutation } from "react-relay";
 
 export default function StudentFlashcards() {
@@ -176,7 +175,7 @@ export default function StudentFlashcards() {
               initial={false}
               transition={{ duration: 0.09, delay: 0.05 }}
             >
-              <ReactMarkdown>{answer.text.text}</ReactMarkdown>
+              {answer.text.text}
 
               <div className="mt-6 flex gap-2 justify-center w-full">
                 <Button

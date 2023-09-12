@@ -10,7 +10,6 @@ import {
 } from "@/__generated__/MediaRecordSelectorCreateMediaRecordMutation.graphql";
 import { MediaRecordSelectorDeleteMediaRecordMutation } from "@/__generated__/MediaRecordSelectorDeleteMediaRecordMutation.graphql";
 import {
-  Add,
   Delete,
   Download,
   Error,
@@ -42,19 +41,30 @@ import { MediaRecordTypeSelector } from "./MediaRecordTypeSelector";
 
 export function MediaRecordSelector({
   _mediaRecords,
-  selectedRecords,
-  setSelectedRecords,
+  isOpen,
+  onClose,
+  ...props
 }: {
   _mediaRecords: MediaRecordSelector$key;
-  selectedRecords: MediaRecordSelector$data["userMediaRecords"];
-  setSelectedRecords: (
-    val:
-      | MediaRecordSelector$data["userMediaRecords"]
-      | ((
-          val: MediaRecordSelector$data["userMediaRecords"]
-        ) => MediaRecordSelector$data["userMediaRecords"])
-  ) => void;
-}) {
+  isOpen: boolean;
+  onClose: () => void;
+} & (
+  | {
+      mode: "multiple";
+      selectedRecords: MediaRecordSelector$data["userMediaRecords"];
+      setSelectedRecords: (
+        val:
+          | MediaRecordSelector$data["userMediaRecords"]
+          | ((
+              val: MediaRecordSelector$data["userMediaRecords"]
+            ) => MediaRecordSelector$data["userMediaRecords"])
+      ) => void;
+    }
+  | {
+      mode: "single";
+      onSelect: (val: MediaRecordSelector$data["userMediaRecords"][0]) => void;
+    }
+)) {
   const [error, setError] = useState<any>(null);
 
   const { userMediaRecords } = useFragment(
@@ -98,11 +108,6 @@ export function MediaRecordSelector({
       }
     `);
 
-  const [isOpen, setIsOpen] = useState(false);
-  function onClose() {
-    setIsOpen(false);
-  }
-
   const [fileUploadStates, setFileUploadStates] = useState<
     Record<string, "running" | "failed" | "done">
   >({});
@@ -128,7 +133,14 @@ export function MediaRecordSelector({
                 ...x,
                 [record.createMediaRecord.id]: "done",
               }));
-              setSelectedRecords((x) => [...x, record.createMediaRecord]);
+              if (props.mode === "multiple") {
+                props.setSelectedRecords((x) => [
+                  ...x,
+                  record.createMediaRecord,
+                ]);
+              } else {
+                props.onSelect(record.createMediaRecord);
+              }
             })
             .catch(() =>
               setFileUploadStates((x) => ({
@@ -148,7 +160,7 @@ export function MediaRecordSelector({
         },
       });
     },
-    [createMediaRecord, setSelectedRecords]
+    [createMediaRecord]
   );
 
   const onDrop = useCallback(
@@ -239,24 +251,32 @@ export function MediaRecordSelector({
         <DialogContent sx={{ paddingX: 0 }}>
           <List>
             {filteredMedia.map((record) => {
-              const checked = selectedRecords.find((x) => x.id === record.id);
+              const checked =
+                props.mode === "multiple" &&
+                props.selectedRecords.find((x) => x.id === record.id);
               const toggle = () =>
-                setSelectedRecords(
-                  checked
-                    ? selectedRecords.filter((x) => x.id !== record.id)
-                    : [...selectedRecords, record]
-                );
+                props.mode === "multiple"
+                  ? props.setSelectedRecords(
+                      checked
+                        ? props.selectedRecords.filter(
+                            (x) => x.id !== record.id
+                          )
+                        : [...props.selectedRecords, record]
+                    )
+                  : props.onSelect(record);
 
               return (
                 <ListItem
                   key={record.id}
                   secondaryAction={
                     <div className="mr-2">
-                      <Checkbox
-                        size="small"
-                        checked={!!checked}
-                        onClick={toggle}
-                      />
+                      {props.mode === "multiple" && (
+                        <Checkbox
+                          size="small"
+                          checked={!!checked}
+                          onClick={toggle}
+                        />
+                      )}
                       <IconButton
                         size="small"
                         onClick={() => {
@@ -320,57 +340,21 @@ export function MediaRecordSelector({
               );
             })}
           </List>
+          {files.length > 0 && (
+            <MediaRecordTypeSelector
+              open
+              file={files[0]}
+              onClose={() => setFiles(([_, ...files]) => files)}
+              onSelect={onTypeSelect}
+            />
+          )}
         </DialogContent>
-        <DialogActions>
-          <Button onClick={onClose}>Ok</Button>
-        </DialogActions>
-      </Dialog>
-
-      <div className="w-full">
-        <List>
-          {userMediaRecords
-            .filter((x) => selectedRecords.some((y) => y.id === x.id))
-            .map((record) => (
-              <ListItem
-                key={record.id}
-                secondaryAction={
-                  <IconButton
-                    onClick={() =>
-                      setSelectedRecords(
-                        selectedRecords.filter((x) => x !== record.id)
-                      )
-                    }
-                    edge="end"
-                    aria-label="delete"
-                  >
-                    <Delete />
-                  </IconButton>
-                }
-              >
-                <ListItemIcon>
-                  <MediaRecordIcon type={record.type} />
-                </ListItemIcon>
-                <ListItemText primary={record.name} />
-              </ListItem>
-            ))}
-        </List>
-        <Button
-          onClick={() => setIsOpen(true)}
-          startIcon={<Add />}
-          size="small"
-          className="float-right"
-        >
-          Add Files
-        </Button>
-        {files.length > 0 && (
-          <MediaRecordTypeSelector
-            open
-            file={files[0]}
-            onClose={() => setFiles(([_, ...files]) => files)}
-            onSelect={onTypeSelect}
-          />
+        {props.mode === "multiple" && (
+          <DialogActions>
+            <Button onClick={onClose}>Ok</Button>
+          </DialogActions>
         )}
-      </div>
+      </Dialog>
     </>
   );
 }

@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
-import { FormSection } from "./Form";
 import { TextField } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers";
 import dayjs from "dayjs";
+import { useEffect, useState } from "react";
+import { FormSection } from "./Form";
 
 export type ContentMetadataPayload = {
   name: string;
@@ -15,7 +15,7 @@ export function ContentMetadataFormSection({
   metadata,
 }: {
   onChange: (side: ContentMetadataPayload | null) => void;
-  metadata?: ContentMetadataPayload;
+  metadata?: ContentMetadataPayload | null;
 }) {
   const [name, setName] = useState(metadata?.name ?? "");
   const [suggestedDate, setSuggestedDate] = useState(
@@ -51,7 +51,7 @@ export function ContentMetadataFormSection({
         label="Name"
         variant="outlined"
         value={name}
-        error={metadata && name.trim() == ""}
+        error={!!metadata && name.trim() == ""}
         onChange={(e) => setName(e.target.value)}
         required
       />

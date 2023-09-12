@@ -1,53 +1,27 @@
 "use client";
 import { lecturerLecturerCourseIdQuery } from "@/__generated__/lecturerLecturerCourseIdQuery.graphql";
-import {
-  Alert,
-  Button,
-  Checkbox,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  FormControlLabel,
-  IconButton,
-  List,
-  ListItem,
-  ListItemButton,
-  ListItemIcon,
-  ListItemText,
-  Switch,
-  Typography,
-} from "@mui/material";
+import { Button, IconButton, Typography } from "@mui/material";
 import Error from "next/error";
-import { useParams, useRouter } from "next/navigation";
-import {
-  graphql,
-  useFragment,
-  useLazyLoadQuery,
-  useMutation,
-} from "react-relay";
+import { useParams } from "next/navigation";
+import { graphql, useLazyLoadQuery } from "react-relay";
 
-import { MediaRecordSelector$key } from "@/__generated__/MediaRecordSelector.graphql";
-import { lecturerAddStageContentModal$key } from "@/__generated__/lecturerAddStageContentModal.graphql";
-import { lecturerEditChapterModalMutation } from "@/__generated__/lecturerEditChapterModalMutation.graphql";
 import { AddChapterModal } from "@/components/AddChapterModal";
-import { AddFlashcardSetModal } from "@/components/AddFlashcardSetModal";
 import { AddSectionButton } from "@/components/AddSectionButton";
 import { AddStageButton } from "@/components/AddStageButton";
 import { ChapterContent } from "@/components/ChapterContent";
 import { ChapterHeader } from "@/components/ChapterHeader";
 import { ContentLink } from "@/components/Content";
 import { DeleteStageButton } from "@/components/DeleteStageButton";
+import EditChapterButton from "@/components/EditChapterButton";
 import { EditCourseModal } from "@/components/EditCourseModal";
 import EditSectionButton from "@/components/EditSectionButton";
+import { Heading } from "@/components/Heading";
 import { Section, SectionContent, SectionHeader } from "@/components/Section";
 import { Stage } from "@/components/Stage";
-import { Add, ArrowForward, Settings } from "@mui/icons-material";
+import { Add, Settings } from "@mui/icons-material";
 import { orderBy } from "lodash";
-import { useEffect, useState } from "react";
-import { MediaContentModal } from "../../../components/MediaContentModal";
-import EditChapterButton from "@/components/EditChapterButton";
-import { Heading } from "@/components/Heading";
+import { useState } from "react";
+import { AddContentModal } from "../../../components/AddContentModal";
 
 graphql`
   fragment lecturerSectionFragment on Section {
@@ -103,6 +77,7 @@ export default function LecturerCoursePage() {
           ...MediaRecordSelector
 
           coursesByIds(ids: $id) {
+            id
             title
             description
             ...AddChapterModalFragment
@@ -112,7 +87,7 @@ export default function LecturerCoursePage() {
                 __id
                 ...EditChapterButtonFragment
                 ...AddFlashcardSetModalFragment
-                ...lecturerAddStageContentModal
+                ...AddContentModalFragment
                 ...ChapterHeaderFragment
                 id
                 title
@@ -208,6 +183,7 @@ export default function LecturerCoursePage() {
                         ))}
                         <div className="mt-4 flex flex-col items-start">
                           <AddContentModal
+                            courseId={course.id}
                             stageId={stage.id}
                             chapterId={chapter.id}
                             _mediaRecords={query}
@@ -240,243 +216,5 @@ export default function LecturerCoursePage() {
         </section>
       ))}
     </main>
-  );
-}
-
-function AddContentModal({
-  chapterId,
-  stageId,
-  _chapter,
-  _mediaRecords,
-  optionalRecords: _optionalRecords,
-  requiredRecords: _requiredRecords,
-}: {
-  chapterId: string;
-  stageId: string;
-  _mediaRecords: MediaRecordSelector$key;
-  _chapter: lecturerAddStageContentModal$key;
-
-  optionalRecords: string[];
-  requiredRecords: string[];
-}) {
-  const [openMediaModal, setOpenMediaModal] = useState(false);
-  const [openFlashcardModal, setOpenFlashcardModal] = useState(false);
-
-  const [openModal, setOpenModal] = useState(false);
-
-  const chapter = useFragment(
-    graphql`
-      fragment lecturerAddStageContentModal on Chapter {
-        ...AddFlashcardSetModalFragment
-        contents {
-          id
-          metadata {
-            name
-          }
-          ... on FlashcardSetAssessment {
-            __typename
-          }
-          ... on MediaContent {
-            __typename
-          }
-          ... on QuizAssessment {
-            __typename
-          }
-        }
-      }
-    `,
-    _chapter
-  );
-
-  const [optionalRecords, setOptionalRecords] = useState(_optionalRecords);
-  const [requiredRecords, setRequiredRecords] = useState(_requiredRecords);
-
-  const [updateStage] = useMutation<lecturerEditChapterModalMutation>(graphql`
-    mutation lecturerEditChapterModalMutation($stage: UpdateStageInput!) {
-      updateStage(input: $stage) {
-        id
-        ...lecturerStageFragment
-      }
-    }
-  `);
-
-  useEffect(() => {
-    setOptionalRecords(_optionalRecords);
-  }, [_optionalRecords]);
-
-  useEffect(() => {
-    setRequiredRecords(_requiredRecords);
-  }, [_requiredRecords]);
-
-  const router = useRouter();
-
-  const [error, setError] = useState<any>(null);
-
-  const submit = () => {
-    updateStage({
-      variables: {
-        stage: {
-          id: stageId,
-          requiredContents: requiredRecords,
-          optionalContents: optionalRecords,
-        },
-      },
-      onError: setError,
-      onCompleted() {
-        setOpenModal(false);
-      },
-    });
-  };
-
-  return (
-    <>
-      <Button startIcon={<Add />} onClick={() => setOpenModal(true)}>
-        Add media
-      </Button>
-
-      <Dialog
-        maxWidth="lg"
-        open={openModal}
-        onClose={() => setOpenModal(false)}
-      >
-        <DialogTitle>Select media</DialogTitle>
-        <DialogContent sx={{ paddingX: 0 }}>
-          {error?.source.errors.map((err: any, i: number) => (
-            <Alert
-              key={i}
-              severity="error"
-              sx={{ minWidth: 400, maxWidth: 800, width: "fit-content" }}
-              onClose={() => setError(null)}
-            >
-              {err.message}
-            </Alert>
-          ))}
-
-          <List className="min-w-[500px]">
-            {chapter.contents.map((content) => {
-              const optional = optionalRecords.find((x) => x === content.id);
-              const required = requiredRecords.find((x) => x === content.id);
-              const toggle =
-                optional || required
-                  ? () => {
-                      setOptionalRecords(
-                        optionalRecords.filter((x) => x !== content.id)
-                      );
-                      setRequiredRecords(
-                        requiredRecords.filter((x) => x !== content.id)
-                      );
-                    }
-                  : () => {
-                      setRequiredRecords([...requiredRecords, content.id]);
-                    };
-
-              const checked = optional || required;
-
-              const toggleOptional = optional
-                ? () => {
-                    setOptionalRecords(
-                      optionalRecords.filter((x) => x !== content.id)
-                    );
-                    setRequiredRecords([...requiredRecords, content.id]);
-                  }
-                : () => {
-                    setOptionalRecords([...optionalRecords, content.id]);
-                    setRequiredRecords(
-                      requiredRecords.filter((x) => x !== content.id)
-                    );
-                  };
-
-              return (
-                <ListItem
-                  key={content.id}
-                  secondaryAction={
-                    <div className="mr-2 flex gap-x-3">
-                      {checked && (
-                        <FormControlLabel
-                          control={
-                            <Switch
-                              checked={!!required}
-                              onClick={toggleOptional}
-                            />
-                          }
-                          label={required ? "Required" : "Optional"}
-                        />
-                      )}
-
-                      <IconButton
-                        edge="end"
-                        onClick={() =>
-                          router.push(
-                            content.__typename === "FlashcardSetAssessment"
-                              ? `flashcards/${content.id}`
-                              : content.__typename === "MediaContent"
-                              ? `media/${content.id}`
-                              : content.__typename === "QuizAssessment"
-                              ? `quizzes/${content.id}`
-                              : ""
-                          )
-                        }
-                      >
-                        <ArrowForward />
-                      </IconButton>
-                    </div>
-                  }
-                  disablePadding
-                >
-                  <ListItemButton onClick={toggle}>
-                    <ListItemIcon>
-                      <Checkbox
-                        edge="start"
-                        checked={!!checked}
-                        tabIndex={-1}
-                        disableRipple
-                      />
-                    </ListItemIcon>
-
-                    <ListItemText primary={content.metadata.name} />
-                  </ListItemButton>
-                </ListItem>
-              );
-            })}
-          </List>
-        </DialogContent>
-
-        <DialogContent>
-          {/* add flashcard button */}
-          <Button
-            onClick={() => setOpenFlashcardModal(true)}
-            variant="text"
-            className="mt-4"
-            startIcon={<Add />}
-          >
-            Add Flashcards
-          </Button>
-          <Button
-            onClick={() => setOpenMediaModal(true)}
-            variant="text"
-            className="mt-4"
-            startIcon={<Add />}
-          >
-            Add Media
-          </Button>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={submit}>Ok</Button>
-        </DialogActions>
-      </Dialog>
-
-      <MediaContentModal
-        chapterId={chapterId}
-        isOpen={openMediaModal}
-        onClose={() => setOpenMediaModal(false)}
-        _mediaRecords={_mediaRecords}
-      />
-      {openFlashcardModal && (
-        <AddFlashcardSetModal
-          onClose={() => setOpenFlashcardModal(false)}
-          _chapter={chapter}
-        />
-      )}
-    </>
   );
 }

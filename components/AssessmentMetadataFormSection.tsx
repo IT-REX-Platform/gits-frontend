@@ -1,5 +1,4 @@
-import { use, useEffect, useState } from "react";
-import { FormSection } from "./Form";
+import { SkillType } from "@/__generated__/AddFlashcardSetModalAssessmentMutation.graphql";
 import {
   Checkbox,
   FormControl,
@@ -10,9 +9,11 @@ import {
   Select,
   TextField,
 } from "@mui/material";
+import { useEffect, useState } from "react";
+import { FormSection } from "./Form";
 
 export type AssessmentMetadataPayload = {
-  skillType: string;
+  skillType: SkillType;
   skillPoints: number;
   initialLearningInterval?: number | null;
 };
@@ -22,7 +23,7 @@ export function AssessmentMetadataFormSection({
   metadata,
 }: {
   onChange: (side: AssessmentMetadataPayload | null) => void;
-  metadata?: AssessmentMetadataPayload;
+  metadata?: AssessmentMetadataPayload | null;
 }) {
   const [intervalLearning, setIntervalLearning] = useState(false);
   const [interval, setInterval] = useState(metadata?.initialLearningInterval);
@@ -55,7 +56,7 @@ export function AssessmentMetadataFormSection({
           label="Skill Type"
           labelId="assessmentSkillTypeLabel"
           value={skillType ?? ""}
-          onChange={(e) => setSkillType(e.target.value)}
+          onChange={(e) => setSkillType(e.target.value as SkillType)}
           inputProps={{ id: "assessmentSkillTypeInput" }}
           required
         >

@@ -1,11 +1,13 @@
 "use client";
 
+import { RichTextEditorFragment$key } from "@/__generated__/RichTextEditorFragment.graphql";
 import { studentQuizQuery } from "@/__generated__/studentQuizQuery.graphql";
 import {
   QuestionCompletedInput,
   studentQuizTrackCompletedMutation,
 } from "@/__generated__/studentQuizTrackCompletedMutation.graphql";
 import { Heading } from "@/components/Heading";
+import { RenderRichText } from "@/components/RichTextEditor";
 import {
   Alert,
   Button,
@@ -81,15 +83,15 @@ export default function StudentQuiz() {
               questionPool {
                 ... on MultipleChoiceQuestion {
                   text {
-                    text
+                    ...RichTextEditorFragment
                   }
                   answers {
                     answerText {
-                      text
+                      ...RichTextEditorFragment
                     }
                     correct
                     feedback {
-                      text
+                      ...RichTextEditorFragment
                     }
                   }
                   numberOfCorrectAnswers
@@ -107,15 +109,15 @@ export default function StudentQuiz() {
               selectedQuestions {
                 ... on MultipleChoiceQuestion {
                   text {
-                    text
+                    ...RichTextEditorFragment
                   }
                   answers {
                     answerText {
-                      text
+                      ...RichTextEditorFragment
                     }
                     correct
                     feedback {
-                      text
+                      ...RichTextEditorFragment
                     }
                   }
                   numberOfCorrectAnswers
@@ -124,7 +126,7 @@ export default function StudentQuiz() {
                 number
                 type
                 hint {
-                  text
+                  ...RichTextEditorFragment
                 }
               }
             }
@@ -218,7 +220,9 @@ export default function StudentQuiz() {
         </div>
       </div>
 
-      <div className="mt-6 text-center text-gray-600">{questionText?.text}</div>
+      <div className="mt-6 text-center text-gray-600">
+        {<RenderRichText value={questionText} />}
+      </div>
 
       <div className="w-full border-b border-b-gray-300 mt-6 flex justify-center mb-6">
         <div>
@@ -256,7 +260,7 @@ export default function StudentQuiz() {
                     checked={userAnswers.includes(index)}
                   />
                 }
-                label={answer.answerText.text}
+                label={<RenderRichText value={answer.answerText} />}
               />
             </div>
           ))}
@@ -288,18 +292,19 @@ function InfoDialog({
   onClose,
 }: {
   title: string;
-  hint: string | null;
+  hint: RichTextEditorFragment$key | null;
   open: boolean;
   onClose: () => void;
 }) {
-  if (hint === null) {
-    hint = "There are no hints for this question.";
-  }
   return (
     <Dialog onClose={onClose} open={open}>
       <DialogTitle>{title}</DialogTitle>
       <Typography variant="body1" sx={{ padding: 3, paddingTop: 0 }}>
-        {hint}
+        {hint ? (
+          <RenderRichText value={hint} />
+        ) : (
+          "There are no hints for this question."
+        )}
       </Typography>
     </Dialog>
   );

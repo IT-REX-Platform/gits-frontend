@@ -555,7 +555,11 @@ function Element(props: RenderElementProps) {
       return <RenderMediaRecord {...props}></RenderMediaRecord>;
     default:
       return (
-        <p style={style} {...attributes}>
+        <p
+          style={style}
+          {...attributes}
+          className="last:inline-block first:inline-block"
+        >
           {children}
         </p>
       );

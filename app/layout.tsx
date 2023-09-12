@@ -20,6 +20,8 @@ import { RelayEnvironmentProvider } from "react-relay";
 import { ThemeProvider, colors, createTheme } from "@mui/material";
 import { PageViewProvider } from "@/src/currentView";
 import { PageLayout } from "@/components/PageLayout";
+import { DndProvider } from "react-dnd";
+import { HTML5Backend } from "react-dnd-html5-backend";
 
 const oidcConfig: AuthProviderProps = {
   redirect_uri:
@@ -57,11 +59,13 @@ export default function App({ children }: { children: React.ReactNode }) {
         <AuthProvider {...oidcConfig}>
           <LocalizationProvider dateAdapter={AdapterDayjs}>
             <PageViewProvider>
-              <Suspense fallback="Loading...">
-                <SigninContent>
-                  <PageLayout>{children}</PageLayout>
-                </SigninContent>
-              </Suspense>
+              <DndProvider backend={HTML5Backend}>
+                <Suspense fallback="Loading...">
+                  <SigninContent>
+                    <PageLayout>{children}</PageLayout>
+                  </SigninContent>
+                </Suspense>
+              </DndProvider>
             </PageViewProvider>
           </LocalizationProvider>
         </AuthProvider>

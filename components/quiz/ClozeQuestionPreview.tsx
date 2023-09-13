@@ -53,7 +53,10 @@ export function ClozeQuestionPreview({
       {question.showBlanksList && (
         <div className="max-w-sm flex justify-start gap-2 mt-4 flex-wrap">
           {question.allBlanks.map((value, i) => (
-            <div key={i} className="border border-gray-300 rounded-sm px-2">
+            <div
+              key={i}
+              className="border border-gray-300 rounded-sm px-2 min-h-[1rem]"
+            >
               {value}
             </div>
           ))}

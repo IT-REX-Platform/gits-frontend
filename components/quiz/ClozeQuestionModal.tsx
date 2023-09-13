@@ -17,7 +17,7 @@ import { FormErrors } from "../FormErrors";
 import { Form, FormSection } from "../Form";
 import { MediaRecordSelector$key } from "@/__generated__/MediaRecordSelector.graphql";
 import { RenderRichText, RichTextEditor } from "../RichTextEditor";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { RichTextEditorFragment$key } from "@/__generated__/RichTextEditorFragment.graphql";
 import {
   Add,
@@ -116,6 +116,16 @@ export function ClozeQuestionModal({
       ],
     }));
   };
+
+  const atLeastOneTextElement = useMemo(
+    () => data.clozeElements.filter((e) => e.type === "text").length > 0,
+    [data]
+  );
+  const atLeastOneBlankElement = useMemo(
+    () => data.clozeElements.filter((e) => e.type === "blank").length > 0,
+    [data]
+  );
+  const valid = atLeastOneTextElement && atLeastOneBlankElement;
 
   useEffect(() => {
     if (!open) {
@@ -242,10 +252,18 @@ export function ClozeQuestionModal({
         </Form>
       </DialogContent>
       <DialogActions>
+        <div className="text-red-600 text-xs mr-3">
+          {!atLeastOneTextElement && <div>Add at least one text element</div>}
+          {!atLeastOneBlankElement && <div>Add at least one blank element</div>}
+        </div>
         <Button disabled={isLoading} onClick={onClose}>
           Cancel
         </Button>
-        <LoadingButton loading={isLoading} onClick={() => onSave(data)}>
+        <LoadingButton
+          disabled={!valid}
+          loading={isLoading}
+          onClick={() => onSave(data)}
+        >
           Save
         </LoadingButton>
       </DialogActions>

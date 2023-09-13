@@ -53,7 +53,7 @@ export function ClozeQuestionModal({
   error,
   initialValue,
   isLoading,
-  onSave: _onSave,
+  onSave,
   onClose,
   clearError,
 }: {
@@ -122,11 +122,6 @@ export function ClozeQuestionModal({
       setData(initialValue);
     }
   }, [open, initialValue]);
-
-  const onSave = () => {
-    _onSave(data);
-    onClose();
-  };
 
   return (
     <Dialog open={open} maxWidth="lg" onClose={onClose}>
@@ -250,7 +245,7 @@ export function ClozeQuestionModal({
         <Button disabled={isLoading} onClick={onClose}>
           Cancel
         </Button>
-        <LoadingButton loading={isLoading} onClick={onSave}>
+        <LoadingButton loading={isLoading} onClick={() => onSave(data)}>
           Save
         </LoadingButton>
       </DialogActions>

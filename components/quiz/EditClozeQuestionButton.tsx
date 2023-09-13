@@ -84,6 +84,8 @@ export function EditClozeQuestionButton({
           ),
         },
       },
+      onCompleted: () => setOpen(false),
+      onError: setError,
     });
   };
 

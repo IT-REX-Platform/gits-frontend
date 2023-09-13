@@ -27,6 +27,7 @@ import {
   ContentMetadataPayload,
 } from "./ContentMetadataFormSection";
 import { Form } from "./Form";
+import { TagsSection } from "./TagsSection";
 
 export function AddFlashcardSetModal({
   onClose,
@@ -81,13 +82,14 @@ export function AddFlashcardSetModal({
       }
     `);
   const isUpdating = isCreatingAssessment || isCreatingFlashcardSet;
+  const [tags, setTags] = useState<string[]>([]);
 
   function handleSubmit() {
     const assessment = {
       metadata: {
         ...metadata!,
         chapterId: chapter.id,
-        tagNames: [],
+        tagNames: tags,
         type: "FLASHCARDS" as ContentType,
       },
       assessmentMetadata: {
@@ -142,6 +144,7 @@ export function AddFlashcardSetModal({
           <Form>
             <ContentMetadataFormSection onChange={setMetadata} />
             <AssessmentMetadataFormSection onChange={setAssessmentMetadata} />
+            <TagsSection tags={tags} setTags={setTags} />
           </Form>
         </DialogContent>
         <DialogActions>

@@ -28,6 +28,7 @@ import { useState } from "react";
 import { graphql, useFragment, useMutation } from "react-relay";
 import { MediaRecordIcon } from "./MediaRecordIcon";
 import { MediaRecordSelector } from "./MediaRecordSelector";
+import { TagsSection } from "./TagsSection";
 
 export function MediaContentModal({
   onClose: _onClose,
@@ -66,6 +67,7 @@ export function MediaContentModal({
     `,
     _existingMediaContent ?? null
   );
+  const [tags, setTags] = useState<string[]>([]);
 
   const [title, setTitle] = useState(existingContent?.metadata.name ?? "");
   const [suggestedDate, setSuggestedDate] = useState<Dayjs | null>(
@@ -163,7 +165,7 @@ export function MediaContentModal({
               name: title,
               rewardPoints,
               suggestedDate: suggestedDate!.toISOString(),
-              tagNames: [],
+              tagNames: tags,
             },
           },
           records: selectedRecords.map((r) => r.id),
@@ -188,7 +190,7 @@ export function MediaContentModal({
             name: title,
             rewardPoints,
             suggestedDate: suggestedDate!.toISOString(),
-            tagNames: [],
+            tagNames: tags,
             type: "MEDIA",
           },
           records: selectedRecords.map((r) => r.id),
@@ -303,6 +305,8 @@ export function MediaContentModal({
               </Button>
             </div>
           </FormSection>
+
+          <TagsSection tags={tags} setTags={setTags} />
         </Form>
         <Backdrop open={isAdding || isUpdating} sx={{ zIndex: "modal" }}>
           <CircularProgress />

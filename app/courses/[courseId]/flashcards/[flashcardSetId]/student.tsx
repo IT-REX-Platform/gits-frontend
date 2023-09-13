@@ -38,10 +38,7 @@ export default function StudentFlashcards() {
                   sides {
                     isQuestion
                     label
-                    text {
-                      text
-                      referencedMediaRecordIds
-                    }
+                    text
                   }
                 }
               }
@@ -90,7 +87,6 @@ export default function StudentFlashcards() {
         input: {
           flashcardId: currentFlashcard.id,
           successful: knewAll,
-          userId: currentUserInfo.id,
         },
       },
       onCompleted() {

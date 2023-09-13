@@ -183,6 +183,7 @@ export default function LecturerCoursePage() {
                         ))}
                         <div className="mt-4 flex flex-col items-start">
                           <AddContentModal
+                            sectionId={section.id}
                             courseId={course.id}
                             stageId={stage.id}
                             chapterId={chapter.id}

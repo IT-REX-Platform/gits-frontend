@@ -7,10 +7,12 @@ import { graphql, useMutation } from "react-relay";
 export function AddStageButton({ sectionId }: { sectionId: string }) {
   const [addStage] = useMutation<AddStageButtonMutation>(graphql`
     mutation AddStageButtonMutation($id: UUID!) {
-      createStage(sectionId: $id) {
-        id
-        ...studentCoursePageStageFragment
-        ...lecturerStageFragment
+      mutateSection(sectionId: $id) {
+        createStage {
+          id
+          ...studentCoursePageStageFragment
+          ...lecturerStageFragment
+        }
       }
     }
   `);
@@ -40,7 +42,7 @@ export function AddStageButton({ sectionId }: { sectionId: string }) {
               const stages = section?.getLinkedRecords("stages");
               if (!section || !stages) return;
               section.setLinkedRecords(
-                [...stages, store.get(data.createStage.id)!],
+                [...stages, store.get(data.mutateSection.createStage.id)!],
                 "stages"
               );
             },

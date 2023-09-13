@@ -57,20 +57,12 @@ export function MultipleChoiceQuestionModal({
               id
               ... on MultipleChoiceQuestion {
                 number
-                text {
-                  text
-                }
-                hint {
-                  text
-                }
+                text
+                hint
                 answers {
                   correct
-                  feedback {
-                    text
-                  }
-                  answerText {
-                    text
-                  }
+                  feedback
+                  answerText
                 }
               }
             }
@@ -91,20 +83,12 @@ export function MultipleChoiceQuestionModal({
               id
               ... on MultipleChoiceQuestion {
                 number
-                text {
-                  text
-                }
-                hint {
-                  text
-                }
+                text
+                hint
                 answers {
                   correct
-                  feedback {
-                    text
-                  }
-                  answerText {
-                    text
-                  }
+                  feedback
+                  answerText
                 }
               }
             }

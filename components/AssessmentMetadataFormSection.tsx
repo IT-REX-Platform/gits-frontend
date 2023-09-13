@@ -5,6 +5,7 @@ import {
   FormControlLabel,
   FormGroup,
   InputLabel,
+  ListItemText,
   MenuItem,
   Select,
   TextField,
@@ -13,9 +14,17 @@ import { useEffect, useState } from "react";
 import { FormSection } from "./Form";
 
 export type AssessmentMetadataPayload = {
-  skillType: SkillType;
+  skillTypes: readonly SkillType[];
   skillPoints: number;
   initialLearningInterval?: number | null;
+};
+
+const skillTypeLabel: Record<SkillType, string> = {
+  ANALYSE: "Analyse",
+  APPLY: "Apply",
+  REMEMBER: "Remember",
+  UNDERSTAND: "Understand",
+  "%future added value": "Unknown",
 };
 
 export function AssessmentMetadataFormSection({
@@ -27,43 +36,59 @@ export function AssessmentMetadataFormSection({
 }) {
   const [intervalLearning, setIntervalLearning] = useState(false);
   const [interval, setInterval] = useState(metadata?.initialLearningInterval);
-  const [skillType, setSkillType] = useState(metadata?.skillType);
+  const [skillTypes, setSkillTypes] = useState(metadata?.skillTypes);
   const [skillPointsStr, setSkillPointsStr] = useState(
     metadata?.skillPoints.toString() ?? "0"
   );
   const skillPoints = parseInt(skillPointsStr);
 
-  const valid = skillType != null && skillPoints.toString() === skillPointsStr;
+  const valid = skillTypes?.length && skillPoints.toString() === skillPointsStr;
 
   useEffect(() => {
     onChange(
       valid
         ? {
-            skillType,
+            skillTypes: skillTypes ?? [],
             skillPoints,
             initialLearningInterval: intervalLearning ? 1 : undefined,
           }
         : null
     );
-  }, [skillType, skillPointsStr]);
+  }, [skillTypes, skillPointsStr]);
 
   return (
     <FormSection title="Assessment details">
       <FormControl variant="outlined">
         <InputLabel htmlFor="assessmentSkillTypeInput">Skill Type</InputLabel>
+
         <Select
-          className="min-w-[8rem]"
+          className="min-w-[16rem] "
           label="Skill Type"
           labelId="assessmentSkillTypeLabel"
-          value={skillType ?? ""}
-          onChange={(e) => setSkillType(e.target.value as SkillType)}
+          value={skillTypes ?? []}
+          onChange={({ target: { value } }) =>
+            setSkillTypes(
+              (typeof value === "string"
+                ? value.split(",")
+                : value) as SkillType[]
+            )
+          }
+          renderValue={(selected) =>
+            selected.map((x) => skillTypeLabel[x]).join(", ")
+          }
           inputProps={{ id: "assessmentSkillTypeInput" }}
           required
+          multiple
         >
-          <MenuItem value="REMEMBER">Remember</MenuItem>
-          <MenuItem value="UNDERSTAND">Understand</MenuItem>
-          <MenuItem value="APPLY">Apply</MenuItem>
-          <MenuItem value="ANALYSE">Analyse</MenuItem>
+          {(["REMEMBER", "UNDERSTAND", "APPLY", "ANALYSE"] as const).map(
+            (val) => (
+              <MenuItem value={val}>
+                <Checkbox checked={(skillTypes ?? []).indexOf(val) > -1} />
+
+                <ListItemText>{skillTypeLabel[val]}</ListItemText>
+              </MenuItem>
+            )
+          )}
         </Select>
       </FormControl>
       <TextField
@@ -88,15 +113,17 @@ export function AssessmentMetadataFormSection({
           label="Do you want to want this content to be learned in an interval?"
         />
       </FormGroup>
-      <TextField
-        disabled={!intervalLearning}
-        className="w-96"
-        type="number"
-        variant="outlined"
-        value={interval}
-        defaultValue={"Learning Interval"}
-        onChange={(e) => setInterval(parseInt(e.target.value))}
-      />
+      {intervalLearning && (
+        <TextField
+          className="w-96"
+          type="number"
+          variant="outlined"
+          value={interval}
+          defaultValue={"Learning Interval"}
+          label="Interval in days"
+          onChange={(e) => setInterval(parseInt(e.target.value))}
+        />
+      )}
     </FormSection>
   );
 }

@@ -258,7 +258,9 @@ export function InvalidContent({
   const { disabled } = useContext(ContentLinkProps);
   const [del, deleting] = useMutation<ContentInvalidDeleteMutation>(graphql`
     mutation ContentInvalidDeleteMutation($id: UUID!) {
-      deleteContent(id: $id)
+      mutateContent(contentId: $id) {
+        deleteContent
+      }
     }
   `);
 

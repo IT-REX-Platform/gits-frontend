@@ -1,6 +1,5 @@
 "use client";
 
-import { RichTextEditorFragment$key } from "@/__generated__/RichTextEditorFragment.graphql";
 import { studentQuizQuery } from "@/__generated__/studentQuizQuery.graphql";
 import {
   QuestionCompletedInput,
@@ -82,52 +81,36 @@ export default function StudentQuiz() {
               assessmentId
               questionPool {
                 ... on MultipleChoiceQuestion {
-                  text {
-                    ...RichTextEditorFragment
-                  }
+                  text
                   answers {
-                    answerText {
-                      ...RichTextEditorFragment
-                    }
+                    answerText
                     correct
-                    feedback {
-                      ...RichTextEditorFragment
-                    }
+                    feedback
                   }
                   numberOfCorrectAnswers
                 }
                 id
                 number
                 type
-                hint {
-                  text
-                }
+                hint
               }
               requiredCorrectAnswers
               questionPoolingMode
               numberOfRandomlySelectedQuestions
               selectedQuestions {
                 ... on MultipleChoiceQuestion {
-                  text {
-                    ...RichTextEditorFragment
-                  }
+                  text
                   answers {
-                    answerText {
-                      ...RichTextEditorFragment
-                    }
+                    answerText
                     correct
-                    feedback {
-                      ...RichTextEditorFragment
-                    }
+                    feedback
                   }
                   numberOfCorrectAnswers
                 }
                 id
                 number
                 type
-                hint {
-                  ...RichTextEditorFragment
-                }
+                hint
               }
             }
           }
@@ -211,7 +194,7 @@ export default function StudentQuiz() {
         open={infoDialogOpen}
         onClose={() => setInfoDialogOpen(false)}
         title={questionText!.text}
-        hint={currentQuestion.hint?.text ?? null}
+        hint={currentQuestion.hint}
       />
 
       <div className="w-full border-b border-b-gray-300 mt-6 flex justify-center">
@@ -292,7 +275,7 @@ function InfoDialog({
   onClose,
 }: {
   title: string;
-  hint: RichTextEditorFragment$key | null;
+  hint: string;
   open: boolean;
   onClose: () => void;
 }) {

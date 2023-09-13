@@ -31,6 +31,7 @@ import { QuizModal } from "./QuizModal";
 export function AddContentModal({
   chapterId,
   stageId,
+  sectionId,
   _chapter,
   _mediaRecords,
   optionalRecords: _optionalRecords,
@@ -38,6 +39,7 @@ export function AddContentModal({
   courseId,
 }: {
   chapterId: string;
+  sectionId: string;
   stageId: string;
   _mediaRecords: MediaRecordSelector$key;
   _chapter: AddContentModalFragment$key;
@@ -92,10 +94,15 @@ export function AddContentModal({
 
   const [updateStage, loading] =
     useMutation<AddContentModalUpdateStageMutation>(graphql`
-      mutation AddContentModalUpdateStageMutation($stage: UpdateStageInput!) {
-        updateStage(input: $stage) {
-          id
-          ...lecturerStageFragment
+      mutation AddContentModalUpdateStageMutation(
+        $stage: UpdateStageInput!
+        $sectionId: UUID!
+      ) {
+        mutateSection(sectionId: $sectionId) {
+          updateStage(input: $stage) {
+            id
+            ...lecturerStageFragment
+          }
         }
       }
     `);
@@ -115,6 +122,7 @@ export function AddContentModal({
   const submit = () => {
     updateStage({
       variables: {
+        sectionId,
         stage: {
           id: stageId,
           requiredContents: requiredRecords,

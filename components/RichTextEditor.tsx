@@ -1,5 +1,4 @@
 import { MediaRecordSelector$key } from "@/__generated__/MediaRecordSelector.graphql";
-import { RichTextEditorFragment$key } from "@/__generated__/RichTextEditorFragment.graphql";
 import { RichTextEditorMediaRecordQuery } from "@/__generated__/RichTextEditorMediaRecordQuery.graphql";
 import { ContentMediaDisplay } from "@/app/courses/[courseId]/media/[mediaId]/student";
 import {
@@ -31,7 +30,7 @@ import { clsx } from "clsx";
 import isHotkey from "is-hotkey";
 import { debounce } from "lodash";
 import { useCallback, useMemo, useState } from "react";
-import { graphql, useFragment, useLazyLoadQuery } from "react-relay";
+import { graphql, useLazyLoadQuery } from "react-relay";
 import {
   BaseEditor,
   Descendant,
@@ -645,23 +644,10 @@ function Leaf({
   return <span {...attributes}>{children}</span>;
 }
 
-export function RenderRichText({
-  value,
-}: {
-  value: RichTextEditorFragment$key | undefined;
-}) {
-  const data = useFragment(
-    graphql`
-      fragment RichTextEditorFragment on ResourceMarkdown {
-        text
-      }
-    `,
-    value ?? null
-  );
+export function RenderRichText({ value }: { value: string | undefined }) {
+  if (!value) return null;
 
-  if (!data) return null;
-
-  const parsed = parseFromString(data.text);
+  const parsed = parseFromString(value);
 
   return (
     <>

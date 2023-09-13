@@ -557,7 +557,11 @@ function Element(props: RenderElementProps) {
         <p
           style={style}
           {...attributes}
-          className="last:inline-block first:inline-block"
+          className={
+            attributes["data-slate-inline"]
+              ? "last:inline-block first:inline-block"
+              : ""
+          }
         >
           {children}
         </p>
@@ -677,7 +681,11 @@ function RecursiveRichText({ val }: { val: Descendant }) {
 
   return (
     <Element
-      attributes={{ "data-slate-node": "element", ref: undefined }}
+      attributes={{
+        "data-slate-node": "element",
+        "data-slate-inline": true,
+        ref: undefined,
+      }}
       element={val}
     >
       {children}

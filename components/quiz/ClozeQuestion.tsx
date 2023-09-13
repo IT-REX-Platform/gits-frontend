@@ -1,11 +1,12 @@
 import { graphql, useFragment } from "react-relay";
 import { RenderRichText } from "../RichTextEditor";
-import { ReactElement, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { QuestionDivider } from "./QuestionDivider";
 import { ClozeQuestionFragment$key } from "@/__generated__/ClozeQuestionFragment.graphql";
 import { useDrag, useDrop } from "react-dnd";
-import { Box, TextField, Tooltip, colors } from "@mui/material";
+import { TextField, colors } from "@mui/material";
 import { AutosizeByText } from "../AutosizeByText";
+import { ClozeBlankFeedbackTooltip } from "./ClozeBlankFeedbackTooltip";
 
 export function ClozeQuestion({
   _question,
@@ -76,7 +77,7 @@ export function ClozeQuestion({
               <RenderRichText value={element.text} />
             </span>
           ) : element.__typename === "ClozeBlankElement" ? (
-            <FeedbackTooltip
+            <ClozeBlankFeedbackTooltip
               key={i}
               feedback={element.feedback}
               disabled={!feedbackMode}
@@ -105,7 +106,7 @@ export function ClozeQuestion({
                   }
                 />
               )}
-            </FeedbackTooltip>
+            </ClozeBlankFeedbackTooltip>
           ) : undefined
         )}
       </div>
@@ -278,39 +279,5 @@ function ClozeElementValue({
     >
       {value}
     </div>
-  );
-}
-
-function FeedbackTooltip({
-  disabled,
-  feedback,
-  correctAnswer,
-  children,
-}: {
-  feedback: string | null;
-  children: ReactElement;
-  correctAnswer: string;
-  disabled: boolean;
-}) {
-  if (disabled) {
-    return children;
-  }
-
-  return (
-    <Tooltip
-      arrow
-      placement="right"
-      title={
-        <div className="font-normal">
-          <div className="text-sm">&rarr; {correctAnswer}</div>
-          {feedback && <RenderRichText value={feedback} />}
-        </div>
-      }
-      classes={{
-        tooltip: "!bg-white border border-gray-200 !text-black",
-      }}
-    >
-      <Box display="inline-block">{children}</Box>
-    </Tooltip>
   );
 }

@@ -55,8 +55,9 @@ export function MultipleChoiceQuestionModal({
             assessmentId
             questionPool {
               id
+              type
+              number
               ... on MultipleChoiceQuestion {
-                number
                 text
                 hint
                 answers {
@@ -81,8 +82,9 @@ export function MultipleChoiceQuestionModal({
             assessmentId
             questionPool {
               id
+              type
+              number
               ... on MultipleChoiceQuestion {
-                number
                 text
                 hint
                 answers {
@@ -236,7 +238,6 @@ export function MultipleChoiceQuestionModal({
                 }}
                 className="w-[700px]"
                 label="Feedback"
-                required
               />
               <div className="flex justify-between items-center w-full">
                 <FormControlLabel

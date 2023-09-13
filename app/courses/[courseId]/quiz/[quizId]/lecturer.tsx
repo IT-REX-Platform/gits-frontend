@@ -1,7 +1,7 @@
 import { lecturerEditQuizQuery } from "@/__generated__/lecturerEditQuizQuery.graphql";
 import { Heading } from "@/components/Heading";
-import { Add, Edit } from "@mui/icons-material";
-import { Alert, Button, IconButton } from "@mui/material";
+import { Edit } from "@mui/icons-material";
+import { IconButton } from "@mui/material";
 import { default as Error } from "next/error";
 import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
@@ -13,6 +13,7 @@ import { DeleteQuizButton } from "@/components/quiz/DeleteQuizButton";
 import { FormErrors } from "@/components/FormErrors";
 import { ClozeQuestionPreview } from "@/components/quiz/ClozeQuestionPreview";
 import { EditClozeQuestionButton } from "@/components/quiz/EditClozeQuestionButton";
+import { AddQuestionButton } from "@/components/quiz/AddQuestionButton";
 
 export default function EditQuiz() {
   const { quizId, courseId } = useParams();
@@ -34,13 +35,19 @@ export default function EditQuiz() {
               questionPool {
                 id
                 type
+                number
                 ...MultipleChoiceQuestionPreviewFragment
                 ...ClozeQuestionPreviewFragment
                 ...EditClozeQuestionButtonFragment
                 ... on MultipleChoiceQuestion {
-                  number
-                  text
-                  hint
+                  text {
+                    text
+                    ...RichTextEditorFragment
+                  }
+                  hint {
+                    text
+                    ...RichTextEditorFragment
+                  }
                   answers {
                     correct
                     feedback
@@ -56,7 +63,6 @@ export default function EditQuiz() {
     { id: quizId }
   );
 
-  const [isAddQuizOpen, setAddQuizOpen] = useState(false);
   const [isEditOpen, setEditOpen] = useState<number | null>(null);
 
   const content = contentsByIds[0];
@@ -102,7 +108,7 @@ export default function EditQuiz() {
                 <DeleteQuestionButton
                   assessmentId={content.id}
                   questionId={question.id}
-                  num={question.number!}
+                  num={question.number}
                 />
               </div>
             </>
@@ -119,28 +125,17 @@ export default function EditQuiz() {
                 <DeleteQuestionButton
                   assessmentId={content.id}
                   questionId={question.id}
-                  num={question.number!}
+                  num={question.number}
                 />
               </div>
             </>
           )}
         </div>
       ))}
-      <div className="mt-8 flex flex-col gap-6">
-        <div>
-          <Button startIcon={<Add />} onClick={() => setAddQuizOpen(true)}>
-            Add quiz question
-          </Button>
-        </div>
+      <div className="mt-8 flex flex-col items-start">
+        <AddQuestionButton _allRecords={query} assessmentId={content.id} />
       </div>
 
-      <MultipleChoiceQuestionModal
-        _allRecords={query}
-        assessmentId={quiz.assessmentId}
-        contentId={content.id}
-        onClose={() => setAddQuizOpen(false)}
-        open={isAddQuizOpen}
-      />
       <MultipleChoiceQuestionModal
         _allRecords={query}
         key={isEditOpen}

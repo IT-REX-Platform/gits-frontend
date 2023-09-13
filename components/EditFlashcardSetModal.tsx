@@ -37,6 +37,7 @@ export function EditFlashcardSetModal({
           name
           suggestedDate
           rewardPoints
+          tagNames
         }
         ... on Assessment {
           assessmentMetadata {

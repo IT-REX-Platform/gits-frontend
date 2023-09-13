@@ -5,6 +5,7 @@ import {
   QuestionCompletedInput,
   studentQuizTrackCompletedMutation,
 } from "@/__generated__/studentQuizTrackCompletedMutation.graphql";
+import { ContentTags } from "@/components/ContentTags";
 import { Heading } from "@/components/Heading";
 import { RenderRichText } from "@/components/RichTextEditor";
 import {
@@ -75,6 +76,7 @@ export default function StudentQuiz() {
           id
           metadata {
             name
+            ...ContentTags
           }
           ... on QuizAssessment {
             quiz {
@@ -190,6 +192,7 @@ export default function StudentQuiz() {
         </Alert>
       ))}
       <Heading title={contentsByIds[0].metadata.name} backButton />
+      <ContentTags metadata={contentsByIds[0].metadata} />
       <InfoDialog
         open={infoDialogOpen}
         onClose={() => setInfoDialogOpen(false)}

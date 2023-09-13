@@ -5,6 +5,7 @@ import { lecturerEditFlashcardMutation } from "@/__generated__/lecturerEditFlash
 import { lecturerEditFlashcardsQuery } from "@/__generated__/lecturerEditFlashcardsQuery.graphql";
 import { AssessmentMetadataPayload } from "@/components/AssessmentMetadataFormSection";
 import { ContentMetadataPayload } from "@/components/ContentMetadataFormSection";
+import { ContentTags } from "@/components/ContentTags";
 import { Form, FormSection } from "@/components/Form";
 import { Heading } from "@/components/Heading";
 import { Add, Delete, Edit, Help, QuestionAnswer } from "@mui/icons-material";
@@ -60,7 +61,8 @@ export default function EditFlashcards() {
           id
           metadata {
             name
-            chapterId
+            chapterId #
+            ...ContentTags
           }
           ... on FlashcardSetAssessment {
             flashcardSet {
@@ -255,6 +257,8 @@ export default function EditFlashcards() {
         }
         backButton
       />
+
+      <ContentTags metadata={content.metadata} />
       {error && (
         <div className="flex flex-col gap-2 mt-8">
           {error?.source?.errors.map((err: any, i: number) => (

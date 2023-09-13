@@ -3,6 +3,7 @@
 import { lecturerDeleteMediaContentMutation } from "@/__generated__/lecturerDeleteMediaContentMutation.graphql";
 import { lecturerMediaQuery } from "@/__generated__/lecturerMediaQuery.graphql";
 import { MediaContent } from "@/components/Content";
+import { ContentTags } from "@/components/ContentTags";
 import { Heading } from "@/components/Heading";
 import { MediaContentModal } from "@/components/MediaContentModal";
 import { Delete, Edit } from "@mui/icons-material";
@@ -26,6 +27,7 @@ export default function LecturerMediaPage() {
             name
             type
             chapterId
+            ...ContentTags
           }
           ... on MediaContent {
             mediaRecords {
@@ -140,6 +142,8 @@ export default function LecturerMediaPage() {
         }
         backButton
       />
+
+      <ContentTags metadata={content.metadata} />
       <div className="my-8 grow">
         <ContentMediaDisplay onProgressChange={() => {}} _record={mainRecord} />
       </div>

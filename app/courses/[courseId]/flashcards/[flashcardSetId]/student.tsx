@@ -2,6 +2,7 @@
 
 import { studentFlashcardLogProgressMutation } from "@/__generated__/studentFlashcardLogProgressMutation.graphql";
 import { studentFlashcardsQuery } from "@/__generated__/studentFlashcardsQuery.graphql";
+import { ContentTags } from "@/components/ContentTags";
 import { Heading } from "@/components/Heading";
 import { Check, Close, Loop } from "@mui/icons-material";
 import { Alert, Button, CircularProgress } from "@mui/material";
@@ -30,6 +31,7 @@ export default function StudentFlashcards() {
             id
             metadata {
               name
+              ...ContentTags
             }
             ... on FlashcardSetAssessment {
               flashcardSet {
@@ -110,7 +112,7 @@ export default function StudentFlashcards() {
   return (
     <main>
       <Heading title={flashcards.metadata.name} backButton />
-
+      <ContentTags metadata={flashcards.metadata} />
       {error?.source.errors.map((err: any, i: number) => (
         <Alert
           key={i}

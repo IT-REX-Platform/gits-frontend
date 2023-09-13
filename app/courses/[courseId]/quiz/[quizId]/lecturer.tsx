@@ -1,6 +1,7 @@
 import { lecturerDeleteMultipleChoiceQuestionMutation } from "@/__generated__/lecturerDeleteMultipleChoiceQuestionMutation.graphql";
 import { lecturerDeleteQuizContentMutation } from "@/__generated__/lecturerDeleteQuizContentMutation.graphql";
 import { lecturerEditQuizQuery } from "@/__generated__/lecturerEditQuizQuery.graphql";
+import { ContentTags } from "@/components/ContentTags";
 import { Heading } from "@/components/Heading";
 import { RenderRichText } from "@/components/RichTextEditor";
 import { Add, Delete, Edit } from "@mui/icons-material";
@@ -41,6 +42,7 @@ export default function EditQuiz() {
           metadata {
             name
             chapterId
+            ...ContentTags
           }
           ... on QuizAssessment {
             quiz {
@@ -134,6 +136,7 @@ export default function EditQuiz() {
         }
         backButton
       />
+      <ContentTags metadata={content.metadata} />
       {error && (
         <div className="flex flex-col gap-2 mt-8">
           {error?.source?.errors.map((err: any, i: number) => (

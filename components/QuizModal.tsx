@@ -27,7 +27,6 @@ import {
   ContentMetadataFormSection,
   ContentMetadataPayload,
 } from "./ContentMetadataFormSection";
-import { TagsSection } from "./TagsSection";
 
 const defaultInput = {
   questionPoolingMode: "RANDOM",
@@ -75,8 +74,6 @@ export function QuizModal({
     _onClose();
   }
 
-  const [tags, setTags] = useState<string[]>([]);
-
   function handleSubmit() {
     mutate({
       variables: {
@@ -88,7 +85,7 @@ export function QuizModal({
               : input.numberOfRandomlySelectedQuestions,
         },
         assessmentInput: {
-          metadata: { ...metadata!, type: "QUIZ", chapterId, tagNames: tags },
+          metadata: { ...metadata!, type: "QUIZ", chapterId },
           assessmentMetadata: assessmentMetadata!,
         },
       },
@@ -182,8 +179,6 @@ export function QuizModal({
               />
             )}
           </FormSection>
-
-          <TagsSection tags={tags} setTags={setTags} />
         </Form>
       </DialogContent>
       <DialogActions>

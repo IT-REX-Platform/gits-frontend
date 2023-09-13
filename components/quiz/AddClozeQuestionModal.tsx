@@ -93,7 +93,7 @@ export function AddClozeQuestionModal({
     <ClozeQuestionModal
       _allRecords={_allRecords}
       open={open}
-      title="Edit cloze question"
+      title="Add cloze question"
       error={error}
       initialValue={initialValue}
       isLoading={isUpdating}

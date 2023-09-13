@@ -44,8 +44,10 @@ export default function EditFlashcards() {
   const { flashcardSetId, courseId } = useParams();
   const [del, deleting] =
     useMutation<lecturerDeleteFlashcardContentMutation>(graphql`
-      mutation lecturerDeleteFlashcardContentMutation($id: UUID!) {
-        deleteContent(id: $id)
+      mutation lecturerDeleteFlashcardContentMutation($contentId: UUID!) {
+        mutateContent(contentId: $contentId) {
+          deleteContent
+        }
       }
     `);
 
@@ -98,9 +100,12 @@ export default function EditFlashcards() {
   const [updateFlashcardSet, isUpdatingFlashcardSet] = useMutation(graphql`
     mutation lecturerEditFlashcardSetMutation(
       $assessment: UpdateAssessmentInput!
+      $contentId: UUID!
     ) {
-      updateAssessment(input: $assessment) {
-        id
+      mutateContent(contentId: $contentId) {
+        updateAssessment(input: $assessment) {
+          id
+        }
       }
     }
   `);

@@ -5,94 +5,37 @@ directive @specifiedBy(
 ) on SCALAR
 
 #  see also https://github.com/graphql-java/graphql-java-extended-validation/blob/master/README.md
-directive @DecimalMax(
-  value: String!
-  inclusive: Boolean! = true
-  message: String = "graphql.validation.DecimalMax.message"
-) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+directive @DecimalMax(value: String!, inclusive: Boolean! = true, message: String = "graphql.validation.DecimalMax.message") on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
 
-directive @DecimalMin(
-  value: String!
-  inclusive: Boolean! = true
-  message: String = "graphql.validation.DecimalMin.message"
-) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+directive @DecimalMin(value: String!, inclusive: Boolean! = true, message: String = "graphql.validation.DecimalMin.message") on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
 
-directive @Max(
-  value: Int! = 2147483647
-  message: String = "graphql.validation.Max.message"
-) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+directive @Max(value: Int! = 2147483647, message: String = "graphql.validation.Max.message") on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
 
-directive @Min(
-  value: Int! = 0
-  message: String = "graphql.validation.Min.message"
-) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+directive @Min(value: Int! = 0, message: String = "graphql.validation.Min.message") on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
 
-directive @Negative(
-  message: String = "graphql.validation.Negative.message"
-) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+directive @Negative(message: String = "graphql.validation.Negative.message") on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
 
-directive @NegativeOrZero(
-  message: String = "graphql.validation.NegativeOrZero.message"
-) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+directive @NegativeOrZero(message: String = "graphql.validation.NegativeOrZero.message") on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
 
-directive @NotBlank(
-  message: String = "graphql.validation.NotBlank.message"
-) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+directive @NotBlank(message: String = "graphql.validation.NotBlank.message") on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
 
-directive @NotEmpty(
-  message: String = "graphql.validation.NotEmpty.message"
-) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+directive @NotEmpty(message: String = "graphql.validation.NotEmpty.message") on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
 
-directive @ContainerNotEmpty(
-  message: String = "graphql.validation.ContainerNotEmpty.message"
-) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+directive @ContainerNotEmpty(message: String = "graphql.validation.ContainerNotEmpty.message") on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
 
-directive @Pattern(
-  regexp: String! = ".*"
-  message: String = "graphql.validation.Pattern.message"
-) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+directive @Pattern(regexp: String! = ".*", message: String = "graphql.validation.Pattern.message") on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
 
-directive @Positive(
-  message: String = "graphql.validation.Positive.message"
-) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+directive @Positive(message: String = "graphql.validation.Positive.message") on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
 
-directive @PositiveOrZero(
-  message: String = "graphql.validation.PositiveOrZero.message"
-) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+directive @PositiveOrZero(message: String = "graphql.validation.PositiveOrZero.message") on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
 
-directive @Range(
-  min: Int = 0
-  max: Int = 2147483647
-  message: String = "graphql.validation.Range.message"
-) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+directive @Range(min: Int = 0, max: Int = 2147483647, message: String = "graphql.validation.Range.message") on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
 
-directive @Size(
-  min: Int = 0
-  max: Int = 2147483647
-  message: String = "graphql.validation.Size.message"
-) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+directive @Size(min: Int = 0, max: Int = 2147483647, message: String = "graphql.validation.Size.message") on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
 
-directive @ContainerSize(
-  min: Int = 0
-  max: Int = 2147483647
-  message: String = "graphql.validation.ContainerSize.message"
-) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+directive @ContainerSize(min: Int = 0, max: Int = 2147483647, message: String = "graphql.validation.ContainerSize.message") on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
 
-directive @resolveTo(
-  requiredSelectionSet: String
-  sourceName: String!
-  sourceTypeName: String!
-  sourceFieldName: String!
-  sourceSelectionSet: String
-  sourceArgs: ResolveToSourceArgs
-  keyField: String
-  keysArg: String
-  pubsubTopic: String
-  filterBy: String
-  additionalArgs: ResolveToSourceArgs
-  result: String
-  resultType: String
-) on FIELD_DEFINITION
+directive @resolveTo(requiredSelectionSet: String, sourceName: String!, sourceTypeName: String!, sourceFieldName: String!, sourceSelectionSet: String, sourceArgs: ResolveToSourceArgs, keyField: String, keysArg: String, pubsubTopic: String, filterBy: String, additionalArgs: ResolveToSourceArgs, result: String, resultType: String) on FIELD_DEFINITION
 
 interface Assessment {
   # Assessment metadata
@@ -116,7 +59,7 @@ type AssessmentMetadata {
   skillPoints: Int!
 
   # Type of the assessment
-  skillType: SkillType!
+  skillTypes: [SkillType!]!
 
   # The initial learning interval for the assessment in days.
   # This is the interval that is applied after the assessment is completed the first time.
@@ -131,7 +74,7 @@ input AssessmentMetadataInput {
   skillPoints: Int!
 
   # Type of the assessment
-  skillType: SkillType!
+  skillTypes: [SkillType!]!
 
   # The initial learning interval for the assessment in days.
   # This is the interval that is applied after the assessment is completed the first time.
@@ -142,20 +85,20 @@ input AssessmentMetadataInput {
 }
 
 input AssociationInput {
-  # Text of the left side of the association, can be markdown.
+  # Text of the left side of the association, in SlateJS JSON format.
   left: String!
 
-  # Text of the right side of the association, can be markdown.
+  # Text of the right side of the association, in SlateJS JSON format.
   right: String!
 
-  # Feedback for the association when the user selects a wrong answer, can be markdown.
-  feedback: ResourceMarkdownInput
+  # Feedback for the association when the user selects a wrong answer, in SlateJS JSON format.
+  feedback: JSON
 }
 
 # Association question, i.e., a question where the user has to assign the correct right side to each left side.
 type AssociationQuestion implements Question {
-  # Text to display above the association question, can be markdown.
-  text: ResourceMarkdown!
+  # Text to display above the association question, in SlateJS JSON format.
+  text: JSON!
 
   # List of correct associations.
   correctAssociations: [SingleAssociation!]!
@@ -176,8 +119,8 @@ type AssociationQuestion implements Question {
   # Type of the question.
   type: QuestionType!
 
-  # Optional hint for the question, can be markdown.
-  hint: ResourceMarkdown
+  # Optional hint for the question, in SlateJS JSON format.
+  hint: JSON
 }
 
 # A chapter is a part of a course.
@@ -238,8 +181,8 @@ type ClozeBlankElement {
   # The correct answer for the blank.
   correctAnswer: String!
 
-  # Feedback for the blank when the user selects a wrong answer, can be markdown.
-  feedback: ResourceMarkdown
+  # Feedback for the blank when the user selects a wrong answer, in SlateJS JSON format.
+  feedback: JSON
 }
 
 union ClozeElement = ClozeTextElement | ClozeBlankElement
@@ -249,13 +192,13 @@ input ClozeElementInput {
   type: ClozeElementType!
 
   # Text of the element. Only used for TEXT type.
-  text: ResourceMarkdownInput
+  text: JSON
 
   # The correct answer for the blank. Only used for BLANK type.
   correctAnswer: String
 
-  # Feedback for the blank when the user selects a wrong answer, can be markdown. Only used for BLANK type.
-  feedback: ResourceMarkdownInput
+  # Feedback for the blank when the user selects a wrong answer, in SlateJS JSON format. Only used for BLANK type.
+  feedback: JSON
 }
 
 enum ClozeElementType {
@@ -286,13 +229,13 @@ type ClozeQuestion implements Question {
   # Type of the question.
   type: QuestionType!
 
-  # Optional hint for the question, can be markdown.
-  hint: ResourceMarkdown
+  # Optional hint for the question, in SlateJS JSON format.
+  hint: JSON
 }
 
 type ClozeTextElement {
-  # Text of the element, can be markdown.
-  text: ResourceMarkdown!
+  # Text of the element, in SlateJS JSON format.
+  text: JSON!
 }
 
 interface Content {
@@ -327,6 +270,26 @@ type ContentMetadata {
 
   # TagNames this content is tagged with
   tagNames: [String!]!
+}
+
+type ContentMutation {
+  # Identifier of Content
+  contentId: UUID!
+
+  # Update an existing Content
+  updateMediaContent(input: UpdateMediaContentInput!): MediaContent!
+
+  # Update an existing Assessment
+  updateAssessment(input: UpdateAssessmentInput!): Assessment!
+
+  # Delete an existing Content, throws an error if no Content with the given id exists
+  deleteContent: UUID!
+
+  # Add a tag to an existing content
+  addTagToContent(tagName: String): Content!
+
+  # Remove a tag from an existing content
+  removeTagFromContent(tagName: String): Content!
 }
 
 type ContentPayload {
@@ -419,17 +382,27 @@ input CourseFilter {
 # Represents a course membership object of a user. Each user can be a member of
 # set of courses and some users can also own courses
 type CourseMembership {
+  # Id of the user.
   userId: UUID!
+
+  # Id of the course the user is a member of.
   courseId: UUID!
-  role: String!
+
+  # The role of the user in the course.
+  role: UserRoleInCourse!
   course: Course!
 }
 
 # Represents a course membership input object of a user.
 input CourseMembershipInput {
+  # Id of the user.
   userId: UUID!
+
+  # Id of the course the user is a member of.
   courseId: UUID!
-  role: String!
+
+  # The role of the user in the course.
+  role: UserRoleInCourse!
 }
 
 # Return type for the course query. Contains the course and the pagination info.
@@ -463,14 +436,14 @@ input CreateAssociationQuestionInput {
   # This can be omitted, in which case a number, one higher than the highest number of the existing questions, will be used.
   number: Int
 
-  # Text of the question, can be markdown.
-  text: ResourceMarkdownInput!
+  # Text of the question, in SlateJS JSON format.
+  text: JSON!
 
   # List of associations.
   correctAssociations: [AssociationInput!]!
 
-  # Optional hint for the question, can be markdown.
-  hint: ResourceMarkdownInput
+  # Optional hint for the question, in SlateJS JSON format.
+  hint: JSON
 }
 
 # Input type for creating chapters.
@@ -519,8 +492,8 @@ input CreateClozeQuestionInput {
   # If true, the list of possible answers will be shown to the user.
   showBlanksList: Boolean! = true
 
-  # Optional hint for the question, can be markdown.
-  hint: ResourceMarkdownInput
+  # Optional hint for the question, in SlateJS JSON format.
+  hint: JSON
 }
 
 input CreateContentMetadataInput {
@@ -574,8 +547,8 @@ input CreateExactAnswerQuestionInput {
   # This can be omitted, in which case a number, one higher than the highest number of the existing questions, will be used.
   number: Int
 
-  # Text of the question, can be markdown.
-  text: ResourceMarkdownInput!
+  # Text of the question, in SlateJS JSON format.
+  text: JSON!
 
   # If the answer is case sensitive. If true, the answer is checked case sensitive.
   caseSensitive: Boolean! = false
@@ -583,11 +556,11 @@ input CreateExactAnswerQuestionInput {
   # A list of possible correct answers.
   correctAnswers: [String!]!
 
-  # Feedback for the question when the user enters a wrong answer, can be markdown.
-  feedback: ResourceMarkdownInput
+  # Feedback for the question when the user enters a wrong answer, in SlateJS JSON format.
+  feedback: JSON
 
-  # Optional hint for the question, can be markdown.
-  hint: ResourceMarkdownInput
+  # Optional hint for the question, in SlateJS JSON format.
+  hint: JSON
 }
 
 input CreateFlashcardInput {
@@ -622,14 +595,14 @@ input CreateMultipleChoiceQuestionInput {
   # This can be omitted, in which case a number, one higher than the highest number of the existing questions, will be used.
   number: Int
 
-  # Text of the question, can be markdown.
-  text: ResourceMarkdownInput!
+  # Text of the question, in SlateJS JSON format.
+  text: JSON!
 
   # List of answers.
   answers: [MultipleChoiceAnswerInput!]!
 
-  # Optional hint for the question, can be markdown.
-  hint: ResourceMarkdownInput
+  # Optional hint for the question, in SlateJS JSON format.
+  hint: JSON
 }
 
 input CreateNumericQuestionInput {
@@ -637,8 +610,8 @@ input CreateNumericQuestionInput {
   # This can be omitted, in which case a number, one higher than the highest number of the existing questions, will be used.
   number: Int
 
-  # Text of the question, can be markdown.
-  text: ResourceMarkdownInput!
+  # Text of the question, in SlateJS JSON format.
+  text: JSON!
 
   # The correct answer for the question.
   correctAnswer: Float!
@@ -646,11 +619,11 @@ input CreateNumericQuestionInput {
   # The allowed deviation from the correct answer.
   tolerance: Float!
 
-  # Feedback for the question when the user enters a wrong answer, can be markdown.
-  feedback: ResourceMarkdownInput
+  # Feedback for the question when the user enters a wrong answer, in SlateJS JSON format.
+  feedback: JSON
 
-  # Optional hint for the question, can be markdown.
-  hint: ResourceMarkdownInput
+  # Optional hint for the question, in SlateJS JSON format.
+  hint: JSON
 }
 
 input CreateQuizInput {
@@ -686,14 +659,22 @@ input CreateSelfAssessmentQuestionInput {
   # This can be omitted, in which case a number, one higher than the highest number of the existing questions, will be used.
   number: Int
 
-  # Text of the question, can be markdown.
-  text: ResourceMarkdownInput!
+  # Text of the question, in SlateJS JSON format.
+  text: JSON!
 
   # A possible correct answer to the question.
-  solutionSuggestion: ResourceMarkdownInput!
+  solutionSuggestion: JSON!
 
-  # Optional hint for the question, can be markdown.
-  hint: ResourceMarkdownInput
+  # Optional hint for the question, in SlateJS JSON format.
+  hint: JSON
+}
+
+input CreateStageInput {
+  # updated List of UUIDs for content labeled as required in this Stage
+  requiredContents: [UUID!]!
+
+  # updated List of UUIDs for content labeled as optional in this Stage
+  optionalContents: [UUID!]!
 }
 
 # An RFC-3339 compliant Full Date Scalar
@@ -716,8 +697,8 @@ input DateTimeFilter {
 # Differs from self-assessment questions in that the user has to enter one of the correct answers and
 # the answer is checked automatically.
 type ExactAnswerQuestion implements Question {
-  # Text of the question, can be markdown.
-  text: ResourceMarkdown!
+  # Text of the question, in SlateJS JSON format.
+  text: JSON!
 
   # A list of possible correct answers. The user has to enter one of these answers.
   correctAnswers: [String!]!
@@ -725,8 +706,8 @@ type ExactAnswerQuestion implements Question {
   # If the answer is case sensitive. If true, the answer is checked case sensitive.
   caseSensitive: Boolean!
 
-  # Feedback for the question when the user enters a wrong answer, can be markdown.
-  feedback: ResourceMarkdown
+  # Feedback for the question when the user enters a wrong answer, in SlateJS JSON format.
+  feedback: JSON
 
   # Unique identifier of the question.
   id: UUID!
@@ -738,8 +719,8 @@ type ExactAnswerQuestion implements Question {
   # Type of the question.
   type: QuestionType!
 
-  # Optional hint for the question, can be markdown.
-  hint: ResourceMarkdown
+  # Optional hint for the question, in SlateJS JSON format.
+  hint: JSON
 }
 
 # A flashcard is a set of two or more sides. Each side has a label and a text.
@@ -832,8 +813,8 @@ type FlashcardSetMutation {
 }
 
 type FlashcardSide {
-  # Text of this flashcard side as ResourceMarkdown.
-  text: ResourceMarkdown!
+  # Text of this flashcard side as rich text in SlateJS json.
+  text: JSON!
 
   # Label of this flashcard side. E.g. "Front" or "Back", or "Question" or "Answer".
   label: String!
@@ -847,8 +828,8 @@ type FlashcardSide {
 }
 
 input FlashcardSideInput {
-  # Text of this flashcard side. This can be markdown. Max length is 3000 characters.
-  text: ResourceMarkdownInput!
+  # Text of this flashcard side.
+  text: JSON!
 
   # Label of this flashcard side. E.g. "Front" or "Back", or "Question" or "Answer".
   label: String!
@@ -874,15 +855,15 @@ input IntFilter {
   lessThan: Int
 }
 
+# A JSON scalar
+scalar JSON
+
 # 24-hour clock time value string in the format `hh:mm:ss` or `hh:mm:ss.sss`.
 scalar LocalTime
 
 input LogFlashcardLearnedInput {
   # The id of the flashcard that was learned.
   flashcardId: UUID!
-
-  # The id of the user that learned the flashcard.
-  userId: UUID!
 
   # If the user knew the flashcard or not.
   successful: Boolean!
@@ -966,31 +947,31 @@ enum MediaType {
 }
 
 type MultipleChoiceAnswer {
-  # Text of the answer, can be markdown.
-  answerText: ResourceMarkdown!
+  # Text of the answer, in SlateJS JSON format.
+  answerText: JSON!
 
   # Whether the answer is correct or not.
   correct: Boolean!
 
-  # Feedback for when the user selects this answer, can be markdown.
-  feedback: ResourceMarkdown
+  # Feedback for when the user selects this answer, in SlateJS JSON format.
+  feedback: JSON
 }
 
 input MultipleChoiceAnswerInput {
-  # Text of the answer, can be markdown.
-  answerText: ResourceMarkdownInput!
+  # Text of the answer, in SlateJS JSON format.
+  answerText: JSON!
 
   # Whether the answer is correct or not.
   correct: Boolean!
 
-  # Feedback for when the user selects this answer, can be markdown.
-  feedback: ResourceMarkdownInput
+  # Feedback for when the user selects this answer, in SlateJS JSON format.
+  feedback: JSON
 }
 
 # Multiple choice question, i.e., a question with multiple answers of which the user has to select the correct ones.
 type MultipleChoiceQuestion implements Question {
-  # Text of the question, can be markdown.
-  text: ResourceMarkdown!
+  # Text of the question, in SlateJS JSON format.
+  text: JSON!
 
   # List of answers.
   answers: [MultipleChoiceAnswer!]!
@@ -1008,12 +989,10 @@ type MultipleChoiceQuestion implements Question {
   # Type of the question.
   type: QuestionType!
 
-  # Optional hint for the question, can be markdown.
-  hint: ResourceMarkdown
+  # Optional hint for the question, in SlateJS JSON format.
+  hint: JSON
 }
 
-# Mutations for the flashcard service. Provides mutations for creating, updating, and deleting flashcard as well as
-# creating and deleting flashcard sets. To update a flashcard set, update, delete, and create flashcards individually.
 type Mutation {
   # Creates a new media record
   createMediaRecord(input: CreateMediaRecordInput!): MediaRecord!
@@ -1025,10 +1004,7 @@ type Mutation {
   deleteMediaRecord(id: UUID!): UUID!
 
   # Allows multiple media records to be linked/added to a content.
-  linkMediaRecordsWithContent(
-    contentId: UUID!
-    mediaRecordIds: [UUID!]!
-  ): [MediaRecord!]!
+  linkMediaRecordsWithContent(contentId: UUID!, mediaRecordIds: [UUID!]!): [MediaRecord!]!
 
   # Logs that a media has been worked on by the current user.
   # See https://gits-enpro.readthedocs.io/en/latest/dev-manuals/gamification/userProgress.html
@@ -1037,15 +1013,6 @@ type Mutation {
   # When all media records of a content have been worked on by a user,
   # a user-progress event is emitted for the content.
   logMediaRecordWorkedOn(mediaRecordId: UUID!): MediaRecord!
-
-  # registers a user to a course with a role
-  createMembership(input: CourseMembershipInput!): CourseMembership!
-
-  # updates the role of a user in a course
-  updateMembership(input: CourseMembershipInput!): CourseMembership!
-
-  # deletes user course link
-  deleteMembership(input: CourseMembershipInput!): CourseMembership!
 
   # Creates a new course with the given input and returns the created course.
   createCourse(input: CreateCourseInput!): Course!
@@ -1068,47 +1035,22 @@ type Mutation {
   # Deletes an existing chapter, throws an error if no chapter with the given id exists.
   deleteChapter(id: UUID!): UUID!
 
-  # Create new media content
-  createMediaContent(input: CreateMediaContentInput!): MediaContent!
+  # registers a user to a course with a role
+  createMembership(input: CourseMembershipInput!): CourseMembership!
 
-  # Update an existing Content
-  updateMediaContent(input: UpdateMediaContentInput!): MediaContent!
+  # updates the role of a user in a course
+  updateMembership(input: CourseMembershipInput!): CourseMembership!
 
-  # Create a new Assessment
-  createAssessment(input: CreateAssessmentInput!): Assessment!
+  # deletes user course link
+  deleteMembership(input: CourseMembershipInput!): CourseMembership!
 
-  # Update an existing Assessment
-  updateAssessment(input: UpdateAssessmentInput!): Assessment!
-
-  # Delete an existing Content, throws an error if no Content with the given id exists
-  deleteContent(id: UUID!): UUID!
-
-  # Add a tag to an existing content
-  addTagToContent(contentId: UUID!, tagName: String): Content!
-
-  # Remove a tag from an existing content
-  removeTagFromContent(contentId: UUID!, tagName: String): Content!
-
-  # create new Section
-  createSection(input: CreateSectionInput!): Section!
-
-  # update the name of a Section
-  updateSection(input: UpdateSectionInput!): Section!
-
-  # delete a Section by ID
-  deleteSection(id: UUID!): UUID!
-
-  # create new Stage in Section
-  createStage(sectionId: UUID!): Stage!
-
-  # Update Content of Stage
-  updateStage(input: UpdateStageInput): Stage!
-
-  # delete Stage by ID
-  deleteStage(id: UUID!): UUID!
-
-  # update Order of Stages within a Section
-  updateStageOrder(input: StageOrderInput!): Section!
+  # ONLY FOR TESTING PURPOSES. DO NOT USE IN FRONTEND. WILL BE REMOVED.
+  #
+  # Triggers the recalculation of the reward score of the user.
+  # This is done automatically at some time in the night.
+  #
+  # The purpose of this mutation is to allow testing of the reward score and demonstrate the functionality.
+  recalculateScores(courseId: UUID!, userId: UUID!): RewardScores! @deprecated(reason: "Only for testing purposes. Will be removed.")
 
   # ONLY FOR TESTING PURPOSES. DO NOT USE IN FRONTEND. WILL BE REMOVED.
   #
@@ -1116,8 +1058,35 @@ type Mutation {
   # This is done automatically at some time in the night.
   #
   # The purpose of this mutation is to allow testing of the reward score and demonstrate the functionality.
-  recalculateLevels(chapterId: UUID!, userId: UUID!): SkillLevels!
-    @deprecated(reason: "Only for testing purposes. Will be removed.")
+  recalculateLevels(chapterId: UUID!, userId: UUID!): SkillLevels! @deprecated(reason: "Only for testing purposes. Will be removed.")
+
+  # Create new media content
+  createMediaContent(input: CreateMediaContentInput!): MediaContent!
+
+  # Create a new Assessment
+  createAssessment(input: CreateAssessmentInput!): Assessment!
+
+  # Modify Content
+  mutateContent(contentId: UUID!): ContentMutation!
+
+  # Create new Section
+  createSection(input: CreateSectionInput!): Section!
+
+  # Modify Sections
+  mutateSection(sectionId: UUID!): SectionMutation!
+
+  # Creates a new flashcard set.
+  createFlashcardSet(assessmentId: UUID!, input: CreateFlashcardSetInput!): FlashcardSet!
+
+  # Deletes a flashcard set. Throws an error if the flashcard set does not exist.
+  # The contained flashcards are deleted as well.
+  deleteFlashcardSet(input: UUID!): UUID! @deprecated(reason: "Only for development, will be removed in production. Use deleteAssessment in contents service instead.")
+
+  # Modify a flashcard set.
+  mutateFlashcardSet(assessmentId: UUID!): FlashcardSetMutation!
+
+  # Logs that a user has learned a flashcard.
+  logFlashcardLearned(input: LogFlashcardLearnedInput!): Flashcard!
 
   # Create a quiz.
   createQuiz(assessmentId: UUID!, input: CreateQuizInput!): Quiz!
@@ -1126,64 +1095,24 @@ type Mutation {
   mutateQuiz(assessmentId: UUID!): QuizMutation!
 
   # Delete a quiz.
-  deleteQuiz(assessmentId: UUID!): UUID!
-    @deprecated(
-      reason: "Only for development, will be removed in production. Use deleteAssessment in contents service instead."
-    )
+  deleteQuiz(assessmentId: UUID!): UUID! @deprecated(reason: "Only for development, will be removed in production. Use deleteAssessment in contents service instead.")
 
   # Log that a multiple choice quiz is completed.
   logQuizCompleted(input: QuizCompletedInput!): Quiz!
 
-  # ONLY FOR TESTING PURPOSES. DO NOT USE IN FRONTEND. WILL BE REMOVED.
-  #
-  # Triggers the recalculation of the reward score of the user.
-  # This is done automatically at some time in the night.
-  #
-  # The purpose of this mutation is to allow testing of the reward score and demonstrate the functionality.
-  recalculateScores(courseId: UUID!, userId: UUID!): RewardScores!
-    @deprecated(reason: "Only for testing purposes. Will be removed.")
-
-  # Creates a new flashcard set.
-  createFlashcardSet(
-    assessmentId: UUID!
-    input: CreateFlashcardSetInput!
-  ): FlashcardSet!
-
-  # Deletes a flashcard set. Throws an error if the flashcard set does not exist.
-  # The contained flashcards are deleted as well.
-  deleteFlashcardSet(input: UUID!): UUID!
-    @deprecated(
-      reason: "Only for development, will be removed in production. Use deleteAssessment in contents service instead."
-    )
-
-  # Modify a flashcard set.
-  mutateFlashcardSet(assessmentId: UUID!): FlashcardSetMutation!
-
-  # Logs that a user has learned a flashcard.
-  logFlashcardLearned(input: LogFlashcardLearnedInput!): Flashcard!
-
   # Creates a new media content and links the given media records to it.
-  createMediaContentAndLinkRecords(
-    contentInput: CreateMediaContentInput!
-    mediaRecordIds: [UUID!]!
-  ): MediaContent!
+  createMediaContentAndLinkRecords(contentInput: CreateMediaContentInput!, mediaRecordIds: [UUID!]!): MediaContent!
 
   # Creates a new quiz assessment and a new, linked quiz with the given properties.
-  createQuizAssessment(
-    assessmentInput: CreateAssessmentInput!
-    quizInput: CreateQuizInput!
-  ): QuizAssessment!
+  createQuizAssessment(assessmentInput: CreateAssessmentInput!, quizInput: CreateQuizInput!): QuizAssessment!
 
   # Creates a new flashcard set assessment and a new, linked flashcard set with the given properties.
-  createFlashcardSetAssessment(
-    assessmentInput: CreateAssessmentInput!
-    flashcardSetInput: CreateFlashcardSetInput!
-  ): FlashcardSetAssessment
+  createFlashcardSetAssessment(assessmentInput: CreateAssessmentInput!, flashcardSetInput: CreateFlashcardSetInput!): FlashcardSetAssessment
 }
 
 type NumericQuestion implements Question {
-  # Text of the question, can be markdown.
-  text: ResourceMarkdown!
+  # Text of the question, in SlateJS JSON format.
+  text: JSON!
 
   # The correct answer to the question.
   correctAnswer: Float!
@@ -1191,8 +1120,8 @@ type NumericQuestion implements Question {
   # The tolerance for the correct answer. The user's answer is correct if it is within the tolerance of the correct answer.
   tolerance: Float!
 
-  # Feedback for the question when the user enters a wrong answer, can be markdown.
-  feedback: ResourceMarkdown
+  # Feedback for the question when the user enters a wrong answer, in SlateJS JSON format.
+  feedback: JSON
 
   # Unique identifier of the question.
   id: UUID!
@@ -1204,8 +1133,8 @@ type NumericQuestion implements Question {
   # Type of the question.
   type: QuestionType!
 
-  # Optional hint for the question, can be markdown.
-  hint: ResourceMarkdown
+  # Optional hint for the question, in SlateJS JSON format.
+  hint: JSON
 }
 
 # Specifies the page size and page number for paginated results.
@@ -1272,10 +1201,7 @@ type Query {
   findMediaRecordsByIds(ids: [UUID!]!): [MediaRecord]!
 
   # Returns all media records of the system.
-  mediaRecords: [MediaRecord!]!
-    @deprecated(
-      reason: "In production there should probably be no way to get all media records of the system."
-    )
+  mediaRecords: [MediaRecord!]! @deprecated(reason: "In production there should probably be no way to get all media records of the system.")
 
   # Returns all media records which the current user created.
   userMediaRecords: [MediaRecord!]!
@@ -1283,18 +1209,6 @@ type Query {
   # Returns the media records associated the given content IDs as a list of lists where each sublist contains
   # the media records associated with the content ID at the same index in the input list
   mediaRecordsByContentIds(contentIds: [UUID!]!): [[MediaRecord!]!]!
-
-  # Gets the publicly available information for a list of users with the specified IDs.
-  # If a user does not exist, null is returned for that user.
-  findPublicUserInfos(ids: [UUID!]!): [PublicUserInfo]!
-
-  # Gets the user information of the currently authorized user.
-  currentUserInfo: UserInfo!
-
-  # Gets all of the users' information for a list of users with the specified IDs.
-  # Only available to privileged users.
-  # If a user does not exist, null is returned for that user.
-  findUserInfos(ids: [UUID!]!): [UserInfo]!
 
   # Get a list of courses. Can be filtered, sorted and paginated.
   courses(
@@ -1317,7 +1231,11 @@ type Query {
 
   # Returns a set of Resource Objects for the given resource ids, containing a
   # list of all course IDs for a resource and its availability in the course.
-  resourceById(ids: [UUID!]!): [CourseResourceAssociation!]!
+  courseResourceAssociationsByIds(ids: [UUID!]!): [CourseResourceAssociation!]!
+
+  # Returns a set of Resource Objects for the given resource ids, containing a
+  # list of all course IDs for a resource and its availability in the course.
+  resourceById(ids: [UUID!]!): [CourseResourceAssociation!]! @deprecated(reason: "Use courseResourceAssociationsByIds instead.")
 
   # Get the list of chapters for a course. Can be filtered, sorted and paginated.
   # Throws an error if the course does not exist.
@@ -1334,6 +1252,33 @@ type Query {
     sortDirection: [SortDirection!]! = [ASC]
     pagination: Pagination
   ): ChapterPayload!
+
+  # Gets the publicly available information for a list of users with the specified IDs.
+  # If a user does not exist, null is returned for that user.
+  findPublicUserInfos(ids: [UUID!]!): [PublicUserInfo]!
+
+  # Gets the user information of the currently authorized user.
+  currentUserInfo: UserInfo!
+
+  # Gets all of the users' information for a list of users with the specified IDs.
+  # Only available to privileged users.
+  # If a user does not exist, null is returned for that user.
+  findUserInfos(ids: [UUID!]!): [UserInfo]!
+
+  # Get the reward score of the current user for the specified course.
+  userCourseRewardScores(courseId: UUID!): RewardScores!
+
+  # Get the reward score of the specified user for the specified course.
+  courseRewardScoresForUser(courseId: UUID!, userId: UUID!): RewardScores!
+
+  # Gets the power scores for each user in the course, ordered by power score descending.
+  scoreboard(courseId: UUID!): [ScoreboardItem!]!
+
+  # Get the skill levels of the current user for all skill types for a list of chapter ids.
+  userSkillLevelsByChapterIds(chapterIds: [UUID!]!): [SkillLevels!]!
+
+  # Get the skill levels of the specified user for all skill types for a list of chapter ids.
+  skillLevelsForUserByChapterIds(chapterIds: [UUID!]!, userId: UUID!): [SkillLevels!]!
 
   # get all contents
   contents: ContentPayload!
@@ -1368,34 +1313,6 @@ type Query {
     skillTypes: [SkillType!]! = []
   ): [Suggestion!]!
 
-  # Get the skill levels of the current user for all skill types for a list of chapter ids.
-  userSkillLevelsByChapterIds(chapterIds: [UUID!]!): [SkillLevels!]!
-
-  # Get the skill levels of the specified user for all skill types for a list of chapter ids.
-  skillLevelsForUserByChapterIds(
-    chapterIds: [UUID!]!
-    userId: UUID!
-  ): [SkillLevels!]!
-
-  # Get quiz by assessment ID.
-  # If any of the assessment IDs are not found, the corresponding quiz will be null.
-  findQuizzesByAssessmentIds(assessmentIds: [UUID!]!): [Quiz]!
-
-  # Get all quizzes.
-  quizzes: [Quiz!]!
-    @deprecated(
-      reason: "In the production system, you shouldn't be able to get all quizzes."
-    )
-
-  # Get the reward score of the current user for the specified course.
-  userCourseRewardScores(courseId: UUID!): RewardScores!
-
-  # Get the reward score of the specified user for the specified course.
-  courseRewardScoresForUser(courseId: UUID!, userId: UUID!): RewardScores!
-
-  # Gets the power scores for each user in the course, ordered by power score descending.
-  scoreboard(courseId: UUID!): [ScoreboardItem!]!
-
   # Get flashcards by their ids
   flashcardsByIds(ids: [UUID!]!): [Flashcard!]!
 
@@ -1403,6 +1320,10 @@ type Query {
   # Returns a list of flashcard sets in the same order as the provided ids.
   # Each element is null if the corresponding id is not found.
   findFlashcardSetsByAssessmentIds(assessmentIds: [UUID!]!): [FlashcardSet]!
+
+  # Get quiz by assessment ID.
+  # If any of the assessment IDs are not found, the corresponding quiz will be null.
+  findQuizzesByAssessmentIds(assessmentIds: [UUID!]!): [Quiz]!
 }
 
 # Generic question interface.
@@ -1417,8 +1338,8 @@ interface Question {
   # Type of the question.
   type: QuestionType!
 
-  # Optional hint for the question, can be markdown.
-  hint: ResourceMarkdown
+  # Optional hint for the question, in SlateJS JSON format.
+  hint: JSON
 }
 
 input QuestionCompletedInput {
@@ -1570,9 +1491,7 @@ type QuizMutation {
 
   # Set the number of questions that are randomly selected from the list of questions.
   # Will only be considered if questionPoolingMode is RANDOM.
-  setNumberOfRandomlySelectedQuestions(
-    numberOfRandomlySelectedQuestions: Int!
-  ): Quiz!
+  setNumberOfRandomlySelectedQuestions(numberOfRandomlySelectedQuestions: Int!): Quiz!
 }
 
 scalar ResolveToSourceArgs
@@ -1585,7 +1504,7 @@ type ResourceMarkdown {
   referencedMediaRecordIds: [UUID!]!
 
   # Resolved MediaRecords referenced in the ResourceMarkdown text in order.
-  # A MediaRecord might be NULL if the referenced MediaRecord no longer exists.
+  # A MediaRecord might be NULL if the referenced MediaRecord no longer exists. 
   referencedMediaRecords: [MediaRecord]!
 }
 
@@ -1699,15 +1618,38 @@ type Section {
   chapter: Chapter!
 }
 
+type SectionMutation {
+  # Identifier of the section
+  sectionId: UUID!
+
+  # update the name of a Section
+  updateSectionName(name: String!): Section!
+
+  # delete a Section by ID
+  deleteSection: UUID!
+
+  # create new Stage in Section
+  createStage(input: CreateStageInput): Stage!
+
+  # Update Content of Stage
+  updateStage(input: UpdateStageInput): Stage!
+
+  # delete Stage by ID
+  deleteStage(id: UUID!): UUID!
+
+  # update Order of Stages within a Section
+  updateStageOrder(stages: [UUID!]!): Section!
+}
+
 # A single question with a free text answer field, where the answer is not automatically checked.
 # The user has to enter a solution and self-assess whether it is correct or not.
 # This is useful for questions where the answer is not clear-cut, e.g. when the user should explain a concept.
 type SelfAssessmentQuestion implements Question {
-  # Text of the question, can be markdown.
-  text: ResourceMarkdown!
+  # Text of the question, in SlateJS JSON format.
+  text: JSON!
 
   # A possible correct answer to the question.
-  solutionSuggestion: ResourceMarkdown!
+  solutionSuggestion: JSON!
 
   # Unique identifier of the question.
   id: UUID!
@@ -1719,8 +1661,8 @@ type SelfAssessmentQuestion implements Question {
   # Type of the question.
   type: QuestionType!
 
-  # Optional hint for the question, can be markdown.
-  hint: ResourceMarkdown
+  # Optional hint for the question, in SlateJS JSON format.
+  hint: JSON
 }
 
 type SingleAssociation {
@@ -1730,8 +1672,8 @@ type SingleAssociation {
   # The right side of the association.
   right: String!
 
-  # Feedback for the association when the user assigns a wrong answer, can be markdown.
-  feedback: ResourceMarkdown
+  # Feedback for the association when the user assigns a wrong answer, in SlateJS JSON format.
+  feedback: JSON
 }
 
 # The skill level of a user.
@@ -1813,14 +1755,6 @@ type Stage {
   optionalContentsProgress: Float!
 }
 
-input StageOrderInput {
-  # Identifier of target Section
-  sectionId: UUID!
-
-  # new position of all stages determined by their position in the list
-  stageIds: [UUID!]!
-}
-
 # Filter for string values.
 # If multiple filters are specified, they are combined with AND.
 input StringFilter {
@@ -1852,9 +1786,6 @@ enum SuggestionType {
 scalar Time
 
 input UpdateAssessmentInput {
-  # ID of the Content to update
-  id: UUID!
-
   # Metadata for the new Content
   metadata: UpdateContentMetadataInput!
 
@@ -1866,14 +1797,14 @@ input UpdateAssociationQuestionInput {
   # UUID of the question to update.
   id: UUID!
 
-  # Text of the question, can be markdown.
-  text: ResourceMarkdownInput!
+  # Text of the question, in SlateJS JSON format.
+  text: JSON!
 
   # List of associations.
   correctAssociations: [AssociationInput!]!
 
-  # Optional hint for the question, can be markdown.
-  hint: ResourceMarkdownInput
+  # Optional hint for the question, in SlateJS JSON format.
+  hint: JSON
 }
 
 # Input type for updating chapters.
@@ -1921,8 +1852,8 @@ input UpdateClozeQuestionInput {
   # If true, the list of possible answers will be shown to the user.
   showBlanksList: Boolean! = true
 
-  # Optional hint for the question, can be markdown.
-  hint: ResourceMarkdownInput
+  # Optional hint for the question, in SlateJS JSON format.
+  hint: JSON
 }
 
 input UpdateContentMetadataInput {
@@ -1969,8 +1900,8 @@ input UpdateExactAnswerQuestionInput {
   # UUID of the question to update.
   id: UUID!
 
-  # Text of the question, can be markdown.
-  text: ResourceMarkdownInput!
+  # Text of the question, in SlateJS JSON format.
+  text: JSON!
 
   # A list of possible correct answers.
   correctAnswers: [String!]!
@@ -1978,11 +1909,11 @@ input UpdateExactAnswerQuestionInput {
   # If the answer is case sensitive. If true, the answer is checked case sensitive.
   caseSensitive: Boolean! = false
 
-  # Feedback for the question when the user enters a wrong answer, can be markdown.
-  feedback: ResourceMarkdownInput
+  # Feedback for the question when the user enters a wrong answer, in SlateJS JSON format.
+  feedback: JSON
 
-  # Optional hint for the question, can be markdown.
-  hint: ResourceMarkdownInput
+  # Optional hint for the question, in SlateJS JSON format.
+  hint: JSON
 }
 
 input UpdateFlashcardInput {
@@ -1994,9 +1925,6 @@ input UpdateFlashcardInput {
 }
 
 input UpdateMediaContentInput {
-  # ID of the Content to update
-  id: UUID!
-
   # Metadata for the new Content
   metadata: UpdateContentMetadataInput!
 }
@@ -2019,22 +1947,22 @@ input UpdateMultipleChoiceQuestionInput {
   # UUID of the question to update.
   id: UUID!
 
-  # Text of the question, can be markdown.
-  text: ResourceMarkdownInput!
+  # Text of the question, in SlateJS JSON format.
+  text: JSON!
 
   # List of answers.
   answers: [MultipleChoiceAnswerInput!]!
 
-  # Optional hint for the question, can be markdown.
-  hint: ResourceMarkdownInput
+  # Optional hint for the question, in SlateJS JSON format.
+  hint: JSON
 }
 
 input UpdateNumericQuestionInput {
   # UUID of the question to update.
   id: UUID!
 
-  # Text of the question, can be markdown.
-  text: ResourceMarkdownInput!
+  # Text of the question, in SlateJS JSON format.
+  text: JSON!
 
   # The correct answer for the question.
   correctAnswer: Float!
@@ -2042,33 +1970,25 @@ input UpdateNumericQuestionInput {
   # The allowed deviation from the correct answer.
   tolerance: Float!
 
-  # Feedback for the question when the user enters a wrong answer, can be markdown.
-  feedback: ResourceMarkdownInput
+  # Feedback for the question when the user enters a wrong answer, in SlateJS JSON format.
+  feedback: JSON
 
-  # Optional hint for the question, can be markdown.
-  hint: ResourceMarkdownInput
-}
-
-input UpdateSectionInput {
-  # Identifier of the Section
-  id: UUID!
-
-  # new name of the Section
-  name: String!
+  # Optional hint for the question, in SlateJS JSON format.
+  hint: JSON
 }
 
 input UpdateSelfAssessmentQuestionInput {
   # UUID of the question to update.
   id: UUID!
 
-  # Text of the question, can be markdown.
-  text: ResourceMarkdownInput!
+  # Text of the question, in SlateJS JSON format.
+  text: JSON!
 
   # A possible correct answer to the question.
-  solutionSuggestion: ResourceMarkdownInput!
+  solutionSuggestion: JSON!
 
-  # Optional hint for the question, can be markdown.
-  hint: ResourceMarkdownInput
+  # Optional hint for the question, in SlateJS JSON format.
+  hint: JSON
 }
 
 input UpdateStageInput {
@@ -2124,6 +2044,13 @@ type UserProgressData {
 
   # True if the assessment is due for review.
   isDueForReview: Boolean!
+}
+
+# Enum containing all valid roles a user can have in a course.
+enum UserRoleInCourse {
+  STUDENT
+  TUTOR
+  ADMINISTRATOR
 }
 
 # A universally unique identifier compliant UUID Scalar

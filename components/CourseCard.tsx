@@ -54,12 +54,13 @@ export function CourseCard({ courses }: { courses: CourseType }) {
             className="shrink text-ellipsis overflow-hidden whitespace-nowrap "
           >
             <Link href={`/courses/${courses.id}`} underline="none">
-              <Chip label={dayjs(courses.startDate).year()}></Chip>
               <Button size="small" sx={{ fontSize: "11px" }}>
                 {courses.title}
               </Button>
             </Link>
           </Typography>
+          <div className="grow"></div>
+          <Chip label={dayjs(courses.startDate).year()}></Chip>
         </div>
       </CardContent>
 

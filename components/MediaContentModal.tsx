@@ -126,13 +126,15 @@ export function MediaContentModal({
         $input: UpdateMediaContentInput!
         $records: [UUID!]!
       ) {
-        updateMediaContent(input: $input) {
-          id
-          ...ContentVideoFragment
-          userProgressData {
-            nextLearnDate
+        mutateContent(contentId: $contentId) {
+          updateMediaContent(input: $input) {
+            id
+            ...ContentVideoFragment
+            userProgressData {
+              nextLearnDate
+            }
+            __typename
           }
-          __typename
         }
         linkMediaRecordsWithContent(
           contentId: $contentId
@@ -156,7 +158,6 @@ export function MediaContentModal({
         variables: {
           contentId: existingContent.id,
           input: {
-            id: existingContent.id,
             metadata: {
               chapterId: existingContent.metadata.chapterId,
               name: title,
@@ -183,8 +184,8 @@ export function MediaContentModal({
       addMedia({
         variables: {
           input: {
-            chapterId,
-            name: title,
+            chapterId: chapterId!,
+            name: title!,
             rewardPoints,
             suggestedDate: suggestedDate!.toISOString(),
             tagNames: [],
@@ -274,7 +275,7 @@ export function MediaContentModal({
                       <IconButton
                         onClick={() =>
                           setSelectedRecords(
-                            selectedRecords.filter((x) => x !== record.id)
+                            selectedRecords.filter((x) => x.id !== record.id)
                           )
                         }
                         edge="end"

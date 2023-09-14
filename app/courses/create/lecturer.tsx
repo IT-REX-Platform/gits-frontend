@@ -1,12 +1,21 @@
 "use client";
 
 import { lecturerCreateChapterMutation } from "@/__generated__/lecturerCreateChapterMutation.graphql";
-import { lecturerCreateCourseMutation } from "@/__generated__/lecturerCreateCourseMutation.graphql";
+import {
+  YearDivision,
+  lecturerCreateCourseMutation,
+} from "@/__generated__/lecturerCreateCourseMutation.graphql";
 import { MultistepForm, StepInfo } from "@/components/MultistepForm";
 import {
   Backdrop,
+  Box,
   CircularProgress,
+  FormControl,
   FormControlLabel,
+  InputLabel,
+  MenuItem,
+  Select,
+  SelectChangeEvent,
   Switch,
   TextField,
   Typography,
@@ -33,8 +42,24 @@ export default function NewCourse() {
   const [description, setDescription] = useState("");
   const [startDate, setStartDate] = useState<Dayjs | null>(null);
   const [endDate, setEndDate] = useState<Dayjs | null>(null);
+  const [yearDivision, setYearDivision] = useState<YearDivision>(
+    "" ||
+      "FIRST_SEMESTER" ||
+      "SECOND_SEMESTER" ||
+      "FIRST_TRIMESTER" ||
+      "SECOND_TRIMESTER" ||
+      "THIRD_TRIMESTER" ||
+      "FIRST_QUARTER" ||
+      "SECOND_QUARTER" ||
+      "THIRD_QUARTER" ||
+      "FOURTH_QUARTER"
+  );
   const [publish, setPublish] = useState(false);
   const [chapterCount, setChapterCount] = useState(12);
+
+  const handleChange = (event: SelectChangeEvent<String>) => {
+    setYearDivision(event.target.value as YearDivision);
+  };
 
   const [createCourse, isCourseInFlight] =
     useMutation<lecturerCreateCourseMutation>(graphql`
@@ -65,6 +90,8 @@ export default function NewCourse() {
           description,
           startDate: startDate!.toISOString(),
           endDate: endDate!.toISOString(),
+          startYear: startDate!.year(),
+          yearDivision: yearDivision,
           published: publish,
         },
       },
@@ -147,6 +174,26 @@ export default function NewCourse() {
             defaultCalendarMonth={startDate ?? undefined}
             onChange={setEndDate}
           />
+          <Box sx={{ minWidth: 120, maxWidth: 200 }}>
+            <FormControl fullWidth>
+              <InputLabel>Year Divison</InputLabel>
+              <Select
+                value={yearDivision}
+                onChange={handleChange}
+                label={"Year Divison"}
+              >
+                <MenuItem value={"FIRST_SEMESTER"}>Winter semester</MenuItem>
+                <MenuItem value={"SECOND_SEMESTER"}>Summer semester</MenuItem>
+                <MenuItem value={"FIRST_TRIMESTER"}>1st Trimester</MenuItem>
+                <MenuItem value={"SECOND_TRIMESTER"}>2nd Trimester</MenuItem>
+                <MenuItem value={"THIRD_TRIMESTER"}>3rd Trimester</MenuItem>
+                <MenuItem value={"FIRST_QUARTER"}>1st Quarter</MenuItem>
+                <MenuItem value={"SECOND_QUARTER"}>2nd Quarter</MenuItem>
+                <MenuItem value={"THIRD_QUARTER"}>3rd Quarter</MenuItem>
+                <MenuItem value={"FOURTH_QUARTER"}>4th Quarter</MenuItem>
+              </Select>
+            </FormControl>
+          </Box>
         </>
       ),
       canContinue: startDate != null && endDate != null,

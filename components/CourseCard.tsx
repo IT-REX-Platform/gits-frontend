@@ -81,7 +81,6 @@ export function CourseCard({ _course }: { _course: CourseCardFragment$key }) {
           </div>
         )}
       </div>
-      <Divider />
     </Card>
   );
 }

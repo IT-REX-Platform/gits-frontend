@@ -46,6 +46,7 @@ import dayjs from "dayjs";
 import Link from "next/link";
 import { useState } from "react";
 import { Suggestion } from "@/components/Suggestion";
+import { FormErrors } from "@/components/FormErrors";
 
 interface Data {
   name: string;
@@ -147,16 +148,7 @@ export default function StudentCoursePage() {
 
   return (
     <main>
-      {error?.source.errors.map((err: any, i: number) => (
-        <Alert
-          key={i}
-          severity="error"
-          sx={{ minWidth: 400, maxWidth: 800, width: "fit-content" }}
-          onClose={() => setError(null)}
-        >
-          {err.message}
-        </Alert>
-      ))}
+      <FormErrors error={error} onClose={() => setError(null)} />
       <div className="flex gap-4 items-center">
         <Typography variant="h1">{course.title}</Typography>
         <LightTooltip

@@ -11,14 +11,10 @@ export function MultipleChoiceQuestionPreview({
   const question = useFragment(
     graphql`
       fragment MultipleChoiceQuestionPreviewFragment on MultipleChoiceQuestion {
-        text {
-          ...RichTextEditorFragment
-        }
+        text
         answers {
           correct
-          answerText {
-            ...RichTextEditorFragment
-          }
+          answerText
         }
       }
     `,

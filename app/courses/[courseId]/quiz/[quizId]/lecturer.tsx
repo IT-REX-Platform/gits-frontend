@@ -40,14 +40,8 @@ export default function EditQuiz() {
                 ...ClozeQuestionPreviewFragment
                 ...EditClozeQuestionButtonFragment
                 ... on MultipleChoiceQuestion {
-                  text {
-                    text
-                    ...RichTextEditorFragment
-                  }
-                  hint {
-                    text
-                    ...RichTextEditorFragment
-                  }
+                  text
+                  hint
                   answers {
                     correct
                     feedback

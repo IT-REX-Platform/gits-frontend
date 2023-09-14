@@ -47,11 +47,11 @@ export function AddClozeQuestionModal({
           additionalWrongAnswers: data.additionalWrongAnswers,
           clozeElements: data.clozeElements.map((elem) =>
             elem.type === "text"
-              ? { type: "TEXT", text: { text: elem.text } }
+              ? { type: "TEXT", text: elem.text }
               : {
                   type: "BLANK",
                   correctAnswer: elem.correctAnswer,
-                  feedback: { text: elem.feedback },
+                  feedback: elem.feedback,
                 }
           ),
         },

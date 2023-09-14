@@ -6,27 +6,16 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  FormControl,
   FormControlLabel,
-  FormLabel,
   IconButton,
-  Switch,
   TextField,
 } from "@mui/material";
 import { FormErrors } from "../FormErrors";
 import { Form, FormSection } from "../Form";
 import { MediaRecordSelector$key } from "@/__generated__/MediaRecordSelector.graphql";
-import { RenderRichText, RichTextEditor } from "../RichTextEditor";
+import { RichTextEditor } from "../RichTextEditor";
 import { useEffect, useMemo, useState } from "react";
-import { RichTextEditorFragment$key } from "@/__generated__/RichTextEditorFragment.graphql";
-import {
-  Add,
-  Clear,
-  Delete,
-  Feedback,
-  Help,
-  HelpOutline,
-} from "@mui/icons-material";
+import { Add, Clear, Feedback } from "@mui/icons-material";
 import { LoadingButton } from "@mui/lab";
 import { EditRichTextButton } from "./EditRichTextButton";
 

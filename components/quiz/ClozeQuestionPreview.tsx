@@ -14,15 +14,11 @@ export function ClozeQuestionPreview({
         clozeElements {
           __typename
           ... on ClozeTextElement {
-            text {
-              ...RichTextEditorFragment
-            }
+            text
           }
           ... on ClozeBlankElement {
             correctAnswer
-            feedback {
-              ...RichTextEditorFragment
-            }
+            feedback
           }
         }
         allBlanks

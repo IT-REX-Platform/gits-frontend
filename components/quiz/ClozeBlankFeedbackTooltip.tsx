@@ -1,4 +1,3 @@
-import { RichTextEditorFragment$key } from "@/__generated__/RichTextEditorFragment.graphql";
 import { Box, Tooltip } from "@mui/material";
 import { ReactElement } from "react";
 import { RenderRichText } from "../RichTextEditor";
@@ -9,7 +8,7 @@ export function ClozeBlankFeedbackTooltip({
   correctAnswer,
   children,
 }: {
-  feedback: RichTextEditorFragment$key | null;
+  feedback: string | null;
   children: ReactElement;
   correctAnswer: string;
   disabled?: boolean;

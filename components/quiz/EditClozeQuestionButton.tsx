@@ -32,15 +32,11 @@ export function EditClozeQuestionButton({
         clozeElements {
           __typename
           ... on ClozeTextElement {
-            text {
-              text
-            }
+            text
           }
           ... on ClozeBlankElement {
             correctAnswer
-            feedback {
-              text
-            }
+            feedback
           }
         }
       }
@@ -75,11 +71,11 @@ export function EditClozeQuestionButton({
           additionalWrongAnswers: data.additionalWrongAnswers,
           clozeElements: data.clozeElements.map((elem) =>
             elem.type === "text"
-              ? { type: "TEXT", text: { text: elem.text } }
+              ? { type: "TEXT", text: elem.text }
               : {
                   type: "BLANK",
                   correctAnswer: elem.correctAnswer,
-                  feedback: { text: elem.feedback },
+                  feedback: elem.feedback,
                 }
           ),
         },
@@ -96,12 +92,12 @@ export function EditClozeQuestionButton({
       clozeElements: question.clozeElements
         .map((elem) =>
           elem.__typename === "ClozeTextElement"
-            ? { type: "text", text: elem.text.text }
+            ? { type: "text", text: elem.text }
             : elem.__typename === "ClozeBlankElement"
             ? {
                 type: "blank",
                 correctAnswer: elem.correctAnswer,
-                feedback: elem.feedback?.text ?? "",
+                feedback: elem.feedback ?? "",
               }
             : null
         )

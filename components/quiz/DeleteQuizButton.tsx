@@ -1,7 +1,6 @@
 import { DeleteQuizButtonMutation } from "@/__generated__/DeleteQuizButtonMutation.graphql";
 import { Delete } from "@mui/icons-material";
 import { Button, CircularProgress } from "@mui/material";
-import { useRouter } from "next/navigation";
 import { graphql, useMutation } from "react-relay";
 
 export function DeleteQuizButton({
@@ -17,7 +16,9 @@ export function DeleteQuizButton({
 }) {
   const [deleteQuiz, deleting] = useMutation<DeleteQuizButtonMutation>(graphql`
     mutation DeleteQuizButtonMutation($id: UUID!) {
-      deleteContent(id: $id)
+      mutateContent(contentId: $id) {
+        deleteContent
+      }
     }
   `);
 

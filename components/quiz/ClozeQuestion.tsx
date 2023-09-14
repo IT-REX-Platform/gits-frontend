@@ -67,6 +67,12 @@ export function ClozeQuestion({
     setSelectedAnswers({});
   }, [question, setSelectedAnswers]);
 
+  useEffect(() => {
+    // Reset state when question changes
+    setSelectedAnswers({});
+    setCorrect({});
+  }, [question]);
+
   return (
     <div>
       {/* Cloze text */}
@@ -119,7 +125,7 @@ export function ClozeQuestion({
           <div className="max-w-sm flex justify-center gap-4 flex-wrap">
             {question.allBlanks.map((value, i) => (
               <ClozeElementValue
-                key={i}
+                key={`${question.id}-${i}`}
                 value={value}
                 used={Object.values(selectedAnswers).includes(value)}
                 feedbackMode={feedbackMode}

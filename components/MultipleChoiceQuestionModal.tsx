@@ -242,7 +242,7 @@ export function MultipleChoiceQuestionModal({
                 <FormControlLabel
                   control={
                     <Checkbox
-                      value={answer.correct}
+                      checked={answer.correct}
                       onChange={(e) => {
                         answer.correct = !answer.correct;
                         setInput({ ...input });

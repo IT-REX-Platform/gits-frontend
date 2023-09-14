@@ -65,6 +65,7 @@ export default function EditFlashcards() {
             chapterId #
             ...ContentTags
           }
+
           ... on FlashcardSetAssessment {
             flashcardSet {
               __id
@@ -109,6 +110,18 @@ export default function EditFlashcards() {
         mutateContent(contentId: $contentId) {
           updateAssessment(input: $assessment) {
             id
+            metadata {
+              chapterId
+              rewardPoints
+              tagNames
+              suggestedDate
+            }
+
+            assessmentMetadata {
+              initialLearningInterval
+              skillPoints
+              skillTypes
+            }
           }
         }
       }

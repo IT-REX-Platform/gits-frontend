@@ -25,7 +25,7 @@ export function ContentMetadataFormSection({
   const [rewardPointsStr, setRewardPointsStr] = useState(
     metadata?.rewardPoints.toString() ?? "0"
   );
-  const [tags, setTags] = useState<string[]>(metadata?.tagNames ?? []);
+  const [tags, setTags] = useState<string[]>([...(metadata?.tagNames ?? [])]);
 
   const rewardPoints = parseInt(rewardPointsStr);
 

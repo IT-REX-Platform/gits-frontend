@@ -6,6 +6,7 @@ import {
   QuestionCompletedInput,
   studentQuizTrackCompletedMutation,
 } from "@/__generated__/studentQuizTrackCompletedMutation.graphql";
+import { ContentTags } from "@/components/ContentTags";
 import { FormErrors } from "@/components/FormErrors";
 import { Heading } from "@/components/Heading";
 import { ClozeQuestion } from "@/components/quiz/ClozeQuestion";
@@ -70,6 +71,7 @@ export default function StudentQuiz() {
           id
           metadata {
             name
+            ...ContentTags
           }
           ... on QuizAssessment {
             quiz {
@@ -132,6 +134,7 @@ export default function StudentQuiz() {
     <main>
       <FormErrors error={error} onClose={() => setError(null)} />
       <Heading title={contentsByIds[0].metadata.name} backButton />
+      <ContentTags metadata={contentsByIds[0].metadata} />
 
       {/* Horizontal line with current question number */}
       <div className="w-full my-6 flex items-center">

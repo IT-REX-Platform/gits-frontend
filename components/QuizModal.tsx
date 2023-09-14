@@ -85,7 +85,7 @@ export function QuizModal({
               : input.numberOfRandomlySelectedQuestions,
         },
         assessmentInput: {
-          metadata: { ...metadata!, type: "QUIZ", chapterId, tagNames: [] },
+          metadata: { ...metadata!, type: "QUIZ", chapterId },
           assessmentMetadata: assessmentMetadata!,
         },
       },

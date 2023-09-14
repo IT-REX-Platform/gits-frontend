@@ -87,7 +87,7 @@ export function AddFlashcardSetModal({
       metadata: {
         ...metadata!,
         chapterId: chapter.id,
-        tagNames: [],
+
         type: "FLASHCARDS" as ContentType,
       },
       assessmentMetadata: {

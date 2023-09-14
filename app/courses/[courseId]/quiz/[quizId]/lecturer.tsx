@@ -1,4 +1,5 @@
 import { lecturerEditQuizQuery } from "@/__generated__/lecturerEditQuizQuery.graphql";
+import { ContentTags } from "@/components/ContentTags";
 import { Heading } from "@/components/Heading";
 import { Edit } from "@mui/icons-material";
 import { IconButton } from "@mui/material";
@@ -28,6 +29,7 @@ export default function EditQuiz() {
           metadata {
             name
             chapterId
+            ...ContentTags
           }
           ... on QuizAssessment {
             quiz {
@@ -82,6 +84,7 @@ export default function EditQuiz() {
         }
         backButton
       />
+      <ContentTags metadata={content.metadata} />
 
       {quiz.questionPool.map((question, index) => (
         <div

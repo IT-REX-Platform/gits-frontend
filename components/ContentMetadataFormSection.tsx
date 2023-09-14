@@ -1,4 +1,4 @@
-import { TextField } from "@mui/material";
+import { Autocomplete, Chip, TextField } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers";
 import dayjs from "dayjs";
 import { useEffect, useState } from "react";
@@ -8,6 +8,7 @@ export type ContentMetadataPayload = {
   name: string;
   suggestedDate: string;
   rewardPoints: number;
+  tagNames: readonly string[];
 };
 
 export function ContentMetadataFormSection({
@@ -24,6 +25,8 @@ export function ContentMetadataFormSection({
   const [rewardPointsStr, setRewardPointsStr] = useState(
     metadata?.rewardPoints.toString() ?? "0"
   );
+  const [tags, setTags] = useState<string[]>([...(metadata?.tagNames ?? [])]);
+
   const rewardPoints = parseInt(rewardPointsStr);
 
   const valid =
@@ -39,10 +42,11 @@ export function ContentMetadataFormSection({
             name,
             suggestedDate: suggestedDate.toISOString(),
             rewardPoints,
+            tagNames: tags,
           }
         : null
     );
-  }, [name, suggestedDate, rewardPointsStr]);
+  }, [name, suggestedDate, rewardPointsStr, tags, rewardPoints, valid]);
 
   return (
     <FormSection title="Content details">
@@ -81,6 +85,30 @@ export function ContentMetadataFormSection({
         onChange={(e) => setRewardPointsStr(e.target.value)}
         multiline
         required
+      />
+
+      <Autocomplete
+        multiple
+        options={[]}
+        defaultValue={[]}
+        freeSolo
+        value={tags}
+        className="w-96"
+        onChange={(_, newValue: string[]) => {
+          setTags(newValue);
+        }}
+        renderTags={(value: readonly string[], getTagProps) =>
+          value.map((option: string, index: number) => (
+            // the key gets set by "getTagProps"
+            // eslint-disable-next-line react/jsx-key
+            <Chip
+              variant="outlined"
+              label={option}
+              {...getTagProps({ index })}
+            />
+          ))
+        }
+        renderInput={(params) => <TextField {...params} label="Tags" />}
       />
     </FormSection>
   );

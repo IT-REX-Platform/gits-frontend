@@ -1,10 +1,13 @@
 import { lecturerAddFlashcardMutation } from "@/__generated__/lecturerAddFlashcardMutation.graphql";
 import { lecturerDeleteFlashcardContentMutation } from "@/__generated__/lecturerDeleteFlashcardContentMutation.graphql";
+import { lecturerDeleteFlashcardMutation } from "@/__generated__/lecturerDeleteFlashcardMutation.graphql";
 import { lecturerEditFlashcardFragment$key } from "@/__generated__/lecturerEditFlashcardFragment.graphql";
 import { lecturerEditFlashcardMutation } from "@/__generated__/lecturerEditFlashcardMutation.graphql";
+import { lecturerEditFlashcardSetMutation } from "@/__generated__/lecturerEditFlashcardSetMutation.graphql";
 import { lecturerEditFlashcardsQuery } from "@/__generated__/lecturerEditFlashcardsQuery.graphql";
 import { AssessmentMetadataPayload } from "@/components/AssessmentMetadataFormSection";
 import { ContentMetadataPayload } from "@/components/ContentMetadataFormSection";
+import { ContentTags } from "@/components/ContentTags";
 import { Form, FormSection } from "@/components/Form";
 import { Heading } from "@/components/Heading";
 import { Add, Delete, Edit, Help, QuestionAnswer } from "@mui/icons-material";
@@ -37,7 +40,6 @@ import {
   useLazyLoadQuery,
   useMutation,
 } from "react-relay";
-import { ID } from "victory";
 import { EditFlashcardSetModal } from "../../../../../components/EditFlashcardSetModal";
 
 export default function EditFlashcards() {
@@ -60,8 +62,10 @@ export default function EditFlashcards() {
           id
           metadata {
             name
-            chapterId
+            chapterId #
+            ...ContentTags
           }
+
           ... on FlashcardSetAssessment {
             flashcardSet {
               __id
@@ -97,29 +101,43 @@ export default function EditFlashcards() {
         }
       }
     `);
-  const [updateFlashcardSet, isUpdatingFlashcardSet] = useMutation(graphql`
-    mutation lecturerEditFlashcardSetMutation(
-      $assessment: UpdateAssessmentInput!
-      $contentId: UUID!
-    ) {
-      mutateContent(contentId: $contentId) {
-        updateAssessment(input: $assessment) {
-          id
+  const [updateFlashcardSet, isUpdatingFlashcardSet] =
+    useMutation<lecturerEditFlashcardSetMutation>(graphql`
+      mutation lecturerEditFlashcardSetMutation(
+        $assessment: UpdateAssessmentInput!
+        $contentId: UUID!
+      ) {
+        mutateContent(contentId: $contentId) {
+          updateAssessment(input: $assessment) {
+            id
+            metadata {
+              chapterId
+              rewardPoints
+              tagNames
+              suggestedDate
+            }
+
+            assessmentMetadata {
+              initialLearningInterval
+              skillPoints
+              skillTypes
+            }
+          }
         }
       }
-    }
-  `);
+    `);
 
-  const [deleteFlashcard, isDeleting] = useMutation(graphql`
-    mutation lecturerDeleteFlashcardMutation(
-      $flashcardId: UUID!
-      $assessmentId: UUID!
-    ) {
-      mutateFlashcardSet(assessmentId: $assessmentId) {
-        deleteFlashcard(id: $flashcardId)
+  const [deleteFlashcard, isDeleting] =
+    useMutation<lecturerDeleteFlashcardMutation>(graphql`
+      mutation lecturerDeleteFlashcardMutation(
+        $flashcardId: UUID!
+        $assessmentId: UUID!
+      ) {
+        mutateFlashcardSet(assessmentId: $assessmentId) {
+          deleteFlashcard(id: $flashcardId)
+        }
       }
-    }
-  `);
+    `);
   const isUpdating = isAddingFlashcard || isUpdatingFlashcardSet || isDeleting;
 
   if (contentsByIds.length == 0) {
@@ -161,7 +179,7 @@ export default function EditFlashcards() {
     });
   }
 
-  function handleDeleteFlashcard(flashcardId: ID) {
+  function handleDeleteFlashcard(flashcardId: string) {
     deleteFlashcard({
       variables: {
         flashcardId: flashcardId,
@@ -188,18 +206,18 @@ export default function EditFlashcards() {
     metadata: ContentMetadataPayload,
     assessmentMetadata: AssessmentMetadataPayload
   ) {
-    const assessment = {
-      id: content.id,
-      metadata: {
-        ...metadata,
-        chapterId: content.metadata.chapterId,
-      },
-      assessmentMetadata,
-    };
-
     setEditSetOpen(false);
     updateFlashcardSet({
-      variables: { assessment },
+      variables: {
+        assessment: {
+          metadata: {
+            ...metadata,
+            chapterId: content.metadata.chapterId,
+          },
+          assessmentMetadata,
+        },
+        contentId: content.id,
+      },
       onError: setError,
     });
   }
@@ -255,6 +273,8 @@ export default function EditFlashcards() {
         }
         backButton
       />
+
+      <ContentTags metadata={content.metadata} />
       {error && (
         <div className="flex flex-col gap-2 mt-8">
           {error?.source?.errors.map((err: any, i: number) => (

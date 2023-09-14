@@ -19,13 +19,14 @@ import {
   ListItem,
   ListItemIcon,
   ListItemText,
-  TextField,
 } from "@mui/material";
-import { DatePicker } from "@mui/x-date-pickers";
 
-import dayjs, { Dayjs } from "dayjs";
 import { useState } from "react";
 import { graphql, useFragment, useMutation } from "react-relay";
+import {
+  ContentMetadataFormSection,
+  ContentMetadataPayload,
+} from "./ContentMetadataFormSection";
 import { MediaRecordIcon } from "./MediaRecordIcon";
 import { MediaRecordSelector } from "./MediaRecordSelector";
 
@@ -67,25 +68,13 @@ export function MediaContentModal({
     _existingMediaContent ?? null
   );
 
-  const [title, setTitle] = useState(existingContent?.metadata.name ?? "");
-  const [suggestedDate, setSuggestedDate] = useState<Dayjs | null>(
-    dayjs(existingContent?.metadata.suggestedDate)
-  );
-  const [rewardPoints, setRewardPoints] = useState(
-    existingContent?.metadata.rewardPoints ?? 0
-  );
+  const [metadata, setMetadata] = useState<ContentMetadataPayload | null>(null);
 
   const [selectedRecords, setSelectedRecords] = useState(
     existingContent?.mediaRecords ?? []
   );
 
   const [error, setError] = useState<any>(null);
-
-  const valid =
-    title !== "" &&
-    suggestedDate != null &&
-    suggestedDate.isValid() &&
-    !isNaN(rewardPoints);
 
   const [addMedia, isAdding] =
     useMutation<MediaContentModalCreateMutation>(graphql`
@@ -146,24 +135,19 @@ export function MediaContentModal({
     `);
 
   function onClose() {
-    setTitle("");
-    setSuggestedDate(dayjs());
-    setRewardPoints(0);
+    setMetadata(null);
     _onClose();
   }
 
   function handleSubmit() {
-    if (existingContent) {
+    if (existingContent && metadata) {
       updateMedia({
         variables: {
           contentId: existingContent.id,
           input: {
             metadata: {
               chapterId: existingContent.metadata.chapterId,
-              name: title,
-              rewardPoints,
-              suggestedDate: suggestedDate!.toISOString(),
-              tagNames: [],
+              ...metadata,
             },
           },
           records: selectedRecords.map((r) => r.id),
@@ -180,16 +164,13 @@ export function MediaContentModal({
           content!.setLinkedRecords(records, "mediaRecords");
         },
       });
-    } else {
+    } else if (metadata) {
       addMedia({
         variables: {
           input: {
             chapterId: chapterId!,
-            name: title!,
-            rewardPoints,
-            suggestedDate: suggestedDate!.toISOString(),
-            tagNames: [],
             type: "MEDIA",
+            ...metadata,
           },
           records: selectedRecords.map((r) => r.id),
         },
@@ -223,39 +204,11 @@ export function MediaContentModal({
           </Alert>
         ))}
         <Form>
-          <FormSection title="General">
-            <TextField
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              className="w-96"
-              label="Name"
-              variant="outlined"
-              required
-            />
-          </FormSection>
+          <ContentMetadataFormSection
+            metadata={metadata}
+            onChange={setMetadata}
+          />
 
-          <FormSection title="Scoring">
-            <TextField
-              value={rewardPoints}
-              onChange={(e) => setRewardPoints(Number(e.target.value))}
-              className="w-96"
-              label="Reward points"
-              variant="outlined"
-              required
-              type="number"
-            />
-            <DatePicker
-              value={suggestedDate}
-              onChange={setSuggestedDate}
-              slotProps={{
-                textField: {
-                  required: true,
-                  error: suggestedDate == null || !suggestedDate.isValid(),
-                },
-              }}
-              label="Suggested completion date"
-            />
-          </FormSection>
           <FormSection title="Media files">
             <MediaRecordSelector
               isOpen={recordSelectorOpen}
@@ -310,7 +263,7 @@ export function MediaContentModal({
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose}>Cancel</Button>
-        <Button disabled={!valid} onClick={handleSubmit}>
+        <Button disabled={!metadata} onClick={handleSubmit}>
           {_existingMediaContent ? "Save" : "Add"}
         </Button>
       </DialogActions>

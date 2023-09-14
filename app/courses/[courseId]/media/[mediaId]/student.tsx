@@ -5,6 +5,7 @@ import { studentContentMediaDisplayFragment$key } from "@/__generated__/studentC
 import { studentMediaLogProgressMutation } from "@/__generated__/studentMediaLogProgressMutation.graphql";
 import { studentMediaQuery } from "@/__generated__/studentMediaQuery.graphql";
 import { MediaContent } from "@/components/Content";
+import { ContentTags } from "@/components/ContentTags";
 import { Heading } from "@/components/Heading";
 import { PdfViewer } from "@/components/PdfViewer";
 import { Check, Download } from "@mui/icons-material";
@@ -40,6 +41,7 @@ export default function StudentMediaPage() {
           metadata {
             name
             type
+            ...ContentTags
           }
           ... on MediaContent {
             mediaRecords {
@@ -125,6 +127,8 @@ export default function StudentMediaPage() {
         action={<DownloadButton _record={mainRecord} />}
         backButton
       />
+
+      <ContentTags metadata={content.metadata} />
 
       {error?.source.errors.map((err: any, i: number) => (
         <Alert

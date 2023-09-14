@@ -33,10 +33,12 @@ export function EditFlashcardSetModal({
   const content = useFragment(
     graphql`
       fragment EditFlashcardSetModalFragment on Content {
+        id
         metadata {
           name
           suggestedDate
           rewardPoints
+          tagNames
         }
         ... on Assessment {
           assessmentMetadata {

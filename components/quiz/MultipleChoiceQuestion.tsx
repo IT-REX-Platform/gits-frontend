@@ -21,18 +21,12 @@ export function MultipleChoiceQuestion({
       fragment MultipleChoiceQuestionFragment on MultipleChoiceQuestion {
         id
 
-        text {
-          ...RichTextEditorFragment
-        }
+        text
 
         answers {
           correct
-          answerText {
-            ...RichTextEditorFragment
-          }
-          feedback {
-            ...RichTextEditorFragment
-          }
+          answerText
+          feedback
         }
 
         ...QuestionDividerFragment

@@ -4,7 +4,6 @@ import { ReactElement, useEffect, useRef, useState } from "react";
 import { QuestionDivider } from "./QuestionDivider";
 import { ClozeQuestionFragment$key } from "@/__generated__/ClozeQuestionFragment.graphql";
 import { useDrag, useDrop } from "react-dnd";
-import { RichTextEditorFragment$key } from "@/__generated__/RichTextEditorFragment.graphql";
 import { Box, TextField, Tooltip, colors } from "@mui/material";
 import { AutosizeByText } from "../AutosizeByText";
 
@@ -27,15 +26,11 @@ export function ClozeQuestion({
         clozeElements {
           __typename
           ... on ClozeTextElement {
-            text {
-              ...RichTextEditorFragment
-            }
+            text
           }
           ... on ClozeBlankElement {
             correctAnswer
-            feedback {
-              ...RichTextEditorFragment
-            }
+            feedback
           }
         }
 
@@ -292,7 +287,7 @@ function FeedbackTooltip({
   correctAnswer,
   children,
 }: {
-  feedback: RichTextEditorFragment$key | null;
+  feedback: string | null;
   children: ReactElement;
   correctAnswer: string;
   disabled: boolean;

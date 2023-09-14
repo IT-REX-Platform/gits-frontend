@@ -1,5 +1,4 @@
 import { QuestionDividerFragment$key } from "@/__generated__/QuestionDividerFragment.graphql";
-import { RichTextEditorFragment$key } from "@/__generated__/RichTextEditorFragment.graphql";
 import { Button, Dialog, DialogTitle, Typography } from "@mui/material";
 import { useState } from "react";
 import { graphql, useFragment } from "react-relay";
@@ -15,9 +14,7 @@ export function QuestionDivider({
   const question = useFragment(
     graphql`
       fragment QuestionDividerFragment on Question {
-        hint {
-          ...RichTextEditorFragment
-        }
+        hint
       }
     `,
     _question
@@ -34,7 +31,7 @@ function HintDialogButton({
   hint,
   onHint,
 }: {
-  hint: RichTextEditorFragment$key | null;
+  hint: string | null;
   onHint?: () => void;
 }) {
   const [open, setOpen] = useState(false);

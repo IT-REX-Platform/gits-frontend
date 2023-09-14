@@ -271,11 +271,28 @@ export function DownloadButton({
     _record
   );
 
+  function downloadFile(url: string, fileName: string) {
+    fetch(url, {
+      method: "get",
+      referrerPolicy: "no-referrer",
+    })
+      .then((res) => res.blob())
+      .then((res) => {
+        const aElement = document.createElement("a");
+        aElement.setAttribute("download", fileName);
+        const href = URL.createObjectURL(res);
+        aElement.href = href;
+        aElement.setAttribute("target", "_blank");
+        aElement.click();
+        URL.revokeObjectURL(href);
+      });
+  }
+
   return (
     <Button
-      href={mediaRecord.downloadUrl}
+      href={""}
       target="_blank"
-      download={mediaRecord.name}
+      onClick={() => downloadFile(mediaRecord.downloadUrl, mediaRecord.name)}
       sx={{ color: "text.secondary" }}
       startIcon={<Download />}
     >

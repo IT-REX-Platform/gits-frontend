@@ -109,7 +109,7 @@ export function MediaRecordSelector({
     `);
 
   const [fileUploadStates, setFileUploadStates] = useState<
-    Record<string, "running" | "failed" | "done">
+    Record<string, "running" | "failed" | "done" | "loading">
   >({});
   const [files, setFiles] = useState<File[]>([]);
 

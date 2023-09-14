@@ -48,7 +48,9 @@ export default function LecturerMediaPage() {
   const [del, deleting] =
     useMutation<lecturerDeleteMediaContentMutation>(graphql`
       mutation lecturerDeleteMediaContentMutation($id: UUID!) {
-        deleteContent(id: $id)
+        mutateContent(contentId: $id) {
+          deleteContent
+        }
       }
     `);
 

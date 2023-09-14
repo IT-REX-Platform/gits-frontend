@@ -3,24 +3,10 @@
 import { studentStudentQuery } from "@/__generated__/studentStudentQuery.graphql";
 import { CourseCard } from "@/components/CourseCard";
 import {
-  ArrowForwardIos,
-  Check,
-  Refresh,
-  Visibility,
-} from "@mui/icons-material";
-import {
   Box,
   Button,
-  Card,
-  CardContent,
-  CircularProgress,
-  Divider,
   FormControl,
   InputLabel,
-  List,
-  ListItemButton,
-  ListItemIcon,
-  ListItemText,
   MenuItem,
   Select,
   SelectChangeEvent,

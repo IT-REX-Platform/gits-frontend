@@ -52,12 +52,10 @@ export function CourseCard({ _course }: { _course: CourseCardFragment$key }) {
           <Typography
             variant="h6"
             component="div"
-            className="shrink text-ellipsis overflow-hidden whitespace-nowrap "
+            className="shrink overflow-hidden !ml-2"
           >
-            <Link href={`/courses/${course.id}`} underline="none">
-              <Button size="small" sx={{ fontSize: "11px" }}>
-                {course.title}
-              </Button>
+            <Link href={`/courses/${course.id}`} underline="none" color="black">
+              {course.title}
             </Link>
           </Typography>
           <div className="grow"></div>

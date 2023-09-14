@@ -14,17 +14,20 @@ import { graphql, useFragment } from "react-relay";
 import { Suggestion } from "./Suggestion";
 
 export function CourseCard({ _course }: { _course: CourseCardFragment$key }) {
-  const course = useFragment(graphql`
-    fragment CourseCardFragment on Course {
-      id
-      title
-      startDate
-      startYear
-      suggestions(amount: 3) {
-        ...SuggestionFragment
+  const course = useFragment(
+    graphql`
+      fragment CourseCardFragment on Course {
+        id
+        title
+        startDate
+        startYear
+        suggestions(amount: 3) {
+          ...SuggestionFragment
+        }
       }
-    }
-  `, _course);
+    `,
+    _course
+  );
 
   return (
     <Card variant="outlined" className="h-full" key={course.id}>

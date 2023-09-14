@@ -128,9 +128,7 @@ export default function StudentFlashcards() {
         </div>
       </div>
 
-      <div className="mt-6 text-center text-gray-600">
-        {question?.text.text}
-      </div>
+      <div className="mt-6 text-center text-gray-600">{question?.text}</div>
 
       <div className="w-full border-b border-b-gray-300 mt-6 flex justify-center mb-6"></div>
 
@@ -171,7 +169,7 @@ export default function StudentFlashcards() {
               initial={false}
               transition={{ duration: 0.09, delay: 0.05 }}
             >
-              {answer.text.text}
+              {answer.text}
 
               <div className="mt-6 flex gap-2 justify-center w-full">
                 <Button

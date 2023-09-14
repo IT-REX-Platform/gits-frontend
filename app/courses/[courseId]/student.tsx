@@ -150,17 +150,17 @@ export default function StudentCoursePage() {
   const nextFlashcard = chain(course.chapters.elements)
     .flatMap((x) => x.contents)
     .filter((x) => x.metadata.type === "FLASHCARDS")
-    .minBy((x) => new Date(x.userProgressData.nextLearnDate))
+    .minBy((x) => new Date(x.userProgressData.nextLearnDate ?? ""))
     .value();
   const nextQuiz = chain(course.chapters.elements)
     .flatMap((x) => x.contents)
     .filter((x) => x.metadata.type === "QUIZ")
-    .minBy((x) => new Date(x.userProgressData.nextLearnDate))
+    .minBy((x) => new Date(x.userProgressData.nextLearnDate ?? ""))
     .value();
   const nextVideo = chain(course.chapters.elements)
     .flatMap((x) => x.contents)
     .filter((x) => x.metadata.type === "MEDIA")
-    .minBy((x) => new Date(x.userProgressData.nextLearnDate))
+    .minBy((x) => new Date(x.userProgressData.nextLearnDate ?? ""))
     .value();
 
   return (

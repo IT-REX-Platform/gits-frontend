@@ -184,8 +184,8 @@ export function MediaContentModal({
       addMedia({
         variables: {
           input: {
-            chapterId,
-            name: title,
+            chapterId: chapterId!,
+            name: title!,
             rewardPoints,
             suggestedDate: suggestedDate!.toISOString(),
             tagNames: [],
@@ -275,7 +275,7 @@ export function MediaContentModal({
                       <IconButton
                         onClick={() =>
                           setSelectedRecords(
-                            selectedRecords.filter((x) => x !== record.id)
+                            selectedRecords.filter((x) => x.id !== record.id)
                           )
                         }
                         edge="end"

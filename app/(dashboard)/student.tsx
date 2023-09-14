@@ -13,6 +13,7 @@ import {
   Typography,
 } from "@mui/material";
 import dayjs from "dayjs";
+import { chain } from "lodash";
 import Link from "next/link";
 import { useState } from "react";
 import { useLazyLoadQuery } from "react-relay";
@@ -62,15 +63,16 @@ export default function StudentPage() {
       );
     } else if (selectedSort === "startYear") {
       // Filter courses that match the currentYear
-      const filtered = courses.filter(
-        (course) => dayjs(course.startDate).year() === currentYear
-      );
-      filtered.sort((a, b) => b.startDate - a.startDate);
+      const filtered = chain(courses)
+        .filter((course) => dayjs(course.startDate).year() === currentYear)
+        .orderBy((x) => x.startDate)
+        .value();
       setFilteredCourses(filtered);
-      const notFocused = courses.filter(
-        (course) => dayjs(course.startDate).year() !== currentYear
-      );
-      notFocused.sort((a, b) => b.startDate - a.startDate);
+      const notFocused = chain(courses)
+        .filter((course) => dayjs(course.startDate).year() !== currentYear)
+        .orderBy((x) => x.startDate)
+        .value();
+
       setNotFocusesdcourses(notFocused);
     }
   };

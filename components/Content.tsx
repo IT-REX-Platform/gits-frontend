@@ -469,7 +469,7 @@ function EarlyRepeatWarnModal({
           ? "today"
           : `${diffLastLearn} day${diffLastLearn > 1 ? "s" : ""}`}{" "}
         ago. You won&apos;t earn any new reward points before{" "}
-        {new Date(nextLearnDate).toLocaleDateString("en-EN")}
+        {new Date(nextLearnDate ?? "").toLocaleDateString("en-EN")}
       </DialogContent>
       <DialogActions>
         <Button onClick={() => push(href)} color="error">

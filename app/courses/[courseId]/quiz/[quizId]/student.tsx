@@ -193,8 +193,8 @@ export default function StudentQuiz() {
       <InfoDialog
         open={infoDialogOpen}
         onClose={() => setInfoDialogOpen(false)}
-        title={questionText!.text}
-        hint={currentQuestion.hint}
+        title={questionText ?? ""}
+        hint={currentQuestion.hint ?? ""}
       />
 
       <div className="w-full border-b border-b-gray-300 mt-6 flex justify-center">

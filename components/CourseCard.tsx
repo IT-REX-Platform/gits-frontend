@@ -1,9 +1,4 @@
-import {
-  ArrowForwardIos,
-  Check,
-  Refresh,
-  Visibility,
-} from "@mui/icons-material";
+import { CourseCardFragment$key } from "@/__generated__/CourseCardFragment.graphql";
 import {
   Button,
   Card,
@@ -12,24 +7,30 @@ import {
   CircularProgress,
   Divider,
   Link,
-  List,
-  ListItemButton,
-  ListItemIcon,
-  ListItemText,
   Typography,
 } from "@mui/material";
 import dayjs from "dayjs";
+import { graphql, useFragment } from "react-relay";
+import { Suggestion } from "./Suggestion";
 
-type CourseType = {
-  readonly id: any;
-  readonly startDate: any;
-  readonly startYear: number | null;
-  readonly title: string;
-};
+export function CourseCard({ _course }: { _course: CourseCardFragment$key }) {
+  const course = useFragment(
+    graphql`
+      fragment CourseCardFragment on Course {
+        id
+        title
+        startDate
+        startYear
+        suggestions(amount: 3) {
+          ...SuggestionFragment
+        }
+      }
+    `,
+    _course
+  );
 
-export function CourseCard({ courses }: { courses: CourseType }) {
   return (
-    <Card variant="outlined" className="h-full" key={courses.id}>
+    <Card variant="outlined" className="h-full" key={course.id}>
       <CardContent>
         <div className="flex gap-4 items-center">
           <div className="aspect-square min-w-[40px] grid">
@@ -53,58 +54,33 @@ export function CourseCard({ courses }: { courses: CourseType }) {
             component="div"
             className="shrink text-ellipsis overflow-hidden whitespace-nowrap "
           >
-            <Link href={`/courses/${courses.id}`} underline="none">
+            <Link href={`/courses/${course.id}`} underline="none">
               <Button size="small" sx={{ fontSize: "11px" }}>
-                {courses.title}
+                {course.title}
               </Button>
             </Link>
           </Typography>
           <div className="grow"></div>
-          <Chip label={dayjs(courses.startDate).year()}></Chip>
+          <Chip label={dayjs(course.startDate).year()}></Chip>
         </div>
       </CardContent>
 
       <Divider />
-      <List>
-        <ListItemButton>
-          <ListItemIcon>
-            <Visibility />
-          </ListItemIcon>
-          <ListItemText
-            primary="Watch the next video"
-            secondary="Chapter 4: Interfaces"
+      <div className="flex flex-col m-4 gap-2 items-start grow min-h-[12rem]">
+        {course.suggestions.map((suggestion, i) => (
+          <Suggestion
+            key={`${course.id}-suggestion-${i}`}
+            _suggestion={suggestion}
           />
-          <ListItemIcon>
-            <ArrowForwardIos fontSize="small" />
-          </ListItemIcon>
-        </ListItemButton>
-        <ListItemButton>
-          <ListItemIcon>
-            <Check />
-          </ListItemIcon>
-          <ListItemText
-            primary="Solve the Quiz"
-            secondary="Chapter 4: Interfaces"
-          />
-          <ListItemIcon>
-            <ArrowForwardIos fontSize="small" />
-          </ListItemIcon>
-        </ListItemButton>
-
-        <ListItemButton>
-          <ListItemIcon>
-            <Refresh />
-          </ListItemIcon>
-          <ListItemText
-            primary="Refresh your Knowledge"
-            secondary="Chapter 1-3"
-          />
-          <ListItemIcon>
-            <ArrowForwardIos fontSize="small" />
-          </ListItemIcon>
-        </ListItemButton>
-      </List>
-      <Divider />
+        ))}
+        {course.suggestions.length === 0 && (
+          <div className="w-full grow flex items-center text-center justify-center text-gray-600">
+            You are all set.
+            <br />
+            No suggestions for this course
+          </div>
+        )}
+      </div>
     </Card>
   );
 }

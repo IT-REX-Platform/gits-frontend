@@ -20,6 +20,7 @@ import { LoadingButton } from "@mui/lab";
 import { EditRichTextButton } from "./EditRichTextButton";
 
 export type ClozeQuestionData = {
+  hint: string | null;
   showBlanksList: boolean;
   additionalWrongAnswers: string[];
   clozeElements: ClozeElementData[];
@@ -198,6 +199,23 @@ export function ClozeQuestionModal({
                 Add blank
               </Button>
             </div>
+          </FormSection>
+          <FormSection title="Hint">
+            <RichTextEditor
+              _allRecords={_allRecords}
+              className="w-[700px]"
+              label="Hint"
+              initialValue={data.hint ?? ""}
+              onChange={(value) =>
+                setData((oldData) => ({
+                  ...oldData,
+                  hint:
+                    value !== '[{"type":"paragraph","children":[{"text":""}]}]'
+                      ? value
+                      : null,
+                }))
+              }
+            />
           </FormSection>
           <FormSection title="Options">
             <FormControlLabel

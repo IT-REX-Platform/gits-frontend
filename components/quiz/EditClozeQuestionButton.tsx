@@ -29,6 +29,7 @@ export function EditClozeQuestionButton({
         id
         showBlanksList
         additionalWrongAnswers
+        hint
         clozeElements {
           __typename
           ... on ClozeTextElement {
@@ -62,11 +63,13 @@ export function EditClozeQuestionButton({
     `);
 
   const handleSubmit = (data: ClozeQuestionData) => {
+    console.log(data.hint);
     updateQuestion({
       variables: {
         assessmentId,
         input: {
           id: question.id,
+          hint: data.hint,
           showBlanksList: data.showBlanksList,
           additionalWrongAnswers: data.additionalWrongAnswers,
           clozeElements: data.clozeElements.map((elem) =>
@@ -87,6 +90,7 @@ export function EditClozeQuestionButton({
 
   const initialValue: ClozeQuestionData = useMemo(
     () => ({
+      hint: question.hint,
       showBlanksList: question.showBlanksList,
       additionalWrongAnswers: [...question.additionalWrongAnswers],
       clozeElements: question.clozeElements

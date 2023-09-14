@@ -84,6 +84,7 @@ export function AddClozeQuestionModal({
   };
 
   const initialValue: ClozeQuestionData = {
+    hint: null,
     showBlanksList: true,
     additionalWrongAnswers: [],
     clozeElements: [],

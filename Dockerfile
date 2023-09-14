@@ -16,10 +16,10 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
 ENV NEXT_TELEMETRY_DISABLED 1
-ENV NEXT_PUBLIC_BACKEND_URL "/graphql"
-ENV NEXT_PUBLIC_OAUTH_REDIRECT_URL "https://orange.informatik.uni-stuttgart.de"
-ENV NEXT_PUBLIC_OAUTH_CLIENT_ID "gits-frontend"
-ENV NEXT_PUBLIC_OAUTH_AUTHORITY "https://orange.informatik.uni-stuttgart.de/keycloak/realms/GITS"
+ARG NEXT_PUBLIC_BACKEND_URL "/graphql"
+ARG NEXT_PUBLIC_OAUTH_REDIRECT_URL "https://orange.informatik.uni-stuttgart.de"
+ARG NEXT_PUBLIC_OAUTH_CLIENT_ID "gits-frontend"
+ARG NEXT_PUBLIC_OAUTH_AUTHORITY "https://orange.informatik.uni-stuttgart.de/keycloak/realms/GITS"
 
 RUN yarn global add pnpm \
     && mkdir -p ./__generated__ \

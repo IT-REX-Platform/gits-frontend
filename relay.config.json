@@ -8,5 +8,15 @@
     "**/__generated__/**",
     "**/.next/**"
   ],
-  "artifactDirectory": "./__generated__"
+  "artifactDirectory": "./__generated__",
+  "customScalars": {
+    "Date": "string",
+    "DateTime": "string",
+    "JSON": "string",
+    "LocalTime": "string",
+    "Time": "string",
+    "Url": "string",
+    "UUID": "string",
+    "ID": "string"
+  }
 }

@@ -86,7 +86,7 @@ export default function StudentMediaPage() {
     Math.abs(
       differenceInHours(
         new Date(),
-        new Date(mainRecord?.userProgressData.dateWorkedOn)
+        new Date(mainRecord?.userProgressData.dateWorkedOn ?? "")
       )
     ) < 24;
 

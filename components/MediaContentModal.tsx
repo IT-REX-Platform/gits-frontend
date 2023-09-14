@@ -168,7 +168,7 @@ export function MediaContentModal({
       addMedia({
         variables: {
           input: {
-            chapterId,
+            chapterId: chapterId!,
             type: "MEDIA",
             ...metadata,
           },
@@ -228,7 +228,7 @@ export function MediaContentModal({
                       <IconButton
                         onClick={() =>
                           setSelectedRecords(
-                            selectedRecords.filter((x) => x !== record.id)
+                            selectedRecords.filter((x) => x.id !== record.id)
                           )
                         }
                         edge="end"

@@ -8,7 +8,7 @@ export function AddStageButton({ sectionId }: { sectionId: string }) {
   const [addStage] = useMutation<AddStageButtonMutation>(graphql`
     mutation AddStageButtonMutation($id: UUID!) {
       mutateSection(sectionId: $id) {
-        createStage {
+        createStage(input: { requiredContents: [], optionalContents: [] }) {
           id
           ...studentCoursePageStageFragment
           ...lecturerStageFragment

@@ -196,8 +196,8 @@ export default function StudentQuiz() {
       <InfoDialog
         open={infoDialogOpen}
         onClose={() => setInfoDialogOpen(false)}
-        title={questionText!.text}
-        hint={currentQuestion.hint}
+        title={questionText ?? ""}
+        hint={currentQuestion.hint ?? ""}
       />
 
       <div className="w-full border-b border-b-gray-300 mt-6 flex justify-center">
@@ -284,7 +284,7 @@ function InfoDialog({
 }) {
   return (
     <Dialog onClose={onClose} open={open}>
-      <DialogTitle>{title}</DialogTitle>
+      <DialogTitle>{<RenderRichText value={title} />}</DialogTitle>
       <Typography variant="body1" sx={{ padding: 3, paddingTop: 0 }}>
         {hint ? (
           <RenderRichText value={hint} />

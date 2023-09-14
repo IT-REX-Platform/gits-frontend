@@ -1051,6 +1051,15 @@ type MultipleChoiceQuestion implements Question {
 }
 
 type Mutation {
+  # registers a user to a course with a role
+  createMembership(input: CourseMembershipInput!): CourseMembership!
+
+  # updates the role of a user in a course
+  updateMembership(input: CourseMembershipInput!): CourseMembership!
+
+  # deletes user course link
+  deleteMembership(input: CourseMembershipInput!): CourseMembership!
+
   # Creates a new media record
   createMediaRecord(input: CreateMediaRecordInput!): MediaRecord!
 
@@ -1074,6 +1083,24 @@ type Mutation {
   # a user-progress event is emitted for the content.
   logMediaRecordWorkedOn(mediaRecordId: UUID!): MediaRecord!
 
+  # ONLY FOR TESTING PURPOSES. DO NOT USE IN FRONTEND. WILL BE REMOVED.
+  #
+  # Triggers the recalculation of the reward score of the user.
+  # This is done automatically at some time in the night.
+  #
+  # The purpose of this mutation is to allow testing of the reward score and demonstrate the functionality.
+  recalculateScores(courseId: UUID!, userId: UUID!): RewardScores!
+    @deprecated(reason: "Only for testing purposes. Will be removed.")
+
+  # ONLY FOR TESTING PURPOSES. DO NOT USE IN FRONTEND. WILL BE REMOVED.
+  #
+  # Triggers the recalculation of the skill level of the user.
+  # This is done automatically at some time in the night.
+  #
+  # The purpose of this mutation is to allow testing of the reward score and demonstrate the functionality.
+  recalculateLevels(chapterId: UUID!, userId: UUID!): SkillLevels!
+    @deprecated(reason: "Only for testing purposes. Will be removed.")
+
   # Creates a new course with the given input and returns the created course.
   createCourse(input: CreateCourseInput!): Course!
 
@@ -1094,33 +1121,6 @@ type Mutation {
 
   # Deletes an existing chapter, throws an error if no chapter with the given id exists.
   deleteChapter(id: UUID!): UUID!
-
-  # registers a user to a course with a role
-  createMembership(input: CourseMembershipInput!): CourseMembership!
-
-  # updates the role of a user in a course
-  updateMembership(input: CourseMembershipInput!): CourseMembership!
-
-  # deletes user course link
-  deleteMembership(input: CourseMembershipInput!): CourseMembership!
-
-  # ONLY FOR TESTING PURPOSES. DO NOT USE IN FRONTEND. WILL BE REMOVED.
-  #
-  # Triggers the recalculation of the reward score of the user.
-  # This is done automatically at some time in the night.
-  #
-  # The purpose of this mutation is to allow testing of the reward score and demonstrate the functionality.
-  recalculateScores(courseId: UUID!, userId: UUID!): RewardScores!
-    @deprecated(reason: "Only for testing purposes. Will be removed.")
-
-  # ONLY FOR TESTING PURPOSES. DO NOT USE IN FRONTEND. WILL BE REMOVED.
-  #
-  # Triggers the recalculation of the skill level of the user.
-  # This is done automatically at some time in the night.
-  #
-  # The purpose of this mutation is to allow testing of the reward score and demonstrate the functionality.
-  recalculateLevels(chapterId: UUID!, userId: UUID!): SkillLevels!
-    @deprecated(reason: "Only for testing purposes. Will be removed.")
 
   # Create new media content
   createMediaContent(input: CreateMediaContentInput!): MediaContent!
@@ -1272,6 +1272,18 @@ type PublicUserInfo {
 }
 
 type Query {
+  # Gets the publicly available information for a list of users with the specified IDs.
+  # If a user does not exist, null is returned for that user.
+  findPublicUserInfos(ids: [UUID!]!): [PublicUserInfo]!
+
+  # Gets the user information of the currently authorized user.
+  currentUserInfo: UserInfo!
+
+  # Gets all of the users' information for a list of users with the specified IDs.
+  # Only available to privileged users.
+  # If a user does not exist, null is returned for that user.
+  findUserInfos(ids: [UUID!]!): [UserInfo]!
+
   # Returns the media records with the given IDs. Throws an error if a MediaRecord corresponding to a given ID
   # cannot be found.
   mediaRecordsByIds(ids: [UUID!]!): [MediaRecord!]!
@@ -1292,6 +1304,24 @@ type Query {
   # Returns the media records associated the given content IDs as a list of lists where each sublist contains
   # the media records associated with the content ID at the same index in the input list
   mediaRecordsByContentIds(contentIds: [UUID!]!): [[MediaRecord!]!]!
+
+  # Get the reward score of the current user for the specified course.
+  userCourseRewardScores(courseId: UUID!): RewardScores!
+
+  # Get the reward score of the specified user for the specified course.
+  courseRewardScoresForUser(courseId: UUID!, userId: UUID!): RewardScores!
+
+  # Gets the power scores for each user in the course, ordered by power score descending.
+  scoreboard(courseId: UUID!): [ScoreboardItem!]!
+
+  # Get the skill levels of the current user for all skill types for a list of chapter ids.
+  userSkillLevelsByChapterIds(chapterIds: [UUID!]!): [SkillLevels!]!
+
+  # Get the skill levels of the specified user for all skill types for a list of chapter ids.
+  skillLevelsForUserByChapterIds(
+    chapterIds: [UUID!]!
+    userId: UUID!
+  ): [SkillLevels!]!
 
   # Get a list of courses. Can be filtered, sorted and paginated.
   courses(
@@ -1336,36 +1366,6 @@ type Query {
     sortDirection: [SortDirection!]! = [ASC]
     pagination: Pagination
   ): ChapterPayload!
-
-  # Gets the publicly available information for a list of users with the specified IDs.
-  # If a user does not exist, null is returned for that user.
-  findPublicUserInfos(ids: [UUID!]!): [PublicUserInfo]!
-
-  # Gets the user information of the currently authorized user.
-  currentUserInfo: UserInfo!
-
-  # Gets all of the users' information for a list of users with the specified IDs.
-  # Only available to privileged users.
-  # If a user does not exist, null is returned for that user.
-  findUserInfos(ids: [UUID!]!): [UserInfo]!
-
-  # Get the reward score of the current user for the specified course.
-  userCourseRewardScores(courseId: UUID!): RewardScores!
-
-  # Get the reward score of the specified user for the specified course.
-  courseRewardScoresForUser(courseId: UUID!, userId: UUID!): RewardScores!
-
-  # Gets the power scores for each user in the course, ordered by power score descending.
-  scoreboard(courseId: UUID!): [ScoreboardItem!]!
-
-  # Get the skill levels of the current user for all skill types for a list of chapter ids.
-  userSkillLevelsByChapterIds(chapterIds: [UUID!]!): [SkillLevels!]!
-
-  # Get the skill levels of the specified user for all skill types for a list of chapter ids.
-  skillLevelsForUserByChapterIds(
-    chapterIds: [UUID!]!
-    userId: UUID!
-  ): [SkillLevels!]!
 
   # get all contents
   contents: ContentPayload!

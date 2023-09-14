@@ -139,7 +139,7 @@ export function AddContentModal({
   return (
     <>
       <Button startIcon={<Add />} onClick={() => setOpenModal(true)}>
-        Add media
+        Add content
       </Button>
 
       <Dialog
@@ -147,7 +147,7 @@ export function AddContentModal({
         open={openModal}
         onClose={() => setOpenModal(false)}
       >
-        <DialogTitle>Select media</DialogTitle>
+        <DialogTitle>Select content</DialogTitle>
         <DialogContent sx={{ paddingX: 0 }}>
           {error?.source.errors.map((err: any, i: number) => (
             <Alert

@@ -329,7 +329,7 @@ function Flashcard({
   title: string;
   onError: (error: any) => void;
   _flashcard: lecturerEditFlashcardFragment$key;
-  _assessmentId: ID;
+  _assessmentId: string;
 }) {
   const flashcard = useFragment(
     graphql`
@@ -490,7 +490,7 @@ function FlashcardSide({
         />
         <CardContent>
           <Typography variant="body2" color="textSecondary">
-            {side.text.text}
+            {side.text}
           </Typography>
         </CardContent>
       </Card>
@@ -507,12 +507,9 @@ function FlashcardSide({
 
 type FlashcardSideData = {
   label: string;
-  text: FlashcardSideDataMarkdown;
+  text: string;
   isQuestion: boolean;
   isAnswer: boolean;
-};
-type FlashcardSideDataMarkdown = {
-  text: string;
 };
 
 function EditSideModal({
@@ -526,12 +523,12 @@ function EditSideModal({
 }) {
   const [label, setLabel] = useState(side?.label ?? "");
   // Initialize the text state with an empty object of type FlashcardSideDataMarkdown
-  const [text, setText] = useState(side?.text ?? { text: "" });
+  const [text, setText] = useState(side?.text ?? "");
   const [isQuestion, setIsQuestion] = useState(side?.isQuestion ?? false);
   const [isAnswer, setIsAnswer] = useState(side?.isAnswer ?? false);
 
   const valid =
-    label.trim() != "" && text.text.trim() != "" && (isQuestion || isAnswer);
+    label.trim() != "" && text.trim() != "" && (isQuestion || isAnswer);
 
   return (
     <Dialog maxWidth="md" open onClose={onClose}>
@@ -552,9 +549,9 @@ function EditSideModal({
               className="w-96"
               label="Text"
               variant="outlined"
-              value={text.text} // Access the 'text' property of the 'text' state
-              error={side && text.text.trim() == ""}
-              onChange={(e) => setText({ ...text, text: e.target.value })} // Update only the 'text' property
+              value={text} // Access the 'text' property of the 'text' state
+              error={side && text.trim() == ""}
+              onChange={(e) => setText(e.target.value)}
               multiline
               required
             />

@@ -61,6 +61,31 @@ graphql`
   }
 `;
 
+graphql`
+  fragment lecturerCourseFragment on Course {
+    id
+    title
+    description
+    ...AddChapterModalFragment
+    ...EditCourseModalFragment
+    chapters {
+      elements {
+        __id
+        ...EditChapterButtonFragment
+        ...AddFlashcardSetModalFragment
+        ...AddContentModalFragment
+        ...ChapterHeaderFragment
+        id
+        title
+        number
+        sections {
+          ...lecturerSectionFragment @relay(mask: false)
+        }
+      }
+    }
+  }
+`;
+
 export default function LecturerCoursePage() {
   // Get course id from url
   const params = useParams();
@@ -77,26 +102,7 @@ export default function LecturerCoursePage() {
           ...MediaRecordSelector
 
           coursesByIds(ids: $id) {
-            id
-            title
-            description
-            ...AddChapterModalFragment
-            ...EditCourseModalFragment
-            chapters {
-              elements {
-                __id
-                ...EditChapterButtonFragment
-                ...AddFlashcardSetModalFragment
-                ...AddContentModalFragment
-                ...ChapterHeaderFragment
-                id
-                title
-                number
-                sections {
-                  ...lecturerSectionFragment @relay(mask: false)
-                }
-              }
-            }
+            ...lecturerCourseFragment @relay(mask: false)
           }
         }
       `,

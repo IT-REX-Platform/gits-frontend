@@ -16,6 +16,7 @@ import {
   ListSubheader,
   Tooltip,
 } from "@mui/material";
+import dayjs from "dayjs";
 import { usePathname, useRouter } from "next/navigation";
 import { ReactElement } from "react";
 import { useAuth } from "react-oidc-context";
@@ -159,6 +160,7 @@ export function Navbar() {
             course {
               id
               title
+              startDate
             }
           }
         }
@@ -167,8 +169,13 @@ export function Navbar() {
     {}
   );
 
+  // Calculate the date 7 months ago from today
+  const sevenMonthsAgo = dayjs().subtract(7, "months");
+
   const filtered = currentUserInfo.courseMemberships.filter(
-    (x) => x.role === "TUTOR" || pageView === PageView.Student
+    (x) =>
+      (x.role === "TUTOR" || pageView === PageView.Student) &&
+      dayjs(x.course.startDate) >= sevenMonthsAgo
   );
 
   return (
@@ -178,7 +185,7 @@ export function Navbar() {
           title={
             pageView === PageView.Lecturer
               ? "Courses I'm tutoring"
-              : "Courses I'm attending"
+              : "Courses I'm attending this semster"
           }
         >
           {filtered.map(({ course }) => (

@@ -81,8 +81,8 @@ export function AssessmentMetadataFormSection({
           multiple
         >
           {(["REMEMBER", "UNDERSTAND", "APPLY", "ANALYSE"] as const).map(
-            (val) => (
-              <MenuItem value={val}>
+            (val, i) => (
+              <MenuItem value={val} key={i}>
                 <Checkbox checked={(skillTypes ?? []).indexOf(val) > -1} />
 
                 <ListItemText>{skillTypeLabel[val]}</ListItemText>

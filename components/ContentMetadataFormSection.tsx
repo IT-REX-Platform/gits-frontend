@@ -99,6 +99,8 @@ export function ContentMetadataFormSection({
         }}
         renderTags={(value: readonly string[], getTagProps) =>
           value.map((option: string, index: number) => (
+            // the key gets set by "getTagProps"
+            // eslint-disable-next-line react/jsx-key
             <Chip
               variant="outlined"
               label={option}

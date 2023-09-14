@@ -1,48 +1,86 @@
 import { SkillLevelsFragment$key } from "@/__generated__/SkillLevelsFragment.graphql";
-import { Box, Tooltip } from "@mui/material";
-import { ReactNode } from "react";
-import { graphql, useFragment } from "react-relay";
+import {
+  SkillLevelsSuggestionsQuery,
+  SkillType,
+} from "@/__generated__/SkillLevelsSuggestionsQuery.graphql";
+import { Box, CircularProgress, Tooltip } from "@mui/material";
+import { ReactNode, Suspense, useEffect, useRef, useState } from "react";
+import { graphql, useFragment, useLazyLoadQuery } from "react-relay";
 import colors from "tailwindcss/colors";
+import { Suggestion } from "./Suggestion";
 
 export function SkillLevels({
   className = "",
-  _skillLevels,
+  _chapter,
 }: {
   className?: string;
-  _skillLevels: SkillLevelsFragment$key;
+  _chapter: SkillLevelsFragment$key;
 }) {
-  const skillLevels = useFragment(
+  const { skillLevels, id: chapterId } = useFragment(
     graphql`
-      fragment SkillLevelsFragment on SkillLevels {
-        remember {
-          value
-        }
-        understand {
-          value
-        }
-        apply {
-          value
-        }
-        analyze {
-          value
+      fragment SkillLevelsFragment on Chapter {
+        id
+        skillLevels {
+          remember {
+            value
+          }
+          understand {
+            value
+          }
+          apply {
+            value
+          }
+          analyze {
+            value
+          }
         }
       }
     `,
-    _skillLevels
+    _chapter
   );
   return (
     <div
       className={`grid grid-flow-col auto-cols-fr gap-4 items-center ${className}`}
     >
-      <SkillLevel label="Remember" value={skillLevels.remember.value} />
-      <SkillLevel label="Understand" value={skillLevels.understand.value} />
-      <SkillLevel label="Apply" value={skillLevels.apply.value} />
-      <SkillLevel label="Analyze" value={skillLevels.analyze.value} />
+      <SkillLevel
+        label="Remember"
+        value={skillLevels.remember.value}
+        chapterId={chapterId}
+        skillType="REMEMBER"
+      />
+      <SkillLevel
+        label="Understand"
+        value={skillLevels.understand.value}
+        chapterId={chapterId}
+        skillType="UNDERSTAND"
+      />
+      <SkillLevel
+        label="Apply"
+        value={skillLevels.apply.value}
+        chapterId={chapterId}
+        skillType="APPLY"
+      />
+      <SkillLevel
+        label="Analyse"
+        value={skillLevels.analyze.value}
+        chapterId={chapterId}
+        skillType="ANALYSE"
+      />
     </div>
   );
 }
 
-export function SkillLevel({ value, label }: { value: number; label: string }) {
+export function SkillLevel({
+  chapterId,
+  skillType,
+  value,
+  label,
+}: {
+  chapterId: string;
+  skillType: SkillType;
+  value: number;
+  label: string;
+}) {
   const level = Math.floor(value); // integer part is level
   const progress = (value % 1) * 100; // decimal part is progress
 
@@ -51,32 +89,41 @@ export function SkillLevel({ value, label }: { value: number; label: string }) {
       <SkillLevelBase
         badge={
           <SkillBadge
-            color={colors.slate[500]}
+            color={colors.white}
             level={level}
             progress={progress}
+            strokeColor={colors.gray[300]}
+            progressColor={colors.gray[400]}
+            textColor={colors.gray[600]}
           />
         }
         label={label}
-        level="Iron"
-        tooltipClass="!bg-slate-500"
+        level="Basic"
+        color={colors.gray[100]}
+        chapterId={chapterId}
+        skillType={skillType}
       />
     );
   } else if (level < 4) {
     return (
       <SkillLevelBase
-        badge={<SkillBadge color="#bf8970" level={level} progress={progress} />}
+        badge={<SkillBadge color="#c0c0c0" level={level} progress={progress} />}
         label={label}
-        level="Bronze"
-        tooltipClass="!bg-[#bf8970]"
+        level="Iron"
+        color="#c0c0c0"
+        chapterId={chapterId}
+        skillType={skillType}
       />
     );
   } else if (level < 6) {
     return (
       <SkillLevelBase
-        badge={<SkillBadge color="#c0c0c0" level={level} progress={progress} />}
+        badge={<SkillBadge color="#bf8970" level={level} progress={progress} />}
         label={label}
-        level="Silver"
-        tooltipClass="!bg-[#c0c0c0]"
+        level="Bronze"
+        color="#bf8970"
+        chapterId={chapterId}
+        skillType={skillType}
       />
     );
   } else if (level < 8) {
@@ -85,7 +132,9 @@ export function SkillLevel({ value, label }: { value: number; label: string }) {
         badge={<SkillBadge color="#d4af37" level={level} progress={progress} />}
         label={label}
         level="Gold"
-        tooltipClass="!bg-[#d4af37]"
+        color="#d4af37"
+        chapterId={chapterId}
+        skillType={skillType}
       />
     );
   } else {
@@ -100,7 +149,9 @@ export function SkillLevel({ value, label }: { value: number; label: string }) {
         }
         label={label}
         level="Emerald"
-        tooltipClass="!bg-emerald-600"
+        color={colors.emerald[600]}
+        chapterId={chapterId}
+        skillType={skillType}
       />
     );
   }
@@ -110,49 +161,174 @@ export function SkillLevelBase({
   badge,
   label,
   level,
-  tooltipClass,
+  color,
+  chapterId,
+  skillType,
 }: {
   badge: ReactNode;
   label: string;
   level: string;
-  tooltipClass: string;
+  color: string;
+  chapterId: string;
+  skillType: SkillType;
 }) {
+  const [tooltipsOpen, setTooltipsOpen] = useState(0);
+  const [hasSuggestions, setHasSuggestions] = useState<boolean>(true);
+  const popperRef = useRef<any>();
+
+  const suggestions = (
+    <Suspense fallback={<CircularProgress className="m-2" size="1rem" />}>
+      <SkillLevelSuggestions
+        chapterId={chapterId}
+        skillType={skillType}
+        onLoad={(num) => {
+          if (popperRef.current) popperRef.current.update();
+          setHasSuggestions(num > 0);
+        }}
+      />
+    </Suspense>
+  );
+
   return (
     <Tooltip
       title={
         <div className="text-center px-1">
-          <div className="font-bold">{label}</div>
+          <div
+            className="-mt-1 h-1 w-8 rounded-b-sm mx-auto"
+            style={{ backgroundColor: color }}
+          ></div>
+          <div className="mt-1 font-bold">{label}</div>
           <div className="text-[80%]">({level})</div>
         </div>
       }
       placement="top"
       slotProps={{
         popper: {
-          modifiers: [{ name: "offset", options: { offset: [0, -5] } }],
+          modifiers: [
+            { name: "offset", options: { offset: [0, -5] } },
+            { name: "flip", enabled: false },
+          ],
         },
       }}
       classes={{
-        tooltip: tooltipClass,
+        tooltip: "!bg-white border !text-gray-800 border-gray-200",
       }}
+      open={tooltipsOpen > (hasSuggestions ? 0 : 1)}
+      onClose={() => setTooltipsOpen((x) => x - 1)}
+      arrow
     >
-      <Box>{badge}</Box>
+      <Box>
+        <Tooltip
+          title={suggestions}
+          placement="bottom"
+          slotProps={{
+            popper: {
+              modifiers: [
+                { name: "offset", options: { offset: [0, -5] } },
+                { name: "flip", enabled: false },
+              ],
+            },
+          }}
+          PopperProps={{ popperRef }}
+          classes={{
+            tooltip: "!bg-white border !text-gray-800 border-gray-200",
+          }}
+          open={tooltipsOpen > 0 && hasSuggestions}
+          onClose={() => setTooltipsOpen((x) => x - 1)}
+          arrow
+        >
+          <Box onMouseEnter={() => setTooltipsOpen(2)}>{badge}</Box>
+        </Tooltip>
+      </Box>
     </Tooltip>
   );
 }
 
-export function SkillBadge({
+function SkillLevelSuggestions({
+  chapterId,
+  skillType,
+  onLoad,
+}: {
+  chapterId: string;
+  skillType: SkillType;
+  onLoad: (num: number) => void;
+}) {
+  const { suggestionsByChapterIds } =
+    useLazyLoadQuery<SkillLevelsSuggestionsQuery>(
+      graphql`
+        query SkillLevelsSuggestionsQuery(
+          $chapterId: UUID!
+          $skillType: SkillType!
+        ) {
+          suggestionsByChapterIds(
+            chapterIds: [$chapterId]
+            amount: 3
+            skillTypes: [$skillType]
+          ) {
+            content {
+              id
+            }
+            ...SuggestionFragment
+          }
+        }
+      `,
+      { chapterId, skillType }
+    );
+
+  useEffect(
+    () => onLoad(suggestionsByChapterIds.length),
+    [onLoad, suggestionsByChapterIds]
+  );
+  if (suggestionsByChapterIds.length === 0) {
+    return <div></div>;
+  }
+
+  return (
+    <div className="font-normal px-1 pb-1">
+      <div className="mb-2 text-center font-medium">
+        Suggestions for improving your score
+      </div>
+      <div className="flex flex-col gap-2 items-start">
+        {suggestionsByChapterIds.map((suggestion) => (
+          <Suggestion
+            key={suggestion.content.id}
+            _suggestion={suggestion}
+            small
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function SkillBadge({
   level,
   progress,
   color,
+  strokeColor,
+  progressColor,
+  textColor = "white",
 }: {
   level: number;
   progress: number;
   color: string;
+  strokeColor?: string;
+  progressColor?: string;
+  textColor?: string;
 }) {
   return (
     <div className="relative h-[3.25rem] w-12 flex justify-center select-none">
-      <LevelIcon className="h-full" color={color} progress={progress} />
-      <div className="absolute inset-0 text-white drop-shadow flex flex-col items-center justify-center">
+      <LevelIcon
+        className="h-full"
+        color={color}
+        progress={progress}
+        strokeColor={strokeColor}
+        progressColor={progressColor}
+      />
+      <div
+        className="absolute inset-0 drop-shadow flex flex-col items-center justify-center"
+        style={{ color: textColor }}
+      >
         <div className="mt-0.5 text-xs">level</div>
         <div className="-mt-2 font-bold text-lg">{level}</div>
       </div>
@@ -160,13 +336,17 @@ export function SkillBadge({
   );
 }
 
-export function LevelIcon({
+function LevelIcon({
   className = "",
   color,
+  strokeColor,
+  progressColor,
   progress,
 }: {
   className?: string;
   color: string;
+  strokeColor?: string;
+  progressColor?: string;
   progress: number;
 }) {
   return (
@@ -180,11 +360,12 @@ export function LevelIcon({
       <path
         d="M69.445 60.133c-1.81 3.135-11.893 8.283-15.028 10.093-3.136 1.81-12.635 7.968-16.255 7.968-3.62 0-13.12-6.158-16.255-7.968-3.136-1.81-13.218-6.958-15.028-10.093-1.81-3.136-1.227-14.441-1.227-18.062 0-3.62-.584-14.925 1.227-18.06 1.81-3.136 11.892-8.284 15.028-10.094 3.135-1.81 12.634-7.968 16.255-7.968 3.62 0 13.12 6.157 16.255 7.968 3.135 1.81 13.217 6.958 15.028 10.093 1.81 3.136 1.227 14.44 1.227 18.061 0 3.62.583 14.926-1.227 18.062z"
         fill={color}
+        stroke={strokeColor}
       />
       <path
         d="M72.883 62.118c-2.01 3.48-13.2 9.193-16.68 11.203-3.48 2.009-14.023 8.843-18.041 8.843-4.019 0-14.562-6.834-18.042-8.843-3.48-2.01-14.67-7.723-16.68-11.203-2.009-3.48-1.362-16.028-1.362-20.047 0-4.018-.647-16.566 1.362-20.046 2.01-3.48 13.2-9.194 16.68-11.203 3.48-2.01 14.023-8.844 18.042-8.844 4.018 0 14.561 6.835 18.041 8.844 3.48 2.01 14.67 7.723 16.68 11.203 2.01 3.48 1.362 16.028 1.362 20.046 0 4.019.647 16.567-1.362 20.047z"
         fill="none"
-        stroke={color}
+        stroke={progressColor ?? strokeColor ?? color}
         strokeWidth="3.9568648"
         strokeDasharray={`${progress},${100 - progress}`}
         strokeDashoffset="33.3333"

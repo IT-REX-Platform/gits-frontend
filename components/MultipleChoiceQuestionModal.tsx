@@ -57,20 +57,12 @@ export function MultipleChoiceQuestionModal({
               id
               ... on MultipleChoiceQuestion {
                 number
-                text {
-                  text
-                }
-                hint {
-                  text
-                }
+                text
+                hint
                 answers {
                   correct
-                  feedback {
-                    text
-                  }
-                  answerText {
-                    text
-                  }
+                  feedback
+                  answerText
                 }
               }
             }
@@ -91,20 +83,12 @@ export function MultipleChoiceQuestionModal({
               id
               ... on MultipleChoiceQuestion {
                 number
-                text {
-                  text
-                }
-                hint {
-                  text
-                }
+                text
+                hint
                 answers {
                   correct
-                  feedback {
-                    text
-                  }
-                  answerText {
-                    text
-                  }
+                  feedback
+                  answerText
                 }
               }
             }
@@ -117,20 +101,20 @@ export function MultipleChoiceQuestionModal({
     ? cloneDeep({
         answers:
           existingQuestion.answers?.map((x) => ({
-            answerText: { text: x.answerText.text },
+            answerText: x.answerText,
             correct: x.correct,
-            feedback: { text: x.feedback?.text ?? "" },
+            feedback: x.feedback ?? "",
           })) ?? [],
-        text: { text: existingQuestion.text!.text },
-        hint: { text: existingQuestion.hint!.text },
+        text: existingQuestion.text!,
+        hint: existingQuestion.hint!,
       })
     : {
         answers: [
-          { answerText: { text: "" }, correct: false, feedback: { text: "" } },
-          { answerText: { text: "" }, correct: false, feedback: { text: "" } },
+          { answerText: "", correct: false, feedback: "" },
+          { answerText: "", correct: false, feedback: "" },
         ],
-        text: { text: "" },
-        hint: { text: "" },
+        text: "",
+        hint: "",
       };
 
   const [input, setInput] =
@@ -210,10 +194,10 @@ export function MultipleChoiceQuestionModal({
           <FormSection title="Question">
             <RichTextEditor
               _allRecords={_allRecords}
-              initialValue={input.text.text}
+              initialValue={input.text}
               onChange={(e) => {
                 console.log("onchange");
-                setInput({ ...input, text: { text: e } });
+                setInput({ ...input, text: e });
               }}
               className="w-[700px]"
               label="Title"
@@ -223,8 +207,8 @@ export function MultipleChoiceQuestionModal({
             <RichTextEditor
               _allRecords={_allRecords}
               required
-              initialValue={input.hint?.text ?? ""}
-              onChange={(e) => setInput({ ...input, hint: { text: e } })}
+              initialValue={input.hint ?? ""}
+              onChange={(e) => setInput({ ...input, hint: e })}
               className="w-[700px]"
               label="Hint"
             />
@@ -233,9 +217,9 @@ export function MultipleChoiceQuestionModal({
             <FormSection title={`Answer ${index + 1}`} key={index}>
               <RichTextEditor
                 _allRecords={_allRecords}
-                initialValue={answer.answerText!.text}
+                initialValue={answer.answerText!}
                 onChange={(e) => {
-                  answer.answerText!.text = e;
+                  answer.answerText! = e;
                   setInput({ ...input });
                 }}
                 className="w-[700px]"
@@ -245,9 +229,9 @@ export function MultipleChoiceQuestionModal({
 
               <RichTextEditor
                 _allRecords={_allRecords}
-                initialValue={answer.feedback?.text}
+                initialValue={answer.feedback ?? ""}
                 onChange={(e) => {
-                  answer.feedback!.text = e;
+                  answer.feedback = e;
                   setInput({ ...input });
                 }}
                 className="w-[700px]"
@@ -258,7 +242,7 @@ export function MultipleChoiceQuestionModal({
                 <FormControlLabel
                   control={
                     <Checkbox
-                      value={answer.correct}
+                      checked={answer.correct}
                       onChange={(e) => {
                         answer.correct = !answer.correct;
                         setInput({ ...input });
@@ -291,8 +275,8 @@ export function MultipleChoiceQuestionModal({
                     ...input.answers,
                     {
                       correct: false,
-                      answerText: { text: "" },
-                      feedback: { text: "" },
+                      answerText: "",
+                      feedback: "",
                     },
                   ],
                 })

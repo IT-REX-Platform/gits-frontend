@@ -17,11 +17,11 @@ export default function EditSectionButton({
 }) {
   const [open, setOpen] = useState(false);
   const [editSection] = useMutation<EditSectionButtonMutation>(graphql`
-    mutation EditSectionButtonMutation($input: UpdateSectionInput!) {
-      updateSection(input: $input) {
-        id
-        ...studentCoursePageSectionFragment
-        ...lecturerSectionFragment
+    mutation EditSectionButtonMutation($sectionId: UUID!, $name: String!) {
+      mutateSection(sectionId: $sectionId) {
+        updateSectionName(name: $name) {
+          name
+        }
       }
     }
   `);
@@ -38,7 +38,7 @@ export default function EditSectionButton({
         sections={dialogSections}
         onSubmit={(data) =>
           editSection({
-            variables: { input: { id: sectionId, name: data.name } },
+            variables: { sectionId, name: data.name },
             onCompleted() {
               setOpen(false);
             },

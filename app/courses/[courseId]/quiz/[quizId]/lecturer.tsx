@@ -24,7 +24,9 @@ export default function EditQuiz() {
   const [del, deleting] =
     useMutation<lecturerDeleteQuizContentMutation>(graphql`
       mutation lecturerDeleteQuizContentMutation($id: UUID!) {
-        deleteContent(id: $id)
+        mutateContent(contentId: $id) {
+          deleteContent
+        }
       }
     `);
 
@@ -47,24 +49,12 @@ export default function EditQuiz() {
                 id
                 ... on MultipleChoiceQuestion {
                   number
-                  text {
-                    text
-                    ...RichTextEditorFragment
-                  }
-                  hint {
-                    text
-                    ...RichTextEditorFragment
-                  }
+                  text
+                  hint
                   answers {
                     correct
-                    feedback {
-                      text
-                      ...RichTextEditorFragment
-                    }
-                    answerText {
-                      text
-                      ...RichTextEditorFragment
-                    }
+                    feedback
+                    answerText
                   }
                 }
               }

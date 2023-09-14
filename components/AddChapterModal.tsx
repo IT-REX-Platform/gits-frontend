@@ -3,13 +3,13 @@ import { graphql, useFragment, useMutation } from "react-relay";
 
 import { AddChapterModalFragment$key } from "@/__generated__/AddChapterModalFragment.graphql";
 import { AddChapterModalMutation } from "@/__generated__/AddChapterModalMutation.graphql";
+import lodash from "lodash";
 import { DialogBase } from "./DialogBase";
 import {
   ChapterData,
   dialogSections,
   validationSchema,
 } from "./dialogs/chapterDialog";
-import lodash from "lodash";
 
 export function AddChapterModal({
   open,
@@ -42,6 +42,7 @@ export function AddChapterModal({
         id
         course {
           ...AddChapterModalFragment
+          ...lecturerCourseFragment
         }
       }
     }

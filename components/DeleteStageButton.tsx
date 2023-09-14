@@ -12,8 +12,10 @@ export function DeleteStageButton({
   stageId: string;
 }) {
   const [deleteStage] = useMutation<DeleteStageButtonMutation>(graphql`
-    mutation DeleteStageButtonMutation($id: UUID!) {
-      deleteStage(id: $id)
+    mutation DeleteStageButtonMutation($id: UUID!, $sectionId: UUID!) {
+      mutateSection(sectionId: $sectionId) {
+        deleteStage(id: $id)
+      }
     }
   `);
 
@@ -35,7 +37,7 @@ export function DeleteStageButton({
       <Button
         onClick={() =>
           deleteStage({
-            variables: { id: stageId },
+            variables: { id: stageId, sectionId },
             onError: setError,
             updater(store, data) {
               const section = store.get(sectionId);

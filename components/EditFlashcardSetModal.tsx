@@ -40,7 +40,7 @@ export function EditFlashcardSetModal({
         }
         ... on Assessment {
           assessmentMetadata {
-            skillType
+            skillTypes
             skillPoints
           }
         }

@@ -554,7 +554,15 @@ function Element(props: RenderElementProps) {
       return <RenderMediaRecord {...props}></RenderMediaRecord>;
     default:
       return (
-        <p style={style} {...attributes}>
+        <p
+          style={style}
+          {...attributes}
+          className={
+            attributes["data-slate-inline"]
+              ? "last:inline-block first:inline-block"
+              : ""
+          }
+        >
           {children}
         </p>
       );
@@ -673,7 +681,11 @@ function RecursiveRichText({ val }: { val: Descendant }) {
 
   return (
     <Element
-      attributes={{ "data-slate-node": "element", ref: undefined }}
+      attributes={{
+        "data-slate-node": "element",
+        "data-slate-inline": true,
+        ref: undefined,
+      }}
       element={val}
     >
       {children}

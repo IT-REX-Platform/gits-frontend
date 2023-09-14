@@ -1,29 +1,26 @@
 "use client";
 
+import { studentQuestionFragment$key } from "@/__generated__/studentQuestionFragment.graphql";
 import { studentQuizQuery } from "@/__generated__/studentQuizQuery.graphql";
 import {
   QuestionCompletedInput,
   studentQuizTrackCompletedMutation,
 } from "@/__generated__/studentQuizTrackCompletedMutation.graphql";
 import { ContentTags } from "@/components/ContentTags";
+import { FormErrors } from "@/components/FormErrors";
 import { Heading } from "@/components/Heading";
-import { RenderRichText } from "@/components/RichTextEditor";
-import {
-  Alert,
-  Button,
-  Checkbox,
-  Dialog,
-  DialogTitle,
-  FormControlLabel,
-  FormGroup,
-  Typography,
-} from "@mui/material";
+import { ClozeQuestion } from "@/components/quiz/ClozeQuestion";
+import { MultipleChoiceQuestion } from "@/components/quiz/MultipleChoiceQuestion";
+import { Button } from "@mui/material";
 import Error from "next/error";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { graphql, useLazyLoadQuery, useMutation } from "react-relay";
-
-type UserAnswers = (number | null)[];
+import {
+  graphql,
+  useFragment,
+  useLazyLoadQuery,
+  useMutation,
+} from "react-relay";
 
 export default function StudentQuiz() {
   // Get course id from url
@@ -31,15 +28,15 @@ export default function StudentQuiz() {
   const router = useRouter();
 
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [infoDialogOpen, setInfoDialogOpen] = useState(false);
-  const [usedHint, setUsedHint] = useState(false);
   const [checkAnswers, setCheckAnswers] = useState(false);
-  const [userAnswers, setUserAnswers] = useState<UserAnswers>([]);
   const [error, setError] = useState<any>(null);
+
+  const [usedHint, setUsedHint] = useState(false);
+  const [correct, setCorrect] = useState(false);
 
   useEffect(() => {
     // Reset user answers when the currentIndex changes
-    setUserAnswers([]);
+    setCorrect(false);
     setUsedHint(false);
   }, [currentIndex]);
 
@@ -54,6 +51,7 @@ export default function StudentQuiz() {
               userProgressData {
                 lastLearnDate
                 nextLearnDate
+                isLearned
               }
             }
           }
@@ -69,9 +67,6 @@ export default function StudentQuiz() {
   const { contentsByIds } = useLazyLoadQuery<studentQuizQuery>(
     graphql`
       query studentQuizQuery($id: [UUID!]!) {
-        currentUserInfo {
-          id
-        }
         contentsByIds(ids: $id) {
           id
           metadata {
@@ -80,39 +75,9 @@ export default function StudentQuiz() {
           }
           ... on QuizAssessment {
             quiz {
-              assessmentId
-              questionPool {
-                ... on MultipleChoiceQuestion {
-                  text
-                  answers {
-                    answerText
-                    correct
-                    feedback
-                  }
-                  numberOfCorrectAnswers
-                }
-                id
-                number
-                type
-                hint
-              }
-              requiredCorrectAnswers
-              questionPoolingMode
-              numberOfRandomlySelectedQuestions
               selectedQuestions {
-                ... on MultipleChoiceQuestion {
-                  text
-                  answers {
-                    answerText
-                    correct
-                    feedback
-                  }
-                  numberOfCorrectAnswers
-                }
                 id
-                number
-                type
-                hint
+                ...studentQuestionFragment
               }
             }
           }
@@ -126,39 +91,38 @@ export default function StudentQuiz() {
   if (contentsByIds.length == 0) {
     return <Error statusCode={404} title="Quiz could not be found." />;
   }
+
   const quiz = contentsByIds[0].quiz;
-  if (quiz === null) {
+  if (quiz == null) {
     return <Error statusCode={404} />;
   }
-  const currentQuestion = quiz!.selectedQuestions[currentIndex];
-  const questionText = currentQuestion.text;
-  const answers = currentQuestion.answers;
 
-  const nextQuestion = async () => {
+  const currentQuestion = quiz.selectedQuestions[currentIndex];
+  const nextQuestion = () => {
+    // Enable feedback mode
     if (!checkAnswers) {
       setCheckAnswers(true);
-    } else if (
-      checkAnswers &&
-      currentIndex + 1 < (quiz?.selectedQuestions.length ?? 0)
-    ) {
+      return;
+    }
+
+    const currentAnswer = {
+      questionId: currentQuestion.id,
+      usedHint,
+      correct,
+    };
+
+    if (currentIndex + 1 < (quiz.selectedQuestions.length ?? 0)) {
+      // Questions left, display next one
       setCheckAnswers(false);
-      setCompletedInput([
-        ...completedInput,
-        {
-          questionId: currentQuestion.id,
-          usedHint,
-          correct: !!currentQuestion.answers?.every(
-            (x, idx) => x.correct || !userAnswers.includes(idx)
-          ),
-        },
-      ]);
+      setCompletedInput((oldValue) => [...oldValue, currentAnswer]);
       setCurrentIndex(currentIndex + 1);
     } else {
+      // No more questions, submit result and go to course page
       trackCompleted({
         variables: {
           input: {
             quizId: contentsByIds[0].id,
-            completedQuestions: completedInput,
+            completedQuestions: [...completedInput, currentAnswer],
           },
         },
       });
@@ -166,93 +130,38 @@ export default function StudentQuiz() {
     }
   };
 
-  const handleAnswerChange = (index: any) => {
-    setUserAnswers((prevAnswers) => {
-      const newAnswers = [...prevAnswers];
-      if (newAnswers.includes(index)) {
-        newAnswers.splice(newAnswers.indexOf(index), 1);
-        return newAnswers;
-      } else {
-        newAnswers.push(index);
-        return newAnswers;
-      }
-    });
-  };
-
   return (
     <main>
-      {error?.source.errors.map((err: any, i: number) => (
-        <Alert
-          key={i}
-          severity="error"
-          sx={{ minWidth: 400, maxWidth: 800, width: "fit-content" }}
-          onClose={() => setError(null)}
-        >
-          {err.message}
-        </Alert>
-      ))}
+      <FormErrors error={error} onClose={() => setError(null)} />
       <Heading title={contentsByIds[0].metadata.name} backButton />
       <ContentTags metadata={contentsByIds[0].metadata} />
-      <InfoDialog
-        open={infoDialogOpen}
-        onClose={() => setInfoDialogOpen(false)}
-        title={questionText ?? ""}
-        hint={currentQuestion.hint ?? ""}
-      />
 
-      <div className="w-full border-b border-b-gray-300 mt-6 flex justify-center">
-        <div className="bg-white -mb-[9px] px-3 text-xs text-gray-600">
+      {/* Horizontal line with current question number */}
+      <div className="w-full my-6 flex items-center">
+        <div className="border-b border-b-gray-300 grow"></div>
+        <div className="px-3 text-xs text-gray-600">
           {currentIndex + 1}/{quiz?.selectedQuestions.length ?? 0}
         </div>
+        <div className="border-b border-b-gray-300 grow"></div>
       </div>
 
-      <div className="mt-6 text-center text-gray-600">
-        {<RenderRichText value={questionText} />}
-      </div>
+      <Question
+        _question={currentQuestion}
+        feedbackMode={checkAnswers}
+        onChange={setCorrect}
+        onHint={() => setUsedHint(true)}
+      />
 
-      <div className="w-full border-b border-b-gray-300 mt-6 flex justify-center mb-6">
-        <div>
-          <Button
-            onClick={() => {
-              setInfoDialogOpen(true);
-              setUsedHint(true);
-            }}
-            sx={{ color: "grey" }}
-          >
-            Hint
-          </Button>
-        </div>
-      </div>
-
-      <div className="flex justify-center gap-4">
-        <FormGroup>
-          {answers!.map((answer, index) => (
-            <div key={index}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    disabled={checkAnswers}
-                    style={{
-                      color:
-                        checkAnswers && answer.correct
-                          ? "green"
-                          : checkAnswers
-                          ? "red"
-                          : userAnswers.includes(index)
-                          ? "blue"
-                          : "grey",
-                    }}
-                    onChange={() => handleAnswerChange(index)}
-                    checked={userAnswers.includes(index)}
-                  />
-                }
-                label={<RenderRichText value={answer.answerText} />}
-              />
-            </div>
-          ))}
-        </FormGroup>
-      </div>
-      <div className="mt-6 w-full flex justify-center">
+      <div className="mt-6 w-full flex flex-col items-center">
+        {checkAnswers && (
+          <div className="mb-4">
+            {correct ? (
+              <span className="text-green-600">Correct answer</span>
+            ) : (
+              <span className="text-red-600">Oops, wrong answer</span>
+            )}
+          </div>
+        )}
         <Button
           size="small"
           variant="text"
@@ -271,27 +180,48 @@ export default function StudentQuiz() {
   );
 }
 
-function InfoDialog({
-  title,
-  hint,
-  open,
-  onClose,
+function Question({
+  _question,
+  onHint,
+  onChange,
+  feedbackMode,
 }: {
-  title: string;
-  hint: string;
-  open: boolean;
-  onClose: () => void;
+  _question: studentQuestionFragment$key;
+  feedbackMode: boolean;
+  onHint: () => void;
+  onChange: (correct: boolean) => void;
 }) {
-  return (
-    <Dialog onClose={onClose} open={open}>
-      <DialogTitle>{<RenderRichText value={title} />}</DialogTitle>
-      <Typography variant="body1" sx={{ padding: 3, paddingTop: 0 }}>
-        {hint ? (
-          <RenderRichText value={hint} />
-        ) : (
-          "There are no hints for this question."
-        )}
-      </Typography>
-    </Dialog>
+  const question = useFragment(
+    graphql`
+      fragment studentQuestionFragment on Question {
+        type
+        ...MultipleChoiceQuestionFragment
+        ...ClozeQuestionFragment
+      }
+    `,
+    _question
   );
+
+  switch (question.type) {
+    case "MULTIPLE_CHOICE":
+      return (
+        <MultipleChoiceQuestion
+          _question={question}
+          feedbackMode={feedbackMode}
+          onHint={onHint}
+          onChange={onChange}
+        />
+      );
+    case "CLOZE":
+      return (
+        <ClozeQuestion
+          _question={question}
+          feedbackMode={feedbackMode}
+          onHint={onHint}
+          onChange={onChange}
+        />
+      );
+    default:
+      return null;
+  }
 }

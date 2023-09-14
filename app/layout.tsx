@@ -22,6 +22,8 @@ import isBetween from "dayjs/plugin/isBetween";
 import { ThemeProvider, colors, createTheme } from "@mui/material";
 import { PageViewProvider } from "@/src/currentView";
 import { PageLayout } from "@/components/PageLayout";
+import { DndProvider } from "react-dnd";
+import { HTML5Backend } from "react-dnd-html5-backend";
 
 dayjs.extend(isBetween);
 
@@ -61,11 +63,13 @@ export default function App({ children }: { children: React.ReactNode }) {
         <AuthProvider {...oidcConfig}>
           <LocalizationProvider dateAdapter={AdapterDayjs}>
             <PageViewProvider>
-              <Suspense fallback="Loading...">
-                <SigninContent>
-                  <PageLayout>{children}</PageLayout>
-                </SigninContent>
-              </Suspense>
+              <DndProvider backend={HTML5Backend}>
+                <Suspense fallback="Loading...">
+                  <SigninContent>
+                    <PageLayout>{children}</PageLayout>
+                  </SigninContent>
+                </Suspense>
+              </DndProvider>
             </PageViewProvider>
           </LocalizationProvider>
         </AuthProvider>

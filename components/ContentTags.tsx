@@ -13,9 +13,19 @@ export function ContentTags({ metadata }: { metadata: ContentTags$key }) {
   );
 
   return (
-    <div className="flex gap-2 my-1">
+    <div className="flex gap-2 mb-1 mt-4">
       {tagNames.map((tag, i) => (
-        <Chip label={tag} key={i} variant="outlined" />
+        <Chip
+          size="small"
+          label={
+            <>
+              <span className="text-gray-400">#</span>
+              {tag}
+            </>
+          }
+          key={i}
+          variant="outlined"
+        />
       ))}
     </div>
   );

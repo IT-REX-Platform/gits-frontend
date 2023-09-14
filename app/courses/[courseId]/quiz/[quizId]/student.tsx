@@ -281,7 +281,7 @@ function InfoDialog({
 }) {
   return (
     <Dialog onClose={onClose} open={open}>
-      <DialogTitle>{title}</DialogTitle>
+      <DialogTitle>{<RenderRichText value={title} />}</DialogTitle>
       <Typography variant="body1" sx={{ padding: 3, paddingTop: 0 }}>
         {hint ? (
           <RenderRichText value={hint} />

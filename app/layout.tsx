@@ -17,9 +17,13 @@ import {
   useAuth,
 } from "react-oidc-context";
 import { RelayEnvironmentProvider } from "react-relay";
+import dayjs from "dayjs";
+import isBetween from "dayjs/plugin/isBetween";
 import { ThemeProvider, colors, createTheme } from "@mui/material";
 import { PageViewProvider } from "@/src/currentView";
 import { PageLayout } from "@/components/PageLayout";
+
+dayjs.extend(isBetween);
 
 const oidcConfig: AuthProviderProps = {
   redirect_uri:
@@ -52,7 +56,7 @@ const theme = createTheme({
 
 export default function App({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="de" className="h-full">
+    <html lang="de" className="h-full overflow-hidden">
       <body className="h-full">
         <AuthProvider {...oidcConfig}>
           <LocalizationProvider dateAdapter={AdapterDayjs}>

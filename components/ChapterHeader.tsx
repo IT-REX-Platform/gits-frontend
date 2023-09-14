@@ -29,9 +29,7 @@ export function ChapterHeader({
             lastLearnDate
           }
         }
-        skillLevels {
-          ...SkillLevelsFragment
-        }
+        ...SkillLevelsFragment
       }
     `,
     _chapter
@@ -73,7 +71,7 @@ export function ChapterHeader({
           </Typography>
         </div>
         <div onClick={(e) => e.stopPropagation()}>
-          <SkillLevels _skillLevels={chapter.skillLevels} />
+          <SkillLevels _chapter={chapter} />
         </div>
       </div>
     </div>

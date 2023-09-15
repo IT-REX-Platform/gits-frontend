@@ -43,6 +43,7 @@ export function AddClozeQuestionModal({
       variables: {
         assessmentId,
         input: {
+          hint: data.hint,
           showBlanksList: data.showBlanksList,
           additionalWrongAnswers: data.additionalWrongAnswers,
           clozeElements: data.clozeElements.map((elem) =>

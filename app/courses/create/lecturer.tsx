@@ -54,7 +54,7 @@ export default function NewCourse() {
       "THIRD_QUARTER" ||
       "FOURTH_QUARTER"
   );
-  const [publish, setPublish] = useState(false);
+  const [publish, setPublish] = useState(true);
   const [chapterCount, setChapterCount] = useState(12);
 
   const handleChange = (event: SelectChangeEvent<String>) => {

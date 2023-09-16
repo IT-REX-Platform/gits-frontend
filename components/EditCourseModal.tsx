@@ -18,6 +18,8 @@ import { DatePicker } from "@mui/x-date-pickers";
 import { Form, FormSection } from "./Form";
 import { EditCourseModalMutation } from "@/__generated__/EditCourseModalMutation.graphql";
 import { EditCourseModalFragment$key } from "@/__generated__/EditCourseModalFragment.graphql";
+import { EditCourseModalDeleteMutation } from "@/__generated__/EditCourseModalDeleteMutation.graphql";
+import { useRouter } from "next/navigation";
 
 export function EditCourseModal({
   _course,
@@ -28,6 +30,8 @@ export function EditCourseModal({
   onClose: () => void;
   _course: EditCourseModalFragment$key;
 }) {
+  const router = useRouter();
+
   const course = useFragment(
     graphql`
       fragment EditCourseModalFragment on Course {
@@ -52,6 +56,12 @@ export function EditCourseModal({
       }
     `);
 
+  const [deleteCourse, isDeleting] =
+    useMutation<EditCourseModalDeleteMutation>(graphql`
+      mutation EditCourseModalDeleteMutation($id: UUID!) {
+        deleteCourse(id: $id)
+      }
+    `);
   const [title, setTitle] = useState(course.title);
   const [description, setDescription] = useState(course.description);
   const [startDate, setStartDate] = useState<Dayjs | null>(
@@ -96,6 +106,18 @@ export function EditCourseModal({
     setEndDate(dayjs(course.endDate));
     setPublish(course.published);
     setError(null);
+  }
+
+  function handleDelete() {
+    deleteCourse({
+      variables: { id: course.id },
+      onError(error) {
+        setError(error);
+      },
+      onCompleted() {
+        router.push("/");
+      },
+    });
   }
 
   return (
@@ -174,7 +196,12 @@ export function EditCourseModal({
           </Backdrop>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleReset}>Reset</Button>
+          <Button onClick={handleDelete} variant="contained" color="error">
+            Delete
+          </Button>
+          <Button onClick={handleReset} variant="outlined">
+            Reset
+          </Button>
           <Button disabled={!valid} variant="contained" onClick={handleSubmit}>
             Update
           </Button>

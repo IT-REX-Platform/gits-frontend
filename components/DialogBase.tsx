@@ -108,7 +108,7 @@ export function DialogBase<T extends { [k in string]: any }>({
       <DialogActions>
         {onDelete && (
           <>
-            <Button color="warning" disabled={inProgress}>
+            <Button color="warning" disabled={inProgress} onClick={onDelete}>
               Delete
             </Button>
             <div className="grow"></div>

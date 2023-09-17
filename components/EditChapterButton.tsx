@@ -7,6 +7,7 @@ import { useFragment, useMutation } from "react-relay";
 import { graphql } from "relay-runtime";
 
 import { EditChapterButtonMutation } from "@/__generated__/EditChapterButtonMutation.graphql";
+import { EditChapterButtonDeleteMutation } from "@/__generated__/EditChapterButtonDeleteMutation.graphql";
 import { EditChapterButtonFragment$key } from "@/__generated__/EditChapterButtonFragment.graphql";
 import { DialogBase } from "./DialogBase";
 import { dialogSections, validationSchema } from "./dialogs/chapterDialog";
@@ -50,6 +51,13 @@ export default function EditChapterButton({
       }
     }
   `);
+  const [deleteChapter] = useMutation<EditChapterButtonDeleteMutation>(
+    graphql`
+      mutation EditChapterButtonDeleteMutation($id: UUID!) {
+        deleteChapter(id: $id)
+      }
+    `
+  );
 
   const [error, setError] = useState<any>(null);
   const predecessorStart = lodash.max(
@@ -87,6 +95,15 @@ export default function EditChapterButton({
             onError: setError,
           })
         }
+        onDelete={() => {
+          deleteChapter({
+            variables: { id: chapter.id },
+            onCompleted() {
+              setOpen(false);
+            },
+            onError: setError,
+          });
+        }}
         initialValues={{
           ...chapter,
           startDate: dayjs(chapter.startDate),

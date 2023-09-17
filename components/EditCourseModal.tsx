@@ -56,12 +56,11 @@ export function EditCourseModal({
       }
     `);
 
-  const [deleteCourse, isDeleting] =
-    useMutation<EditCourseModalDeleteMutation>(graphql`
-      mutation EditCourseModalDeleteMutation($id: UUID!) {
-        deleteCourse(id: $id)
-      }
-    `);
+  const [deleteCourse] = useMutation<EditCourseModalDeleteMutation>(graphql`
+    mutation EditCourseModalDeleteMutation($id: UUID!) {
+      deleteCourse(id: $id)
+    }
+  `);
   const [title, setTitle] = useState(course.title);
   const [description, setDescription] = useState(course.description);
   const [startDate, setStartDate] = useState<Dayjs | null>(

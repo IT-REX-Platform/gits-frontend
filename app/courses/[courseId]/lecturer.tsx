@@ -232,11 +232,20 @@ export default function LecturerCoursePage() {
                   onClick={() =>
                     deleteSection({
                       variables: { sectionId: section.id },
-                      onCompleted() {
-                        window.location.reload;
-                      },
                       onError(error) {
                         console.log(error);
+                      },
+                      updater(store) {
+                        const root = store.get(chapter.id);
+                        console.log(root);
+                        if (!root) return;
+
+                        const sections =
+                          root.getLinkedRecords("sections") ?? [];
+                        root.setLinkedRecords(
+                          sections.filter((x) => x.getDataID() !== section.id),
+                          "sections"
+                        );
                       },
                     })
                   }

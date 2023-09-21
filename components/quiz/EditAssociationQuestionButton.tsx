@@ -62,6 +62,7 @@ export function EditAssociationQuestionButton({
         input: {
           id: question.id,
           text: data.text,
+          hint: data.hint,
           correctAssociations: data.correctAssociations,
         },
       },

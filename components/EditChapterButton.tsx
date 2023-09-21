@@ -100,6 +100,7 @@ export default function EditChapterButton({
             variables: { id: chapter.id },
             onCompleted() {
               setOpen(false);
+              window.location.reload();
             },
             onError: setError,
           });

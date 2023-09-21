@@ -237,7 +237,6 @@ export default function LecturerCoursePage() {
                       },
                       updater(store) {
                         const root = store.get(chapter.id);
-                        console.log(root);
                         if (!root) return;
 
                         const sections =

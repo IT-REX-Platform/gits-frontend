@@ -9,13 +9,13 @@ This will contain a description on how get started to work as a frontend develop
 ### Prerequisites
 
 - [Node.js](https://nodejs.org/en/) (v16.14 or higher)
-    We use pnpm as a package manager, but npm and yarn should work as well. If you want to use pnpm, you can install it with `npm install -g pnpm`. npm is installed with Node.js, and yarn can be installed with `npm install -g yarn`.
+  We use pnpm as a package manager, but npm and yarn should work as well. If you want to use pnpm, you can install it with `npm install -g pnpm`. npm is installed with Node.js, and yarn can be installed with `npm install -g yarn`.
 - [TypeScript](https://www.typescriptlang.org/) (v5.0.4)
-    The project uses Typescript to add typed programming to the frontend. TypeScript is installed with the project, so you don't need to install it yourself.
+  The project uses Typescript to add typed programming to the frontend. TypeScript is installed with the project, so you don't need to install it yourself.
 - [Next.js](https://nextjs.org/) (v13.4.7 or higher)
-    Next.js is a React framework that we use to build the frontend. It is installed with the project, so you don't need to install it yourself. We implement some of the features and use the structure of v14 of Next.js. Please refer to the [Next.js documentation](https://nextjs.org/docs) for more information.
+  Next.js is a React framework that we use to build the frontend. It is installed with the project, so you don't need to install it yourself. We implement some of the features and use the structure of v14 of Next.js. Please refer to the [Next.js documentation](https://nextjs.org/docs) for more information.
 - [React](https://reactjs.org/) (v17.0.2 or higher)
-    React is a JavaScript library for building user interfaces. It is installed with the project, so you don't need to install it yourself. Please refer to the [React documentation](https://reactjs.org/docs/getting-started.html) for more information.
+  React is a JavaScript library for building user interfaces. It is installed with the project, so you don't need to install it yourself. Please refer to the [React documentation](https://reactjs.org/docs/getting-started.html) for more information.
 
 Before you run the project you need to install the dependencies and create the graphql files. You can do this by running the following commands:
 

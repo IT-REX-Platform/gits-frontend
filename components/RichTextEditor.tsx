@@ -4,6 +4,7 @@ import { ContentMediaDisplay } from "@/app/courses/[courseId]/media/[mediaId]/st
 import {
   Code,
   Delete,
+  ErrorOutline,
   FormatAlignCenter,
   FormatAlignJustify,
   FormatAlignLeft,
@@ -54,6 +55,7 @@ import {
   withReact,
 } from "slate-react";
 import { MediaRecordSelector } from "./MediaRecordSelector";
+import { ErrorBoundary } from "react-error-boundary";
 
 const HOTKEYS: Record<string, string> = {
   "mod+b": "bold",
@@ -574,24 +576,12 @@ function RenderMediaRecord({
   element,
   children,
 }: RenderElementProps) {
-  const { mediaRecordsByIds } =
-    useLazyLoadQuery<RichTextEditorMediaRecordQuery>(
-      graphql`
-        query RichTextEditorMediaRecordQuery($id: UUID!) {
-          mediaRecordsByIds(ids: [$id]) {
-            ...studentContentMediaDisplayFragment
-          }
-        }
-      `,
-      { id: (element as any).id }
-    );
   const inner = (
     <>
       {children}
-      <ContentMediaDisplay
-        _record={mediaRecordsByIds[0]}
-        onProgressChange={() => {}}
-      />
+      <ErrorBoundary FallbackComponent={DeletedMediaRecord}>
+        <DisplayMediaRecord id={(element as any).id} />
+      </ErrorBoundary>
     </>
   );
 
@@ -624,6 +614,35 @@ function RenderMediaRecord({
     // not inside a slate editor
     return inner;
   }
+}
+
+function DisplayMediaRecord({ id }: { id: string }) {
+  const { mediaRecordsByIds } =
+    useLazyLoadQuery<RichTextEditorMediaRecordQuery>(
+      graphql`
+        query RichTextEditorMediaRecordQuery($id: UUID!) {
+          mediaRecordsByIds(ids: [$id]) {
+            ...studentContentMediaDisplayFragment
+          }
+        }
+      `,
+      { id }
+    );
+  return (
+    <ContentMediaDisplay
+      _record={mediaRecordsByIds[0]}
+      onProgressChange={() => {}}
+    />
+  );
+}
+
+function DeletedMediaRecord() {
+  return (
+    <div className="border rounded border-red-500 px-2 text-red-500 flex items-center gap-1">
+      <ErrorOutline fontSize="small" />
+      <span className="mb-0.5">Deleted media record</span>
+    </div>
+  );
 }
 
 function Leaf({

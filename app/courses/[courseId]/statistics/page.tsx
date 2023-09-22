@@ -4,7 +4,7 @@ import Error from "next/error";
 import { PageView, usePageView } from "@/src/currentView";
 import StudentCourseStatsPage from "./student";
 
-export default function CoursePage() {
+export default function CourseStatisticsPage() {
   const [pageView, _] = usePageView();
   switch (pageView) {
     case PageView.Student:

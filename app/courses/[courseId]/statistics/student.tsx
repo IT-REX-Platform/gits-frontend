@@ -13,18 +13,9 @@ import {
 } from "@/components/RewardScoreHistoryTable";
 import { Subheading } from "@/components/Subheading";
 import { RewardScoreFilter } from "@/components/RewardScoreFilter";
-import { isUUID } from "@/src/utils";
 import { PageError } from "@/components/PageError";
 
 export default function StudentCourseStatsPage() {
-  const { courseId } = useParams();
-  if (!isUUID(courseId)) {
-    return <PageError message="Invalid course id." />;
-  }
-  return <_StudentCourseStatsPage />;
-}
-
-function _StudentCourseStatsPage() {
   // Get course id from url
   const { courseId: id } = useParams();
 

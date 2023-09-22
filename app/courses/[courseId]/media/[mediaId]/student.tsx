@@ -9,7 +9,6 @@ import { ContentTags } from "@/components/ContentTags";
 import { Heading } from "@/components/Heading";
 import { DisplayError, PageError } from "@/components/PageError";
 import { PdfViewer } from "@/components/PdfViewer";
-import { isUUID } from "@/src/utils";
 import { Check, Download } from "@mui/icons-material";
 import {
   Alert,
@@ -33,14 +32,6 @@ import {
 } from "react-relay";
 
 export default function StudentMediaPage() {
-  const { mediaId } = useParams();
-  if (!isUUID(mediaId)) {
-    return <PageError message="Invalid media id" />;
-  }
-  return <_StudentMediaPage />;
-}
-
-function _StudentMediaPage() {
   const { mediaId } = useParams();
   const searchParams = useSearchParams();
   const media = useLazyLoadQuery<studentMediaQuery>(

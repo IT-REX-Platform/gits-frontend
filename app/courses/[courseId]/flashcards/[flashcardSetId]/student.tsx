@@ -5,7 +5,6 @@ import { studentFlashcardsQuery } from "@/__generated__/studentFlashcardsQuery.g
 import { ContentTags } from "@/components/ContentTags";
 import { Heading } from "@/components/Heading";
 import { PageError } from "@/components/PageError";
-import { isUUID } from "@/src/utils";
 import { Check, Close, Loop } from "@mui/icons-material";
 import { Alert, Button, CircularProgress } from "@mui/material";
 import { motion } from "framer-motion";
@@ -15,17 +14,6 @@ import { useState } from "react";
 import { graphql, useLazyLoadQuery, useMutation } from "react-relay";
 
 export default function StudentFlashcards() {
-  const { flashcardSetId, courseId } = useParams();
-  if (!isUUID(courseId)) {
-    return <PageError message="Invalid course id." />;
-  }
-  if (!isUUID(flashcardSetId)) {
-    return <PageError message="Invalid flashcards id." />;
-  }
-  return <_StudentFlashcards />;
-}
-
-function _StudentFlashcards() {
   // Get course id from url
   const { flashcardSetId, courseId } = useParams();
 

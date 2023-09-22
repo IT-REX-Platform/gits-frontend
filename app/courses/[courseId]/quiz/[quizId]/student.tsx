@@ -12,7 +12,6 @@ import { Heading } from "@/components/Heading";
 import { PageError } from "@/components/PageError";
 import { ClozeQuestion } from "@/components/quiz/ClozeQuestion";
 import { MultipleChoiceQuestion } from "@/components/quiz/MultipleChoiceQuestion";
-import { isUUID } from "@/src/utils";
 import { Button } from "@mui/material";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -24,17 +23,6 @@ import {
 } from "react-relay";
 
 export default function StudentQuiz() {
-  const { quizId, courseId } = useParams();
-  if (!isUUID(courseId)) {
-    return <PageError message="Invalid course id." />;
-  }
-  if (!isUUID(quizId)) {
-    return <PageError message="Invalid quiz id." />;
-  }
-  return <_StudentQuiz />;
-}
-
-function _StudentQuiz() {
   // Get course id from url
   const { quizId, courseId } = useParams();
   const router = useRouter();

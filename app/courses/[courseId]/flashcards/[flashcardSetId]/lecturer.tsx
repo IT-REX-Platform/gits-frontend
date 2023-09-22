@@ -39,22 +39,10 @@ import {
   useLazyLoadQuery,
   useMutation,
 } from "react-relay";
-import { EditFlashcardSetModal } from "../../../../../components/EditFlashcardSetModal";
-import { isUUID } from "@/src/utils";
+import { EditFlashcardSetModal } from "@/components/EditFlashcardSetModal";
 import { PageError } from "@/components/PageError";
 
 export default function LecturerFlashcards() {
-  const { flashcardSetId, courseId } = useParams();
-  if (!isUUID(courseId)) {
-    return <PageError message="Invalid course id." />;
-  }
-  if (!isUUID(flashcardSetId)) {
-    return <PageError message="Invalid flashcards id." />;
-  }
-  return <_LecturerFlashcards />;
-}
-
-function _LecturerFlashcards() {
   const { flashcardSetId, courseId } = useParams();
   const [del, deleting] =
     useMutation<lecturerDeleteFlashcardContentMutation>(graphql`

@@ -6,7 +6,7 @@ import { IconButton } from "@mui/material";
 import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
 import { graphql, useLazyLoadQuery } from "react-relay";
-import { MultipleChoiceQuestionModal } from "../../../../../components/MultipleChoiceQuestionModal";
+import { MultipleChoiceQuestionModal } from "@/components/MultipleChoiceQuestionModal";
 import { MultipleChoiceQuestionPreview } from "@/components/quiz/MultipleChoiceQuestionPreview";
 import { DeleteQuestionButton } from "@/components/quiz/DeleteQuestionButton";
 import { DeleteQuizButton } from "@/components/quiz/DeleteQuizButton";
@@ -14,21 +14,9 @@ import { FormErrors } from "@/components/FormErrors";
 import { ClozeQuestionPreview } from "@/components/quiz/ClozeQuestionPreview";
 import { EditClozeQuestionButton } from "@/components/quiz/EditClozeQuestionButton";
 import { AddQuestionButton } from "@/components/quiz/AddQuestionButton";
-import { isUUID } from "@/src/utils";
 import { PageError } from "@/components/PageError";
 
 export default function LecturerQuiz() {
-  const { quizId, courseId } = useParams();
-  if (!isUUID(courseId)) {
-    return <PageError message="Invalid course id." />;
-  }
-  if (!isUUID(quizId)) {
-    return <PageError message="Invalid quiz id." />;
-  }
-  return <_LecturerQuiz />;
-}
-
-function _LecturerQuiz() {
   const { quizId, courseId } = useParams();
   const router = useRouter();
 

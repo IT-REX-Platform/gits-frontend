@@ -12,21 +12,9 @@ import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { graphql, useLazyLoadQuery, useMutation } from "react-relay";
 import { ContentMediaDisplay, DownloadButton } from "./student";
-import { isUUID } from "@/src/utils";
 import { PageError } from "@/components/PageError";
 
 export default function LecturerMediaPage() {
-  const { mediaId, courseId } = useParams();
-  if (!isUUID(courseId)) {
-    return <PageError message="Invalid course id" />;
-  }
-  if (!isUUID(mediaId)) {
-    return <PageError message="Invalid media id" />;
-  }
-  return <_LecturerMediaPage />;
-}
-
-function _LecturerMediaPage() {
   const { mediaId, courseId } = useParams();
   const router = useRouter();
   const searchParams = useSearchParams();

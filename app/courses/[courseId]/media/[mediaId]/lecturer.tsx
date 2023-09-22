@@ -8,13 +8,25 @@ import { Heading } from "@/components/Heading";
 import { MediaContentModal } from "@/components/MediaContentModal";
 import { Delete, Edit } from "@mui/icons-material";
 import { Alert, Button, CircularProgress, Typography } from "@mui/material";
-import Error from "next/error";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { graphql, useLazyLoadQuery, useMutation } from "react-relay";
 import { ContentMediaDisplay, DownloadButton } from "./student";
+import { isUUID } from "@/src/utils";
+import { PageError } from "@/components/PageError";
 
 export default function LecturerMediaPage() {
+  const { mediaId, courseId } = useParams();
+  if (!isUUID(courseId)) {
+    return <PageError message="Invalid course id" />;
+  }
+  if (!isUUID(mediaId)) {
+    return <PageError message="Invalid media id" />;
+  }
+  return <_LecturerMediaPage />;
+}
+
+function _LecturerMediaPage() {
   const { mediaId, courseId } = useParams();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -60,15 +72,15 @@ export default function LecturerMediaPage() {
   const [error, setError] = useState<any>();
 
   if (media.contentsByIds.length == 0) {
-    return <Error statusCode={404} />;
+    return <PageError message="No content found with given id." />;
   }
 
   const content = media.contentsByIds[0];
   if (content.metadata.type !== "MEDIA") {
-    return <Error statusCode={400} />;
+    return <PageError message="Wrong content type." />;
   }
-  if (!content.mediaRecords || content.mediaRecords.length == 0) {
-    return <Error statusCode={404} />;
+  if (!content.mediaRecords) {
+    return <PageError message="Content has no media records." />;
   }
 
   const recordId = searchParams.get("recordId");
@@ -76,12 +88,12 @@ export default function LecturerMediaPage() {
     ? content.mediaRecords.find((record) => record.id === recordId)
     : content.mediaRecords[0];
 
-  if (mainRecord == null) {
-    return <Error statusCode={404} />;
+  if (recordId && mainRecord == null) {
+    return <PageError message="Content has no record with given id." />;
   }
 
   const relatedRecords = content.mediaRecords.filter(
-    (record) => record.id !== mainRecord.id
+    (record) => record.id !== mainRecord?.id
   );
 
   return (
@@ -93,11 +105,11 @@ export default function LecturerMediaPage() {
       ))}
 
       <Heading
-        title={mainRecord.name}
-        overline={content.metadata.name}
+        title={mainRecord?.name ?? content.metadata.name}
+        overline={mainRecord != null ? content.metadata.name : undefined}
         action={
           <div className="flex gap-2">
-            <DownloadButton _record={mainRecord} />{" "}
+            {mainRecord && <DownloadButton _record={mainRecord} />}{" "}
             <Button
               sx={{ color: "text.secondary" }}
               startIcon={deleting ? <CircularProgress size={16} /> : <Delete />}
@@ -145,7 +157,12 @@ export default function LecturerMediaPage() {
 
       <ContentTags metadata={content.metadata} />
       <div className="my-8 grow">
-        <ContentMediaDisplay onProgressChange={() => {}} _record={mainRecord} />
+        {mainRecord && (
+          <ContentMediaDisplay
+            onProgressChange={() => {}}
+            _record={mainRecord}
+          />
+        )}
       </div>
       {relatedRecords.length > 0 && (
         <>

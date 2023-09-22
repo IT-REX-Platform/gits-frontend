@@ -7,7 +7,9 @@ import { studentMediaQuery } from "@/__generated__/studentMediaQuery.graphql";
 import { MediaContent } from "@/components/Content";
 import { ContentTags } from "@/components/ContentTags";
 import { Heading } from "@/components/Heading";
+import { DisplayError, PageError } from "@/components/PageError";
 import { PdfViewer } from "@/components/PdfViewer";
+import { isUUID } from "@/src/utils";
 import { Check, Download } from "@mui/icons-material";
 import {
   Alert,
@@ -20,7 +22,6 @@ import {
 } from "@mui/material";
 import { differenceInHours } from "date-fns";
 import { first } from "lodash";
-import Error from "next/error";
 import { useParams, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import ReactPlayer from "react-player";
@@ -32,6 +33,14 @@ import {
 } from "react-relay";
 
 export default function StudentMediaPage() {
+  const { mediaId } = useParams();
+  if (!isUUID(mediaId)) {
+    return <PageError message="Invalid media id" />;
+  }
+  return <_StudentMediaPage />;
+}
+
+function _StudentMediaPage() {
   const { mediaId } = useParams();
   const searchParams = useSearchParams();
   const media = useLazyLoadQuery<studentMediaQuery>(
@@ -101,30 +110,32 @@ export default function StudentMediaPage() {
   const [error, setError] = useState<any>(null);
 
   if (media.contentsByIds.length == 0) {
-    return <Error statusCode={404} />;
+    return <PageError message="No content found with given id." />;
   }
 
   if (content.metadata.type !== "MEDIA") {
-    return <Error statusCode={400} />;
+    return <PageError message="Wrong content type." />;
   }
-  if (!content.mediaRecords || content.mediaRecords.length == 0) {
-    return <Error statusCode={404} />;
+  if (!content.mediaRecords) {
+    return <PageError message="Content has no media records." />;
   }
 
-  if (mainRecord == null) {
-    return <Error statusCode={404} />;
+  if (recordId && mainRecord == null) {
+    return <PageError message="Content has no record with given id." />;
   }
 
   const relatedRecords = content.mediaRecords.filter(
-    (record) => record.id !== mainRecord.id
+    (record) => record.id !== mainRecord?.id
   );
 
   return (
     <main className="flex flex-col h-full">
       <Heading
-        title={mainRecord.name}
-        overline={content.metadata.name}
-        action={<DownloadButton _record={mainRecord} />}
+        title={mainRecord?.name ?? content.metadata.name}
+        overline={mainRecord != null ? content.metadata.name : undefined}
+        action={
+          mainRecord ? <DownloadButton _record={mainRecord} /> : undefined
+        }
         backButton
       />
 
@@ -141,54 +152,58 @@ export default function StudentMediaPage() {
         </Alert>
       ))}
 
-      <Dialog open={progress > 0.8 && !workedOnToday && !nagDismissed}>
-        <DialogTitle>Do you want to mark this as understood?</DialogTitle>
-        <DialogContent>
-          You&apos;ve completed more than 80% of this content - this could be a
-          good time to mark it as completed.
-        </DialogContent>
-        <DialogActions>
-          <Button variant="text" onClick={() => setNagDismissed(true)}>
-            No thanks
-          </Button>
-          <Button
-            variant="text"
-            onClick={() =>
-              mediaRecordWorkedOn({
-                variables: { id: mainRecord.id },
-                onError: setError,
-              })
-            }
-          >
-            Ok
-          </Button>
-        </DialogActions>
-      </Dialog>
-
-      <div className="my-8 grow">
-        <ContentMediaDisplay
-          onProgressChange={setProgress}
-          _record={mainRecord}
-        />
-        <div className="w-full flex justify-center mt-10">
-          <Button
-            disabled={progress < 0.5 || workedOnToday}
-            onClick={() =>
-              mediaRecordWorkedOn({
-                variables: { id: mainRecord.id },
-                onError: setError,
-              })
-            }
-          >
-            {workedOnToday && <Check className="mr-2" />}
-            {workedOnToday
-              ? "Understood"
-              : progress >= 0.5
-              ? "Mark content as understood"
-              : "Complete more than 50% to mark as understood"}
-          </Button>
-        </div>
-      </div>
+      {mainRecord && (
+        <>
+          <Dialog open={progress > 0.8 && !workedOnToday && !nagDismissed}>
+            <DialogTitle>Do you want to mark this as understood?</DialogTitle>
+            <DialogContent>
+              You&apos;ve completed more than 80% of this content - this could
+              be a good time to mark it as completed.
+            </DialogContent>
+            <DialogActions>
+              <Button variant="text" onClick={() => setNagDismissed(true)}>
+                No thanks
+              </Button>
+              <Button
+                variant="text"
+                onClick={() =>
+                  mediaRecordWorkedOn({
+                    variables: { id: mainRecord.id },
+                    onError: setError,
+                  })
+                }
+              >
+                Ok
+              </Button>
+            </DialogActions>
+          </Dialog>
+          <div className="my-8 grow">
+            <ContentMediaDisplay
+              onProgressChange={setProgress}
+              _record={mainRecord}
+            />
+            <div className="w-full flex justify-center mt-10">
+              <Button
+                disabled={progress < 0.5 || workedOnToday}
+                onClick={() =>
+                  mediaRecordWorkedOn({
+                    variables: { id: mainRecord.id },
+                    onError: setError,
+                  })
+                }
+              >
+                {workedOnToday && <Check className="mr-2" />}
+                {workedOnToday
+                  ? "Understood"
+                  : progress >= 0.5
+                  ? "Mark content as understood"
+                  : "Complete more than 50% to mark as understood"}
+              </Button>
+            </div>
+          </div>
+        </>
+      )}
+      {!mainRecord && <DisplayError message="Content has no media records." />}
 
       {relatedRecords.length > 0 && (
         <>

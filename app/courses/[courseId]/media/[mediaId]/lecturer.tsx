@@ -77,10 +77,17 @@ function _LecturerMediaPage() {
 
   const content = media.contentsByIds[0];
   if (content.metadata.type !== "MEDIA") {
-    return <PageError message="Wrong content type." />;
+    return (
+      <PageError title={content.metadata.name} message="Wrong content type." />
+    );
   }
   if (!content.mediaRecords) {
-    return <PageError message="Content has no media records." />;
+    return (
+      <PageError
+        title={content.metadata.name}
+        message="Content has no media records."
+      />
+    );
   }
 
   const recordId = searchParams.get("recordId");
@@ -89,7 +96,12 @@ function _LecturerMediaPage() {
     : content.mediaRecords[0];
 
   if (recordId && mainRecord == null) {
-    return <PageError message="Content has no record with given id." />;
+    return (
+      <PageError
+        title={content.metadata.name}
+        message="Content has no record with given id."
+      />
+    );
   }
 
   const relatedRecords = content.mediaRecords.filter(

@@ -1,10 +1,16 @@
 import { ErrorOutline } from "@mui/icons-material";
 import { Heading } from "./Heading";
 
-export function PageError({ message }: { message: string }) {
+export function PageError({
+  message,
+  title,
+}: {
+  message: string;
+  title?: string;
+}) {
   return (
     <main className="h-full flex flex-col">
-      <Heading title="Unexpected error" backButton />
+      <Heading title={title ?? "Unexpected error"} backButton />
       <DisplayError message={message} />
     </main>
   );

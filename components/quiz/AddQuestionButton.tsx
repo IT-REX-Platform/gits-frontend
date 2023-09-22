@@ -11,7 +11,7 @@ import {
 } from "@mui/material";
 import { useState } from "react";
 import { AddClozeQuestionModal } from "./AddClozeQuestionModal";
-import { MultipleChoiceQuestionModal } from "../MultipleChoiceQuestionModal";
+import { AddMultipleChoiceQuestionModal } from "./AddMultipleChoiceQuestionModal";
 
 export function AddQuestionButton({
   _allRecords,
@@ -56,12 +56,11 @@ export function AddQuestionButton({
           </ListItemButton>
         </List>
       </Dialog>
-      <MultipleChoiceQuestionModal
+      <AddMultipleChoiceQuestionModal
         _allRecords={_allRecords}
         assessmentId={assessmentId}
-        contentId={assessmentId}
-        onClose={() => setAddMultipleChoice(false)}
         open={addMultipleChoice}
+        onClose={() => setAddMultipleChoice(false)}
       />
       <AddClozeQuestionModal
         _allRecords={_allRecords}

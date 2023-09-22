@@ -621,7 +621,7 @@ function LocalFlashcard({
   const [addSideOpen, setAddSideOpen] = useState(false);
 
   const numQuestions = sides.filter((s) => s.isQuestion === true).length;
-  const numAnswers = sides.filter((s) => s.isQuestion === false).length;
+  const numAnswers = sides.filter((s) => s.isAnswer === true).length;
   const valid = numQuestions >= 1 && numAnswers >= 1;
 
   function handleEditFlashcardSide(idx: number, data: FlashcardSideData) {

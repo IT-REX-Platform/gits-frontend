@@ -234,6 +234,7 @@ export function ContentMediaDisplay({
     graphql`
       fragment studentContentMediaDisplayFragment on MediaRecord {
         type
+        name
         downloadUrl
       }
     `,
@@ -269,7 +270,8 @@ export function ContentMediaDisplay({
         />
       );
     case "IMAGE":
-      return <img src={mediaRecord.downloadUrl}></img>;
+      // eslint-disable-next-line @next/next/no-img-element
+      return <img alt={mediaRecord.name} src={mediaRecord.downloadUrl}></img>;
     default:
       return <>Unsupported media type</>;
   }

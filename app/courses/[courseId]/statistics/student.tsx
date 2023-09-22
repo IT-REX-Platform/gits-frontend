@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { useParams } from "next/navigation";
-import Error from "next/error";
 import { graphql, useLazyLoadQuery } from "react-relay";
 
 import { Heading } from "@/components/Heading";
@@ -14,11 +13,20 @@ import {
 } from "@/components/RewardScoreHistoryTable";
 import { Subheading } from "@/components/Subheading";
 import { RewardScoreFilter } from "@/components/RewardScoreFilter";
+import { isUUID } from "@/src/utils";
+import { PageError } from "@/components/PageError";
 
 export default function StudentCourseStatsPage() {
+  const { courseId } = useParams();
+  if (!isUUID(courseId)) {
+    return <PageError message="Invalid course id." />;
+  }
+  return <_StudentCourseStatsPage />;
+}
+
+function _StudentCourseStatsPage() {
   // Get course id from url
-  const params = useParams();
-  const id = params.courseId;
+  const { courseId: id } = useParams();
 
   // Fetch course data
   const { coursesByIds } = useLazyLoadQuery<studentCourseStatsQuery>(
@@ -45,7 +53,7 @@ export default function StudentCourseStatsPage() {
 
   // Show 404 error page if id was not found
   if (coursesByIds.length == 0) {
-    return <Error statusCode={404} title="Course could not be found." />;
+    return <PageError message="No course found with given id" />;
   }
 
   // Extract course

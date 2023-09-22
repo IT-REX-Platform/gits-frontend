@@ -3,7 +3,6 @@ import { ContentTags } from "@/components/ContentTags";
 import { Heading } from "@/components/Heading";
 import { Edit } from "@mui/icons-material";
 import { IconButton } from "@mui/material";
-import { default as Error } from "next/error";
 import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
 import { graphql, useLazyLoadQuery } from "react-relay";

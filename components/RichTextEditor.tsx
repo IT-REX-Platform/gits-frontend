@@ -638,7 +638,7 @@ function DisplayMediaRecord({ id }: { id: string }) {
 
 function DeletedMediaRecord() {
   return (
-    <div className="border rounded border-red-500 px-2 text-red-500 flex items-center gap-1">
+    <div className="border rounded border-red-500 px-2 text-red-500 flex items-center gap-1 w-fit">
       <ErrorOutline fontSize="small" />
       <span className="mb-0.5">Deleted media record</span>
     </div>

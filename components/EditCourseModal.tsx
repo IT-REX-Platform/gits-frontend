@@ -116,6 +116,18 @@ export function EditCourseModal({
       onCompleted() {
         router.push("/");
       },
+      updater(store) {
+        console.log(store);
+        const courses = store.get("courses");
+        console.log(courses);
+        if (!courses) return;
+        courses.setLinkedRecords(
+          courses
+            .getLinkedRecords("courses")
+            ?.filter((x) => x.getDataID() !== course.id) ?? [],
+          "courses"
+        );
+      },
     });
   }
 

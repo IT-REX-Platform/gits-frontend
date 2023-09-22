@@ -29,7 +29,7 @@ This will install all the dependencies for the project. After this you need to c
 pnpm relay
 ```
 
-This will create the graphql files for all queries and mutations. You need to run this command every time you change a graphql query or mutation.
+This will create the graphql files for all queries and mutations. The `dev` command further down should also do the same, but if for some reason it should not update all graphql query or mutation files, you need to run this command.
 Should the graphql schema change, you need to run the following command:
 
 ```bash

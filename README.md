@@ -9,7 +9,7 @@ This will contain a description on how get started to work as a frontend develop
 ### Prerequisites
 
 - [Node.js](https://nodejs.org/en/) (v16.14 or higher)
-  We use pnpm as a package manager, but npm and yarn should work as well. If you want to use pnpm, you can install it with `npm install -g pnpm`. npm is installed with Node.js, and yarn can be installed with `npm install -g yarn`.
+  We use pnpm as a package manager, but npm and yarn might work as well. We recommend pnpm because otherwise the lockfile will have the wrong format. To use pnpm, you can install it with `npm install -g pnpm`. The further instructions in this README will be for pnpm usage only.
 - [TypeScript](https://www.typescriptlang.org/) (v5.0.4)
   The project uses Typescript to add typed programming to the frontend. TypeScript is installed with the project, so you don't need to install it yourself.
 - [Next.js](https://nextjs.org/) (v13.4.7 or higher)
@@ -20,20 +20,12 @@ This will contain a description on how get started to work as a frontend develop
 Before you run the project you need to install the dependencies and create the graphql files. You can do this by running the following commands:
 
 ```bash
-npm run install
-# or
-yarn install
-# or
 pnpm install
 ```
 
 This will install all the dependencies for the project. After this you need to create the graphql files. You can do this by running the following command:
 
 ```bash
-npm run relay
-# or
-yarn relay
-# or
 pnpm relay
 ```
 
@@ -41,10 +33,6 @@ This will create the graphql files for all queries and mutations. You need to ru
 Should the graphql schema change, you need to run the following command:
 
 ```bash
-npm run update-schema
-# or
-yarn update-schema
-# or
 pnpm update-schema
 ```
 
@@ -53,10 +41,6 @@ This will update the graphql schema by running to seperate commands: `fetch-grap
 After everything was installed, updated and created, you can run the project with the following command:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
 pnpm dev
 ```
 
@@ -78,4 +62,4 @@ More information about the technologies can be found on the respective websites:
 - [Husky](https://typicode.github.io/husky/#/)
 - [pnpm](https://pnpm.io/)
 
-We recommend you work on this project with an IDE of your choice.
+We recommend you work on this project with an IDE of your choice. The IDE we used was VSC. as it works very well for the project.

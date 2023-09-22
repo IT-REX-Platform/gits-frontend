@@ -9,10 +9,11 @@ import {
 import { ContentTags } from "@/components/ContentTags";
 import { FormErrors } from "@/components/FormErrors";
 import { Heading } from "@/components/Heading";
+import { PageError } from "@/components/PageError";
 import { ClozeQuestion } from "@/components/quiz/ClozeQuestion";
 import { MultipleChoiceQuestion } from "@/components/quiz/MultipleChoiceQuestion";
+import { isUUID } from "@/src/utils";
 import { Button } from "@mui/material";
-import Error from "next/error";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import {
@@ -23,6 +24,17 @@ import {
 } from "react-relay";
 
 export default function StudentQuiz() {
+  const { quizId, courseId } = useParams();
+  if (!isUUID(courseId)) {
+    return <PageError message="Invalid course id." />;
+  }
+  if (!isUUID(quizId)) {
+    return <PageError message="Invalid quiz id." />;
+  }
+  return <_StudentQuiz />;
+}
+
+function _StudentQuiz() {
   // Get course id from url
   const { quizId, courseId } = useParams();
   const router = useRouter();
@@ -87,17 +99,27 @@ export default function StudentQuiz() {
     { id: [quizId] }
   );
 
-  // Show 404 error page if id was not found
   if (contentsByIds.length == 0) {
-    return <Error statusCode={404} title="Quiz could not be found." />;
+    return <PageError message="No quiz found with given id." />;
   }
 
   const quiz = contentsByIds[0].quiz;
   if (quiz == null) {
-    return <Error statusCode={404} />;
+    return (
+      <PageError
+        title={contentsByIds[0].metadata.name}
+        message="Content not of type quiz."
+      />
+    );
   }
 
   const currentQuestion = quiz.selectedQuestions[currentIndex];
+  if (!currentQuestion) {
+    return (
+      <PageError title={contentsByIds[0].metadata.name} message="Empty quiz." />
+    );
+  }
+
   const nextQuestion = () => {
     // Enable feedback mode
     if (!checkAnswers) {

@@ -15,8 +15,21 @@ import { FormErrors } from "@/components/FormErrors";
 import { ClozeQuestionPreview } from "@/components/quiz/ClozeQuestionPreview";
 import { EditClozeQuestionButton } from "@/components/quiz/EditClozeQuestionButton";
 import { AddQuestionButton } from "@/components/quiz/AddQuestionButton";
+import { isUUID } from "@/src/utils";
+import { PageError } from "@/components/PageError";
 
-export default function EditQuiz() {
+export default function LecturerQuiz() {
+  const { quizId, courseId } = useParams();
+  if (!isUUID(courseId)) {
+    return <PageError message="Invalid course id." />;
+  }
+  if (!isUUID(quizId)) {
+    return <PageError message="Invalid quiz id." />;
+  }
+  return <_LecturerQuiz />;
+}
+
+function _LecturerQuiz() {
   const { quizId, courseId } = useParams();
   const router = useRouter();
 
@@ -60,13 +73,21 @@ export default function EditQuiz() {
   );
 
   const [isEditOpen, setEditOpen] = useState<number | null>(null);
+  const [error, setError] = useState<any>(null);
 
   const content = contentsByIds[0];
-  const quiz = content.quiz;
+  if (!content) {
+    return <PageError message="No quiz found with given id." />;
+  }
 
-  const [error, setError] = useState<any>(null);
+  const quiz = content.quiz;
   if (!quiz) {
-    return <Error statusCode={400} />;
+    return (
+      <PageError
+        title={contentsByIds[0].metadata.name}
+        message="Content not of type quiz."
+      />
+    );
   }
 
   return (

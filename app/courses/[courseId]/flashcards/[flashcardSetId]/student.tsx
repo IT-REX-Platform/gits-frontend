@@ -4,52 +4,60 @@ import { studentFlashcardLogProgressMutation } from "@/__generated__/studentFlas
 import { studentFlashcardsQuery } from "@/__generated__/studentFlashcardsQuery.graphql";
 import { ContentTags } from "@/components/ContentTags";
 import { Heading } from "@/components/Heading";
+import { PageError } from "@/components/PageError";
+import { isUUID } from "@/src/utils";
 import { Check, Close, Loop } from "@mui/icons-material";
 import { Alert, Button, CircularProgress } from "@mui/material";
 import { motion } from "framer-motion";
 import { chain } from "lodash";
-import Error from "next/error";
 import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
 import { graphql, useLazyLoadQuery, useMutation } from "react-relay";
 
 export default function StudentFlashcards() {
+  const { flashcardSetId, courseId } = useParams();
+  if (!isUUID(courseId)) {
+    return <PageError message="Invalid course id." />;
+  }
+  if (!isUUID(flashcardSetId)) {
+    return <PageError message="Invalid flashcards id." />;
+  }
+  return <_StudentFlashcards />;
+}
+
+function _StudentFlashcards() {
   // Get course id from url
   const { flashcardSetId, courseId } = useParams();
 
   const [currentIndex, setCurrentIndex] = useState(0);
 
   // Fetch course data
-  const { findContentsByIds, currentUserInfo } =
-    useLazyLoadQuery<studentFlashcardsQuery>(
-      graphql`
-        query studentFlashcardsQuery($id: [UUID!]!) {
-          currentUserInfo {
-            id
+  const { findContentsByIds } = useLazyLoadQuery<studentFlashcardsQuery>(
+    graphql`
+      query studentFlashcardsQuery($id: [UUID!]!) {
+        findContentsByIds(ids: $id) {
+          id
+          metadata {
+            name
+            ...ContentTags
           }
-          findContentsByIds(ids: $id) {
-            id
-            metadata {
-              name
-              ...ContentTags
-            }
-            ... on FlashcardSetAssessment {
-              flashcardSet {
-                flashcards {
-                  id
-                  sides {
-                    isQuestion
-                    label
-                    text
-                  }
+          ... on FlashcardSetAssessment {
+            flashcardSet {
+              flashcards {
+                id
+                sides {
+                  isQuestion
+                  label
+                  text
                 }
               }
             }
           }
         }
-      `,
-      { id: [flashcardSetId] }
-    );
+      }
+    `,
+    { id: [flashcardSetId] }
+  );
 
   const [flashcardLearned, logging] =
     useMutation<studentFlashcardLogProgressMutation>(graphql`
@@ -71,9 +79,21 @@ export default function StudentFlashcards() {
 
   const flashcards = findContentsByIds[0];
   if (!flashcards) {
-    return <Error statusCode={404} />;
+    return <PageError message="No flashcards found with given id." />;
   }
-  const currentFlashcard = flashcards.flashcardSet!.flashcards[currentIndex];
+  if (
+    !flashcards.flashcardSet ||
+    flashcards.flashcardSet.flashcards.length === 0
+  ) {
+    return (
+      <PageError
+        title={flashcards.metadata.name}
+        message="Empty flashcard set."
+      />
+    );
+  }
+
+  const currentFlashcard = flashcards.flashcardSet.flashcards[currentIndex];
   const question = currentFlashcard.sides.find((x) => x.isQuestion);
   const answers = currentFlashcard.sides.filter((x) => !x.isQuestion);
 

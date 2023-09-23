@@ -6,7 +6,7 @@ import { isUUID } from "@/src/utils";
 import { useParams } from "next/navigation";
 import { PageError } from "@/components/PageError";
 
-export default function CoursePage() {
+export default function CourseStatisticsPage() {
   const [pageView, _] = usePageView();
   const { courseId } = useParams();
 

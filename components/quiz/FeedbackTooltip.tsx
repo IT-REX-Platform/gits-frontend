@@ -1,8 +1,8 @@
 import { Box, Tooltip } from "@mui/material";
-import { ReactElement } from "react";
+import { ReactElement, ReactNode } from "react";
 import { RenderRichText } from "../RichTextEditor";
 
-export function ClozeBlankFeedbackTooltip({
+export function FeedbackTooltip({
   disabled = false,
   feedback,
   correctAnswer,
@@ -10,10 +10,10 @@ export function ClozeBlankFeedbackTooltip({
 }: {
   feedback: string | null;
   children: ReactElement;
-  correctAnswer: string;
+  correctAnswer?: ReactNode;
   disabled?: boolean;
 }) {
-  if (disabled) {
+  if (disabled || (feedback == null && correctAnswer == null)) {
     return children;
   }
 
@@ -23,7 +23,9 @@ export function ClozeBlankFeedbackTooltip({
       placement="right"
       title={
         <div className="font-normal">
-          <div className="text-sm">&rarr; {correctAnswer}</div>
+          {correctAnswer && (
+            <div className="text-sm">&rarr; {correctAnswer}</div>
+          )}
           {feedback && <RenderRichText value={feedback} />}
         </div>
       }

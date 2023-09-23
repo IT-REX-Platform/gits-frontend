@@ -63,7 +63,6 @@ export function EditClozeQuestionButton({
     `);
 
   const handleSubmit = (data: ClozeQuestionData) => {
-    console.log(data.hint);
     updateQuestion({
       variables: {
         assessmentId,

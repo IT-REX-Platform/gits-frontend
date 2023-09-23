@@ -18,6 +18,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Add, Clear, Feedback } from "@mui/icons-material";
 import { LoadingButton } from "@mui/lab";
 import { EditRichTextButton } from "./EditRichTextButton";
+import { HintFormSection } from "./HintFormSection";
 
 export type ClozeQuestionData = {
   hint: string | null;
@@ -200,23 +201,13 @@ export function ClozeQuestionModal({
               </Button>
             </div>
           </FormSection>
-          <FormSection title="Hint">
-            <RichTextEditor
-              _allRecords={_allRecords}
-              className="w-[700px]"
-              label="Hint"
-              initialValue={data.hint ?? ""}
-              onChange={(value) =>
-                setData((oldData) => ({
-                  ...oldData,
-                  hint:
-                    value !== '[{"type":"paragraph","children":[{"text":""}]}]'
-                      ? value
-                      : null,
-                }))
-              }
-            />
-          </FormSection>
+          <HintFormSection
+            _allRecords={_allRecords}
+            initialValue={data.hint}
+            onChange={(hint) => {
+              setData((oldData) => ({ ...oldData, hint }));
+            }}
+          />
           <FormSection title="Options">
             <FormControlLabel
               label="Freetext blanks"

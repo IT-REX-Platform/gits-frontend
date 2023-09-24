@@ -1,6 +1,8 @@
 "use client";
 import { pageScoreboardQuery } from "@/__generated__/pageScoreboardQuery.graphql";
 import { Heading } from "@/components/Heading";
+import { PageError } from "@/components/PageError";
+import { isUUID } from "@/src/utils";
 import { TextField } from "@mui/material";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
@@ -45,13 +47,20 @@ function capitalizeFirstLetter(str: string): string {
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
-export default function StickyHeadTable() {
+export default function ScoreboardPage() {
+  const { courseId } = useParams();
+  if (!isUUID(courseId)) {
+    return <PageError message="Invalid course id." />;
+  }
+  return <_ScoreboardPage />;
+}
+
+function _ScoreboardPage() {
+  const { courseId } = useParams();
+
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
   const [searchTerm, setSearchTerm] = React.useState("");
-
-  const params = useParams();
-  const courseId = params.courseId;
 
   const { scoreboard } = useLazyLoadQuery<pageScoreboardQuery>(
     graphql`

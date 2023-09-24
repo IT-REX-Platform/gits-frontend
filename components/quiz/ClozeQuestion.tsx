@@ -6,7 +6,7 @@ import { ClozeQuestionFragment$key } from "@/__generated__/ClozeQuestionFragment
 import { useDrag, useDrop } from "react-dnd";
 import { TextField, colors } from "@mui/material";
 import { AutosizeByText } from "../AutosizeByText";
-import { ClozeBlankFeedbackTooltip } from "./ClozeBlankFeedbackTooltip";
+import { FeedbackTooltip } from "./FeedbackTooltip";
 
 export function ClozeQuestion({
   _question,
@@ -83,7 +83,7 @@ export function ClozeQuestion({
               <RenderRichText value={element.text} />
             </span>
           ) : element.__typename === "ClozeBlankElement" ? (
-            <ClozeBlankFeedbackTooltip
+            <FeedbackTooltip
               key={i}
               feedback={element.feedback}
               disabled={!feedbackMode}
@@ -112,7 +112,7 @@ export function ClozeQuestion({
                   }
                 />
               )}
-            </ClozeBlankFeedbackTooltip>
+            </FeedbackTooltip>
           ) : undefined
         )}
       </div>

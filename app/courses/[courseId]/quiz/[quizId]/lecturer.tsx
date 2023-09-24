@@ -15,6 +15,8 @@ import { FormErrors } from "@/components/FormErrors";
 import { ClozeQuestionPreview } from "@/components/quiz/ClozeQuestionPreview";
 import { EditClozeQuestionButton } from "@/components/quiz/EditClozeQuestionButton";
 import { AddQuestionButton } from "@/components/quiz/AddQuestionButton";
+import { AssociationQuestionPreview } from "@/components/quiz/AssociationQuestionPreview";
+import { EditAssociationQuestionButton } from "@/components/quiz/EditAssociationQuestionButton";
 
 export default function EditQuiz() {
   const { quizId, courseId } = useParams();
@@ -40,7 +42,9 @@ export default function EditQuiz() {
                 number
                 ...MultipleChoiceQuestionPreviewFragment
                 ...ClozeQuestionPreviewFragment
+                ...AssociationQuestionPreviewFragment
                 ...EditClozeQuestionButtonFragment
+                ...EditAssociationQuestionButtonFragment
                 ... on MultipleChoiceQuestion {
                   text
                   hint
@@ -115,6 +119,23 @@ export default function EditQuiz() {
               <ClozeQuestionPreview _question={question} />
               <div className="flex">
                 <EditClozeQuestionButton
+                  _allRecords={query}
+                  _question={question}
+                  assessmentId={content.id}
+                />
+                <DeleteQuestionButton
+                  assessmentId={content.id}
+                  questionId={question.id}
+                  num={question.number}
+                />
+              </div>
+            </>
+          )}
+          {question.type === "ASSOCIATION" && (
+            <>
+              <AssociationQuestionPreview _question={question} />
+              <div className="flex">
+                <EditAssociationQuestionButton
                   _allRecords={query}
                   _question={question}
                   assessmentId={content.id}

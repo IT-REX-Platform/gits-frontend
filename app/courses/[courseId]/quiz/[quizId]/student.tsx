@@ -9,6 +9,7 @@ import {
 import { ContentTags } from "@/components/ContentTags";
 import { FormErrors } from "@/components/FormErrors";
 import { Heading } from "@/components/Heading";
+import { AssociationQuestion } from "@/components/quiz/AssociationQuestion";
 import { ClozeQuestion } from "@/components/quiz/ClozeQuestion";
 import { MultipleChoiceQuestion } from "@/components/quiz/MultipleChoiceQuestion";
 import { Button } from "@mui/material";
@@ -197,6 +198,7 @@ function Question({
         type
         ...MultipleChoiceQuestionFragment
         ...ClozeQuestionFragment
+        ...AssociationQuestionFragment
       }
     `,
     _question
@@ -215,6 +217,15 @@ function Question({
     case "CLOZE":
       return (
         <ClozeQuestion
+          _question={question}
+          feedbackMode={feedbackMode}
+          onHint={onHint}
+          onChange={onChange}
+        />
+      );
+    case "ASSOCIATION":
+      return (
+        <AssociationQuestion
           _question={question}
           feedbackMode={feedbackMode}
           onHint={onHint}

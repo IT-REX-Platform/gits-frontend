@@ -1,5 +1,10 @@
 import { MediaRecordSelector$key } from "@/__generated__/MediaRecordSelector.graphql";
-import { Add, List as ListIcon, TextFields } from "@mui/icons-material";
+import {
+  Add,
+  List as ListIcon,
+  Shuffle,
+  TextFields,
+} from "@mui/icons-material";
 import {
   Button,
   Dialog,
@@ -12,6 +17,7 @@ import {
 import { useState } from "react";
 import { AddClozeQuestionModal } from "./AddClozeQuestionModal";
 import { MultipleChoiceQuestionModal } from "../MultipleChoiceQuestionModal";
+import { AddAssociationQuestionModal } from "./AddAssociationQuestionModal";
 
 export function AddQuestionButton({
   _allRecords,
@@ -23,6 +29,7 @@ export function AddQuestionButton({
   const [open, setOpen] = useState(false);
   const [addMultipleChoice, setAddMultipleChoice] = useState(false);
   const [addCloze, setAddCloze] = useState(false);
+  const [addAssociation, setAddAssociation] = useState(false);
 
   return (
     <>
@@ -54,6 +61,17 @@ export function AddQuestionButton({
             </ListItemIcon>
             <ListItemText primary="Add cloze question" />
           </ListItemButton>
+          <ListItemButton
+            onClick={() => {
+              setAddAssociation(true);
+              setOpen(false);
+            }}
+          >
+            <ListItemIcon>
+              <Shuffle />
+            </ListItemIcon>
+            <ListItemText primary="Add association question" />
+          </ListItemButton>
         </List>
       </Dialog>
       <MultipleChoiceQuestionModal
@@ -68,6 +86,12 @@ export function AddQuestionButton({
         assessmentId={assessmentId}
         open={addCloze}
         onClose={() => setAddCloze(false)}
+      />
+      <AddAssociationQuestionModal
+        _allRecords={_allRecords}
+        assessmentId={assessmentId}
+        open={addAssociation}
+        onClose={() => setAddAssociation(false)}
       />
     </>
   );

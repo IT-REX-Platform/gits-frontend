@@ -161,6 +161,8 @@ export function Navbar() {
               id
               title
               startDate
+              endDate
+              published
             }
           }
         }
@@ -169,14 +171,14 @@ export function Navbar() {
     {}
   );
 
-  // Calculate the date 7 months ago from today
-  const sevenMonthsAgo = dayjs().subtract(7, "months");
-
-  const filtered = currentUserInfo.courseMemberships.filter(
-    (x) =>
-      (x.role === "TUTOR" || pageView === PageView.Student) &&
-      dayjs(x.course.startDate) >= sevenMonthsAgo
-  );
+  const filtered = currentUserInfo.courseMemberships
+    .filter((x) => x.role === "TUTOR" || pageView === PageView.Student)
+    .filter((x) => x.course.published || pageView === PageView.Lecturer)
+    .filter(
+      (x) =>
+        dayjs(x.course.endDate) >= dayjs() &&
+        dayjs(x.course.startDate) <= dayjs()
+    );
 
   return (
     <NavbarBase>

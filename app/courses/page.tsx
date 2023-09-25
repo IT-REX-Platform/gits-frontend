@@ -40,6 +40,7 @@ export default function StudentCourseList() {
       query pageCourseListQuery {
         courses {
           elements {
+            published
             id
             title
             description
@@ -72,13 +73,15 @@ export default function StudentCourseList() {
 
   const [search, setSearch] = useState("");
 
-  const filteredCourses = courses.elements.filter(
-    (x) =>
-      !search ||
-      x.title.toLowerCase().includes(search.toLowerCase()) ||
-      x.description.toLowerCase().includes(search.toLowerCase()) ||
-      (x.startYear && x.startYear.toString().includes(search))
-  );
+  const filteredCourses = courses.elements
+    .filter((x) => x.published || pageView === PageView.Lecturer)
+    .filter(
+      (x) =>
+        !search ||
+        x.title.toLowerCase().includes(search.toLowerCase()) ||
+        x.description.toLowerCase().includes(search.toLowerCase()) ||
+        (x.startYear && x.startYear.toString().includes(search))
+    );
   const myCourseIds = filteredCourses
     .filter(
       (course) =>

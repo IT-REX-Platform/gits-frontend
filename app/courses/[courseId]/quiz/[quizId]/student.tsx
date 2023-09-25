@@ -5,16 +5,26 @@ import { studentQuizQuery } from "@/__generated__/studentQuizQuery.graphql";
 import {
   QuestionCompletedInput,
   studentQuizTrackCompletedMutation,
+  studentQuizTrackCompletedMutation$data,
 } from "@/__generated__/studentQuizTrackCompletedMutation.graphql";
 import { ContentTags } from "@/components/ContentTags";
 import { FormErrors } from "@/components/FormErrors";
 import { Heading } from "@/components/Heading";
 import { ClozeQuestion } from "@/components/quiz/ClozeQuestion";
 import { MultipleChoiceQuestion } from "@/components/quiz/MultipleChoiceQuestion";
-import { Button } from "@mui/material";
+import {
+  Button,
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Typography,
+} from "@mui/material";
 import Error from "next/error";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import Confetti from "react-confetti";
 import {
   graphql,
   useFragment,
@@ -47,13 +57,9 @@ export default function StudentQuiz() {
           $input: QuizCompletedInput!
         ) {
           logQuizCompleted(input: $input) {
-            assessment {
-              userProgressData {
-                lastLearnDate
-                nextLearnDate
-                isLearned
-              }
-            }
+            correctness
+            hintsUsed
+            success
           }
         }
       `
@@ -62,6 +68,9 @@ export default function StudentQuiz() {
   const [completedInput, setCompletedInput] = useState<
     QuestionCompletedInput[]
   >([]);
+
+  const [feedback, setFeedback] =
+    useState<studentQuizTrackCompletedMutation$data["logQuizCompleted"]>();
 
   // Fetch quiz data
   const { contentsByIds } = useLazyLoadQuery<studentQuizQuery>(
@@ -125,8 +134,10 @@ export default function StudentQuiz() {
             completedQuestions: [...completedInput, currentAnswer],
           },
         },
+        onCompleted(response) {
+          setFeedback(response.logQuizCompleted);
+        },
       });
-      router.push(`/courses/${courseId}`);
     }
   };
 
@@ -176,6 +187,7 @@ export default function StudentQuiz() {
             : "Finish"}
         </Button>
       </div>
+      {feedback && <Feedback courseId={courseId} feedback={feedback} />}
     </main>
   );
 }
@@ -224,4 +236,43 @@ function Question({
     default:
       return null;
   }
+}
+
+function Feedback({
+  feedback: { success, correctness, hintsUsed },
+  courseId,
+}: {
+  feedback: studentQuizTrackCompletedMutation$data["logQuizCompleted"];
+  courseId: string;
+}) {
+  const router = useRouter();
+  return (
+    <Dialog open>
+      {success && <Confetti />}
+      <DialogTitle style={{ color: success ? "green" : "red" }}>
+        {success ? "Congratulations!" : "Better luck next time!"}
+      </DialogTitle>
+      <DialogContent>
+        <Typography variant="body1" component="div">
+          <CircularProgress variant="determinate" value={correctness * 100} />
+          <strong>{`You've scored `}</strong>
+          <span style={{ color: success ? "green" : "red" }}>{`${Math.round(
+            correctness * 100
+          )}%`}</span>
+        </Typography>
+        <Typography variant="body1">
+          <strong>{`Hints used: `}</strong>
+          {hintsUsed}
+        </Typography>
+      </DialogContent>
+      <DialogActions>
+        <Button
+          variant="text"
+          onClick={() => router.push(`/courses/${courseId}`)}
+        >
+          Back to Course
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
 }

@@ -1,8 +1,8 @@
 "use client";
 
 import { PageView, usePageView } from "@/src/currentView";
+import StudentQuiz from "./StudentQuiz";
 import EditQuiz from "./lecturer";
-import StudentQuiz from "./student";
 //import EditQuiz from "./lecturer";
 
 export default function CoursePage() {

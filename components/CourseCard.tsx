@@ -1,6 +1,5 @@
 import { CourseCardFragment$key } from "@/__generated__/CourseCardFragment.graphql";
 import {
-  Button,
   Card,
   CardContent,
   Chip,
@@ -67,6 +66,7 @@ export function CourseCard({ _course }: { _course: CourseCardFragment$key }) {
       <div className="flex flex-col m-4 gap-2 items-start grow min-h-[12rem]">
         {course.suggestions.map((suggestion, i) => (
           <Suggestion
+            courseId={course.id}
             key={`${course.id}-suggestion-${i}`}
             _suggestion={suggestion}
           />

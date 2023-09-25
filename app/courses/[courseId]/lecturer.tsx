@@ -156,6 +156,7 @@ export default function LecturerCoursePage() {
       {orderBy(course.chapters.elements, (x) => x.number).map((chapter) => (
         <section key={chapter.id} className="mb-6">
           <ChapterHeader
+            courseId={id}
             _chapter={chapter}
             action={<EditChapterButton _chapter={chapter} />}
           />
@@ -178,10 +179,15 @@ export default function LecturerCoursePage() {
                     (stage) => (
                       <Stage progress={0} key={stage.id}>
                         {stage.requiredContents.map((content) => (
-                          <ContentLink key={content.id} _content={content} />
+                          <ContentLink
+                            courseId={course.id}
+                            key={content.id}
+                            _content={content}
+                          />
                         ))}
                         {stage.optionalContents.map((content) => (
                           <ContentLink
+                            courseId={course.id}
                             key={content.id}
                             _content={content}
                             optional

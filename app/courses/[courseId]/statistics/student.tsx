@@ -1,19 +1,19 @@
 "use client";
 
-import { useState } from "react";
-import { useParams } from "next/navigation";
 import Error from "next/error";
+import { useParams } from "next/navigation";
+import { useState } from "react";
 import { graphql, useLazyLoadQuery } from "react-relay";
 
-import { Heading } from "@/components/Heading";
 import { studentCourseStatsQuery } from "@/__generated__/studentCourseStatsQuery.graphql";
+import { Heading } from "@/components/Heading";
 import { RewardScoreChart } from "@/components/RewardScoreChart";
+import { RewardScoreFilter } from "@/components/RewardScoreFilter";
 import {
   RewardScoreFilterType,
   RewardScoreHistoryTable,
 } from "@/components/RewardScoreHistoryTable";
 import { Subheading } from "@/components/Subheading";
-import { RewardScoreFilter } from "@/components/RewardScoreFilter";
 
 export default function StudentCourseStatsPage() {
   // Get course id from url
@@ -85,6 +85,7 @@ export default function StudentCourseStatsPage() {
         History
       </Subheading>
       <RewardScoreHistoryTable
+        courseId={id}
         _scores={course.rewardScores}
         filter={historySelection}
       />

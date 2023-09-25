@@ -213,6 +213,10 @@ type Chapter {
   contents: [Content!]!
   sections: [Section!]!
   skillLevels: SkillLevels!
+
+  # The skill types which are achievable in this chapter.
+  # A skill type is achievable if there is at least one assessment in this chapter with this skill type.
+  achievableSkillTypes: [SkillType]!
 }
 
 input ChapterFilter {
@@ -293,6 +297,17 @@ type ClozeQuestion implements Question {
 type ClozeTextElement {
   # Text of the element, in SlateJS JSON format.
   text: JSON!
+}
+
+type CompositeProgressInformation {
+  # percentage of completedContents/totalContents
+  progress: Float!
+
+  # absolut number of completed content
+  completedContents: Int!
+
+  # absolut number of total content
+  totalContents: Int!
 }
 
 interface Content {
@@ -1060,47 +1075,6 @@ type Mutation {
   # deletes user course link
   deleteMembership(input: CourseMembershipInput!): CourseMembership!
 
-  # Creates a new media record
-  createMediaRecord(input: CreateMediaRecordInput!): MediaRecord!
-
-  # Updates an existing media record with the given UUID
-  updateMediaRecord(input: UpdateMediaRecordInput!): MediaRecord!
-
-  # Deletes the media record with the given UUID
-  deleteMediaRecord(id: UUID!): UUID!
-
-  # Allows multiple media records to be linked/added to a content.
-  linkMediaRecordsWithContent(
-    contentId: UUID!
-    mediaRecordIds: [UUID!]!
-  ): [MediaRecord!]!
-
-  # Logs that a media has been worked on by the current user.
-  # See https://gits-enpro.readthedocs.io/en/latest/dev-manuals/gamification/userProgress.html
-  #
-  # Possible side effects:
-  # When all media records of a content have been worked on by a user,
-  # a user-progress event is emitted for the content.
-  logMediaRecordWorkedOn(mediaRecordId: UUID!): MediaRecord!
-
-  # ONLY FOR TESTING PURPOSES. DO NOT USE IN FRONTEND. WILL BE REMOVED.
-  #
-  # Triggers the recalculation of the reward score of the user.
-  # This is done automatically at some time in the night.
-  #
-  # The purpose of this mutation is to allow testing of the reward score and demonstrate the functionality.
-  recalculateScores(courseId: UUID!, userId: UUID!): RewardScores!
-    @deprecated(reason: "Only for testing purposes. Will be removed.")
-
-  # ONLY FOR TESTING PURPOSES. DO NOT USE IN FRONTEND. WILL BE REMOVED.
-  #
-  # Triggers the recalculation of the skill level of the user.
-  # This is done automatically at some time in the night.
-  #
-  # The purpose of this mutation is to allow testing of the reward score and demonstrate the functionality.
-  recalculateLevels(chapterId: UUID!, userId: UUID!): SkillLevels!
-    @deprecated(reason: "Only for testing purposes. Will be removed.")
-
   # Creates a new course with the given input and returns the created course.
   createCourse(input: CreateCourseInput!): Course!
 
@@ -1136,6 +1110,47 @@ type Mutation {
 
   # Modify Sections
   mutateSection(sectionId: UUID!): SectionMutation!
+
+  # ONLY FOR TESTING PURPOSES. DO NOT USE IN FRONTEND. WILL BE REMOVED.
+  #
+  # Triggers the recalculation of the skill level of the user.
+  # This is done automatically at some time in the night.
+  #
+  # The purpose of this mutation is to allow testing of the skill level score and demonstrate the functionality.
+  recalculateLevels(chapterId: UUID!, userId: UUID!): SkillLevels!
+    @deprecated(reason: "Only for testing purposes. Will be removed.")
+
+  # ONLY FOR TESTING PURPOSES. DO NOT USE IN FRONTEND. WILL BE REMOVED.
+  #
+  # Triggers the recalculation of the reward score of the user.
+  # This is done automatically at some time in the night.
+  #
+  # The purpose of this mutation is to allow testing of the reward score and demonstrate the functionality.
+  recalculateScores(courseId: UUID!, userId: UUID!): RewardScores!
+    @deprecated(reason: "Only for testing purposes. Will be removed.")
+
+  # Creates a new media record
+  createMediaRecord(input: CreateMediaRecordInput!): MediaRecord!
+
+  # Updates an existing media record with the given UUID
+  updateMediaRecord(input: UpdateMediaRecordInput!): MediaRecord!
+
+  # Deletes the media record with the given UUID
+  deleteMediaRecord(id: UUID!): UUID!
+
+  # Allows multiple media records to be linked/added to a content.
+  linkMediaRecordsWithContent(
+    contentId: UUID!
+    mediaRecordIds: [UUID!]!
+  ): [MediaRecord!]!
+
+  # Logs that a media has been worked on by the current user.
+  # See https://gits-enpro.readthedocs.io/en/latest/dev-manuals/gamification/userProgress.html
+  #
+  # Possible side effects:
+  # When all media records of a content have been worked on by a user,
+  # a user-progress event is emitted for the content.
+  logMediaRecordWorkedOn(mediaRecordId: UUID!): MediaRecord!
 
   # Creates a new flashcard set.
   createFlashcardSet(
@@ -1284,45 +1299,6 @@ type Query {
   # If a user does not exist, null is returned for that user.
   findUserInfos(ids: [UUID!]!): [UserInfo]!
 
-  # Returns the media records with the given IDs. Throws an error if a MediaRecord corresponding to a given ID
-  # cannot be found.
-  mediaRecordsByIds(ids: [UUID!]!): [MediaRecord!]!
-
-  # Like mediaRecordsByIds() returns the media records with the given IDs, but instead of throwing an error if an ID
-  # cannot be found, it instead returns NULL for that media record.
-  findMediaRecordsByIds(ids: [UUID!]!): [MediaRecord]!
-
-  # Returns all media records of the system.
-  mediaRecords: [MediaRecord!]!
-    @deprecated(
-      reason: "In production there should probably be no way to get all media records of the system."
-    )
-
-  # Returns all media records which the current user created.
-  userMediaRecords: [MediaRecord!]!
-
-  # Returns the media records associated the given content IDs as a list of lists where each sublist contains
-  # the media records associated with the content ID at the same index in the input list
-  mediaRecordsByContentIds(contentIds: [UUID!]!): [[MediaRecord!]!]!
-
-  # Get the reward score of the current user for the specified course.
-  userCourseRewardScores(courseId: UUID!): RewardScores!
-
-  # Get the reward score of the specified user for the specified course.
-  courseRewardScoresForUser(courseId: UUID!, userId: UUID!): RewardScores!
-
-  # Gets the power scores for each user in the course, ordered by power score descending.
-  scoreboard(courseId: UUID!): [ScoreboardItem!]!
-
-  # Get the skill levels of the current user for all skill types for a list of chapter ids.
-  userSkillLevelsByChapterIds(chapterIds: [UUID!]!): [SkillLevels!]!
-
-  # Get the skill levels of the specified user for all skill types for a list of chapter ids.
-  skillLevelsForUserByChapterIds(
-    chapterIds: [UUID!]!
-    userId: UUID!
-  ): [SkillLevels!]!
-
   # Get a list of courses. Can be filtered, sorted and paginated.
   courses(
     filter: CourseFilter
@@ -1383,6 +1359,9 @@ type Query {
   # Retrieves all existing sections for multiple chapters.
   sectionsByChapterIds(chapterIds: [UUID!]!): [[Section!]!]!
 
+  # Retrieve progress for multiple chapters
+  progressByChapterIds(chapterIds: [UUID!]!): [CompositeProgressInformation!]!
+
   # Generates user specific suggestions for multiple chapters.
   #
   # Only content that the user can access will be considered.
@@ -1399,6 +1378,51 @@ type Query {
     # also containing suggestions for media content (which do not have a skill type).
     skillTypes: [SkillType!]! = []
   ): [Suggestion!]!
+
+  # Retrieves all skill types that are achievable for the given chapters.
+  # Each chapter will have its own list of skill types (batching query).
+  _internal_noauth_achievableSkillTypesByChapterIds(
+    chapterIds: [UUID!]!
+  ): [[SkillType!]!]!
+
+  # Get the skill levels of the current user for all skill types for a list of chapter ids.
+  userSkillLevelsByChapterIds(chapterIds: [UUID!]!): [SkillLevels!]!
+
+  # Get the skill levels of the specified user for all skill types for a list of chapter ids.
+  skillLevelsForUserByChapterIds(
+    chapterIds: [UUID!]!
+    userId: UUID!
+  ): [SkillLevels!]!
+
+  # Get the reward score of the current user for the specified course.
+  userCourseRewardScores(courseId: UUID!): RewardScores!
+
+  # Get the reward score of the specified user for the specified course.
+  courseRewardScoresForUser(courseId: UUID!, userId: UUID!): RewardScores!
+
+  # Gets the power scores for each user in the course, ordered by power score descending.
+  scoreboard(courseId: UUID!): [ScoreboardItem!]!
+
+  # Returns the media records with the given IDs. Throws an error if a MediaRecord corresponding to a given ID
+  # cannot be found.
+  mediaRecordsByIds(ids: [UUID!]!): [MediaRecord!]!
+
+  # Like mediaRecordsByIds() returns the media records with the given IDs, but instead of throwing an error if an ID
+  # cannot be found, it instead returns NULL for that media record.
+  findMediaRecordsByIds(ids: [UUID!]!): [MediaRecord]!
+
+  # Returns all media records of the system.
+  mediaRecords: [MediaRecord!]!
+    @deprecated(
+      reason: "In production there should probably be no way to get all media records of the system."
+    )
+
+  # Returns all media records which the current user created.
+  userMediaRecords: [MediaRecord!]!
+
+  # Returns the media records associated the given content IDs as a list of lists where each sublist contains
+  # the media records associated with the content ID at the same index in the input list
+  mediaRecordsByContentIds(contentIds: [UUID!]!): [[MediaRecord!]!]!
 
   # Get flashcards by their ids
   flashcardsByIds(ids: [UUID!]!): [Flashcard!]!

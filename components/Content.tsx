@@ -35,7 +35,7 @@ import {
   Typography,
 } from "@mui/material";
 import dayjs from "dayjs";
-import { useParams, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import {
   MouseEventHandler,
   ReactElement,
@@ -66,12 +66,14 @@ export function ContentLink({
   extra_chips = [],
   size = "normal",
   _content,
+  courseId,
 }: {
   disabled?: boolean;
   optional?: boolean;
   extra_chips?: ContentChip[];
   size?: ContentSize;
   _content: ContentLinkFragment$key;
+  courseId: string;
 }) {
   const content = useFragment(
     graphql`
@@ -91,11 +93,11 @@ export function ContentLink({
   function getContentNode() {
     switch (content.metadata.type) {
       case "MEDIA":
-        return <MediaContent _media={content} />;
+        return <MediaContent courseId={courseId} _media={content} />;
       case "FLASHCARDS":
-        return <FlashcardContent _flashcard={content} />;
+        return <FlashcardContent courseId={courseId} _flashcard={content} />;
       case "QUIZ":
-        return <QuizContent _quiz={content} />;
+        return <QuizContent courseId={courseId} _quiz={content} />;
     }
     return null;
   }
@@ -116,13 +118,14 @@ export function MediaContent({
   recordId,
   replace = false,
   _media,
+  courseId,
 }: {
   recordId?: string;
   replace?: boolean;
   _media: ContentMediaFragment$key;
+  courseId: string;
 }) {
   const router = useRouter();
-  const { courseId } = useParams();
   const media = useFragment(
     graphql`
       fragment ContentMediaFragment on MediaContent {
@@ -505,10 +508,11 @@ function EarlyRepeatWarnModal({
 
 export function FlashcardContent({
   _flashcard,
+  courseId,
 }: {
   _flashcard: ContentFlashcardFragment$key;
+  courseId: string;
 }) {
-  const { courseId } = useParams();
   const flashcard = useFragment(
     graphql`
       fragment ContentFlashcardFragment on FlashcardSetAssessment {
@@ -577,8 +581,13 @@ export function FlashcardContent({
   );
 }
 
-export function QuizContent({ _quiz }: { _quiz: ContentQuizFragment$key }) {
-  const { courseId } = useParams();
+export function QuizContent({
+  _quiz,
+  courseId,
+}: {
+  _quiz: ContentQuizFragment$key;
+  courseId: string;
+}) {
   const quiz = useFragment(
     graphql`
       fragment ContentQuizFragment on QuizAssessment {

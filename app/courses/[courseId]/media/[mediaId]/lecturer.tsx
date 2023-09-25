@@ -153,6 +153,7 @@ export default function LecturerMediaPage() {
           <div className="mt-4 flex flex-col gap-2">
             {relatedRecords.map((record) => (
               <MediaContent
+                courseId={courseId}
                 key={record.id}
                 _media={content}
                 recordId={record.id}

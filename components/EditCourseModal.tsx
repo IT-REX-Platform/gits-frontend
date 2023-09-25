@@ -1,6 +1,3 @@
-import { useState } from "react";
-import { graphql, useFragment, useMutation } from "react-relay";
-import dayjs, { Dayjs } from "dayjs";
 import {
   Alert,
   Backdrop,
@@ -14,12 +11,15 @@ import {
   TextField,
 } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers";
+import dayjs, { Dayjs } from "dayjs";
+import { useState } from "react";
+import { graphql, useFragment, useMutation } from "react-relay";
 
-import { Form, FormSection } from "./Form";
-import { EditCourseModalMutation } from "@/__generated__/EditCourseModalMutation.graphql";
-import { EditCourseModalFragment$key } from "@/__generated__/EditCourseModalFragment.graphql";
 import { EditCourseModalDeleteMutation } from "@/__generated__/EditCourseModalDeleteMutation.graphql";
+import { EditCourseModalFragment$key } from "@/__generated__/EditCourseModalFragment.graphql";
+import { EditCourseModalMutation } from "@/__generated__/EditCourseModalMutation.graphql";
 import { useRouter } from "next/navigation";
+import { Form, FormSection } from "./Form";
 
 export function EditCourseModal({
   _course,
@@ -117,16 +117,42 @@ export function EditCourseModal({
         router.push("/");
       },
       updater(store) {
-        console.log(store);
-        const courses = store.get("courses");
-        console.log(courses);
-        if (!courses) return;
-        courses.setLinkedRecords(
-          courses
-            .getLinkedRecords("courses")
-            ?.filter((x) => x.getDataID() !== course.id) ?? [],
-          "courses"
-        );
+        try {
+          // update "query.currentUserInfo.courseMemberships"
+          const currentUserInfo = store
+            .getRoot()
+            .getLinkedRecord("currentUserInfo");
+
+          const courseMemberships =
+            currentUserInfo?.getLinkedRecords("courseMemberships");
+
+          console.log("courseMemberships", courseMemberships);
+
+          if (!currentUserInfo || !courseMemberships) return;
+
+          currentUserInfo.setLinkedRecords(
+            courseMemberships.filter(
+              (x) => x.getLinkedRecord("course")?.getDataID() !== course.id
+            ),
+            "courseMemberships"
+          );
+
+          // update "query.courses"
+
+          const courseQuery = store.getRoot().getLinkedRecord("courses");
+          const courses = courseQuery?.getLinkedRecords("elements");
+
+          console.log("courses", courses);
+
+          if (!courseQuery || !courses) return;
+
+          courseQuery.setLinkedRecords(
+            courses.filter((x) => x.getDataID() !== course.id),
+            "elements"
+          );
+        } catch (err) {
+          console.error(err);
+        }
       },
     });
   }

@@ -1,6 +1,6 @@
 "use client";
-import { lecturerLecturerCourseIdQuery } from "@/__generated__/lecturerLecturerCourseIdQuery.graphql";
 import { lecturerDeleteSectionMutation } from "@/__generated__/lecturerDeleteSectionMutation.graphql";
+import { lecturerLecturerCourseIdQuery } from "@/__generated__/lecturerLecturerCourseIdQuery.graphql";
 import { Button, IconButton, Typography } from "@mui/material";
 import Error from "next/error";
 import { useParams } from "next/navigation";
@@ -21,7 +21,7 @@ import { Section, SectionContent, SectionHeader } from "@/components/Section";
 import { Stage } from "@/components/Stage";
 import { Add, Delete, Settings } from "@mui/icons-material";
 import { orderBy } from "lodash";
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import { AddContentModal } from "../../../components/AddContentModal";
 
 graphql`
@@ -170,8 +170,8 @@ export default function LecturerCoursePage() {
 
           <ChapterContent>
             {chapter.sections.map((section) => (
-              <>
-                <Section key={section.id}>
+              <Fragment key={section.id}>
+                <Section>
                   <SectionHeader
                     action={
                       <EditSectionButton
@@ -251,7 +251,7 @@ export default function LecturerCoursePage() {
                 >
                   Delete Section
                 </Button>
-              </>
+              </Fragment>
             ))}
             <AddSectionButton chapterId={chapter.id} />
           </ChapterContent>

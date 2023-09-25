@@ -11,7 +11,6 @@ import {
   tooltipClasses,
 } from "@mui/material";
 import { every, orderBy, some } from "lodash";
-import Error from "next/error";
 import { useParams, useRouter } from "next/navigation";
 import {
   graphql,
@@ -36,6 +35,7 @@ import { ChapterContent } from "@/components/ChapterContent";
 import { ChapterHeader } from "@/components/ChapterHeader";
 import { ContentLink } from "@/components/Content";
 import { FormErrors } from "@/components/FormErrors";
+import { PageError } from "@/components/PageError";
 import { RewardScores } from "@/components/RewardScores";
 import { Section, SectionContent, SectionHeader } from "@/components/Section";
 import { Stage, StageBarrier } from "@/components/Stage";
@@ -58,8 +58,7 @@ function createData(name: string, power: number) {
 
 export default function StudentCoursePage() {
   // Get course id from url
-  const params = useParams();
-  const id = params.courseId;
+  const { courseId: id } = useParams();
 
   const router = useRouter();
   const [error, setError] = useState<any>(null);
@@ -132,7 +131,7 @@ export default function StudentCoursePage() {
 
   // Show 404 error page if id was not found
   if (coursesByIds.length == 0) {
-    return <Error statusCode={404} title="Course could not be found." />;
+    return <PageError message="No course found with given id." />;
   }
 
   // Extract scoreboard

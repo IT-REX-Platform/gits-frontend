@@ -14,12 +14,14 @@ export function EditRichTextButton({
   title,
   icon,
   initialValue,
+  placeholder,
   _allRecords,
   onSave: _onSave,
 }: {
   title: string;
   icon: ReactNode;
   initialValue: string;
+  placeholder?: string;
   _allRecords: MediaRecordSelector$key;
   onSave: (value: string) => void;
 }) {
@@ -47,6 +49,7 @@ export function EditRichTextButton({
             className="w-[700px]"
             _allRecords={_allRecords}
             initialValue={value}
+            placeholder={placeholder}
             onChange={setValue}
           />
         </DialogContent>

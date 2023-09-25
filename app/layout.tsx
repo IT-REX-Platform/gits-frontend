@@ -24,6 +24,7 @@ import { PageViewProvider } from "@/src/currentView";
 import { PageLayout } from "@/components/PageLayout";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
+import PageLoading from "./loading";
 
 dayjs.extend(isBetween);
 
@@ -64,11 +65,9 @@ export default function App({ children }: { children: React.ReactNode }) {
           <LocalizationProvider dateAdapter={AdapterDayjs}>
             <PageViewProvider>
               <DndProvider backend={HTML5Backend}>
-                <Suspense fallback="Loading...">
-                  <SigninContent>
-                    <PageLayout>{children}</PageLayout>
-                  </SigninContent>
-                </Suspense>
+                <SigninContent>
+                  <PageLayout>{children}</PageLayout>
+                </SigninContent>
               </DndProvider>
             </PageViewProvider>
           </LocalizationProvider>
@@ -112,7 +111,7 @@ function SigninContent({ children }: { children: React.ReactNode }) {
   }
 
   if (auth.isLoading) {
-    return <div>Loading...</div>;
+    return <PageLoading />;
   }
 
   if (auth.error) {

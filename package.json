@@ -11,7 +11,7 @@
     "format": "prettier --write .",
     "check-format": "prettier --check .",
     "prepare": "husky install",
-    "update-schema": "fetch-graphql-schema http://orange.informatik.uni-stuttgart.de/graphql -o src/schema.graphql -r && sed -i 's/Assessment,/Assessment \\&/' src/schema.graphql"
+    "update-schema": "fetch-graphql-schema http://orange.informatik.uni-stuttgart.de/graphql -o src/schema.graphql -r && ( [[ \"$OSTYPE\" == \"darwin\"* ]] && sed -i '' 's/Assessment,/Assessment \\&/' src/schema.graphql || sed -i 's/Assessment,/Assessment \\&/' src/schema.graphql )"
   },
   "lint-staged": {
     "*.{ts,tsx,css,json}": "prettier --write"
@@ -51,6 +51,7 @@
     "react-dnd-html5-backend": "^16.0.1",
     "react-dom": "18.2.0",
     "react-dropzone": "^14.2.3",
+    "react-error-boundary": "^4.0.11",
     "react-oidc-context": "^2.2.2",
     "react-pdf": "^7.2.0",
     "react-player": "^2.12.0",

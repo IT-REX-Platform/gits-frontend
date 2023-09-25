@@ -1,7 +1,7 @@
 import { ClozeQuestionPreviewFragment$key } from "@/__generated__/ClozeQuestionPreviewFragment.graphql";
 import { graphql, useFragment } from "react-relay";
 import { RenderRichText } from "../RichTextEditor";
-import { ClozeBlankFeedbackTooltip } from "./ClozeBlankFeedbackTooltip";
+import { FeedbackTooltip } from "./FeedbackTooltip";
 
 export function ClozeQuestionPreview({
   _question,
@@ -35,7 +35,7 @@ export function ClozeQuestionPreview({
             <RenderRichText value={elem.text} />
           </span>
         ) : elem.__typename === "ClozeBlankElement" ? (
-          <ClozeBlankFeedbackTooltip
+          <FeedbackTooltip
             key={i}
             feedback={elem.feedback}
             correctAnswer={elem.correctAnswer}
@@ -43,7 +43,7 @@ export function ClozeQuestionPreview({
             <span className="mx-1 px-1 border-b border-gray-300">
               {elem.correctAnswer}
             </span>
-          </ClozeBlankFeedbackTooltip>
+          </FeedbackTooltip>
         ) : undefined
       )}
       {question.showBlanksList && (

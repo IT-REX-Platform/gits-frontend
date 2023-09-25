@@ -10,6 +10,8 @@ import {
 import { ContentTags } from "@/components/ContentTags";
 import { FormErrors } from "@/components/FormErrors";
 import { Heading } from "@/components/Heading";
+import { PageError } from "@/components/PageError";
+import { AssociationQuestion } from "@/components/quiz/AssociationQuestion";
 import { ClozeQuestion } from "@/components/quiz/ClozeQuestion";
 import { MultipleChoiceQuestion } from "@/components/quiz/MultipleChoiceQuestion";
 import {
@@ -21,7 +23,6 @@ import {
   DialogTitle,
   Typography,
 } from "@mui/material";
-import Error from "next/error";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Confetti from "react-confetti";
@@ -96,17 +97,27 @@ export default function StudentQuiz() {
     { id: [quizId] }
   );
 
-  // Show 404 error page if id was not found
   if (contentsByIds.length == 0) {
-    return <Error statusCode={404} title="Quiz could not be found." />;
+    return <PageError message="No quiz found with given id." />;
   }
 
   const quiz = contentsByIds[0].quiz;
   if (quiz == null) {
-    return <Error statusCode={404} />;
+    return (
+      <PageError
+        title={contentsByIds[0].metadata.name}
+        message="Content not of type quiz."
+      />
+    );
   }
 
   const currentQuestion = quiz.selectedQuestions[currentIndex];
+  if (!currentQuestion) {
+    return (
+      <PageError title={contentsByIds[0].metadata.name} message="Empty quiz." />
+    );
+  }
+
   const nextQuestion = () => {
     // Enable feedback mode
     if (!checkAnswers) {
@@ -209,6 +220,7 @@ function Question({
         type
         ...MultipleChoiceQuestionFragment
         ...ClozeQuestionFragment
+        ...AssociationQuestionFragment
       }
     `,
     _question
@@ -227,6 +239,15 @@ function Question({
     case "CLOZE":
       return (
         <ClozeQuestion
+          _question={question}
+          feedbackMode={feedbackMode}
+          onHint={onHint}
+          onChange={onChange}
+        />
+      );
+    case "ASSOCIATION":
+      return (
+        <AssociationQuestion
           _question={question}
           feedbackMode={feedbackMode}
           onHint={onHint}

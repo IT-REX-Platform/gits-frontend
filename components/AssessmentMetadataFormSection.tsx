@@ -8,7 +8,9 @@ import {
   ListItemText,
   MenuItem,
   Select,
+  Slider,
   TextField,
+  Typography,
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import { FormSection } from "./Form";
@@ -37,12 +39,11 @@ export function AssessmentMetadataFormSection({
   const [intervalLearning, setIntervalLearning] = useState(false);
   const [interval, setInterval] = useState(metadata?.initialLearningInterval);
   const [skillTypes, setSkillTypes] = useState(metadata?.skillTypes);
-  const [skillPointsStr, setSkillPointsStr] = useState(
-    metadata?.skillPoints.toString() ?? "0"
+  const [skillPoints, setSkillPoints] = useState(
+    Number(metadata?.skillPoints) || 50
   );
-  const skillPoints = parseInt(skillPointsStr);
 
-  const valid = skillTypes?.length && skillPoints.toString() === skillPointsStr;
+  const valid = skillTypes?.length;
 
   useEffect(() => {
     onChange(
@@ -54,7 +55,7 @@ export function AssessmentMetadataFormSection({
           }
         : null
     );
-  }, [skillTypes, skillPointsStr]);
+  }, [skillTypes, skillPoints, intervalLearning, valid, onChange]);
 
   return (
     <FormSection title="Assessment details">
@@ -91,19 +92,24 @@ export function AssessmentMetadataFormSection({
           )}
         </Select>
       </FormControl>
-      <TextField
-        className="w-96"
-        label="Skill Points"
-        variant="outlined"
-        type="number"
-        value={skillPointsStr}
-        error={
-          !(metadata == null && skillPointsStr.trim() == "") &&
-          skillPoints.toString() !== skillPointsStr
-        }
-        onChange={(e) => setSkillPointsStr(e.target.value)}
-        multiline
-        required
+
+      <Typography variant="caption" sx={{ marginTop: 2 }}>
+        Skill Points
+      </Typography>
+
+      <Slider
+        sx={{ marginX: 1 }}
+        step={5}
+        marks={[
+          { value: 10, label: "Low" },
+          { value: 50, label: "Medium" },
+          { value: 90, label: "High" },
+        ]}
+        min={0}
+        max={100}
+        valueLabelDisplay="auto"
+        value={skillPoints}
+        onChange={(e, a) => setSkillPoints(a as number)}
       />
       <FormGroup>
         <FormControlLabel

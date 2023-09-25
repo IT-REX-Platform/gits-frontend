@@ -31,7 +31,6 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
-import Error from "next/error";
 import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
 import {
@@ -40,9 +39,10 @@ import {
   useLazyLoadQuery,
   useMutation,
 } from "react-relay";
-import { EditFlashcardSetModal } from "../../../../../components/EditFlashcardSetModal";
+import { EditFlashcardSetModal } from "@/components/EditFlashcardSetModal";
+import { PageError } from "@/components/PageError";
 
-export default function EditFlashcards() {
+export default function LecturerFlashcards() {
   const { flashcardSetId, courseId } = useParams();
   const [del, deleting] =
     useMutation<lecturerDeleteFlashcardContentMutation>(graphql`
@@ -141,14 +141,19 @@ export default function EditFlashcards() {
   const isUpdating = isAddingFlashcard || isUpdatingFlashcardSet || isDeleting;
 
   if (contentsByIds.length == 0) {
-    return <Error statusCode={404} />;
+    return <PageError message="No flashcards found with given id." />;
   }
 
   const content = contentsByIds[0];
   const flashcardSet = content.flashcardSet;
 
   if (flashcardSet == null) {
-    return <Error statusCode={400} />;
+    return (
+      <PageError
+        title={content.metadata.name}
+        message="Content is not of type flashcards."
+      />
+    );
   }
 
   function handleAddFlashcard(sides: FlashcardSideData[]) {
@@ -616,7 +621,7 @@ function LocalFlashcard({
   const [addSideOpen, setAddSideOpen] = useState(false);
 
   const numQuestions = sides.filter((s) => s.isQuestion === true).length;
-  const numAnswers = sides.filter((s) => s.isQuestion === false).length;
+  const numAnswers = sides.filter((s) => s.isAnswer === true).length;
   const valid = numQuestions >= 1 && numAnswers >= 1;
 
   function handleEditFlashcardSide(idx: number, data: FlashcardSideData) {

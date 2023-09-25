@@ -14,6 +14,7 @@ import { PageError } from "@/components/PageError";
 import { AssociationQuestion } from "@/components/quiz/AssociationQuestion";
 import { ClozeQuestion } from "@/components/quiz/ClozeQuestion";
 import { MultipleChoiceQuestion } from "@/components/quiz/MultipleChoiceQuestion";
+import { Check, Close } from "@mui/icons-material";
 import {
   Button,
   CircularProgress,
@@ -267,24 +268,48 @@ function Feedback({
   courseId: string;
 }) {
   const router = useRouter();
+  const color = success ? "green" : "red";
+
   return (
     <Dialog open>
       {success && <Confetti />}
-      <DialogTitle style={{ color: success ? "green" : "red" }}>
+      <DialogTitle style={{ color }}>
         {success ? "Congratulations!" : "Better luck next time!"}
       </DialogTitle>
       <DialogContent>
-        <Typography variant="body1" component="div">
-          <CircularProgress variant="determinate" value={correctness * 100} />
-          <strong>{`You've scored `}</strong>
-          <span style={{ color: success ? "green" : "red" }}>{`${Math.round(
-            correctness * 100
-          )}%`}</span>
+        <Typography
+          variant="body1"
+          component="div"
+          className="flex gap-3 items-center"
+        >
+          <div style={{ position: "relative", display: "inline-block" }}>
+            <CircularProgress
+              variant="determinate"
+              value={correctness * 100}
+              style={{ color }}
+            />
+            <div
+              style={{
+                position: "absolute",
+                top: "43%",
+                left: "50%",
+                transform: "translate(-50%, -50%)",
+              }}
+            >
+              {success ? (
+                <Check style={{ color }} />
+              ) : (
+                <Close style={{ color }} />
+              )}
+            </div>
+          </div>
+          <div className="mb-2">
+            You&apos;ve scored{" "}
+            <b style={{ color }}>{`${Math.round(correctness * 100)}%`}</b> and
+            used <b>{hintsUsed}</b> Hints
+          </div>
         </Typography>
-        <Typography variant="body1">
-          <strong>{`Hints used: `}</strong>
-          {hintsUsed}
-        </Typography>
+        <Typography variant="body1"></Typography>
       </DialogContent>
       <DialogActions>
         <Button

@@ -66,6 +66,11 @@ export default function NewCourse() {
       mutation lecturerCreateCourseMutation($course: CreateCourseInput!) {
         createCourse(input: $course) {
           id
+          published
+          title
+          description
+          startYear
+          ...pageCourseListItemFragment
         }
       }
     `);
@@ -94,6 +99,19 @@ export default function NewCourse() {
           yearDivision: yearDivision,
           published: publish,
         },
+      },
+      updater(store, data) {
+        const existingCourses = store
+          .getRoot()
+          .getLinkedRecord("courses")
+          ?.getLinkedRecords("elements");
+        const newCourse = store.get(data.createCourse.id);
+        if (!existingCourses || !newCourse) return;
+
+        store
+          .getRoot()
+          .getLinkedRecord("courses")
+          ?.setLinkedRecords([...existingCourses, newCourse], "elements");
       },
       onCompleted(response) {
         function _addChapter(num: number, dateStart: Dayjs) {

@@ -4,7 +4,6 @@ import { Heading } from "@/components/Heading";
 import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
 import { graphql, useLazyLoadQuery } from "react-relay";
-import { MultipleChoiceQuestionModal } from "@/components/MultipleChoiceQuestionModal";
 import { MultipleChoiceQuestionPreview } from "@/components/quiz/MultipleChoiceQuestionPreview";
 import { DeleteQuestionButton } from "@/components/quiz/DeleteQuestionButton";
 import { DeleteQuizButton } from "@/components/quiz/DeleteQuizButton";
@@ -54,9 +53,6 @@ export default function LecturerQuiz() {
     `,
     { id: quizId }
   );
-
-  const [isEditOpen, setEditOpen] = useState<number | null>(null);
-  const [error, setError] = useState<any>(null);
 
   const content = contentsByIds[0];
   if (!content) {

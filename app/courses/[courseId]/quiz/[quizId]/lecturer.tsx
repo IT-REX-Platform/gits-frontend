@@ -1,10 +1,10 @@
 import { lecturerEditQuizQuery } from "@/__generated__/lecturerEditQuizQuery.graphql";
 import { ContentTags } from "@/components/ContentTags";
 import { Heading } from "@/components/Heading";
-import { default as Error } from "next/error";
 import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
 import { graphql, useLazyLoadQuery } from "react-relay";
+import { MultipleChoiceQuestionModal } from "@/components/MultipleChoiceQuestionModal";
 import { MultipleChoiceQuestionPreview } from "@/components/quiz/MultipleChoiceQuestionPreview";
 import { DeleteQuestionButton } from "@/components/quiz/DeleteQuestionButton";
 import { DeleteQuizButton } from "@/components/quiz/DeleteQuizButton";
@@ -12,9 +12,12 @@ import { FormErrors } from "@/components/FormErrors";
 import { ClozeQuestionPreview } from "@/components/quiz/ClozeQuestionPreview";
 import { EditClozeQuestionButton } from "@/components/quiz/EditClozeQuestionButton";
 import { AddQuestionButton } from "@/components/quiz/AddQuestionButton";
+import { PageError } from "@/components/PageError";
+import { AssociationQuestionPreview } from "@/components/quiz/AssociationQuestionPreview";
+import { EditAssociationQuestionButton } from "@/components/quiz/EditAssociationQuestionButton";
 import { EditMultipleChoiceQuestionButton } from "@/components/quiz/EditMultipleChoiceQuestionButton";
 
-export default function EditQuiz() {
+export default function LecturerQuiz() {
   const { quizId, courseId } = useParams();
   const router = useRouter();
   const [error, setError] = useState<any>(null);
@@ -40,7 +43,9 @@ export default function EditQuiz() {
                 ...MultipleChoiceQuestionPreviewFragment
                 ...ClozeQuestionPreviewFragment
                 ...EditMultipleChoiceQuestionButtonFragment
+                ...AssociationQuestionPreviewFragment
                 ...EditClozeQuestionButtonFragment
+                ...EditAssociationQuestionButtonFragment
               }
             }
           }
@@ -50,11 +55,22 @@ export default function EditQuiz() {
     { id: quizId }
   );
 
-  const content = contentsByIds[0];
-  const quiz = content.quiz;
+  const [isEditOpen, setEditOpen] = useState<number | null>(null);
+  const [error, setError] = useState<any>(null);
 
+  const content = contentsByIds[0];
+  if (!content) {
+    return <PageError message="No quiz found with given id." />;
+  }
+
+  const quiz = content.quiz;
   if (!quiz) {
-    return <Error statusCode={400} />;
+    return (
+      <PageError
+        title={contentsByIds[0].metadata.name}
+        message="Content not of type quiz."
+      />
+    );
   }
 
   return (
@@ -101,6 +117,23 @@ export default function EditQuiz() {
               <ClozeQuestionPreview _question={question} />
               <div className="flex">
                 <EditClozeQuestionButton
+                  _allRecords={query}
+                  _question={question}
+                  assessmentId={content.id}
+                />
+                <DeleteQuestionButton
+                  assessmentId={content.id}
+                  questionId={question.id}
+                  num={question.number}
+                />
+              </div>
+            </>
+          )}
+          {question.type === "ASSOCIATION" && (
+            <>
+              <AssociationQuestionPreview _question={question} />
+              <div className="flex">
+                <EditAssociationQuestionButton
                   _allRecords={query}
                   _question={question}
                   assessmentId={content.id}

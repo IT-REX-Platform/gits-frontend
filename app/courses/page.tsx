@@ -4,6 +4,7 @@ import { pageCourseJoinMutation } from "@/__generated__/pageCourseJoinMutation.g
 import { pageCourseListItemFragment$key } from "@/__generated__/pageCourseListItemFragment.graphql";
 import { pageCourseListQuery } from "@/__generated__/pageCourseListQuery.graphql";
 import { pageCourseUpdateMembershipMutation } from "@/__generated__/pageCourseUpdateMembershipMutation.graphql";
+import { yearDivisionToStringShort } from "@/components/CourseCard";
 import { PageView, usePageView } from "@/src/currentView";
 import { ArrowForward } from "@mui/icons-material";
 import {
@@ -268,13 +269,15 @@ function CourseListItem({
         description
         startDate
         startYear
+        yearDivision
       }
     `,
     _course
   );
 
-  const year = course.startYear ?? dayjs(course.startDate).year();
-
+  const year = course.yearDivision
+    ? yearDivisionToStringShort[course.yearDivision]
+    : dayjs(course.startDate).year();
   return (
     <ListItem disablePadding>
       <ListItemButton
@@ -283,8 +286,11 @@ function CourseListItem({
           joined ? () => router.push(`/courses/${course.id}`) : undefined
         }
       >
-        <ListItemIcon className="!min-w-[4.5rem]">
-          <Chip label={year} className="!border-gray-400"></Chip>
+        <ListItemIcon className="!min-w-[5.5rem]">
+          <Chip
+            label={year}
+            className="!border-gray-400 !min-w-[4.5rem]"
+          ></Chip>
         </ListItemIcon>
         <ListItemText
           primary={

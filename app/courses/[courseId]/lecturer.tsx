@@ -1,7 +1,6 @@
 "use client";
 import { lecturerLecturerCourseIdQuery } from "@/__generated__/lecturerLecturerCourseIdQuery.graphql";
 import { Button, IconButton, Typography } from "@mui/material";
-import Error from "next/error";
 import { useParams } from "next/navigation";
 import { graphql, useLazyLoadQuery } from "react-relay";
 
@@ -22,6 +21,7 @@ import { Add, Settings } from "@mui/icons-material";
 import { orderBy } from "lodash";
 import { useState } from "react";
 import { AddContentModal } from "../../../components/AddContentModal";
+import { PageError } from "@/components/PageError";
 
 graphql`
   fragment lecturerSectionFragment on Section {
@@ -113,7 +113,7 @@ export default function LecturerCoursePage() {
 
   // Show 404 error page if id was not found
   if (coursesByIds.length == 0) {
-    return <Error statusCode={404} title="Course could not be found." />;
+    return <PageError message="No course found with given id." />;
   }
 
   // Extract course

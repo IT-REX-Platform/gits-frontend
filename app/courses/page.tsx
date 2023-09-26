@@ -37,8 +37,8 @@ export default function StudentCourseList() {
     currentUserInfo: { courseMemberships, id: userId },
   } = useLazyLoadQuery<pageCourseListQuery>(
     graphql`
-      query pageCourseListQuery {
-        courses {
+      query pageCourseListQuery($filter: CourseFilter) {
+        courses(filter: $filter) {
           elements {
             published
             id
@@ -61,7 +61,7 @@ export default function StudentCourseList() {
         }
       }
     `,
-    {}
+    { filter: pageView === PageView.Lecturer ? undefined : { published: true } }
   );
 
   const courseIdsAlreadyJoined: string[] =
@@ -73,15 +73,13 @@ export default function StudentCourseList() {
 
   const [search, setSearch] = useState("");
 
-  const filteredCourses = courses.elements
-    .filter((x) => x.published || pageView === PageView.Lecturer)
-    .filter(
-      (x) =>
-        !search ||
-        x.title.toLowerCase().includes(search.toLowerCase()) ||
-        x.description.toLowerCase().includes(search.toLowerCase()) ||
-        (x.startYear && x.startYear.toString().includes(search))
-    );
+  const filteredCourses = courses.elements.filter(
+    (x) =>
+      !search ||
+      x.title.toLowerCase().includes(search.toLowerCase()) ||
+      x.description.toLowerCase().includes(search.toLowerCase()) ||
+      (x.startYear && x.startYear.toString().includes(search))
+  );
   const myCourseIds = filteredCourses
     .filter(
       (course) =>

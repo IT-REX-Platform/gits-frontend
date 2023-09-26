@@ -171,8 +171,8 @@ export default function LecturerCoursePage() {
 
           <ChapterContent>
             {chapter.sections.map((section) => (
-              <Fragment key={section.id}>
-                <Section>
+              <>
+                <Section key={section.id}>
                   <SectionHeader
                     action={
                       <EditSectionButton
@@ -257,7 +257,7 @@ export default function LecturerCoursePage() {
                 >
                   Delete Section
                 </Button>
-              </Fragment>
+              </>
             ))}
             <AddSectionButton chapterId={chapter.id} />
           </ChapterContent>

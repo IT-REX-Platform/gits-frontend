@@ -1,22 +1,24 @@
 "use client";
+import { ChapterHeaderFragment$key } from "@/__generated__/ChapterHeaderFragment.graphql";
 import { Done, ExpandLess, ExpandMore } from "@mui/icons-material";
 import { CircularProgress, IconButton, Typography } from "@mui/material";
-import { ReactNode } from "react";
-import { SkillLevels } from "./SkillLevels";
-import { graphql, useFragment } from "react-relay";
-import { ChapterHeaderFragment$key } from "@/__generated__/ChapterHeaderFragment.graphql";
 import dayjs from "dayjs";
+import { ReactNode } from "react";
+import { graphql, useFragment } from "react-relay";
+import { SkillLevels } from "./SkillLevels";
 
 export function ChapterHeader({
   _chapter,
   expanded,
   action,
   onExpandClick,
+  courseId,
 }: {
   _chapter: ChapterHeaderFragment$key;
   expanded?: boolean;
   action?: ReactNode;
   onExpandClick?: () => void;
+  courseId: string;
 }) {
   const chapter = useFragment(
     graphql`
@@ -71,7 +73,7 @@ export function ChapterHeader({
           </Typography>
         </div>
         <div onClick={(e) => e.stopPropagation()}>
-          <SkillLevels _chapter={chapter} />
+          <SkillLevels courseId={courseId} _chapter={chapter} />
         </div>
       </div>
     </div>

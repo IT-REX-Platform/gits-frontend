@@ -32,7 +32,7 @@ import {
 } from "react-relay";
 
 export default function StudentMediaPage() {
-  const { mediaId } = useParams();
+  const { mediaId, courseId } = useParams();
   const searchParams = useSearchParams();
   const media = useLazyLoadQuery<studentMediaQuery>(
     graphql`
@@ -214,6 +214,7 @@ export default function StudentMediaPage() {
           <div className="mt-4 flex flex-col gap-2">
             {relatedRecords.map((record) => (
               <MediaContent
+                courseId={courseId}
                 key={record.id}
                 _media={content}
                 recordId={record.id}

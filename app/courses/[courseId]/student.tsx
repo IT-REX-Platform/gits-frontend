@@ -1,7 +1,6 @@
 "use client";
 import { studentCourseIdQuery } from "@/__generated__/studentCourseIdQuery.graphql";
 import {
-  Alert,
   Button,
   Collapse,
   IconButton,
@@ -35,18 +34,18 @@ import { studentCoursePageStageFragment$key } from "@/__generated__/studentCours
 import { ChapterContent } from "@/components/ChapterContent";
 import { ChapterHeader } from "@/components/ChapterHeader";
 import { ContentLink } from "@/components/Content";
+import { FormErrors } from "@/components/FormErrors";
+import { PageError } from "@/components/PageError";
 import { RewardScores } from "@/components/RewardScores";
 import { Section, SectionContent, SectionHeader } from "@/components/Section";
 import { Stage, StageBarrier } from "@/components/Stage";
+import { Suggestion } from "@/components/Suggestion";
 import { Info } from "@mui/icons-material";
 import ExitToAppIcon from "@mui/icons-material/ExitToApp";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import dayjs from "dayjs";
 import Link from "next/link";
 import { useState } from "react";
-import { Suggestion } from "@/components/Suggestion";
-import { FormErrors } from "@/components/FormErrors";
-import { PageError } from "@/components/PageError";
 
 interface Data {
   name: string;
@@ -251,7 +250,11 @@ export default function StudentCoursePage() {
         <Typography variant="h2">Up next</Typography>
         <div className="mt-8 gap-8 flex flex-wrap">
           {course.suggestions.map((x) => (
-            <Suggestion key={x.content.id} _suggestion={x} />
+            <Suggestion
+              courseId={course.id}
+              key={x.content.id}
+              _suggestion={x}
+            />
           ))}
         </div>
       </section>
@@ -268,6 +271,7 @@ function StudentChapter({
 }: {
   _chapter: studentCoursePageChapterFragment$key;
 }) {
+  const { courseId } = useParams();
   const chapter = useFragment(
     graphql`
       fragment studentCoursePageChapterFragment on Chapter {
@@ -292,6 +296,7 @@ function StudentChapter({
   return (
     <section>
       <ChapterHeader
+        courseId={courseId}
         _chapter={chapter}
         expanded={expanded}
         onExpandClick={() => setExpanded((curr) => !curr)}
@@ -372,6 +377,7 @@ function StudentStage({
   disabled?: boolean;
   _stage: studentCoursePageStageFragment$key;
 }) {
+  const { courseId } = useParams();
   const stage = useFragment(
     graphql`
       fragment studentCoursePageStageFragment on Stage {
@@ -392,10 +398,16 @@ function StudentStage({
   return (
     <Stage progress={disabled ? 0 : stage.requiredContentsProgress}>
       {stage.requiredContents.map((content) => (
-        <ContentLink key={content.id} _content={content} disabled={disabled} />
+        <ContentLink
+          courseId={courseId}
+          key={content.id}
+          _content={content}
+          disabled={disabled}
+        />
       ))}
       {stage.optionalContents.map((content) => (
         <ContentLink
+          courseId={courseId}
           key={content.id}
           _content={content}
           optional

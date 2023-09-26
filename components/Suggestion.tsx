@@ -1,15 +1,16 @@
 import { graphql, useFragment } from "react-relay";
-import { Chip } from "@mui/material";
 
-import { ContentLink } from "./Content";
 import { SuggestionFragment$key } from "@/__generated__/SuggestionFragment.graphql";
+import { ContentLink } from "./Content";
 
 export function Suggestion({
   _suggestion,
   small = false,
+  courseId,
 }: {
   _suggestion: SuggestionFragment$key;
   small?: boolean;
+  courseId: string;
 }) {
   const suggestion = useFragment(
     graphql`
@@ -32,6 +33,7 @@ export function Suggestion({
 
   return (
     <ContentLink
+      courseId={courseId}
       _content={suggestion.content}
       extra_chips={extra_chips}
       size={small ? "small" : "normal"}

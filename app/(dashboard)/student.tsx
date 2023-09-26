@@ -109,7 +109,6 @@ export default function StudentPage() {
         </Typography>
       )}
 
-      {/* MOCK */}
       {filteredCourses.length === 0 && sortBy === "startYear" ? (
         <div className="text-center text-2xl text-slate-400 my-80">
           You have not joined any courses this year. Visit the{" "}

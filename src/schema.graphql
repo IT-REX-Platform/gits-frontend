@@ -217,6 +217,9 @@ type Chapter {
   # The skill types which are achievable in this chapter.
   # A skill type is achievable if there is at least one assessment in this chapter with this skill type.
   achievableSkillTypes: [SkillType]!
+
+  # The progress of the current user in this chapter.
+  userProgress: CompositeProgressInformation!
 }
 
 input ChapterFilter {
@@ -436,6 +439,9 @@ type Course {
     # also containing suggestions for media content (which do not have a skill type).
     skillTypes: [SkillType!]! = []
   ): [Suggestion!]!
+
+  # The progress of the current user in this course.
+  userProgress: CompositeProgressInformation!
 }
 
 # Input type for filtering courses. All fields are optional.
@@ -810,6 +816,18 @@ type Flashcard {
   userProgressData: FlashcardProgressData!
 }
 
+# Feedback for the logFlashcardLearned mutation.
+type FlashcardLearnedFeedback {
+  # Whether the flashcard was learned correctly.
+  success: Boolean!
+
+  # Next date when the flashcard should be learned again.
+  nextLearnDate: DateTime!
+
+  # Progress of the whole flashcard set.
+  flashcardSetProgress: FlashcardSetProgress!
+}
+
 type FlashcardProgressData {
   # The date the user learned the flashcard.
   # This is null it the user has not learned the content item once.
@@ -882,6 +900,14 @@ type FlashcardSetMutation {
 
   # Deletes the flashcard with the specified ID. Throws an error if the flashcard does not exist.
   deleteFlashcard(id: UUID!): UUID!
+}
+
+type FlashcardSetProgress {
+  # Percentage of how many flashcards in the set have been learned.
+  percentageLearned: Float!
+
+  # Percentage of how many flashcards have been learned correctly of the ones that have been learned.
+  correctness: Float!
 }
 
 type FlashcardSide {
@@ -1066,82 +1092,6 @@ type MultipleChoiceQuestion implements Question {
 }
 
 type Mutation {
-  # Create new media content
-  createMediaContent(input: CreateMediaContentInput!): MediaContent!
-
-  # Create a new Assessment
-  createAssessment(input: CreateAssessmentInput!): Assessment!
-
-  # Modify Content
-  mutateContent(contentId: UUID!): ContentMutation!
-
-  # Create new Section
-  createSection(input: CreateSectionInput!): Section!
-
-  # Modify Sections
-  mutateSection(sectionId: UUID!): SectionMutation!
-
-  # ONLY FOR TESTING PURPOSES. DO NOT USE IN FRONTEND. WILL BE REMOVED.
-  #
-  # Triggers the recalculation of the skill level of the user.
-  # This is done automatically at some time in the night.
-  #
-  # The purpose of this mutation is to allow testing of the skill level score and demonstrate the functionality.
-  recalculateLevels(chapterId: UUID!, userId: UUID!): SkillLevels!
-    @deprecated(reason: "Only for testing purposes. Will be removed.")
-
-  # Create a quiz.
-  createQuiz(assessmentId: UUID!, input: CreateQuizInput!): Quiz!
-
-  # Modify a quiz.
-  mutateQuiz(assessmentId: UUID!): QuizMutation!
-
-  # Delete a quiz.
-  deleteQuiz(assessmentId: UUID!): UUID!
-    @deprecated(
-      reason: "Only for development, will be removed in production. Use deleteAssessment in contents service instead."
-    )
-
-  # Log that a multiple choice quiz is completed.
-  logQuizCompleted(input: QuizCompletedInput!): Quiz!
-
-  # Creates a new flashcard set.
-  createFlashcardSet(
-    assessmentId: UUID!
-    input: CreateFlashcardSetInput!
-  ): FlashcardSet!
-
-  # Deletes a flashcard set. Throws an error if the flashcard set does not exist.
-  # The contained flashcards are deleted as well.
-  deleteFlashcardSet(input: UUID!): UUID!
-    @deprecated(
-      reason: "Only for development, will be removed in production. Use deleteAssessment in contents service instead."
-    )
-
-  # Modify a flashcard set.
-  mutateFlashcardSet(assessmentId: UUID!): FlashcardSetMutation!
-
-  # Logs that a user has learned a flashcard.
-  logFlashcardLearned(input: LogFlashcardLearnedInput!): Flashcard!
-
-  # ONLY FOR TESTING PURPOSES. DO NOT USE IN FRONTEND. WILL BE REMOVED.
-  #
-  # Triggers the recalculation of the reward score of the user.
-  # This is done automatically at some time in the night.
-  #
-  # The purpose of this mutation is to allow testing of the reward score and demonstrate the functionality.
-  recalculateScores(courseId: UUID!, userId: UUID!): RewardScores!
-    @deprecated(reason: "Only for testing purposes. Will be removed.")
-
-  # registers a user to a course with a role
-  createMembership(input: CourseMembershipInput!): CourseMembership!
-
-  # updates the role of a user in a course
-  updateMembership(input: CourseMembershipInput!): CourseMembership!
-
-  # deletes user course link
-  deleteMembership(input: CourseMembershipInput!): CourseMembership!
-
   # Creates a new course with the given input and returns the created course.
   createCourse(input: CreateCourseInput!): Course!
 
@@ -1185,6 +1135,84 @@ type Mutation {
   # When all media records of a content have been worked on by a user,
   # a user-progress event is emitted for the content.
   logMediaRecordWorkedOn(mediaRecordId: UUID!): MediaRecord!
+
+  # ONLY FOR TESTING PURPOSES. DO NOT USE IN FRONTEND. WILL BE REMOVED.
+  #
+  # Triggers the recalculation of the reward score of the user.
+  # This is done automatically at some time in the night.
+  #
+  # The purpose of this mutation is to allow testing of the reward score and demonstrate the functionality.
+  recalculateScores(courseId: UUID!, userId: UUID!): RewardScores!
+    @deprecated(reason: "Only for testing purposes. Will be removed.")
+
+  # ONLY FOR TESTING PURPOSES. DO NOT USE IN FRONTEND. WILL BE REMOVED.
+  #
+  # Triggers the recalculation of the skill level of the user.
+  # This is done automatically at some time in the night.
+  #
+  # The purpose of this mutation is to allow testing of the skill level score and demonstrate the functionality.
+  recalculateLevels(chapterId: UUID!, userId: UUID!): SkillLevels!
+    @deprecated(reason: "Only for testing purposes. Will be removed.")
+
+  # registers a user to a course with a role
+  createMembership(input: CourseMembershipInput!): CourseMembership!
+
+  # updates the role of a user in a course
+  updateMembership(input: CourseMembershipInput!): CourseMembership!
+
+  # deletes user course link
+  deleteMembership(input: CourseMembershipInput!): CourseMembership!
+
+  # Creates a new flashcard set.
+  createFlashcardSet(
+    assessmentId: UUID!
+    input: CreateFlashcardSetInput!
+  ): FlashcardSet!
+
+  # Deletes a flashcard set. Throws an error if the flashcard set does not exist.
+  # The contained flashcards are deleted as well.
+  deleteFlashcardSet(input: UUID!): UUID!
+    @deprecated(
+      reason: "Only for development, will be removed in production. Use deleteAssessment in contents service instead."
+    )
+
+  # Modify a flashcard set.
+  mutateFlashcardSet(assessmentId: UUID!): FlashcardSetMutation!
+
+  # Logs that a user has learned a flashcard.
+  logFlashcardLearned(
+    input: LogFlashcardLearnedInput!
+  ): FlashcardLearnedFeedback!
+
+  # Create a quiz.
+  createQuiz(assessmentId: UUID!, input: CreateQuizInput!): Quiz!
+
+  # Modify a quiz.
+  mutateQuiz(assessmentId: UUID!): QuizMutation!
+
+  # Delete a quiz.
+  deleteQuiz(assessmentId: UUID!): UUID!
+    @deprecated(
+      reason: "Only for development, will be removed in production. Use deleteAssessment in contents service instead."
+    )
+
+  # Log that a multiple choice quiz is completed.
+  logQuizCompleted(input: QuizCompletedInput!): QuizCompletionFeedback!
+
+  # Create new media content
+  createMediaContent(input: CreateMediaContentInput!): MediaContent!
+
+  # Create a new Assessment
+  createAssessment(input: CreateAssessmentInput!): Assessment!
+
+  # Modify Content
+  mutateContent(contentId: UUID!): ContentMutation!
+
+  # Create new Section
+  createSection(input: CreateSectionInput!): Section!
+
+  # Modify Sections
+  mutateSection(sectionId: UUID!): SectionMutation!
 
   # Creates a new media content and links the given media records to it.
   createMediaContentAndLinkRecords(
@@ -1287,90 +1315,6 @@ type PublicUserInfo {
 }
 
 type Query {
-  # get all contents
-  contents: ContentPayload!
-
-  # Get contents by ids. Throws an error if any of the ids are not found.
-  contentsByIds(ids: [UUID!]!): [Content!]!
-
-  # Get contents by ids. If any of the given ids are not found, the corresponding element in the result list will be null.
-  findContentsByIds(ids: [UUID!]!): [Content]!
-
-  # get contents by chapter ids. Returns a list containing sublists, where each sublist contains all contents
-  # associated with that chapter
-  contentsByChapterIds(chapterIds: [UUID!]!): [[Content!]!]!
-
-  # Retrieves all existing sections for multiple chapters.
-  sectionsByChapterIds(chapterIds: [UUID!]!): [[Section!]!]!
-
-  # Retrieve progress for multiple chapters
-  progressByChapterIds(chapterIds: [UUID!]!): [CompositeProgressInformation!]!
-
-  # Generates user specific suggestions for multiple chapters.
-  #
-  # Only content that the user can access will be considered.
-  # The contents will be ranked by suggested date, with the most overdue or most urgent content first.
-  suggestionsByChapterIds(
-    # The ids of the chapters for which suggestions should be generated.
-    chapterIds: [UUID!]!
-
-    # The amount of suggestions to generate in total.
-    amount: Int!
-
-    # Only suggestions for these skill types will be generated.
-    # If no skill types are given, suggestions for all skill types will be generated,
-    # also containing suggestions for media content (which do not have a skill type).
-    skillTypes: [SkillType!]! = []
-  ): [Suggestion!]!
-
-  # Retrieves all skill types that are achievable for the given chapters.
-  # Each chapter will have its own list of skill types (batching query).
-  _internal_noauth_achievableSkillTypesByChapterIds(
-    chapterIds: [UUID!]!
-  ): [[SkillType!]!]!
-
-  # Get the skill levels of the current user for all skill types for a list of chapter ids.
-  userSkillLevelsByChapterIds(chapterIds: [UUID!]!): [SkillLevels!]!
-
-  # Get the skill levels of the specified user for all skill types for a list of chapter ids.
-  skillLevelsForUserByChapterIds(
-    chapterIds: [UUID!]!
-    userId: UUID!
-  ): [SkillLevels!]!
-
-  # Get quiz by assessment ID.
-  # If any of the assessment IDs are not found, the corresponding quiz will be null.
-  findQuizzesByAssessmentIds(assessmentIds: [UUID!]!): [Quiz]!
-
-  # Get flashcards by their ids
-  flashcardsByIds(ids: [UUID!]!): [Flashcard!]!
-
-  # Get flashcard sets by their assessment ids.
-  # Returns a list of flashcard sets in the same order as the provided ids.
-  # Each element is null if the corresponding id is not found.
-  findFlashcardSetsByAssessmentIds(assessmentIds: [UUID!]!): [FlashcardSet]!
-
-  # Get the reward score of the current user for the specified course.
-  userCourseRewardScores(courseId: UUID!): RewardScores!
-
-  # Get the reward score of the specified user for the specified course.
-  courseRewardScoresForUser(courseId: UUID!, userId: UUID!): RewardScores!
-
-  # Gets the power scores for each user in the course, ordered by power score descending.
-  scoreboard(courseId: UUID!): [ScoreboardItem!]!
-
-  # Gets the publicly available information for a list of users with the specified IDs.
-  # If a user does not exist, null is returned for that user.
-  findPublicUserInfos(ids: [UUID!]!): [PublicUserInfo]!
-
-  # Gets the user information of the currently authorized user.
-  currentUserInfo: UserInfo!
-
-  # Gets all of the users' information for a list of users with the specified IDs.
-  # Only available to privileged users.
-  # If a user does not exist, null is returned for that user.
-  findUserInfos(ids: [UUID!]!): [UserInfo]!
-
   # Get a list of courses. Can be filtered, sorted and paginated.
   courses(
     filter: CourseFilter
@@ -1435,6 +1379,92 @@ type Query {
   # Returns the media records associated the given content IDs as a list of lists where each sublist contains
   # the media records associated with the content ID at the same index in the input list
   mediaRecordsByContentIds(contentIds: [UUID!]!): [[MediaRecord!]!]!
+
+  # Get the reward score of the current user for the specified course.
+  userCourseRewardScores(courseId: UUID!): RewardScores!
+
+  # Get the reward score of the specified user for the specified course.
+  courseRewardScoresForUser(courseId: UUID!, userId: UUID!): RewardScores!
+
+  # Gets the power scores for each user in the course, ordered by power score descending.
+  scoreboard(courseId: UUID!): [ScoreboardItem!]!
+
+  # Get the skill levels of the current user for all skill types for a list of chapter ids.
+  userSkillLevelsByChapterIds(chapterIds: [UUID!]!): [SkillLevels!]!
+
+  # Get the skill levels of the specified user for all skill types for a list of chapter ids.
+  skillLevelsForUserByChapterIds(
+    chapterIds: [UUID!]!
+    userId: UUID!
+  ): [SkillLevels!]!
+
+  # Gets the publicly available information for a list of users with the specified IDs.
+  # If a user does not exist, null is returned for that user.
+  findPublicUserInfos(ids: [UUID!]!): [PublicUserInfo]!
+
+  # Gets the user information of the currently authorized user.
+  currentUserInfo: UserInfo!
+
+  # Gets all of the users' information for a list of users with the specified IDs.
+  # Only available to privileged users.
+  # If a user does not exist, null is returned for that user.
+  findUserInfos(ids: [UUID!]!): [UserInfo]!
+
+  # Get flashcards by their ids
+  flashcardsByIds(ids: [UUID!]!): [Flashcard!]!
+
+  # Get flashcard sets by their assessment ids.
+  # Returns a list of flashcard sets in the same order as the provided ids.
+  # Each element is null if the corresponding id is not found.
+  findFlashcardSetsByAssessmentIds(assessmentIds: [UUID!]!): [FlashcardSet]!
+
+  # Get quiz by assessment ID.
+  # If any of the assessment IDs are not found, the corresponding quiz will be null.
+  findQuizzesByAssessmentIds(assessmentIds: [UUID!]!): [Quiz]!
+
+  # get all contents
+  contents: ContentPayload!
+
+  # Get contents by ids. Throws an error if any of the ids are not found.
+  contentsByIds(ids: [UUID!]!): [Content!]!
+
+  # Get contents by ids. If any of the given ids are not found, the corresponding element in the result list will be null.
+  findContentsByIds(ids: [UUID!]!): [Content]!
+
+  # get contents by chapter ids. Returns a list containing sublists, where each sublist contains all contents
+  # associated with that chapter
+  contentsByChapterIds(chapterIds: [UUID!]!): [[Content!]!]!
+
+  # Retrieves all existing sections for multiple chapters.
+  sectionsByChapterIds(chapterIds: [UUID!]!): [[Section!]!]!
+
+  # Retrieve progress for multiple chapters
+  _internal_noauth_progressByChapterIds(
+    chapterIds: [UUID!]!
+  ): [CompositeProgressInformation!]!
+
+  # Generates user specific suggestions for multiple chapters.
+  #
+  # Only content that the user can access will be considered.
+  # The contents will be ranked by suggested date, with the most overdue or most urgent content first.
+  suggestionsByChapterIds(
+    # The ids of the chapters for which suggestions should be generated.
+    chapterIds: [UUID!]!
+
+    # The amount of suggestions to generate in total.
+    amount: Int!
+
+    # Only suggestions for these skill types will be generated.
+    # If no skill types are given, suggestions for all skill types will be generated,
+    # also containing suggestions for media content (which do not have a skill type).
+    skillTypes: [SkillType!]! = []
+  ): [Suggestion!]!
+
+  # Retrieves all skill types that are achievable for the given chapters.
+  # Each chapter will have its own list of skill types (batching query).
+  _internal_noauth_achievableSkillTypesByChapterIds(
+    chapterIds: [UUID!]!
+  ): [[SkillType!]!]!
 }
 
 # Generic question interface.
@@ -1547,6 +1577,18 @@ input QuizCompletedInput {
   completedQuestions: [QuestionCompletedInput!]!
 }
 
+# Feedback data when `logQuizCompletion` is called.
+type QuizCompletionFeedback {
+  # Whether the quiz was passed or not.
+  success: Boolean!
+
+  # The number of questions that were answered correctly.
+  correctness: Float!
+
+  # The number of hints that were used.
+  hintsUsed: Int!
+}
+
 type QuizMutation {
   # Id of the quiz to modify.
   assessmentId: UUID!
@@ -1608,23 +1650,6 @@ type QuizMutation {
 }
 
 scalar ResolveToSourceArgs
-
-type ResourceMarkdown {
-  # The raw ResourceMarkdown text.
-  text: String!
-
-  # Ids of MediaRecords referenced in the ResourceMarkdown text in order.
-  referencedMediaRecordIds: [UUID!]!
-
-  # Resolved MediaRecords referenced in the ResourceMarkdown text in order.
-  # A MediaRecord might be NULL if the referenced MediaRecord no longer exists.
-  referencedMediaRecords: [MediaRecord]!
-}
-
-input ResourceMarkdownInput {
-  # The raw ResourceMarkdown text.
-  text: String!
-}
 
 # The reason why the reward score has changed.
 enum RewardChangeReason {

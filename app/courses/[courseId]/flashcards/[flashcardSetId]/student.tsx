@@ -53,7 +53,7 @@ export default function StudentFlashcards() {
         $input: LogFlashcardLearnedInput!
       ) {
         logFlashcardLearned(input: $input) {
-          id
+          success
         }
       }
     `);

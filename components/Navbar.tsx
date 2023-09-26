@@ -185,7 +185,7 @@ export function Navbar() {
           title={
             pageView === PageView.Lecturer
               ? "Courses I'm tutoring"
-              : "Courses I'm attending this semster"
+              : "Courses I'm attending this semester"
           }
         >
           {filtered.map(({ course }) => (

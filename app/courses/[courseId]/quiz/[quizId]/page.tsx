@@ -1,11 +1,11 @@
 "use client";
 
+import { PageError } from "@/components/PageError";
 import { PageView, usePageView } from "@/src/currentView";
+import { isUUID } from "@/src/utils";
+import { useParams } from "next/navigation";
 import LecturerQuiz from "./lecturer";
 import StudentQuiz from "./student";
-import { isUUID } from "@/src/utils";
-import { PageError } from "@/components/PageError";
-import { useParams } from "next/navigation";
 
 export default function CoursePage() {
   const [pageView, _] = usePageView();

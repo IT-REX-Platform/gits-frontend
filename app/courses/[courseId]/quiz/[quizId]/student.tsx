@@ -5,6 +5,7 @@ import { studentQuizQuery } from "@/__generated__/studentQuizQuery.graphql";
 import {
   QuestionCompletedInput,
   studentQuizTrackCompletedMutation,
+  studentQuizTrackCompletedMutation$data,
 } from "@/__generated__/studentQuizTrackCompletedMutation.graphql";
 import { ContentTags } from "@/components/ContentTags";
 import { FormErrors } from "@/components/FormErrors";
@@ -13,9 +14,19 @@ import { PageError } from "@/components/PageError";
 import { AssociationQuestion } from "@/components/quiz/AssociationQuestion";
 import { ClozeQuestion } from "@/components/quiz/ClozeQuestion";
 import { MultipleChoiceQuestion } from "@/components/quiz/MultipleChoiceQuestion";
-import { Button } from "@mui/material";
+import { Check, Close } from "@mui/icons-material";
+import {
+  Button,
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Typography,
+} from "@mui/material";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import Confetti from "react-confetti";
 import {
   graphql,
   useFragment,
@@ -48,13 +59,9 @@ export default function StudentQuiz() {
           $input: QuizCompletedInput!
         ) {
           logQuizCompleted(input: $input) {
-            assessment {
-              userProgressData {
-                lastLearnDate
-                nextLearnDate
-                isLearned
-              }
-            }
+            correctness
+            hintsUsed
+            success
           }
         }
       `
@@ -63,6 +70,9 @@ export default function StudentQuiz() {
   const [completedInput, setCompletedInput] = useState<
     QuestionCompletedInput[]
   >([]);
+
+  const [feedback, setFeedback] =
+    useState<studentQuizTrackCompletedMutation$data["logQuizCompleted"]>();
 
   // Fetch quiz data
   const { contentsByIds } = useLazyLoadQuery<studentQuizQuery>(
@@ -136,8 +146,10 @@ export default function StudentQuiz() {
             completedQuestions: [...completedInput, currentAnswer],
           },
         },
+        onCompleted(response) {
+          setFeedback(response.logQuizCompleted);
+        },
       });
-      router.push(`/courses/${courseId}`);
     }
   };
 
@@ -187,6 +199,7 @@ export default function StudentQuiz() {
             : "Finish"}
         </Button>
       </div>
+      {feedback && <Feedback courseId={courseId} feedback={feedback} />}
     </main>
   );
 }
@@ -245,4 +258,67 @@ function Question({
     default:
       return null;
   }
+}
+
+function Feedback({
+  feedback: { success, correctness, hintsUsed },
+  courseId,
+}: {
+  feedback: studentQuizTrackCompletedMutation$data["logQuizCompleted"];
+  courseId: string;
+}) {
+  const router = useRouter();
+  const color = success ? "green" : "red";
+
+  return (
+    <Dialog open>
+      {success && <Confetti />}
+      <DialogTitle style={{ color }}>
+        {success ? "Congratulations!" : "Better luck next time!"}
+      </DialogTitle>
+      <DialogContent>
+        <Typography
+          variant="body1"
+          component="div"
+          className="flex gap-3 items-center"
+        >
+          <div style={{ position: "relative", display: "inline-block" }}>
+            <CircularProgress
+              variant="determinate"
+              value={correctness * 100}
+              style={{ color }}
+            />
+            <div
+              style={{
+                position: "absolute",
+                top: "43%",
+                left: "50%",
+                transform: "translate(-50%, -50%)",
+              }}
+            >
+              {success ? (
+                <Check style={{ color }} />
+              ) : (
+                <Close style={{ color }} />
+              )}
+            </div>
+          </div>
+          <div className="mb-2">
+            You&apos;ve scored{" "}
+            <b style={{ color }}>{`${Math.round(correctness * 100)}%`}</b> and
+            used <b>{hintsUsed}</b> Hints
+          </div>
+        </Typography>
+        <Typography variant="body1"></Typography>
+      </DialogContent>
+      <DialogActions>
+        <Button
+          variant="text"
+          onClick={() => router.push(`/courses/${courseId}`)}
+        >
+          Back to Course
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
 }

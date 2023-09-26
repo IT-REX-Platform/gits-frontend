@@ -468,8 +468,6 @@ type CourseMembership {
 
   # The role of the user in the course.
   role: UserRoleInCourse!
-
-  # Course of the Course Membership
   course: Course!
 }
 
@@ -1094,26 +1092,26 @@ type MultipleChoiceQuestion implements Question {
 }
 
 type Mutation {
-  # Creates a new flashcard set.
-  createFlashcardSet(
-    assessmentId: UUID!
-    input: CreateFlashcardSetInput!
-  ): FlashcardSet!
+  # Creates a new course with the given input and returns the created course.
+  createCourse(input: CreateCourseInput!): Course!
 
-  # Deletes a flashcard set. Throws an error if the flashcard set does not exist.
-  # The contained flashcards are deleted as well.
-  deleteFlashcardSet(input: UUID!): UUID!
-    @deprecated(
-      reason: "Only for development, will be removed in production. Use deleteAssessment in contents service instead."
-    )
+  # Creates a new chapter with the given input and returns the created chapter.
+  # The course id must be a course id of an existing course.
+  createChapter(input: CreateChapterInput!): Chapter!
 
-  # Modify a flashcard set.
-  mutateFlashcardSet(assessmentId: UUID!): FlashcardSetMutation!
+  # Updates an existing course with the given input and returns the updated course.
+  # The course id must be a course id of an existing course.
+  updateCourse(input: UpdateCourseInput!): Course!
 
-  # Logs that a user has learned a flashcard.
-  logFlashcardLearned(
-    input: LogFlashcardLearnedInput!
-  ): FlashcardLearnedFeedback!
+  # Updates an existing chapter with the given input and returns the updated chapter.
+  # The chapter id must be a chapter id of an existing chapter.
+  updateChapter(input: UpdateChapterInput!): Chapter!
+
+  # Deletes an existing course, throws an error if no course with the given id exists.
+  deleteCourse(id: UUID!): UUID!
+
+  # Deletes an existing chapter, throws an error if no chapter with the given id exists.
+  deleteChapter(id: UUID!): UUID!
 
   # Creates a new media record
   createMediaRecord(input: CreateMediaRecordInput!): MediaRecord!
@@ -1165,26 +1163,26 @@ type Mutation {
   # deletes user course link
   deleteMembership(input: CourseMembershipInput!): CourseMembership!
 
-  # Creates a new course with the given input and returns the created course.
-  createCourse(input: CreateCourseInput!): Course!
+  # Creates a new flashcard set.
+  createFlashcardSet(
+    assessmentId: UUID!
+    input: CreateFlashcardSetInput!
+  ): FlashcardSet!
 
-  # Creates a new chapter with the given input and returns the created chapter.
-  # The course id must be a course id of an existing course.
-  createChapter(input: CreateChapterInput!): Chapter!
+  # Deletes a flashcard set. Throws an error if the flashcard set does not exist.
+  # The contained flashcards are deleted as well.
+  deleteFlashcardSet(input: UUID!): UUID!
+    @deprecated(
+      reason: "Only for development, will be removed in production. Use deleteAssessment in contents service instead."
+    )
 
-  # Updates an existing course with the given input and returns the updated course.
-  # The course id must be a course id of an existing course.
-  updateCourse(input: UpdateCourseInput!): Course!
+  # Modify a flashcard set.
+  mutateFlashcardSet(assessmentId: UUID!): FlashcardSetMutation!
 
-  # Updates an existing chapter with the given input and returns the updated chapter.
-  # The chapter id must be a chapter id of an existing chapter.
-  updateChapter(input: UpdateChapterInput!): Chapter!
-
-  # Deletes an existing course, throws an error if no course with the given id exists.
-  deleteCourse(id: UUID!): UUID!
-
-  # Deletes an existing chapter, throws an error if no chapter with the given id exists.
-  deleteChapter(id: UUID!): UUID!
+  # Logs that a user has learned a flashcard.
+  logFlashcardLearned(
+    input: LogFlashcardLearnedInput!
+  ): FlashcardLearnedFeedback!
 
   # Create a quiz.
   createQuiz(assessmentId: UUID!, input: CreateQuizInput!): Quiz!
@@ -1317,13 +1315,49 @@ type PublicUserInfo {
 }
 
 type Query {
-  # Get flashcards by their ids
-  flashcardsByIds(ids: [UUID!]!): [Flashcard!]!
+  # Get a list of courses. Can be filtered, sorted and paginated.
+  courses(
+    filter: CourseFilter
 
-  # Get flashcard sets by their assessment ids.
-  # Returns a list of flashcard sets in the same order as the provided ids.
-  # Each element is null if the corresponding id is not found.
-  findFlashcardSetsByAssessmentIds(assessmentIds: [UUID!]!): [FlashcardSet]!
+    # The fields to sort by.
+    # Throws an error if no field with the given name exists.
+    sortBy: [String!]
+
+    # The sort direction for each field. If not specified, defaults to ASC.
+    sortDirection: [SortDirection!]! = [ASC]
+    pagination: Pagination
+  ): CoursePayload!
+
+  # Returns the courses with the given ids.
+  coursesByIds(ids: [UUID!]!): [Course!]!
+
+  # Returns the chapters with the given ids.
+  chaptersByIds(ids: [UUID!]!): [Chapter!]!
+
+  # Returns a set of Resource Objects for the given resource ids, containing a
+  # list of all course IDs for a resource and its availability in the course.
+  courseResourceAssociationsByIds(ids: [UUID!]!): [CourseResourceAssociation!]!
+
+  # Returns a set of Resource Objects for the given resource ids, containing a
+  # list of all course IDs for a resource and its availability in the course.
+  resourceById(ids: [UUID!]!): [CourseResourceAssociation!]!
+    @deprecated(reason: "Use courseResourceAssociationsByIds instead.")
+
+  # Get the list of chapters for a course. Can be filtered, sorted and paginated.
+  # Throws an error if the course does not exist.
+  # The default sort order is by chapter number.
+  chapters(
+    courseId: UUID!
+    filter: ChapterFilter
+
+    # The fields to sort by. The default sort order is by chapter number.
+    # Throws an error if no field with the given name exists.
+    sortBy: [String!]! = []
+
+    # The sort direction for each field. If not specified, defaults to ASC.
+    sortDirection: [SortDirection!]! = [ASC]
+    pagination: Pagination
+  ): ChapterPayload!
 
   # Returns the media records with the given IDs. Throws an error if a MediaRecord corresponding to a given ID
   # cannot be found.
@@ -1376,52 +1410,13 @@ type Query {
   # If a user does not exist, null is returned for that user.
   findUserInfos(ids: [UUID!]!): [UserInfo]!
 
-  # Get a list of courses. Can be filtered, sorted and paginated.
-  courses(
-    filter: CourseFilter
+  # Get flashcards by their ids
+  flashcardsByIds(ids: [UUID!]!): [Flashcard!]!
 
-    # The fields to sort by.
-    # Throws an error if no field with the given name exists.
-    sortBy: [String!]
-
-    # The sort direction for each field. If not specified, defaults to ASC.
-    sortDirection: [SortDirection!]! = [ASC]
-    pagination: Pagination
-  ): CoursePayload!
-
-  # Returns the courses with the given ids.
-  coursesByIds(ids: [UUID!]!): [Course!]!
-
-  # Returns the chapters with the given ids.
-  chaptersByIds(ids: [UUID!]!): [Chapter!]!
-
-  # Returns a set of Resource Objects for the given resource ids, containing a
-  # list of all course IDs for a resource and its availability in the course.
-  courseResourceAssociationsByIds(ids: [UUID!]!): [CourseResourceAssociation!]!
-
-  # Returns a set of Resource Objects for the given resource ids, containing a
-  # list of all course IDs for a resource and its availability in the course.
-  resourceById(ids: [UUID!]!): [CourseResourceAssociation!]!
-    @deprecated(reason: "Use courseResourceAssociationsByIds instead.")
-
-  # Get the list of chapters for a course. Can be filtered, sorted and paginated.
-  # Throws an error if the course does not exist.
-  # The default sort order is by chapter number.
-  chapters(
-    courseId: UUID!
-    filter: ChapterFilter
-
-    # The fields to sort by. The default sort order is by chapter number.
-    # Throws an error if no field with the given name exists.
-    sortBy: [String!]! = []
-
-    # The sort direction for each field. If not specified, defaults to ASC.
-    sortDirection: [SortDirection!]! = [ASC]
-    pagination: Pagination
-  ): ChapterPayload!
-
-  # Returns the list of courseMemberships for the specified User.
-  courseMembershipsByUserIds(userIds: [UUID!]!): [[CourseMembership!]!]!
+  # Get flashcard sets by their assessment ids.
+  # Returns a list of flashcard sets in the same order as the provided ids.
+  # Each element is null if the corresponding id is not found.
+  findFlashcardSetsByAssessmentIds(assessmentIds: [UUID!]!): [FlashcardSet]!
 
   # Get quiz by assessment ID.
   # If any of the assessment IDs are not found, the corresponding quiz will be null.

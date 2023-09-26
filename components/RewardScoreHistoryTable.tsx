@@ -4,6 +4,7 @@ import {
   RewardScoreHistoryTableScoreFragment$data,
   RewardScoreHistoryTableScoreFragment$key,
 } from "@/__generated__/RewardScoreHistoryTableScoreFragment.graphql";
+import { KeyboardArrowDown, KeyboardArrowUp } from "@mui/icons-material";
 import {
   Button,
   Collapse,
@@ -16,11 +17,10 @@ import {
 } from "@mui/material";
 import dayjs from "dayjs";
 import lodash from "lodash";
-import { graphql, useFragment } from "react-relay";
-import { FitnessIcon, GrowthIcon, HealthIcon, PowerIcon } from "./RewardScores";
-import { ContentLink, DeletedContent } from "./Content";
-import { KeyboardArrowDown, KeyboardArrowUp } from "@mui/icons-material";
 import { useCallback, useState } from "react";
+import { graphql, useFragment } from "react-relay";
+import { ContentLink, DeletedContent } from "./Content";
+import { FitnessIcon, GrowthIcon, HealthIcon, PowerIcon } from "./RewardScores";
 
 const reasons: { [k in RewardChangeReason]?: string } = {
   CONTENT_DONE: "Content done",
@@ -35,9 +35,11 @@ export type RewardScoreFilterType = "health" | "fitness" | "growth" | "power";
 export function RewardScoreHistoryTable({
   _scores,
   filter = [],
+  courseId,
 }: {
   _scores: RewardScoreHistoryTableFragment$key;
   filter?: RewardScoreFilterType[];
+  courseId: string;
 }) {
   const scores = useFragment(
     graphql`
@@ -164,7 +166,7 @@ export function RewardScoreHistoryTable({
                     {entry.associatedContents.map((content, j) => (
                       <div key={`${entry.id}-content-${j}`}>
                         {content ? (
-                          <ContentLink _content={content} />
+                          <ContentLink courseId={courseId} _content={content} />
                         ) : (
                           <DeletedContent />
                         )}

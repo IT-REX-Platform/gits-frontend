@@ -1,13 +1,9 @@
 import { lecturerEditQuizQuery } from "@/__generated__/lecturerEditQuizQuery.graphql";
 import { ContentTags } from "@/components/ContentTags";
 import { Heading } from "@/components/Heading";
-import { Edit } from "@mui/icons-material";
-import { IconButton } from "@mui/material";
-import { default as Error } from "next/error";
 import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
 import { graphql, useLazyLoadQuery } from "react-relay";
-import { MultipleChoiceQuestionModal } from "../../../../../components/MultipleChoiceQuestionModal";
 import { MultipleChoiceQuestionPreview } from "@/components/quiz/MultipleChoiceQuestionPreview";
 import { DeleteQuestionButton } from "@/components/quiz/DeleteQuestionButton";
 import { DeleteQuizButton } from "@/components/quiz/DeleteQuizButton";
@@ -15,12 +11,15 @@ import { FormErrors } from "@/components/FormErrors";
 import { ClozeQuestionPreview } from "@/components/quiz/ClozeQuestionPreview";
 import { EditClozeQuestionButton } from "@/components/quiz/EditClozeQuestionButton";
 import { AddQuestionButton } from "@/components/quiz/AddQuestionButton";
+import { PageError } from "@/components/PageError";
 import { AssociationQuestionPreview } from "@/components/quiz/AssociationQuestionPreview";
 import { EditAssociationQuestionButton } from "@/components/quiz/EditAssociationQuestionButton";
+import { EditMultipleChoiceQuestionButton } from "@/components/quiz/EditMultipleChoiceQuestionButton";
 
-export default function EditQuiz() {
+export default function LecturerQuiz() {
   const { quizId, courseId } = useParams();
   const router = useRouter();
+  const [error, setError] = useState<any>(null);
 
   const { contentsByIds, ...query } = useLazyLoadQuery<lecturerEditQuizQuery>(
     graphql`
@@ -42,18 +41,10 @@ export default function EditQuiz() {
                 number
                 ...MultipleChoiceQuestionPreviewFragment
                 ...ClozeQuestionPreviewFragment
+                ...EditMultipleChoiceQuestionButtonFragment
                 ...AssociationQuestionPreviewFragment
                 ...EditClozeQuestionButtonFragment
                 ...EditAssociationQuestionButtonFragment
-                ... on MultipleChoiceQuestion {
-                  text
-                  hint
-                  answers {
-                    correct
-                    feedback
-                    answerText
-                  }
-                }
               }
             }
           }
@@ -63,14 +54,19 @@ export default function EditQuiz() {
     { id: quizId }
   );
 
-  const [isEditOpen, setEditOpen] = useState<number | null>(null);
-
   const content = contentsByIds[0];
-  const quiz = content.quiz;
+  if (!content) {
+    return <PageError message="No quiz found with given id." />;
+  }
 
-  const [error, setError] = useState<any>(null);
+  const quiz = content.quiz;
   if (!quiz) {
-    return <Error statusCode={400} />;
+    return (
+      <PageError
+        title={contentsByIds[0].metadata.name}
+        message="Content not of type quiz."
+      />
+    );
   }
 
   return (
@@ -99,13 +95,11 @@ export default function EditQuiz() {
             <>
               <MultipleChoiceQuestionPreview _question={question} />
               <div className="flex">
-                <IconButton
-                  onClick={() => {
-                    setEditOpen(index);
-                  }}
-                >
-                  <Edit fontSize="small"></Edit>
-                </IconButton>
+                <EditMultipleChoiceQuestionButton
+                  _allRecords={query}
+                  _question={question}
+                  assessmentId={content.id}
+                />
                 <DeleteQuestionButton
                   assessmentId={content.id}
                   questionId={question.id}
@@ -153,18 +147,6 @@ export default function EditQuiz() {
       <div className="mt-8 flex flex-col items-start">
         <AddQuestionButton _allRecords={query} assessmentId={content.id} />
       </div>
-
-      <MultipleChoiceQuestionModal
-        _allRecords={query}
-        key={isEditOpen}
-        assessmentId={quiz.assessmentId}
-        contentId={content.id}
-        onClose={() => setEditOpen(null)}
-        open={isEditOpen !== null}
-        existingQuestion={
-          isEditOpen !== null ? quiz.questionPool[isEditOpen] : undefined
-        }
-      />
     </main>
   );
 }

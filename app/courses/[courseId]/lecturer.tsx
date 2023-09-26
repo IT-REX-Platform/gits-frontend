@@ -2,7 +2,6 @@
 import { lecturerDeleteSectionMutation } from "@/__generated__/lecturerDeleteSectionMutation.graphql";
 import { lecturerLecturerCourseIdQuery } from "@/__generated__/lecturerLecturerCourseIdQuery.graphql";
 import { Button, IconButton, Typography } from "@mui/material";
-import Error from "next/error";
 import { useParams } from "next/navigation";
 import { graphql, useLazyLoadQuery, useMutation } from "react-relay";
 
@@ -23,6 +22,7 @@ import { Add, Delete, Settings } from "@mui/icons-material";
 import { orderBy } from "lodash";
 import { Fragment, useState } from "react";
 import { AddContentModal } from "../../../components/AddContentModal";
+import { PageError } from "@/components/PageError";
 
 graphql`
   fragment lecturerSectionFragment on Section {
@@ -121,7 +121,7 @@ export default function LecturerCoursePage() {
 
   // Show 404 error page if id was not found
   if (coursesByIds.length == 0) {
-    return <Error statusCode={404} title="Course could not be found." />;
+    return <PageError message="No course found with given id." />;
   }
 
   // Extract course
@@ -164,6 +164,7 @@ export default function LecturerCoursePage() {
       {orderBy(course.chapters.elements, (x) => x.number).map((chapter) => (
         <section key={chapter.id} className="mb-6">
           <ChapterHeader
+            courseId={id}
             _chapter={chapter}
             action={<EditChapterButton _chapter={chapter} />}
           />
@@ -187,10 +188,15 @@ export default function LecturerCoursePage() {
                       (stage) => (
                         <Stage progress={0} key={stage.id}>
                           {stage.requiredContents.map((content) => (
-                            <ContentLink key={content.id} _content={content} />
+                            <ContentLink
+                              courseId={course.id}
+                              key={content.id}
+                              _content={content}
+                            />
                           ))}
                           {stage.optionalContents.map((content) => (
                             <ContentLink
+                              courseId={course.id}
                               key={content.id}
                               _content={content}
                               optional

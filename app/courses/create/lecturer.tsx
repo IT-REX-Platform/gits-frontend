@@ -5,6 +5,8 @@ import {
   YearDivision,
   lecturerCreateCourseMutation,
 } from "@/__generated__/lecturerCreateCourseMutation.graphql";
+import { yearDivisionToString } from "@/components/CourseCard";
+import { FormErrors } from "@/components/FormErrors";
 import { MultistepForm, StepInfo } from "@/components/MultistepForm";
 import {
   Backdrop,
@@ -43,18 +45,8 @@ export default function NewCourse() {
   const [description, setDescription] = useState("");
   const [startDate, setStartDate] = useState<Dayjs | null>(null);
   const [endDate, setEndDate] = useState<Dayjs | null>(null);
-  const [yearDivision, setYearDivision] = useState<YearDivision>(
-    "" ||
-      "FIRST_SEMESTER" ||
-      "SECOND_SEMESTER" ||
-      "FIRST_TRIMESTER" ||
-      "SECOND_TRIMESTER" ||
-      "THIRD_TRIMESTER" ||
-      "FIRST_QUARTER" ||
-      "SECOND_QUARTER" ||
-      "THIRD_QUARTER" ||
-      "FOURTH_QUARTER"
-  );
+  const [yearDivision, setYearDivision] =
+    useState<YearDivision>("FIRST_SEMESTER");
   const [publish, setPublish] = useState(true);
   const [chapterCount, setChapterCount] = useState(12);
 
@@ -67,6 +59,11 @@ export default function NewCourse() {
       mutation lecturerCreateCourseMutation($course: CreateCourseInput!) {
         createCourse(input: $course) {
           id
+          published
+          title
+          description
+          startYear
+          ...pageCourseListItemFragment
         }
       }
     `);
@@ -82,6 +79,7 @@ export default function NewCourse() {
         }
       }
     `);
+  const [error, setError] = useState<any>(null);
 
   function handleSubmit() {
     createCourse({
@@ -96,6 +94,20 @@ export default function NewCourse() {
           published: publish,
         },
       },
+      updater(store, data) {
+        const existingCourses = store
+          .getRoot()
+          .getLinkedRecord("courses")
+          ?.getLinkedRecords("elements");
+        const newCourse = store.get(data.createCourse.id);
+        if (!existingCourses || !newCourse) return;
+
+        store
+          .getRoot()
+          .getLinkedRecord("courses")
+          ?.setLinkedRecords([...existingCourses, newCourse], "elements");
+      },
+      onError: setError,
       onCompleted(response) {
         function _addChapter(num: number, dateStart: Dayjs) {
           addChapter({
@@ -109,6 +121,7 @@ export default function NewCourse() {
                 endDate: dateStart.add(6, "day").toISOString(),
               },
             },
+            onError: setError,
             onCompleted() {
               if (num < chapterCount - 1) {
                 _addChapter(num + 1, dateStart.add(7, "day"));
@@ -183,15 +196,23 @@ export default function NewCourse() {
                 onChange={handleChange}
                 label={"Year Divison"}
               >
-                <MenuItem value={"FIRST_SEMESTER"}>Winter semester</MenuItem>
-                <MenuItem value={"SECOND_SEMESTER"}>Summer semester</MenuItem>
-                <MenuItem value={"FIRST_TRIMESTER"}>1st Trimester</MenuItem>
-                <MenuItem value={"SECOND_TRIMESTER"}>2nd Trimester</MenuItem>
-                <MenuItem value={"THIRD_TRIMESTER"}>3rd Trimester</MenuItem>
-                <MenuItem value={"FIRST_QUARTER"}>1st Quarter</MenuItem>
-                <MenuItem value={"SECOND_QUARTER"}>2nd Quarter</MenuItem>
-                <MenuItem value={"THIRD_QUARTER"}>3rd Quarter</MenuItem>
-                <MenuItem value={"FOURTH_QUARTER"}>4th Quarter</MenuItem>
+                {(
+                  [
+                    "FIRST_SEMESTER",
+                    "SECOND_SEMESTER",
+                    "FIRST_TRIMESTER",
+                    "SECOND_TRIMESTER",
+                    "THIRD_TRIMESTER",
+                    "FIRST_QUARTER",
+                    "SECOND_QUARTER",
+                    "THIRD_QUARTER",
+                    "FOURTH_QUARTER",
+                  ] as const
+                ).map((x) => (
+                  <MenuItem key={x} value={x}>
+                    {yearDivisionToString[x]}
+                  </MenuItem>
+                ))}
               </Select>
             </FormControl>
           </Box>
@@ -234,6 +255,8 @@ export default function NewCourse() {
       <Typography variant="h1" gutterBottom>
         Create new course
       </Typography>
+      <FormErrors error={error} onClose={() => setError(null)} />
+
       <MultistepForm
         submitLabel="Create course"
         steps={steps}

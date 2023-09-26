@@ -1,24 +1,23 @@
 "use client";
 
-import { useState } from "react";
 import { useParams } from "next/navigation";
-import Error from "next/error";
+import { useState } from "react";
 import { graphql, useLazyLoadQuery } from "react-relay";
 
-import { Heading } from "@/components/Heading";
 import { studentCourseStatsQuery } from "@/__generated__/studentCourseStatsQuery.graphql";
+import { Heading } from "@/components/Heading";
+import { PageError } from "@/components/PageError";
 import { RewardScoreChart } from "@/components/RewardScoreChart";
+import { RewardScoreFilter } from "@/components/RewardScoreFilter";
 import {
   RewardScoreFilterType,
   RewardScoreHistoryTable,
 } from "@/components/RewardScoreHistoryTable";
 import { Subheading } from "@/components/Subheading";
-import { RewardScoreFilter } from "@/components/RewardScoreFilter";
 
 export default function StudentCourseStatsPage() {
   // Get course id from url
-  const params = useParams();
-  const id = params.courseId;
+  const { courseId: id } = useParams();
 
   // Fetch course data
   const { coursesByIds } = useLazyLoadQuery<studentCourseStatsQuery>(
@@ -45,7 +44,7 @@ export default function StudentCourseStatsPage() {
 
   // Show 404 error page if id was not found
   if (coursesByIds.length == 0) {
-    return <Error statusCode={404} title="Course could not be found." />;
+    return <PageError message="No course found with given id" />;
   }
 
   // Extract course
@@ -85,6 +84,7 @@ export default function StudentCourseStatsPage() {
         History
       </Subheading>
       <RewardScoreHistoryTable
+        courseId={id}
         _scores={course.rewardScores}
         filter={historySelection}
       />

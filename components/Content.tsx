@@ -8,6 +8,7 @@ import { ContentMediaFragment$key } from "@/__generated__/ContentMediaFragment.g
 import { ContentPresentationFragment$key } from "@/__generated__/ContentPresentationFragment.graphql";
 import { ContentProgressFrameFragment$key } from "@/__generated__/ContentProgressFrameFragment.graphql";
 import { ContentQuizFragment$key } from "@/__generated__/ContentQuizFragment.graphql";
+import { ContentUnknownMediaFragment$key } from "@/__generated__/ContentUnknownMediaFragment.graphql";
 import { ContentVideoFragment$key } from "@/__generated__/ContentVideoFragment.graphql";
 import { PageView, usePageView } from "@/src/currentView";
 import {
@@ -35,7 +36,7 @@ import {
   Typography,
 } from "@mui/material";
 import dayjs from "dayjs";
-import { useParams, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import {
   MouseEventHandler,
   ReactElement,
@@ -66,12 +67,14 @@ export function ContentLink({
   extra_chips = [],
   size = "normal",
   _content,
+  courseId,
 }: {
   disabled?: boolean;
   optional?: boolean;
   extra_chips?: ContentChip[];
   size?: ContentSize;
   _content: ContentLinkFragment$key;
+  courseId: string;
 }) {
   const content = useFragment(
     graphql`
@@ -91,11 +94,11 @@ export function ContentLink({
   function getContentNode() {
     switch (content.metadata.type) {
       case "MEDIA":
-        return <MediaContent _media={content} />;
+        return <MediaContent courseId={courseId} _media={content} />;
       case "FLASHCARDS":
-        return <FlashcardContent _flashcard={content} />;
+        return <FlashcardContent courseId={courseId} _flashcard={content} />;
       case "QUIZ":
-        return <QuizContent _quiz={content} />;
+        return <QuizContent courseId={courseId} _quiz={content} />;
     }
     return null;
   }
@@ -116,13 +119,14 @@ export function MediaContent({
   recordId,
   replace = false,
   _media,
+  courseId,
 }: {
   recordId?: string;
   replace?: boolean;
   _media: ContentMediaFragment$key;
+  courseId: string;
 }) {
   const router = useRouter();
-  const { courseId } = useParams();
   const media = useFragment(
     graphql`
       fragment ContentMediaFragment on MediaContent {
@@ -134,6 +138,7 @@ export function MediaContent({
         ...ContentVideoFragment
         ...ContentPresentationFragment
         ...ContentDocumentFragment
+        ...ContentUnknownMediaFragment
         mediaRecords {
           id
           type
@@ -144,23 +149,24 @@ export function MediaContent({
     _media
   );
 
-  if (media.mediaRecords.length == 0) {
-    return (
-      <InvalidContent
-        id={media.id}
-        chapterId={media.metadata.chapterId}
-        type="Invalid content"
-        title={media.metadata.name}
-      />
-    );
-  }
+  // if (media.mediaRecords.length == 0) {
+  //   return (
+  //     <InvalidContent
+  //       id={media.id}
+  //       chapterId={media.metadata.chapterId}
+  //       type="Invalid content"
+  //       title={media.metadata.name}
+  //     />
+  //   );
+  // }
 
   const record = recordId
-    ? media.mediaRecords.find((record) => record.id === recordId)!
+    ? media.mediaRecords.find((record) => record.id === recordId)
     : media.mediaRecords[0];
 
   function onClick() {
-    const path = `/courses/${courseId}/media/${media.id}?recordId=${record.id}`;
+    const recordSelection = record ? `?recordId=${record.id}` : "";
+    const path = `/courses/${courseId}/media/${media.id}${recordSelection}`;
     if (replace) {
       router.replace(path);
     } else {
@@ -168,29 +174,92 @@ export function MediaContent({
     }
   }
 
-  let title = recordId ? record.name : media.metadata.name;
+  if (!record) {
+    return (
+      <UnknownMediaContent
+        title={media.metadata.name}
+        onClick={onClick}
+        _media={media}
+      />
+    );
+  }
 
   switch (record.type) {
     case "VIDEO":
-      return <VideoContent title={title} onClick={onClick} _media={media} />;
+      return (
+        <VideoContent title={record.name} onClick={onClick} _media={media} />
+      );
     case "PRESENTATION":
       return (
-        <PresentationContent title={title} onClick={onClick} _media={media} />
+        <PresentationContent
+          title={record.name}
+          onClick={onClick}
+          _media={media}
+        />
       );
     case "DOCUMENT":
-      return <DocumentContent title={title} onClick={onClick} _media={media} />;
+      return (
+        <DocumentContent title={record.name} onClick={onClick} _media={media} />
+      );
     case "URL":
-      return <UrlContent title={title} />;
+      return <UrlContent title={record.name} />;
     default:
       return (
         <InvalidContent
           id={media.id}
           chapterId={media.metadata.chapterId}
           type="Unknown content type"
-          title={title}
+          title={record.name}
         />
       );
   }
+}
+
+export function UnknownMediaContent({
+  title,
+  onClick,
+  _media,
+}: {
+  title: string;
+  onClick: () => void;
+  _media: ContentUnknownMediaFragment$key;
+}) {
+  const { disabled } = useContext(ContentLinkProps);
+  const media = useFragment(
+    graphql`
+      fragment ContentUnknownMediaFragment on MediaContent {
+        id
+        userProgressData {
+          ...ContentProgressFrameFragment
+        }
+      }
+    `,
+    _media
+  );
+
+  return (
+    <Content
+      type="Empty media"
+      title={title}
+      className="hover:bg-gray-100"
+      color={disabled ? colors.gray[100] : colors.gray[200]}
+      onClick={onClick}
+      icon={
+        <QuestionMark
+          className="!w-1/2 !h-1/2"
+          sx={{
+            color: disabled ? "text.disabled" : "text.secondary",
+          }}
+        />
+      }
+      iconFrame={
+        <ProgressFrame
+          color={disabled ? colors.gray[100] : colors.gray[200]}
+          _progress={media.userProgressData}
+        />
+      }
+    />
+  );
 }
 
 export function VideoContent({
@@ -505,10 +574,11 @@ function EarlyRepeatWarnModal({
 
 export function FlashcardContent({
   _flashcard,
+  courseId,
 }: {
   _flashcard: ContentFlashcardFragment$key;
+  courseId: string;
 }) {
-  const { courseId } = useParams();
   const flashcard = useFragment(
     graphql`
       fragment ContentFlashcardFragment on FlashcardSetAssessment {
@@ -577,8 +647,13 @@ export function FlashcardContent({
   );
 }
 
-export function QuizContent({ _quiz }: { _quiz: ContentQuizFragment$key }) {
-  const { courseId } = useParams();
+export function QuizContent({
+  _quiz,
+  courseId,
+}: {
+  _quiz: ContentQuizFragment$key;
+  courseId: string;
+}) {
   const quiz = useFragment(
     graphql`
       fragment ContentQuizFragment on QuizAssessment {

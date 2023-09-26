@@ -1,6 +1,6 @@
 import { CourseCardFragment$key } from "@/__generated__/CourseCardFragment.graphql";
+import { YearDivision } from "@/__generated__/lecturerCreateCourseMutation.graphql";
 import {
-  Button,
   Card,
   CardContent,
   Chip,
@@ -13,6 +13,34 @@ import dayjs from "dayjs";
 import { graphql, useFragment } from "react-relay";
 import { Suggestion } from "./Suggestion";
 
+export const yearDivisionToString: Record<YearDivision, string> = {
+  FIRST_SEMESTER: "Winter semester",
+  SECOND_SEMESTER: "Summer semester",
+  FIRST_TRIMESTER: "1st Trimester",
+  SECOND_TRIMESTER: "2nd Trimester",
+  THIRD_TRIMESTER: "3rd Trimester",
+  FIRST_QUARTER: "1st Quarter",
+  SECOND_QUARTER: "2nd Quarter",
+  THIRD_QUARTER: "3rd Quarter",
+  FOURTH_QUARTER: "4th Quarter",
+
+  "%future added value": "Unknown",
+};
+
+export const yearDivisionToStringShort: Record<YearDivision, string> = {
+  FIRST_SEMESTER: "Winter",
+  SECOND_SEMESTER: "Summer",
+  FIRST_TRIMESTER: "1st Trim.",
+  SECOND_TRIMESTER: "2nd Trim.",
+  THIRD_TRIMESTER: "3rd Trim.",
+  FIRST_QUARTER: "Q1",
+  SECOND_QUARTER: "Q2",
+  THIRD_QUARTER: "Q3",
+  FOURTH_QUARTER: "Q4",
+
+  "%future added value": "Unknown",
+};
+
 export function CourseCard({ _course }: { _course: CourseCardFragment$key }) {
   const course = useFragment(
     graphql`
@@ -20,7 +48,7 @@ export function CourseCard({ _course }: { _course: CourseCardFragment$key }) {
         id
         title
         startDate
-        startYear
+        yearDivision
         suggestions(amount: 3) {
           ...SuggestionFragment
         }
@@ -59,7 +87,13 @@ export function CourseCard({ _course }: { _course: CourseCardFragment$key }) {
             </Link>
           </Typography>
           <div className="grow"></div>
-          <Chip label={dayjs(course.startDate).year()}></Chip>
+          <Chip
+            label={
+              course.yearDivision
+                ? yearDivisionToStringShort[course.yearDivision]
+                : dayjs(course.startDate).year()
+            }
+          ></Chip>
         </div>
       </CardContent>
 
@@ -67,6 +101,7 @@ export function CourseCard({ _course }: { _course: CourseCardFragment$key }) {
       <div className="flex flex-col m-4 gap-2 items-start grow min-h-[12rem]">
         {course.suggestions.map((suggestion, i) => (
           <Suggestion
+            courseId={course.id}
             key={`${course.id}-suggestion-${i}`}
             _suggestion={suggestion}
           />

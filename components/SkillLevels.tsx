@@ -12,9 +12,11 @@ import { Suggestion } from "./Suggestion";
 export function SkillLevels({
   className = "",
   _chapter,
+  courseId,
 }: {
   className?: string;
   _chapter: SkillLevelsFragment$key;
+  courseId: string;
 }) {
   const { skillLevels, id: chapterId } = useFragment(
     graphql`
@@ -43,24 +45,28 @@ export function SkillLevels({
       className={`grid grid-flow-col auto-cols-fr gap-4 items-center ${className}`}
     >
       <SkillLevel
+        courseId={courseId}
         label="Remember"
         value={skillLevels.remember.value}
         chapterId={chapterId}
         skillType="REMEMBER"
       />
       <SkillLevel
+        courseId={courseId}
         label="Understand"
         value={skillLevels.understand.value}
         chapterId={chapterId}
         skillType="UNDERSTAND"
       />
       <SkillLevel
+        courseId={courseId}
         label="Apply"
         value={skillLevels.apply.value}
         chapterId={chapterId}
         skillType="APPLY"
       />
       <SkillLevel
+        courseId={courseId}
         label="Analyse"
         value={skillLevels.analyze.value}
         chapterId={chapterId}
@@ -75,11 +81,13 @@ export function SkillLevel({
   skillType,
   value,
   label,
+  courseId,
 }: {
   chapterId: string;
   skillType: SkillType;
   value: number;
   label: string;
+  courseId: string;
 }) {
   const level = Math.floor(value); // integer part is level
   const progress = (value % 1) * 100; // decimal part is progress
@@ -87,6 +95,7 @@ export function SkillLevel({
   if (level < 2) {
     return (
       <SkillLevelBase
+        courseId={courseId}
         badge={
           <SkillBadge
             color={colors.white}
@@ -107,6 +116,7 @@ export function SkillLevel({
   } else if (level < 4) {
     return (
       <SkillLevelBase
+        courseId={courseId}
         badge={<SkillBadge color="#c0c0c0" level={level} progress={progress} />}
         label={label}
         level="Iron"
@@ -118,6 +128,7 @@ export function SkillLevel({
   } else if (level < 6) {
     return (
       <SkillLevelBase
+        courseId={courseId}
         badge={<SkillBadge color="#bf8970" level={level} progress={progress} />}
         label={label}
         level="Bronze"
@@ -129,6 +140,7 @@ export function SkillLevel({
   } else if (level < 8) {
     return (
       <SkillLevelBase
+        courseId={courseId}
         badge={<SkillBadge color="#d4af37" level={level} progress={progress} />}
         label={label}
         level="Gold"
@@ -152,6 +164,7 @@ export function SkillLevel({
         color={colors.emerald[600]}
         chapterId={chapterId}
         skillType={skillType}
+        courseId={courseId}
       />
     );
   }
@@ -164,6 +177,7 @@ export function SkillLevelBase({
   color,
   chapterId,
   skillType,
+  courseId,
 }: {
   badge: ReactNode;
   label: string;
@@ -171,6 +185,7 @@ export function SkillLevelBase({
   color: string;
   chapterId: string;
   skillType: SkillType;
+  courseId: string;
 }) {
   const [tooltipsOpen, setTooltipsOpen] = useState(0);
   const [hasSuggestions, setHasSuggestions] = useState<boolean>(true);
@@ -179,6 +194,7 @@ export function SkillLevelBase({
   const suggestions = (
     <Suspense fallback={<CircularProgress className="m-2" size="1rem" />}>
       <SkillLevelSuggestions
+        courseId={courseId}
         chapterId={chapterId}
         skillType={skillType}
         onLoad={(num) => {
@@ -248,10 +264,12 @@ function SkillLevelSuggestions({
   chapterId,
   skillType,
   onLoad,
+  courseId,
 }: {
   chapterId: string;
   skillType: SkillType;
   onLoad: (num: number) => void;
+  courseId: string;
 }) {
   const { suggestionsByChapterIds } =
     useLazyLoadQuery<SkillLevelsSuggestionsQuery>(
@@ -291,6 +309,7 @@ function SkillLevelSuggestions({
       <div className="flex flex-col gap-2 items-start">
         {suggestionsByChapterIds.map((suggestion) => (
           <Suggestion
+            courseId={courseId}
             key={suggestion.content.id}
             _suggestion={suggestion}
             small

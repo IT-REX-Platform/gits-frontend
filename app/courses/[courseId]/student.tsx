@@ -11,7 +11,6 @@ import {
   tooltipClasses,
 } from "@mui/material";
 import { every, orderBy, some } from "lodash";
-import Error from "next/error";
 import { useParams, useRouter } from "next/navigation";
 import {
   graphql,
@@ -36,6 +35,7 @@ import { ChapterContent } from "@/components/ChapterContent";
 import { ChapterHeader } from "@/components/ChapterHeader";
 import { ContentLink } from "@/components/Content";
 import { FormErrors } from "@/components/FormErrors";
+import { PageError } from "@/components/PageError";
 import { RewardScores } from "@/components/RewardScores";
 import { Section, SectionContent, SectionHeader } from "@/components/Section";
 import { Stage, StageBarrier } from "@/components/Stage";
@@ -45,7 +45,7 @@ import ExitToAppIcon from "@mui/icons-material/ExitToApp";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import dayjs from "dayjs";
 import Link from "next/link";
-import { Fragment, useState } from "react";
+import { useState } from "react";
 
 interface Data {
   name: string;
@@ -58,8 +58,7 @@ function createData(name: string, power: number) {
 
 export default function StudentCoursePage() {
   // Get course id from url
-  const params = useParams();
-  const id = params.courseId;
+  const { courseId: id } = useParams();
 
   const router = useRouter();
   const [error, setError] = useState<any>(null);
@@ -132,7 +131,7 @@ export default function StudentCoursePage() {
 
   // Show 404 error page if id was not found
   if (coursesByIds.length == 0) {
-    return <Error statusCode={404} title="Course could not be found." />;
+    return <PageError message="No course found with given id." />;
   }
 
   // Extract scoreboard
@@ -251,7 +250,11 @@ export default function StudentCoursePage() {
         <Typography variant="h2">Up next</Typography>
         <div className="mt-8 gap-8 flex flex-wrap">
           {course.suggestions.map((x) => (
-            <Suggestion key={x.content.id} _suggestion={x} />
+            <Suggestion
+              courseId={course.id}
+              key={x.content.id}
+              _suggestion={x}
+            />
           ))}
         </div>
       </section>
@@ -268,6 +271,7 @@ function StudentChapter({
 }: {
   _chapter: studentCoursePageChapterFragment$key;
 }) {
+  const { courseId } = useParams();
   const chapter = useFragment(
     graphql`
       fragment studentCoursePageChapterFragment on Chapter {
@@ -292,6 +296,7 @@ function StudentChapter({
   return (
     <section>
       <ChapterHeader
+        courseId={courseId}
         _chapter={chapter}
         expanded={expanded}
         onExpandClick={() => setExpanded((curr) => !curr)}
@@ -346,15 +351,19 @@ function StudentSection({
       <SectionHeader>{section.name}</SectionHeader>
       <SectionContent>
         {stages.map((stage, i) => (
-          <Fragment key={stage.id}>
+          <>
             {/* Show barrier if this is the first non-complete stage */}
             {(i == 0
               ? false
               : !stageComplete[i - 1] && !stageDisabled[i - 1]) && (
               <StageBarrier />
             )}
-            <StudentStage _stage={stage} disabled={stageDisabled[i]} />
-          </Fragment>
+            <StudentStage
+              key={stage.id}
+              _stage={stage}
+              disabled={stageDisabled[i]}
+            />
+          </>
         ))}
       </SectionContent>
     </Section>
@@ -368,6 +377,7 @@ function StudentStage({
   disabled?: boolean;
   _stage: studentCoursePageStageFragment$key;
 }) {
+  const { courseId } = useParams();
   const stage = useFragment(
     graphql`
       fragment studentCoursePageStageFragment on Stage {
@@ -388,10 +398,16 @@ function StudentStage({
   return (
     <Stage progress={disabled ? 0 : stage.requiredContentsProgress}>
       {stage.requiredContents.map((content) => (
-        <ContentLink key={content.id} _content={content} disabled={disabled} />
+        <ContentLink
+          courseId={courseId}
+          key={content.id}
+          _content={content}
+          disabled={disabled}
+        />
       ))}
       {stage.optionalContents.map((content) => (
         <ContentLink
+          courseId={courseId}
           key={content.id}
           _content={content}
           optional

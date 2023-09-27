@@ -18,10 +18,15 @@ export function SkillLevels({
   _chapter: SkillLevelsFragment$key;
   courseId: string;
 }) {
-  const { skillLevels, id: chapterId } = useFragment(
+  const {
+    skillLevels,
+    id: chapterId,
+    achievableSkillTypes,
+  } = useFragment(
     graphql`
       fragment SkillLevelsFragment on Chapter {
         id
+        achievableSkillTypes
         skillLevels {
           remember {
             value
@@ -44,34 +49,42 @@ export function SkillLevels({
     <div
       className={`grid grid-flow-col auto-cols-fr gap-4 items-center ${className}`}
     >
-      <SkillLevel
-        courseId={courseId}
-        label="Remember"
-        value={skillLevels.remember.value}
-        chapterId={chapterId}
-        skillType="REMEMBER"
-      />
-      <SkillLevel
-        courseId={courseId}
-        label="Understand"
-        value={skillLevels.understand.value}
-        chapterId={chapterId}
-        skillType="UNDERSTAND"
-      />
-      <SkillLevel
-        courseId={courseId}
-        label="Apply"
-        value={skillLevels.apply.value}
-        chapterId={chapterId}
-        skillType="APPLY"
-      />
-      <SkillLevel
-        courseId={courseId}
-        label="Analyse"
-        value={skillLevels.analyze.value}
-        chapterId={chapterId}
-        skillType="ANALYSE"
-      />
+      {achievableSkillTypes.includes("REMEMBER") && (
+        <SkillLevel
+          courseId={courseId}
+          label="Remember"
+          value={skillLevels.remember.value}
+          chapterId={chapterId}
+          skillType="REMEMBER"
+        />
+      )}
+      {achievableSkillTypes.includes("UNDERSTAND") && (
+        <SkillLevel
+          courseId={courseId}
+          label="Understand"
+          value={skillLevels.understand.value}
+          chapterId={chapterId}
+          skillType="UNDERSTAND"
+        />
+      )}
+      {achievableSkillTypes.includes("APPLY") && (
+        <SkillLevel
+          courseId={courseId}
+          label="Apply"
+          value={skillLevels.apply.value}
+          chapterId={chapterId}
+          skillType="APPLY"
+        />
+      )}
+      {achievableSkillTypes.includes("ANALYSE") && (
+        <SkillLevel
+          courseId={courseId}
+          label="Analyse"
+          value={skillLevels.analyze.value}
+          chapterId={chapterId}
+          skillType="ANALYSE"
+        />
+      )}
     </div>
   );
 }

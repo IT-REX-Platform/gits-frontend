@@ -1,9 +1,10 @@
+import { MultipleChoiceQuestionFragment$key } from "@/__generated__/MultipleChoiceQuestionFragment.graphql";
+import { Checkbox, FormControlLabel, FormGroup } from "@mui/material";
+import { shuffle } from "lodash";
+import { useEffect, useMemo, useState } from "react";
 import { graphql, useFragment } from "react-relay";
 import { RenderRichText } from "../RichTextEditor";
-import { MultipleChoiceQuestionFragment$key } from "@/__generated__/MultipleChoiceQuestionFragment.graphql";
-import { useEffect, useState } from "react";
 import { QuestionDivider } from "./QuestionDivider";
-import { Checkbox, FormControlLabel, FormGroup } from "@mui/material";
 
 export function MultipleChoiceQuestion({
   _question,
@@ -58,6 +59,8 @@ export function MultipleChoiceQuestion({
     setSelectedAnswers([]);
   }, [question]);
 
+  const shuffled = useMemo(() => shuffle(question.answers), [question.answers]);
+
   return (
     <div>
       {/* Question */}
@@ -70,7 +73,7 @@ export function MultipleChoiceQuestion({
       {/* Answer options */}
       <div className="flex justify-center gap-4">
         <FormGroup>
-          {question.answers.map((answer, index) => (
+          {shuffled.map((answer, index) => (
             <FormControlLabel
               key={index}
               control={

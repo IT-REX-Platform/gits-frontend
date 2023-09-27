@@ -15,13 +15,13 @@ import EditChapterButton from "@/components/EditChapterButton";
 import { EditCourseModal } from "@/components/EditCourseModal";
 import EditSectionButton from "@/components/EditSectionButton";
 import { Heading } from "@/components/Heading";
+import { PageError } from "@/components/PageError";
 import { Section, SectionContent, SectionHeader } from "@/components/Section";
 import { Stage } from "@/components/Stage";
 import { Add, Settings } from "@mui/icons-material";
 import { orderBy } from "lodash";
 import { useState } from "react";
 import { AddContentModal } from "../../../components/AddContentModal";
-import { PageError } from "@/components/PageError";
 
 graphql`
   fragment lecturerSectionFragment on Section {
@@ -224,7 +224,7 @@ export default function LecturerCoursePage() {
                 </SectionContent>
               </Section>
             ))}
-            <AddSectionButton chapterId={chapter.id} />
+            w <AddSectionButton chapterId={chapter.id} />
           </ChapterContent>
         </section>
       ))}

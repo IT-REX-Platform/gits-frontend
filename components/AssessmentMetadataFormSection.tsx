@@ -116,7 +116,7 @@ export function AssessmentMetadataFormSection({
           control={
             <Checkbox onChange={() => setIntervalLearning(!intervalLearning)} />
           }
-          label="Do you want to want this content to be learned in an interval?"
+          label="Do you want to set an inital learning interval?"
         />
       </FormGroup>
       {intervalLearning && (

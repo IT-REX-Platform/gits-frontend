@@ -308,6 +308,7 @@ export function AddContentModal({
         isOpen={openAddQuizModal}
         onClose={() => setOpenAddQuizModal(false)}
         chapterId={chapterId}
+        _existingQuiz={null}
       />
       {openFlashcardModal && (
         <AddFlashcardSetModal

@@ -43,7 +43,7 @@ export function AssessmentMetadataFormSection({
     Number(metadata?.skillPoints) || 50
   );
 
-  const valid = skillTypes?.length;
+  const valid = skillTypes?.length && interval && interval >= 0;
 
   useEffect(() => {
     onChange(
@@ -127,6 +127,10 @@ export function AssessmentMetadataFormSection({
           value={interval}
           defaultValue={"Learning Interval"}
           label="Interval in days"
+          error={(interval ?? 0) < 0}
+          helperText={
+            (interval ?? 0) < 0 ? "Please enter a positive value" : undefined
+          }
           onChange={(e) => setInterval(parseInt(e.target.value))}
         />
       )}

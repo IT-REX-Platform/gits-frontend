@@ -90,7 +90,9 @@ export function CourseCard({ _course }: { _course: CourseCardFragment$key }) {
           <Chip
             label={
               course.yearDivision
-                ? yearDivisionToStringShort[course.yearDivision]
+                ? yearDivisionToStringShort[course.yearDivision] +
+                  " " +
+                  (dayjs(course.startDate).year() % 100)
                 : dayjs(course.startDate).year()
             }
           ></Chip>

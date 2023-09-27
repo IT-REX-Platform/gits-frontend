@@ -1,6 +1,3 @@
-import { useState } from "react";
-import { graphql, useFragment, useMutation } from "react-relay";
-import dayjs, { Dayjs } from "dayjs";
 import {
   Alert,
   Backdrop,
@@ -10,14 +7,23 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
   Switch,
   TextField,
 } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers";
+import dayjs, { Dayjs } from "dayjs";
+import { useState } from "react";
+import { graphql, useFragment, useMutation } from "react-relay";
 
-import { Form, FormSection } from "./Form";
-import { EditCourseModalMutation } from "@/__generated__/EditCourseModalMutation.graphql";
+import { YearDivision } from "@/__generated__/CourseCardFragment.graphql";
 import { EditCourseModalFragment$key } from "@/__generated__/EditCourseModalFragment.graphql";
+import { EditCourseModalMutation } from "@/__generated__/EditCourseModalMutation.graphql";
+import { yearDivisionToString } from "./CourseCard";
+import { Form, FormSection } from "./Form";
 
 export function EditCourseModal({
   _course,
@@ -37,6 +43,7 @@ export function EditCourseModal({
         startDate
         endDate
         published
+        yearDivision
       }
     `,
     _course
@@ -58,6 +65,9 @@ export function EditCourseModal({
     dayjs(course.startDate)
   );
   const [endDate, setEndDate] = useState<Dayjs | null>(dayjs(course.endDate));
+  const [yearDivision, setYearDivision] = useState<YearDivision | null>(
+    course.yearDivision
+  );
   const [publish, setPublish] = useState(course.published);
 
   const [error, setError] = useState<any>(null);
@@ -78,6 +88,7 @@ export function EditCourseModal({
           startDate: startDate!.toISOString(),
           endDate: endDate!.toISOString(),
           published: publish,
+          // TODO add year division as soon as supported by the backend
         },
       },
       onError(error) {
@@ -160,6 +171,35 @@ export function EditCourseModal({
                   },
                 }}
               />
+
+              <FormControl fullWidth>
+                <InputLabel>Year Divison</InputLabel>
+                <Select
+                  value={yearDivision}
+                  onChange={(x) =>
+                    setYearDivision(x.target.value as YearDivision)
+                  }
+                  label={"Year Divison"}
+                >
+                  {(
+                    [
+                      "FIRST_SEMESTER",
+                      "SECOND_SEMESTER",
+                      "FIRST_TRIMESTER",
+                      "SECOND_TRIMESTER",
+                      "THIRD_TRIMESTER",
+                      "FIRST_QUARTER",
+                      "SECOND_QUARTER",
+                      "THIRD_QUARTER",
+                      "FOURTH_QUARTER",
+                    ] as const
+                  ).map((x) => (
+                    <MenuItem key={x} value={x}>
+                      {yearDivisionToString[x]}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
             </FormSection>
 
             <FormSection title="Published">

@@ -277,7 +277,9 @@ function CourseListItem({
   );
 
   const year = course.yearDivision
-    ? yearDivisionToStringShort[course.yearDivision]
+    ? yearDivisionToStringShort[course.yearDivision] +
+      " " +
+      (dayjs(course.startDate).year() % 100)
     : dayjs(course.startDate).year();
   return (
     <ListItem disablePadding>
@@ -287,10 +289,10 @@ function CourseListItem({
           joined ? () => router.push(`/courses/${course.id}`) : undefined
         }
       >
-        <ListItemIcon className="!min-w-[5.5rem]">
+        <ListItemIcon className="!min-w-[6.5rem]">
           <Chip
             label={year}
-            className="!border-gray-400 !min-w-[4.5rem]"
+            className="!border-gray-400 !min-w-[5.5rem]"
           ></Chip>
         </ListItemIcon>
         <ListItemText

@@ -26,25 +26,14 @@ export function ChapterHeader({
         title
         suggestedStartDate
         suggestedEndDate
-        contents {
-          userProgressData {
-            lastLearnDate
-          }
+        userProgress {
+          progress
         }
         ...SkillLevelsFragment
       }
     `,
     _chapter
   );
-
-  const chapterProgress =
-    chapter.contents.length > 0
-      ? (100 *
-          chapter.contents.filter(
-            (content) => content.userProgressData.lastLearnDate != null
-          ).length) /
-        chapter.contents.length
-      : 0;
 
   return (
     <div
@@ -57,7 +46,7 @@ export function ChapterHeader({
         </IconButton>
       )}
       <div className="mr-8">
-        <ChapterProgress progress={chapterProgress} />
+        <ChapterProgress progress={chapter.userProgress.progress} />
       </div>
       <div className="flex justify-between items-center flex-grow">
         <div className="pr-8 flex flex-col items-start">

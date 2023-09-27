@@ -285,6 +285,10 @@ function StudentChapter({
           id
           ...studentCoursePageSectionFragment
         }
+        contentsWithNoSection {
+          id
+          ...ContentLinkFragment
+        }
       }
     `,
     _chapter
@@ -307,7 +311,22 @@ function StudentChapter({
             {chapter.sections.map((section) => (
               <StudentSection key={section.id} _section={section} />
             ))}
-          </ChapterContent>{" "}
+
+            {chapter.contentsWithNoSection.length > 0 && (
+              <Section>
+                <SectionHeader>Other Content</SectionHeader>
+                <SectionContent>
+                  {chapter.contentsWithNoSection.map((content) => (
+                    <ContentLink
+                      courseId={courseId}
+                      key={content.id}
+                      _content={content}
+                    />
+                  ))}
+                </SectionContent>
+              </Section>
+            )}
+          </ChapterContent>
         </div>
       </Collapse>
     </section>
@@ -324,6 +343,7 @@ function StudentSection({
       fragment studentCoursePageSectionFragment on Section {
         id
         name
+
         stages {
           id
           position

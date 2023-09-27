@@ -1,13 +1,13 @@
+import { Edit } from "@mui/icons-material";
+import { IconButton } from "@mui/material";
 import dayjs from "dayjs";
 import lodash from "lodash";
 import { useState } from "react";
-import { Edit } from "@mui/icons-material";
-import { IconButton } from "@mui/material";
 import { useFragment, useMutation } from "react-relay";
 import { graphql } from "relay-runtime";
 
-import { EditChapterButtonMutation } from "@/__generated__/EditChapterButtonMutation.graphql";
 import { EditChapterButtonFragment$key } from "@/__generated__/EditChapterButtonFragment.graphql";
+import { EditChapterButtonMutation } from "@/__generated__/EditChapterButtonMutation.graphql";
 import { DialogBase } from "./DialogBase";
 import { dialogSections, validationSchema } from "./dialogs/chapterDialog";
 
@@ -64,6 +64,8 @@ export default function EditChapterButton({
         <Edit fontSize="small" />
       </IconButton>
       <DialogBase
+        // reset values when the chapter changes
+        key={JSON.stringify(chapter)}
         open={open}
         title="Edit chapter"
         sections={dialogSections}

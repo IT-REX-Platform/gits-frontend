@@ -1,25 +1,25 @@
-import { studentCoursePageSectionFragment$key } from "@/__generated__/studentCoursePageSectionFragment.graphql";
 import { every, orderBy, some } from "lodash";
 import { graphql, useFragment } from "react-relay";
 import { Section, SectionContent, SectionHeader } from "./Section";
 import { StageBarrier } from "./Stage";
 import { StudentStage } from "./StudentStage";
+import { StudentSectionFragment$key } from "@/__generated__/StudentSectionFragment.graphql";
 
 export function StudentSection({
   _section,
 }: {
-  _section: studentCoursePageSectionFragment$key;
+  _section: StudentSectionFragment$key;
 }) {
   const section = useFragment(
     graphql`
-      fragment studentCoursePageSectionFragment on Section {
+      fragment StudentSectionFragment on Section {
         id
         name
         stages {
           id
           position
           requiredContentsProgress
-          ...studentCoursePageStageFragment
+          ...StudentStageFragment
         }
       }
     `,

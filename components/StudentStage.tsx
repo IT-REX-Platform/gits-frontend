@@ -1,20 +1,20 @@
-import { studentCoursePageStageFragment$key } from "@/__generated__/studentCoursePageStageFragment.graphql";
 import { useParams } from "next/navigation";
 import { graphql, useFragment } from "react-relay";
 import { Stage } from "./Stage";
 import { ContentLink } from "./Content";
+import { StudentStageFragment$key } from "@/__generated__/StudentStageFragment.graphql";
 
 export function StudentStage({
   disabled = false,
   _stage,
 }: {
   disabled?: boolean;
-  _stage: studentCoursePageStageFragment$key;
+  _stage: StudentStageFragment$key;
 }) {
   const { courseId } = useParams();
   const stage = useFragment(
     graphql`
-      fragment studentCoursePageStageFragment on Stage {
+      fragment StudentStageFragment on Stage {
         requiredContentsProgress
         requiredContents {
           ...ContentLinkFragment

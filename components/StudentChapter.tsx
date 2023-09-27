@@ -1,4 +1,3 @@
-import { studentCoursePageChapterFragment$key } from "@/__generated__/studentCoursePageChapterFragment.graphql";
 import dayjs from "dayjs";
 import { useParams } from "next/navigation";
 import { useState } from "react";
@@ -7,16 +6,17 @@ import { ChapterHeader } from "./ChapterHeader";
 import { Collapse } from "@mui/material";
 import { ChapterContent } from "./ChapterContent";
 import { StudentSection } from "./StudentSection";
+import { StudentChapterFragment$key } from "@/__generated__/StudentChapterFragment.graphql";
 
 export function StudentChapter({
   _chapter,
 }: {
-  _chapter: studentCoursePageChapterFragment$key;
+  _chapter: StudentChapterFragment$key;
 }) {
   const { courseId } = useParams();
   const chapter = useFragment(
     graphql`
-      fragment studentCoursePageChapterFragment on Chapter {
+      fragment StudentChapterFragment on Chapter {
         id
         title
         number
@@ -25,7 +25,7 @@ export function StudentChapter({
         ...ChapterHeaderFragment
         sections {
           id
-          ...studentCoursePageSectionFragment
+          ...StudentSectionFragment
         }
       }
     `,

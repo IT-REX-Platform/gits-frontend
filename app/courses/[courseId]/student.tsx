@@ -77,7 +77,7 @@ export default function StudentCoursePage() {
             elements {
               id
               number
-              ...studentCoursePageChapterFragment
+              ...StudentChapterFragment
               contents {
                 ...ContentLinkFragment
 

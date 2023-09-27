@@ -64,8 +64,6 @@ export default function EditChapterButton({
         <Edit fontSize="small" />
       </IconButton>
       <DialogBase
-        // reset values when the chapter changes
-        key={JSON.stringify(chapter)}
         open={open}
         title="Edit chapter"
         sections={dialogSections}

@@ -45,7 +45,7 @@ import ExitToAppIcon from "@mui/icons-material/ExitToApp";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import dayjs from "dayjs";
 import Link from "next/link";
-import { useState } from "react";
+import { Fragment, useState } from "react";
 
 interface Data {
   name: string;
@@ -351,19 +351,15 @@ function StudentSection({
       <SectionHeader>{section.name}</SectionHeader>
       <SectionContent>
         {stages.map((stage, i) => (
-          <>
+          <Fragment key={stage.id}>
             {/* Show barrier if this is the first non-complete stage */}
             {(i == 0
               ? false
               : !stageComplete[i - 1] && !stageDisabled[i - 1]) && (
               <StageBarrier />
             )}
-            <StudentStage
-              key={stage.id}
-              _stage={stage}
-              disabled={stageDisabled[i]}
-            />
-          </>
+            <StudentStage _stage={stage} disabled={stageDisabled[i]} />
+          </Fragment>
         ))}
       </SectionContent>
     </Section>

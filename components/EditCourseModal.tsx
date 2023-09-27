@@ -1,6 +1,3 @@
-import { useState } from "react";
-import { graphql, useFragment, useMutation } from "react-relay";
-import dayjs, { Dayjs } from "dayjs";
 import {
   Alert,
   Backdrop,
@@ -14,10 +11,13 @@ import {
   TextField,
 } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers";
+import dayjs, { Dayjs } from "dayjs";
+import { useState } from "react";
+import { graphql, useFragment, useMutation } from "react-relay";
 
-import { Form, FormSection } from "./Form";
-import { EditCourseModalMutation } from "@/__generated__/EditCourseModalMutation.graphql";
 import { EditCourseModalFragment$key } from "@/__generated__/EditCourseModalFragment.graphql";
+import { EditCourseModalMutation } from "@/__generated__/EditCourseModalMutation.graphql";
+import { Form, FormSection } from "./Form";
 
 export function EditCourseModal({
   _course,
@@ -134,7 +134,10 @@ export function EditCourseModal({
               />
             </FormSection>
 
-            <FormSection title="Start and end">
+            <FormSection
+              title="Start and end"
+              subtitle="The chapter will be hidden before and after this date"
+            >
               <DatePicker
                 label="Start date"
                 value={startDate}

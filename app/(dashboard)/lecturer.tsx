@@ -1,6 +1,9 @@
 "use client";
 
-import { lecturerLecturerDashboardQuery } from "@/__generated__/lecturerLecturerDashboardQuery.graphql";
+import {
+  YearDivision,
+  lecturerLecturerDashboardQuery,
+} from "@/__generated__/lecturerLecturerDashboardQuery.graphql";
 import {
   Add,
   ArrowForwardIos,
@@ -13,6 +16,7 @@ import {
   Card,
   CardActions,
   CardContent,
+  Chip,
   CircularProgress,
   Divider,
   List,
@@ -21,10 +25,25 @@ import {
   ListItemText,
   Typography,
 } from "@mui/material";
+import dayjs from "dayjs";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useLazyLoadQuery } from "react-relay";
 import { graphql } from "relay-runtime";
+
+export const yearDivisionToStringShort: Record<YearDivision, string> = {
+  FIRST_SEMESTER: "Winter",
+  SECOND_SEMESTER: "Summer",
+  FIRST_TRIMESTER: "1st Trim.",
+  SECOND_TRIMESTER: "2nd Trim.",
+  THIRD_TRIMESTER: "3rd Trim.",
+  FIRST_QUARTER: "Q1",
+  SECOND_QUARTER: "Q2",
+  THIRD_QUARTER: "Q3",
+  FOURTH_QUARTER: "Q4",
+
+  "%future added value": "Unknown",
+};
 
 export default function LecturerPage() {
   const { currentUserInfo } = useLazyLoadQuery<lecturerLecturerDashboardQuery>(
@@ -36,6 +55,9 @@ export default function LecturerPage() {
             course {
               id
               title
+              startDate
+              startYear
+              yearDivision
             }
           }
         }
@@ -71,80 +93,27 @@ export default function LecturerPage() {
         {courses.map((course) => (
           <Card variant="outlined" className="h-full" key={course.id}>
             <CardContent>
-              <div className="flex gap-4 items-center">
-                <div className="aspect-square min-w-[40px] grid">
-                  <CircularProgress
-                    variant="determinate"
-                    value={100}
-                    sx={{
-                      color: (theme) => theme.palette.grey[200],
-                    }}
-                    className="col-start-1 row-start-1"
-                  />
-                  <CircularProgress
-                    variant="determinate"
-                    value={45}
-                    color="success"
-                    className="col-start-1 row-start-1"
-                  />
-                </div>
+              <div className="flex justify-between">
                 <Typography
                   variant="h6"
                   component="div"
                   className="shrink text-ellipsis overflow-hidden whitespace-nowrap "
                 >
-                  {course.title}
+                  <Link href={`/courses/${course.id}`} color="black">
+                    {course.title}
+                  </Link>
                 </Typography>
+                <Chip
+                  label={
+                    course.yearDivision
+                      ? yearDivisionToStringShort[course.yearDivision] +
+                        " " +
+                        dayjs(course.startDate).year()
+                      : dayjs(course.startDate).year()
+                  }
+                ></Chip>
               </div>
             </CardContent>
-
-            <Divider />
-            <List>
-              <ListItemButton>
-                <ListItemIcon>
-                  <Visibility />
-                </ListItemIcon>
-                <ListItemText
-                  primary="Get quiz results"
-                  secondary="Chapter 4: Interfaces"
-                />
-                <ListItemIcon>
-                  <ArrowForwardIos fontSize="small" />
-                </ListItemIcon>
-              </ListItemButton>
-              <ListItemButton>
-                <ListItemIcon>
-                  <Check />
-                </ListItemIcon>
-                <ListItemText
-                  primary="Grade Assignments"
-                  secondary="Chapter 4: Interfaces"
-                />
-                <ListItemIcon>
-                  <ArrowForwardIos fontSize="small" />
-                </ListItemIcon>
-              </ListItemButton>
-
-              <ListItemButton>
-                <ListItemIcon>
-                  <Refresh />
-                </ListItemIcon>
-                <ListItemText
-                  primary="Check Student Progress"
-                  secondary="Chapter 1-3"
-                />
-                <ListItemIcon>
-                  <ArrowForwardIos fontSize="small" />
-                </ListItemIcon>
-              </ListItemButton>
-            </List>
-            <Divider />
-
-            <CardActions>
-              <Link href={{ pathname: `/courses/${course.id}` }}>
-                <Button size="small">Show Details</Button>
-              </Link>
-            </CardActions>
           </Card>
         ))}
       </div>

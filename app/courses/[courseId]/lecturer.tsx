@@ -16,13 +16,14 @@ import EditChapterButton from "@/components/EditChapterButton";
 import { EditCourseModal } from "@/components/EditCourseModal";
 import EditSectionButton from "@/components/EditSectionButton";
 import { Heading } from "@/components/Heading";
+import { PageError } from "@/components/PageError";
 import { Section, SectionContent, SectionHeader } from "@/components/Section";
 import { Stage } from "@/components/Stage";
 import { Add, Settings } from "@mui/icons-material";
 import { orderBy } from "lodash";
 import { useState } from "react";
 import { AddContentModal } from "../../../components/AddContentModal";
-import { PageError } from "@/components/PageError";
+import { OtherContent } from "@/components/OtherContent";
 
 graphql`
   fragment lecturerSectionFragment on Section {
@@ -76,11 +77,16 @@ graphql`
         ...AddFlashcardSetModalFragment
         ...AddContentModalFragment
         ...ChapterHeaderFragment
+        ...OtherContentFragment
         id
         title
         number
         sections {
           ...lecturerSectionFragment @relay(mask: false)
+        }
+        contentsWithNoSection {
+          id
+          ...ContentLinkFragment
         }
       }
     }
@@ -230,6 +236,8 @@ export default function LecturerCoursePage() {
             ))}
             <AddSectionButton chapterId={chapter.id} />
           </ChapterContent>
+
+          <OtherContent _chapter={chapter} />
         </section>
       ))}
     </main>

@@ -46,6 +46,7 @@ import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import dayjs from "dayjs";
 import Link from "next/link";
 import { useState } from "react";
+import { OtherContent } from "@/components/OtherContent";
 
 interface Data {
   name: string;
@@ -281,6 +282,7 @@ function StudentChapter({
         suggestedStartDate
         suggestedEndDate
         ...ChapterHeaderFragment
+        ...OtherContentFragment
         sections {
           id
           ...studentCoursePageSectionFragment
@@ -302,13 +304,12 @@ function StudentChapter({
         onExpandClick={() => setExpanded((curr) => !curr)}
       />
       <Collapse in={expanded}>
-        <div className="mb-6">
-          <ChapterContent>
-            {chapter.sections.map((section) => (
-              <StudentSection key={section.id} _section={section} />
-            ))}
-          </ChapterContent>{" "}
-        </div>
+        <ChapterContent>
+          {chapter.sections.map((section) => (
+            <StudentSection key={section.id} _section={section} />
+          ))}
+        </ChapterContent>
+        <OtherContent _chapter={chapter} />
       </Collapse>
     </section>
   );
@@ -324,6 +325,7 @@ function StudentSection({
       fragment studentCoursePageSectionFragment on Section {
         id
         name
+
         stages {
           id
           position

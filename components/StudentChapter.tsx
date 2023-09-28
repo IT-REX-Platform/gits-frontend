@@ -51,7 +51,7 @@ export function StudentChapter({
             <StudentSection key={section.id} _section={section} />
           ))}
         </ChapterContent>
-        <OtherContent _chapter={chapter} />
+        <OtherContent _chapter={chapter} courseId={courseId} />
       </Collapse>
     </section>
   );

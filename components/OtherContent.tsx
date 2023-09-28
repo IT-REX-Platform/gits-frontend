@@ -6,16 +6,15 @@ import { ContentLink } from "./Content";
 import { OtherContentFragment$key } from "@/__generated__/OtherContentFragment.graphql";
 
 export function OtherContent({
+  courseId,
   _chapter,
 }: {
+  courseId: string;
   _chapter: OtherContentFragment$key;
 }) {
   const chapter = useFragment(
     graphql`
       fragment OtherContentFragment on Chapter {
-        course {
-          id
-        }
         contentsWithNoSection {
           id
           ...ContentLinkFragment
@@ -37,7 +36,7 @@ export function OtherContent({
       <div className="flex flex-wrap gap-4">
         {chapter.contentsWithNoSection.map((content) => (
           <ContentLink
-            courseId={chapter.course.id}
+            courseId={courseId}
             key={content.id}
             _content={content}
           />

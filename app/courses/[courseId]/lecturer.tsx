@@ -237,7 +237,7 @@ export default function LecturerCoursePage() {
             <AddSectionButton chapterId={chapter.id} />
           </ChapterContent>
 
-          <OtherContent _chapter={chapter} />
+          <OtherContent _chapter={chapter} courseId={course.id} />
         </section>
       ))}
     </main>

@@ -165,7 +165,16 @@ export function QuizModal({
   const valid = metadata && assessmentMetadata;
 
   function onClose() {
-    setInput(defaultInput);
+    setInput(
+      existingQuiz
+        ? {
+            questionPoolingMode: existingQuiz.questionPoolingMode,
+            requiredCorrectAnswers: existingQuiz.requiredCorrectAnswers,
+            numberOfRandomlySelectedQuestions:
+              existingQuiz.numberOfRandomlySelectedQuestions,
+          }
+        : defaultInput
+    );
     _onClose();
   }
 

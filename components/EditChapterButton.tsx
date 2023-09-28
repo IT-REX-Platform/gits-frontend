@@ -13,8 +13,10 @@ import { DialogBase } from "./DialogBase";
 import { dialogSections, validationSchema } from "./dialogs/chapterDialog";
 
 export default function EditChapterButton({
+  courseId,
   _chapter,
 }: {
+  courseId: string;
   _chapter: EditChapterButtonFragment$key;
 }) {
   const [open, setOpen] = useState(false);
@@ -98,11 +100,18 @@ export default function EditChapterButton({
         onDelete={() => {
           deleteChapter({
             variables: { id: chapter.id },
-            onCompleted() {
-              setOpen(false);
-              window.location.reload();
-            },
+            onCompleted: () => setOpen(false),
             onError: setError,
+            updater(store) {
+              const root = store.get(courseId)?.getLinkedRecord("chapters");
+              if (!root) return;
+
+              const sections = root?.getLinkedRecords("elements") ?? [];
+              root.setLinkedRecords(
+                sections.filter((x) => x.getDataID() !== chapter.id),
+                "elements"
+              );
+            },
           });
         }}
         initialValues={{

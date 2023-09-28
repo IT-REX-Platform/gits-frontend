@@ -159,7 +159,9 @@ export default function LecturerCoursePage() {
           <ChapterHeader
             courseId={id}
             _chapter={chapter}
-            action={<EditChapterButton _chapter={chapter} />}
+            action={
+              <EditChapterButton _chapter={chapter} courseId={course.id} />
+            }
           />
 
           <ChapterContent>

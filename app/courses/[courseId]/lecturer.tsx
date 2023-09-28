@@ -1,4 +1,5 @@
 "use client";
+
 import { lecturerLecturerCourseIdQuery } from "@/__generated__/lecturerLecturerCourseIdQuery.graphql";
 import { Button, IconButton, Typography } from "@mui/material";
 import { useParams } from "next/navigation";
@@ -15,13 +16,14 @@ import EditChapterButton from "@/components/EditChapterButton";
 import { EditCourseModal } from "@/components/EditCourseModal";
 import EditSectionButton from "@/components/EditSectionButton";
 import { Heading } from "@/components/Heading";
+import { PageError } from "@/components/PageError";
 import { Section, SectionContent, SectionHeader } from "@/components/Section";
 import { Stage } from "@/components/Stage";
 import { Add, Settings } from "@mui/icons-material";
 import { orderBy } from "lodash";
 import { useState } from "react";
 import { AddContentModal } from "../../../components/AddContentModal";
-import { PageError } from "@/components/PageError";
+import { OtherContent } from "@/components/OtherContent";
 
 graphql`
   fragment lecturerSectionFragment on Section {
@@ -75,11 +77,16 @@ graphql`
         ...AddFlashcardSetModalFragment
         ...AddContentModalFragment
         ...ChapterHeaderFragment
+        ...OtherContentFragment
         id
         title
         number
         sections {
           ...lecturerSectionFragment @relay(mask: false)
+        }
+        contentsWithNoSection {
+          id
+          ...ContentLinkFragment
         }
       }
     }
@@ -158,7 +165,9 @@ export default function LecturerCoursePage() {
           <ChapterHeader
             courseId={id}
             _chapter={chapter}
-            action={<EditChapterButton _chapter={chapter} />}
+            action={
+              <EditChapterButton _chapter={chapter} courseId={course.id} />
+            }
           />
 
           <ChapterContent>
@@ -168,6 +177,7 @@ export default function LecturerCoursePage() {
                   action={
                     <EditSectionButton
                       name={section.name}
+                      chapterId={chapter.id}
                       sectionId={section.id}
                     />
                   }
@@ -226,6 +236,8 @@ export default function LecturerCoursePage() {
             ))}
             <AddSectionButton chapterId={chapter.id} />
           </ChapterContent>
+
+          <OtherContent _chapter={chapter} />
         </section>
       ))}
     </main>

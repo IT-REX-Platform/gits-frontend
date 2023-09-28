@@ -23,12 +23,16 @@ export function ChapterHeader({
   const chapter = useFragment(
     graphql`
       fragment ChapterHeaderFragment on Chapter {
+        userProgress {
+          progress
+        }
         title
         suggestedStartDate
         suggestedEndDate
         userProgress {
           progress
         }
+        description
         ...SkillLevelsFragment
       }
     `,
@@ -56,9 +60,17 @@ export function ChapterHeader({
             </Typography>
             {action}
           </div>
-          <Typography variant="subtitle1" onClick={(e) => e.stopPropagation()}>
-            {dayjs(chapter.suggestedStartDate).format("D. MMMM")} –{" "}
-            {dayjs(chapter.suggestedEndDate).format("D. MMMM")}
+          {chapter.suggestedEndDate && chapter.suggestedStartDate && (
+            <Typography
+              variant="subtitle1"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {dayjs(chapter.suggestedStartDate).format("D. MMMM")} –{" "}
+              {dayjs(chapter.suggestedEndDate).format("D. MMMM")}
+            </Typography>
+          )}
+          <Typography variant="caption" onClick={(e) => e.stopPropagation()}>
+            {chapter.description}
           </Typography>
         </div>
         <div onClick={(e) => e.stopPropagation()}>

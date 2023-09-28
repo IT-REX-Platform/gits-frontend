@@ -6,13 +6,13 @@ import { MediaContent } from "@/components/Content";
 import { ContentTags } from "@/components/ContentTags";
 import { Heading } from "@/components/Heading";
 import { MediaContentModal } from "@/components/MediaContentModal";
+import { PageError } from "@/components/PageError";
 import { Delete, Edit } from "@mui/icons-material";
 import { Alert, Button, CircularProgress, Typography } from "@mui/material";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { graphql, useLazyLoadQuery, useMutation } from "react-relay";
 import { ContentMediaDisplay, DownloadButton } from "./student";
-import { PageError } from "@/components/PageError";
 
 export default function LecturerMediaPage() {
   const { mediaId, courseId } = useParams();
@@ -128,14 +128,7 @@ export default function LecturerMediaPage() {
                       setError(error);
                     },
                     updater(store) {
-                      const chapter = store.get(content.metadata.chapterId);
-                      const contents = chapter?.getLinkedRecords("contents");
-                      if (chapter && contents) {
-                        chapter.setLinkedRecords(
-                          contents.filter((x) => x.getDataID() !== content.id),
-                          "contents"
-                        );
-                      }
+                      store.get(content.id)?.invalidateRecord();
                     },
                   });
                 }

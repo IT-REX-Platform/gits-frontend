@@ -10,7 +10,7 @@ export function AddStageButton({ sectionId }: { sectionId: string }) {
       mutateSection(sectionId: $id) {
         createStage(input: { requiredContents: [], optionalContents: [] }) {
           id
-          ...studentCoursePageStageFragment
+          ...StudentStageFragment
           ...lecturerStageFragment
         }
       }

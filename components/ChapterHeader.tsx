@@ -29,12 +29,10 @@ export function ChapterHeader({
         title
         suggestedStartDate
         suggestedEndDate
-        description
-        contents {
-          userProgressData {
-            lastLearnDate
-          }
+        userProgress {
+          progress
         }
+        description
         ...SkillLevelsFragment
       }
     `,

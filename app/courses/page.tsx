@@ -202,7 +202,7 @@ export default function StudentCourseList() {
                             courseId: course.id,
                             role:
                               pageView === PageView.Lecturer
-                                ? "TUTOR"
+                                ? "ADMINISTRATOR"
                                 : "STUDENT",
                             userId,
                           },

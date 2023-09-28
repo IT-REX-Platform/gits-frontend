@@ -1,20 +1,23 @@
 import { lecturerEditQuizQuery } from "@/__generated__/lecturerEditQuizQuery.graphql";
 import { ContentTags } from "@/components/ContentTags";
+import { FormErrors } from "@/components/FormErrors";
 import { Heading } from "@/components/Heading";
+import { PageError } from "@/components/PageError";
+import { QuizModal } from "@/components/QuizModal";
+import { AddQuestionButton } from "@/components/quiz/AddQuestionButton";
+import { AssociationQuestionPreview } from "@/components/quiz/AssociationQuestionPreview";
+import { ClozeQuestionPreview } from "@/components/quiz/ClozeQuestionPreview";
+import { DeleteQuestionButton } from "@/components/quiz/DeleteQuestionButton";
+import { DeleteQuizButton } from "@/components/quiz/DeleteQuizButton";
+import { EditAssociationQuestionButton } from "@/components/quiz/EditAssociationQuestionButton";
+import { EditClozeQuestionButton } from "@/components/quiz/EditClozeQuestionButton";
+import { EditMultipleChoiceQuestionButton } from "@/components/quiz/EditMultipleChoiceQuestionButton";
+import { MultipleChoiceQuestionPreview } from "@/components/quiz/MultipleChoiceQuestionPreview";
+import { Edit } from "@mui/icons-material";
+import { Button } from "@mui/material";
 import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
 import { graphql, useLazyLoadQuery } from "react-relay";
-import { MultipleChoiceQuestionPreview } from "@/components/quiz/MultipleChoiceQuestionPreview";
-import { DeleteQuestionButton } from "@/components/quiz/DeleteQuestionButton";
-import { DeleteQuizButton } from "@/components/quiz/DeleteQuizButton";
-import { FormErrors } from "@/components/FormErrors";
-import { ClozeQuestionPreview } from "@/components/quiz/ClozeQuestionPreview";
-import { EditClozeQuestionButton } from "@/components/quiz/EditClozeQuestionButton";
-import { AddQuestionButton } from "@/components/quiz/AddQuestionButton";
-import { PageError } from "@/components/PageError";
-import { AssociationQuestionPreview } from "@/components/quiz/AssociationQuestionPreview";
-import { EditAssociationQuestionButton } from "@/components/quiz/EditAssociationQuestionButton";
-import { EditMultipleChoiceQuestionButton } from "@/components/quiz/EditMultipleChoiceQuestionButton";
 
 export default function LecturerQuiz() {
   const { quizId, courseId } = useParams();
@@ -46,6 +49,7 @@ export default function LecturerQuiz() {
                 ...EditClozeQuestionButtonFragment
                 ...EditAssociationQuestionButtonFragment
               }
+              ...QuizModalFragment
             }
           }
         }
@@ -53,6 +57,7 @@ export default function LecturerQuiz() {
     `,
     { id: quizId }
   );
+  const [isEditSetOpen, setEditSetOpen] = useState(false);
 
   const content = contentsByIds[0];
   if (!content) {
@@ -75,12 +80,21 @@ export default function LecturerQuiz() {
       <Heading
         title={content.metadata.name}
         action={
-          <DeleteQuizButton
-            chapterId={content.metadata.chapterId}
-            contentId={content.id}
-            onCompleted={() => router.push(`/courses/${courseId}`)}
-            onError={setError}
-          />
+          <div className="flex gap-2">
+            <DeleteQuizButton
+              chapterId={content.metadata.chapterId}
+              contentId={content.id}
+              onCompleted={() => router.push(`/courses/${courseId}`)}
+              onError={setError}
+            />
+            <Button
+              sx={{ color: "text.secondary" }}
+              startIcon={<Edit />}
+              onClick={() => setEditSetOpen(true)}
+            >
+              Edit
+            </Button>
+          </div>
         }
         backButton
       />
@@ -98,10 +112,10 @@ export default function LecturerQuiz() {
                 <EditMultipleChoiceQuestionButton
                   _allRecords={query}
                   _question={question}
-                  assessmentId={content.id}
+                  assessmentId={content.id!}
                 />
                 <DeleteQuestionButton
-                  assessmentId={content.id}
+                  assessmentId={content.id!}
                   questionId={question.id}
                   num={question.number}
                 />
@@ -147,6 +161,13 @@ export default function LecturerQuiz() {
       <div className="mt-8 flex flex-col items-start">
         <AddQuestionButton _allRecords={query} assessmentId={content.id} />
       </div>
+
+      <QuizModal
+        onClose={() => setEditSetOpen(false)}
+        isOpen={isEditSetOpen}
+        _existingQuiz={quiz}
+        chapterId={content.metadata.chapterId}
+      />
     </main>
   );
 }

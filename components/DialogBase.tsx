@@ -10,6 +10,7 @@ import {
 import { DatePicker } from "@mui/x-date-pickers";
 import { Dayjs } from "dayjs";
 import { FormikProps, useFormik } from "formik";
+import { useEffect, useState } from "react";
 import { ObjectSchema } from "yup";
 import { Form, FormSection } from "./Form";
 import { FormErrors } from "./FormErrors";
@@ -34,6 +35,7 @@ export type FieldOptions<T extends object> = {
 );
 export type SectionOptions<T extends object> = {
   label: string;
+  subtitle?: string;
   fields: FieldOptions<T>[];
 };
 
@@ -77,7 +79,11 @@ export function DialogBase<T extends { [k in string]: any }>({
         <FormErrors error={error} onClose={clearError} />
         <Form>
           {sections.map((section) => (
-            <FormSection key={section.label} title={section.label}>
+            <FormSection
+              key={section.label}
+              title={section.label}
+              subtitle={section.subtitle}
+            >
               {section.fields.map((field) => (
                 <Field
                   formik={formik}

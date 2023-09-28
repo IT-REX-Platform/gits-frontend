@@ -13,12 +13,12 @@ import {
 import { DatePicker } from "@mui/x-date-pickers";
 import dayjs, { Dayjs } from "dayjs";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { graphql, useFragment, useMutation } from "react-relay";
 
-import { EditCourseModalDeleteMutation } from "@/__generated__/EditCourseModalDeleteMutation.graphql";
-import { EditCourseModalFragment$key } from "@/__generated__/EditCourseModalFragment.graphql";
 import { EditCourseModalMutation } from "@/__generated__/EditCourseModalMutation.graphql";
-import { useRouter } from "next/navigation";
+import { EditCourseModalFragment$key } from "@/__generated__/EditCourseModalFragment.graphql";
+import { EditCourseModalDeleteMutation } from "@/__generated__/EditCourseModalDeleteMutation.graphql";
 import { Form, FormSection } from "./Form";
 
 export function EditCourseModal({
@@ -193,7 +193,10 @@ export function EditCourseModal({
               />
             </FormSection>
 
-            <FormSection title="Start and end">
+            <FormSection
+              title="Start and end"
+              subtitle="The chapter will be hidden before and after this date"
+            >
               <DatePicker
                 label="Start date"
                 value={startDate}

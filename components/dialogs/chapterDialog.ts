@@ -1,6 +1,6 @@
+import { Dayjs } from "dayjs";
 import * as yup from "yup";
 import { SectionOptions } from "../DialogBase";
-import { Dayjs } from "dayjs";
 
 export type ChapterData = {
   title: string;
@@ -32,6 +32,7 @@ export const dialogSections: SectionOptions<ChapterData>[] = [
   },
   {
     label: "Start and end",
+    subtitle: "The chapter will be hidden before and after this date",
     fields: [
       {
         key: "startDate",
@@ -51,6 +52,9 @@ export const dialogSections: SectionOptions<ChapterData>[] = [
   },
   {
     label: "Suggested start and end",
+    subtitle:
+      "The recommended time to work on this chapter, displayed to the student",
+
     fields: [
       {
         key: "suggestedStartDate",

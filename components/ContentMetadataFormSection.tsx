@@ -33,7 +33,8 @@ export function ContentMetadataFormSection({
     name.trim() != "" &&
     suggestedDate != null &&
     suggestedDate.isValid() &&
-    rewardPoints.toString() === rewardPointsStr;
+    rewardPoints.toString() === rewardPointsStr &&
+    rewardPoints >= 0;
 
   useEffect(() => {
     onChange(
@@ -46,7 +47,15 @@ export function ContentMetadataFormSection({
           }
         : null
     );
-  }, [name, suggestedDate, rewardPointsStr, tags, rewardPoints, valid]);
+  }, [
+    name,
+    suggestedDate,
+    rewardPointsStr,
+    tags,
+    rewardPoints,
+    valid,
+    onChange,
+  ]);
 
   return (
     <FormSection title="Content details">
@@ -79,8 +88,12 @@ export function ContentMetadataFormSection({
         type="number"
         value={rewardPointsStr}
         error={
-          !(metadata == null && rewardPointsStr.trim() == "") &&
-          rewardPoints.toString() !== rewardPointsStr
+          (!(metadata == null && rewardPointsStr.trim() == "") &&
+            rewardPoints.toString() !== rewardPointsStr) ||
+          (rewardPoints ?? 0) < 0
+        }
+        helperText={
+          (rewardPoints ?? 0) < 0 ? "Please enter a positive value" : undefined
         }
         onChange={(e) => setRewardPointsStr(e.target.value)}
         multiline

@@ -7,11 +7,14 @@ import { useMutation } from "react-relay";
 import { graphql } from "relay-runtime";
 import { DialogBase } from "./DialogBase";
 import { dialogSections, validationSchema } from "./dialogs/sectionDialog";
+import { EditSectionButtonDeleteMutation } from "@/__generated__/EditSectionButtonDeleteMutation.graphql";
 
 export default function EditSectionButton({
+  chapterId,
   sectionId,
   name,
 }: {
+  chapterId: string;
   sectionId: string;
   name: string;
 }) {
@@ -22,6 +25,13 @@ export default function EditSectionButton({
         updateSectionName(name: $name) {
           name
         }
+      }
+    }
+  `);
+  const [deleteSection] = useMutation<EditSectionButtonDeleteMutation>(graphql`
+    mutation EditSectionButtonDeleteMutation($sectionId: UUID!) {
+      mutateSection(sectionId: $sectionId) {
+        deleteSection
       }
     }
   `);
@@ -48,6 +58,23 @@ export default function EditSectionButton({
         initialValues={{ name }}
         validationSchema={validationSchema}
         onClose={() => setOpen(false)}
+        onDelete={() =>
+          deleteSection({
+            variables: { sectionId },
+            onCompleted: () => setOpen(false),
+            onError: setError,
+            updater(store) {
+              const root = store.get(chapterId);
+              if (!root) return;
+
+              const sections = root.getLinkedRecords("sections") ?? [];
+              root.setLinkedRecords(
+                sections.filter((x) => x.getDataID() !== sectionId),
+                "sections"
+              );
+            },
+          })
+        }
       />
     </>
   );

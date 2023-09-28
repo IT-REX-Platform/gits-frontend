@@ -1,9 +1,9 @@
 "use client";
-import { lecturerDeleteSectionMutation } from "@/__generated__/lecturerDeleteSectionMutation.graphql";
+
 import { lecturerLecturerCourseIdQuery } from "@/__generated__/lecturerLecturerCourseIdQuery.graphql";
 import { Button, IconButton, Typography } from "@mui/material";
 import { useParams } from "next/navigation";
-import { graphql, useLazyLoadQuery, useMutation } from "react-relay";
+import { graphql, useLazyLoadQuery } from "react-relay";
 
 import { AddChapterModal } from "@/components/AddChapterModal";
 import { AddSectionButton } from "@/components/AddSectionButton";
@@ -18,9 +18,9 @@ import EditSectionButton from "@/components/EditSectionButton";
 import { Heading } from "@/components/Heading";
 import { Section, SectionContent, SectionHeader } from "@/components/Section";
 import { Stage } from "@/components/Stage";
-import { Add, Delete, Settings } from "@mui/icons-material";
+import { Add, Settings } from "@mui/icons-material";
 import { orderBy } from "lodash";
-import { Fragment, useState } from "react";
+import { useState } from "react";
 import { AddContentModal } from "../../../components/AddContentModal";
 import { PageError } from "@/components/PageError";
 
@@ -110,13 +110,6 @@ export default function LecturerCoursePage() {
       { id: [id] }
     );
 
-  const [deleteSection] = useMutation<lecturerDeleteSectionMutation>(graphql`
-    mutation lecturerDeleteSectionMutation($sectionId: UUID!) {
-      mutateSection(sectionId: $sectionId) {
-        deleteSection
-      }
-    }
-  `);
   const [openModal, setOpenModal] = useState(false);
 
   // Show 404 error page if id was not found
@@ -171,93 +164,67 @@ export default function LecturerCoursePage() {
 
           <ChapterContent>
             {chapter.sections.map((section) => (
-              <>
-                <Section key={section.id}>
-                  <SectionHeader
-                    action={
-                      <EditSectionButton
-                        name={section.name}
-                        sectionId={section.id}
-                      />
-                    }
-                  >
-                    {section.name}
-                  </SectionHeader>
-                  <SectionContent>
-                    {orderBy(section.stages, (x) => x.position, "asc").map(
-                      (stage) => (
-                        <Stage progress={0} key={stage.id}>
-                          {stage.requiredContents.map((content) => (
-                            <ContentLink
-                              courseId={course.id}
-                              key={content.id}
-                              _content={content}
-                            />
-                          ))}
-                          {stage.optionalContents.map((content) => (
-                            <ContentLink
-                              courseId={course.id}
-                              key={content.id}
-                              _content={content}
-                              optional
-                            />
-                          ))}
-                          <div className="mt-4 flex flex-col items-start">
-                            <AddContentModal
-                              sectionId={section.id}
-                              courseId={course.id}
-                              stageId={stage.id}
-                              chapterId={chapter.id}
-                              _mediaRecords={query}
-                              _chapter={chapter}
-                              optionalRecords={stage.optionalContents.map(
-                                (x) => x.id
-                              )}
-                              requiredRecords={stage.requiredContents.map(
-                                (x) => x.id
-                              )}
-                            />
-                          </div>
-                          <div className="mt-2">
-                            <DeleteStageButton
-                              stageId={stage.id}
-                              sectionId={section.id}
-                            />
-                          </div>
-                        </Stage>
-                      )
-                    )}
-                    <Stage progress={0}>
-                      <AddStageButton sectionId={section.id} />
-                    </Stage>
-                  </SectionContent>
-                </Section>
-                <Button
-                  color="warning"
-                  startIcon={<Delete />}
-                  onClick={() =>
-                    deleteSection({
-                      variables: { sectionId: section.id },
-                      onError(error) {
-                        console.log(error);
-                      },
-                      updater(store) {
-                        const root = store.get(chapter.id);
-                        if (!root) return;
-
-                        const sections =
-                          root.getLinkedRecords("sections") ?? [];
-                        root.setLinkedRecords(
-                          sections.filter((x) => x.getDataID() !== section.id),
-                          "sections"
-                        );
-                      },
-                    })
+              <Section key={section.id}>
+                <SectionHeader
+                  action={
+                    <EditSectionButton
+                      name={section.name}
+                      chapterId={chapter.id}
+                      sectionId={section.id}
+                    />
                   }
                 >
-                  Delete Section
-                </Button>
-              </>
+                  {section.name}
+                </SectionHeader>
+                <SectionContent>
+                  {orderBy(section.stages, (x) => x.position, "asc").map(
+                    (stage) => (
+                      <Stage progress={0} key={stage.id}>
+                        {stage.requiredContents.map((content) => (
+                          <ContentLink
+                            courseId={course.id}
+                            key={content.id}
+                            _content={content}
+                          />
+                        ))}
+                        {stage.optionalContents.map((content) => (
+                          <ContentLink
+                            courseId={course.id}
+                            key={content.id}
+                            _content={content}
+                            optional
+                          />
+                        ))}
+                        <div className="mt-4 flex flex-col items-start">
+                          <AddContentModal
+                            sectionId={section.id}
+                            courseId={course.id}
+                            stageId={stage.id}
+                            chapterId={chapter.id}
+                            _mediaRecords={query}
+                            _chapter={chapter}
+                            optionalRecords={stage.optionalContents.map(
+                              (x) => x.id
+                            )}
+                            requiredRecords={stage.requiredContents.map(
+                              (x) => x.id
+                            )}
+                          />
+                        </div>
+                        <div className="mt-2">
+                          <DeleteStageButton
+                            stageId={stage.id}
+                            sectionId={section.id}
+                          />
+                        </div>
+                      </Stage>
+                    )
+                  )}
+                  <Stage progress={0}>
+                    <AddStageButton sectionId={section.id} />
+                  </Stage>
+                </SectionContent>
+              </Section>
             ))}
             <AddSectionButton chapterId={chapter.id} />
           </ChapterContent>

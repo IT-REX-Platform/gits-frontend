@@ -22,6 +22,7 @@ import { Add, Settings } from "@mui/icons-material";
 import { orderBy } from "lodash";
 import { useState } from "react";
 import { AddContentModal } from "../../../components/AddContentModal";
+import { OtherContent } from "@/components/OtherContent";
 
 graphql`
   fragment lecturerSectionFragment on Section {
@@ -75,6 +76,7 @@ graphql`
         ...AddFlashcardSetModalFragment
         ...AddContentModalFragment
         ...ChapterHeaderFragment
+        ...OtherContentFragment
         id
         title
         number
@@ -228,23 +230,10 @@ export default function LecturerCoursePage() {
                 </SectionContent>
               </Section>
             ))}
-
-            {chapter.contentsWithNoSection.length > 0 && (
-              <Section>
-                <SectionHeader>Other Content</SectionHeader>
-                <SectionContent>
-                  {chapter.contentsWithNoSection.map((content) => (
-                    <ContentLink
-                      courseId={courseId}
-                      key={content.id}
-                      _content={content}
-                    />
-                  ))}
-                </SectionContent>
-              </Section>
-            )}
             <AddSectionButton chapterId={chapter.id} />
           </ChapterContent>
+
+          <OtherContent _chapter={chapter} />
         </section>
       ))}
     </main>

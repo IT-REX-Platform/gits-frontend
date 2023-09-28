@@ -73,7 +73,7 @@ export function ChapterHeader({
             {chapter.description}
           </Typography>
         </div>
-        <div onClick={(e) => e.stopPropagation()}>
+        <div className="self-stretch" onClick={(e) => e.stopPropagation()}>
           <SkillLevels courseId={courseId} _chapter={chapter} />
         </div>
       </div>

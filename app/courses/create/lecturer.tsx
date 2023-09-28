@@ -19,6 +19,7 @@ import {
   Select,
   SelectChangeEvent,
   Switch,
+  TableBody,
   TextField,
   Typography,
 } from "@mui/material";
@@ -224,13 +225,15 @@ export default function NewCourse() {
       content: (
         <>
           <table>
-            <TableRow label="Title" value={title} />
-            <TableRow label="Description" value={description} />
-            <TableRow
-              label="Start date"
-              value={startDate?.format("LL") ?? "-"}
-            />
-            <TableRow label="End date" value={endDate?.format("LL") ?? "-"} />
+            <TableBody>
+              <TableRow label="Title" value={title} />
+              <TableRow label="Description" value={description} />
+              <TableRow
+                label="Start date"
+                value={startDate?.format("LL") ?? "-"}
+              />
+              <TableRow label="End date" value={endDate?.format("LL") ?? "-"} />
+            </TableBody>
           </table>
           <FormControlLabel
             label="Publish course"

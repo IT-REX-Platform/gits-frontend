@@ -1,4 +1,5 @@
 "use client";
+
 import { lecturerLecturerCourseIdQuery } from "@/__generated__/lecturerLecturerCourseIdQuery.graphql";
 import { Button, IconButton, Typography } from "@mui/material";
 import { useParams } from "next/navigation";
@@ -158,7 +159,9 @@ export default function LecturerCoursePage() {
           <ChapterHeader
             courseId={id}
             _chapter={chapter}
-            action={<EditChapterButton _chapter={chapter} />}
+            action={
+              <EditChapterButton _chapter={chapter} courseId={course.id} />
+            }
           />
 
           <ChapterContent>
@@ -168,6 +171,7 @@ export default function LecturerCoursePage() {
                   action={
                     <EditSectionButton
                       name={section.name}
+                      chapterId={chapter.id}
                       sectionId={section.id}
                     />
                   }

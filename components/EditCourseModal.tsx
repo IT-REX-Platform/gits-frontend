@@ -1,6 +1,3 @@
-import { useState } from "react";
-import { graphql, useFragment, useMutation } from "react-relay";
-import dayjs, { Dayjs } from "dayjs";
 import {
   Alert,
   Backdrop,
@@ -14,10 +11,15 @@ import {
   TextField,
 } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers";
+import dayjs, { Dayjs } from "dayjs";
+import { useState } from "react";
+import { graphql, useFragment, useMutation } from "react-relay";
 
-import { Form, FormSection } from "./Form";
-import { EditCourseModalMutation } from "@/__generated__/EditCourseModalMutation.graphql";
+import { EditCourseModalDeleteMutation } from "@/__generated__/EditCourseModalDeleteMutation.graphql";
 import { EditCourseModalFragment$key } from "@/__generated__/EditCourseModalFragment.graphql";
+import { EditCourseModalMutation } from "@/__generated__/EditCourseModalMutation.graphql";
+import { useRouter } from "next/navigation";
+import { Form, FormSection } from "./Form";
 
 export function EditCourseModal({
   _course,
@@ -28,6 +30,8 @@ export function EditCourseModal({
   onClose: () => void;
   _course: EditCourseModalFragment$key;
 }) {
+  const router = useRouter();
+
   const course = useFragment(
     graphql`
       fragment EditCourseModalFragment on Course {
@@ -52,6 +56,11 @@ export function EditCourseModal({
       }
     `);
 
+  const [deleteCourse] = useMutation<EditCourseModalDeleteMutation>(graphql`
+    mutation EditCourseModalDeleteMutation($id: UUID!) {
+      deleteCourse(id: $id)
+    }
+  `);
   const [title, setTitle] = useState(course.title);
   const [description, setDescription] = useState(course.description);
   const [startDate, setStartDate] = useState<Dayjs | null>(
@@ -96,6 +105,56 @@ export function EditCourseModal({
     setEndDate(dayjs(course.endDate));
     setPublish(course.published);
     setError(null);
+  }
+
+  function handleDelete() {
+    deleteCourse({
+      variables: { id: course.id },
+      onError(error) {
+        setError(error);
+      },
+      onCompleted() {
+        router.push("/");
+      },
+      updater(store) {
+        try {
+          // update "query.currentUserInfo.courseMemberships"
+          const currentUserInfo = store
+            .getRoot()
+            .getLinkedRecord("currentUserInfo");
+
+          const courseMemberships =
+            currentUserInfo?.getLinkedRecords("courseMemberships");
+
+          console.log("courseMemberships", courseMemberships);
+
+          if (!currentUserInfo || !courseMemberships) return;
+
+          currentUserInfo.setLinkedRecords(
+            courseMemberships.filter(
+              (x) => x.getLinkedRecord("course")?.getDataID() !== course.id
+            ),
+            "courseMemberships"
+          );
+
+          // update "query.courses"
+
+          const courseQuery = store.getRoot().getLinkedRecord("courses");
+          const courses = courseQuery?.getLinkedRecords("elements");
+
+          console.log("courses", courses);
+
+          if (!courseQuery || !courses) return;
+
+          courseQuery.setLinkedRecords(
+            courses.filter((x) => x.getDataID() !== course.id),
+            "elements"
+          );
+        } catch (err) {
+          console.error(err);
+        }
+      },
+    });
   }
 
   return (
@@ -174,7 +233,12 @@ export function EditCourseModal({
           </Backdrop>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleReset}>Reset</Button>
+          <Button onClick={handleDelete} variant="contained" color="error">
+            Delete
+          </Button>
+          <Button onClick={handleReset} variant="outlined">
+            Reset
+          </Button>
           <Button disabled={!valid} variant="contained" onClick={handleSubmit}>
             Update
           </Button>

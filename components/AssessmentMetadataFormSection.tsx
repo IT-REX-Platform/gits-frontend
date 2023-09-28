@@ -43,7 +43,9 @@ export function AssessmentMetadataFormSection({
     Number(metadata?.skillPoints) || 50
   );
 
-  const valid = skillTypes?.length && interval && interval >= 0;
+  const valid =
+    skillTypes?.length &&
+    (!intervalLearning || (interval != null && interval > 0));
 
   useEffect(() => {
     onChange(

@@ -47,7 +47,15 @@ export function ContentMetadataFormSection({
           }
         : null
     );
-  }, [name, suggestedDate, rewardPointsStr, tags, rewardPoints, valid]);
+  }, [
+    name,
+    suggestedDate,
+    rewardPointsStr,
+    tags,
+    rewardPoints,
+    valid,
+    onChange,
+  ]);
 
   return (
     <FormSection title="Content details">

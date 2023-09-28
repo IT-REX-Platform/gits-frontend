@@ -68,7 +68,7 @@ export default function LecturerQuiz() {
   if (!quiz) {
     return (
       <PageError
-        title={contentsByIds[0].metadata!.name}
+        title={contentsByIds[0].metadata.name}
         message="Content not of type quiz."
       />
     );
@@ -78,12 +78,12 @@ export default function LecturerQuiz() {
     <main>
       <FormErrors error={error} onClose={() => setError(null)} />
       <Heading
-        title={content.metadata!.name}
+        title={content.metadata.name}
         action={
           <div className="flex gap-2">
             <DeleteQuizButton
-              chapterId={content.metadata!.chapterId}
-              contentId={content.id!}
+              chapterId={content.metadata.chapterId}
+              contentId={content.id}
               onCompleted={() => router.push(`/courses/${courseId}`)}
               onError={setError}
             />
@@ -98,7 +98,7 @@ export default function LecturerQuiz() {
         }
         backButton
       />
-      <ContentTags metadata={content.metadata!} />
+      <ContentTags metadata={content.metadata} />
 
       {quiz.questionPool.map((question, index) => (
         <div
@@ -129,10 +129,10 @@ export default function LecturerQuiz() {
                 <EditClozeQuestionButton
                   _allRecords={query}
                   _question={question}
-                  assessmentId={content.id!}
+                  assessmentId={content.id}
                 />
                 <DeleteQuestionButton
-                  assessmentId={content.id!}
+                  assessmentId={content.id}
                   questionId={question.id}
                   num={question.number}
                 />
@@ -146,10 +146,10 @@ export default function LecturerQuiz() {
                 <EditAssociationQuestionButton
                   _allRecords={query}
                   _question={question}
-                  assessmentId={content.id!}
+                  assessmentId={content.id}
                 />
                 <DeleteQuestionButton
-                  assessmentId={content.id!}
+                  assessmentId={content.id}
                   questionId={question.id}
                   num={question.number}
                 />
@@ -159,14 +159,14 @@ export default function LecturerQuiz() {
         </div>
       ))}
       <div className="mt-8 flex flex-col items-start">
-        <AddQuestionButton _allRecords={query} assessmentId={content.id!} />
+        <AddQuestionButton _allRecords={query} assessmentId={content.id} />
       </div>
 
       <QuizModal
         onClose={() => setEditSetOpen(false)}
         isOpen={isEditSetOpen}
         _existingQuiz={quiz}
-        chapterId={content.metadata!.chapterId!}
+        chapterId={content.metadata.chapterId}
       />
     </main>
   );

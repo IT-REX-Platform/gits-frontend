@@ -224,7 +224,7 @@ export default function LecturerCoursePage() {
                 </SectionContent>
               </Section>
             ))}
-            w <AddSectionButton chapterId={chapter.id} />
+            <AddSectionButton chapterId={chapter.id} />
           </ChapterContent>
         </section>
       ))}

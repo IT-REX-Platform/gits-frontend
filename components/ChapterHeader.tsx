@@ -26,6 +26,7 @@ export function ChapterHeader({
         title
         suggestedStartDate
         suggestedEndDate
+        description
         contents {
           userProgressData {
             lastLearnDate
@@ -67,9 +68,17 @@ export function ChapterHeader({
             </Typography>
             {action}
           </div>
-          <Typography variant="subtitle1" onClick={(e) => e.stopPropagation()}>
-            {dayjs(chapter.suggestedStartDate).format("D. MMMM")} –{" "}
-            {dayjs(chapter.suggestedEndDate).format("D. MMMM")}
+          {chapter.suggestedEndDate && chapter.suggestedStartDate && (
+            <Typography
+              variant="subtitle1"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {dayjs(chapter.suggestedStartDate).format("D. MMMM")} –{" "}
+              {dayjs(chapter.suggestedEndDate).format("D. MMMM")}
+            </Typography>
+          )}
+          <Typography variant="caption" onClick={(e) => e.stopPropagation()}>
+            {chapter.description}
           </Typography>
         </div>
         <div onClick={(e) => e.stopPropagation()}>

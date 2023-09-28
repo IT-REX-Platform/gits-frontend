@@ -64,23 +64,13 @@ export function DialogBase<T extends { [k in string]: any }>({
   onDelete?: () => void;
   clearError?: () => void;
 }) {
-  const [prevOpen, setPrevOpen] = useState(open);
   const formik = useFormik<T>({
     initialValues,
     validationSchema,
     validateOnMount: true,
+    enableReinitialize: true,
     onSubmit,
   });
-
-  useEffect(() => {
-    // Reset form when closing dialog to ensure form contains initial values when opened again
-    if (!open && prevOpen) {
-      formik.resetForm();
-      setPrevOpen(false);
-    } else if (open && !prevOpen) {
-      setPrevOpen(open);
-    }
-  }, [open, prevOpen, formik]);
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="md">
@@ -113,7 +103,7 @@ export function DialogBase<T extends { [k in string]: any }>({
       <DialogActions>
         {onDelete && (
           <>
-            <Button color="warning" disabled={inProgress}>
+            <Button color="warning" disabled={inProgress} onClick={onDelete}>
               Delete
             </Button>
             <div className="grow"></div>

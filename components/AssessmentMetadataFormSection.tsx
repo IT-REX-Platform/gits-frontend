@@ -1,4 +1,3 @@
-import { SkillType } from "@/__generated__/AddFlashcardSetModalAssessmentMutation.graphql";
 import {
   Checkbox,
   FormControl,
@@ -14,6 +13,7 @@ import {
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import { FormSection } from "./Form";
+import { SkillType } from "@/__generated__/AddFlashcardSetModalMutation.graphql";
 
 export type AssessmentMetadataPayload = {
   skillTypes: readonly SkillType[];

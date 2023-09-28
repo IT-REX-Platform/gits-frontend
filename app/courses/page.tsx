@@ -38,9 +38,10 @@ export default function StudentCourseList() {
     currentUserInfo: { courseMemberships, id: userId },
   } = useLazyLoadQuery<pageCourseListQuery>(
     graphql`
-      query pageCourseListQuery {
-        courses {
+      query pageCourseListQuery($filter: CourseFilter) {
+        courses(filter: $filter) {
           elements {
+            published
             id
             title
             description
@@ -61,7 +62,7 @@ export default function StudentCourseList() {
         }
       }
     `,
-    {}
+    { filter: pageView === PageView.Lecturer ? undefined : { published: true } }
   );
 
   const courseIdsAlreadyJoined: string[] =

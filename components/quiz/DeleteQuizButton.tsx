@@ -37,14 +37,7 @@ export function DeleteQuizButton({
             onCompleted,
             onError,
             updater(store) {
-              const chapter = store.get(chapterId);
-              const contents = chapter?.getLinkedRecords("contents");
-              if (chapter && contents) {
-                chapter.setLinkedRecords(
-                  contents.filter((x) => x.getDataID() !== contentId),
-                  "contents"
-                );
-              }
+              store.get(contentId)?.invalidateRecord();
             },
           });
         }

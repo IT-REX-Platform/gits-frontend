@@ -3,6 +3,7 @@ import { graphql, useFragment, useMutation } from "react-relay";
 
 import { AddChapterModalFragment$key } from "@/__generated__/AddChapterModalFragment.graphql";
 import { AddChapterModalMutation } from "@/__generated__/AddChapterModalMutation.graphql";
+import dayjs from "dayjs";
 import lodash from "lodash";
 import { DialogBase } from "./DialogBase";
 import {
@@ -24,6 +25,7 @@ export function AddChapterModal({
     graphql`
       fragment AddChapterModalFragment on Course {
         id
+        endDate
         chapters {
           elements {
             id
@@ -87,9 +89,9 @@ export function AddChapterModal({
         title: "",
         description: "",
         startDate: null,
-        endDate: null,
+        endDate: dayjs(course.endDate),
         suggestedStartDate: null,
-        suggestedEndDate: null,
+        suggestedEndDate: dayjs(course.endDate),
       }}
       validationSchema={validationSchema(predecessorStart)}
       onClose={onClose}

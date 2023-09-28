@@ -8,8 +8,10 @@ import { lecturerEditFlashcardsQuery } from "@/__generated__/lecturerEditFlashca
 import { AssessmentMetadataPayload } from "@/components/AssessmentMetadataFormSection";
 import { ContentMetadataPayload } from "@/components/ContentMetadataFormSection";
 import { ContentTags } from "@/components/ContentTags";
+import { EditFlashcardSetModal } from "@/components/EditFlashcardSetModal";
 import { Form, FormSection } from "@/components/Form";
 import { Heading } from "@/components/Heading";
+import { PageError } from "@/components/PageError";
 import { Add, Delete, Edit, Help, QuestionAnswer } from "@mui/icons-material";
 import ClearIcon from "@mui/icons-material/Clear";
 import {
@@ -39,8 +41,6 @@ import {
   useLazyLoadQuery,
   useMutation,
 } from "react-relay";
-import { EditFlashcardSetModal } from "@/components/EditFlashcardSetModal";
-import { PageError } from "@/components/PageError";
 
 export default function LecturerFlashcards() {
   const { flashcardSetId, courseId } = useParams();
@@ -251,14 +251,7 @@ export default function LecturerFlashcards() {
                       setError(error);
                     },
                     updater(store) {
-                      const chapter = store.get(content.metadata.chapterId);
-                      const contents = chapter?.getLinkedRecords("contents");
-                      if (chapter && contents) {
-                        chapter.setLinkedRecords(
-                          contents.filter((x) => x.getDataID() !== content.id),
-                          "contents"
-                        );
-                      }
+                      store.get(content.id)?.invalidateRecord();
                     },
                   });
                 }

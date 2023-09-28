@@ -7,6 +7,7 @@ import { Collapse } from "@mui/material";
 import { ChapterContent } from "./ChapterContent";
 import { StudentSection } from "./StudentSection";
 import { StudentChapterFragment$key } from "@/__generated__/StudentChapterFragment.graphql";
+import { OtherContent } from "./OtherContent";
 
 export function StudentChapter({
   _chapter,
@@ -23,6 +24,7 @@ export function StudentChapter({
         suggestedStartDate
         suggestedEndDate
         ...ChapterHeaderFragment
+        ...OtherContentFragment
         sections {
           id
           ...StudentSectionFragment
@@ -44,13 +46,12 @@ export function StudentChapter({
         onExpandClick={() => setExpanded((curr) => !curr)}
       />
       <Collapse in={expanded}>
-        <div className="mb-6">
-          <ChapterContent>
-            {chapter.sections.map((section) => (
-              <StudentSection key={section.id} _section={section} />
-            ))}
-          </ChapterContent>{" "}
-        </div>
+        <ChapterContent>
+          {chapter.sections.map((section) => (
+            <StudentSection key={section.id} _section={section} />
+          ))}
+        </ChapterContent>
+        <OtherContent _chapter={chapter} />
       </Collapse>
     </section>
   );

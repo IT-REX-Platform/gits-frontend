@@ -372,14 +372,7 @@ export function InvalidContent({
                 del({
                   variables: { id },
                   updater(store) {
-                    const chapter = store.get(chapterId);
-                    const contents = chapter?.getLinkedRecords("contents");
-                    if (chapter && contents) {
-                      chapter.setLinkedRecords(
-                        contents.filter((x) => x.getDataID() !== id),
-                        "contents"
-                      );
-                    }
+                    store.get(id)?.invalidateRecord();
                   },
                 });
               }

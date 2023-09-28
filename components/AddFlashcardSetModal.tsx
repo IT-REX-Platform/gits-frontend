@@ -11,13 +11,12 @@ import {
 import { useState } from "react";
 import { graphql, useFragment, useMutation } from "react-relay";
 
+import { AddFlashcardSetModalFragment$key } from "@/__generated__/AddFlashcardSetModalFragment.graphql";
 import {
-  AddFlashcardSetModalAssessmentMutation,
+  AddFlashcardSetModalMutation,
   ContentType,
   SkillType,
-} from "@/__generated__/AddFlashcardSetModalAssessmentMutation.graphql";
-import { AddFlashcardSetModalFragment$key } from "@/__generated__/AddFlashcardSetModalFragment.graphql";
-import { AddFlashcardSetModalMutation } from "@/__generated__/AddFlashcardSetModalMutation.graphql";
+} from "@/__generated__/AddFlashcardSetModalMutation.graphql";
 import {
   AssessmentMetadataFormSection,
   AssessmentMetadataPayload,
@@ -51,12 +50,15 @@ export function AddFlashcardSetModal({
     _chapter
   );
 
-  const [createAssessment, isCreatingAssessment] =
-    useMutation<AddFlashcardSetModalAssessmentMutation>(graphql`
-      mutation AddFlashcardSetModalAssessmentMutation(
-        $assessment: CreateAssessmentInput!
+  const [createFlashcardSet, isCreatingFlashcardSet] =
+    useMutation<AddFlashcardSetModalMutation>(graphql`
+      mutation AddFlashcardSetModalMutation(
+        $assessmentInput: CreateAssessmentInput!
       ) {
-        createAssessment(input: $assessment) {
+        createFlashcardSetAssessment(
+          assessmentInput: $assessmentInput
+          flashcardSetInput: { flashcards: [] }
+        ) {
           __id
           __typename
 
@@ -69,18 +71,7 @@ export function AddFlashcardSetModal({
         }
       }
     `);
-  const [createFlashcardSet, isCreatingFlashcardSet] =
-    useMutation<AddFlashcardSetModalMutation>(graphql`
-      mutation AddFlashcardSetModalMutation($assessmentId: UUID!) {
-        createFlashcardSet(
-          input: { flashcards: [] }
-          assessmentId: $assessmentId
-        ) {
-          assessmentId
-        }
-      }
-    `);
-  const isUpdating = isCreatingAssessment || isCreatingFlashcardSet;
+  const isUpdating = isCreatingFlashcardSet;
 
   function handleSubmit() {
     const assessment = {
@@ -97,33 +88,40 @@ export function AddFlashcardSetModal({
           .initialLearningInterval as number,
       },
     };
-    createAssessment({
-      variables: { assessment },
+    createFlashcardSet({
+      variables: {
+        assessmentInput: {
+          metadata: {
+            ...metadata!,
+            chapterId: chapter.id,
+            type: "FLASHCARDS" as ContentType,
+          },
+          assessmentMetadata: {
+            ...assessmentMetadata!,
+            skillTypes: assessmentMetadata!.skillTypes as SkillType[],
+            initialLearningInterval: assessmentMetadata!
+              .initialLearningInterval as number,
+          },
+        },
+      },
       onError: setError,
-      onCompleted(response) {
-        createFlashcardSet({
-          variables: {
-            assessmentId: response.createAssessment.id,
-          },
-          onError: setError,
-          updater(store) {
-            // Get record of chapter and of the new assignment
-            const chapterRecord = store.get(chapter.__id);
-            const newRecord = store.get(response!.createAssessment.__id);
-            if (!chapterRecord || !newRecord) return;
+      updater(store, response) {
+        // Get record of chapter and of the new assignment
+        const chapterRecord = store.get(chapter.__id);
+        const newRecord = store.get(
+          response!.createFlashcardSetAssessment!.__id
+        );
+        if (!chapterRecord || !newRecord) return;
 
-            // Update the linked records of the chapter contents
-            const contentRecords =
-              chapterRecord.getLinkedRecords("contents") ?? [];
-            chapterRecord.setLinkedRecords(
-              [...contentRecords, newRecord],
-              "contents"
-            );
-          },
-          onCompleted() {
-            onClose();
-          },
-        });
+        // Update the linked records of the chapter contents
+        const contentRecords = chapterRecord.getLinkedRecords("contents") ?? [];
+        chapterRecord.setLinkedRecords(
+          [...contentRecords, newRecord],
+          "contents"
+        );
+      },
+      onCompleted() {
+        onClose();
       },
     });
     onClose();

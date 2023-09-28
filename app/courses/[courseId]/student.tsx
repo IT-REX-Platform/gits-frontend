@@ -1,23 +1,9 @@
 "use client";
 import { studentCourseIdQuery } from "@/__generated__/studentCourseIdQuery.graphql";
-import {
-  Button,
-  Collapse,
-  IconButton,
-  Tooltip,
-  TooltipProps,
-  Typography,
-  styled,
-  tooltipClasses,
-} from "@mui/material";
-import { every, orderBy, some } from "lodash";
+import { Button, IconButton, Typography } from "@mui/material";
+import { orderBy } from "lodash";
 import { useParams, useRouter } from "next/navigation";
-import {
-  graphql,
-  useFragment,
-  useLazyLoadQuery,
-  useMutation,
-} from "react-relay";
+import { graphql, useLazyLoadQuery, useMutation } from "react-relay";
 
 import Paper from "@mui/material/Paper";
 import Table from "@mui/material/Table";
@@ -28,24 +14,17 @@ import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 
 import { studentCourseLeaveMutation } from "@/__generated__/studentCourseLeaveMutation.graphql";
-import { studentCoursePageChapterFragment$key } from "@/__generated__/studentCoursePageChapterFragment.graphql";
-import { studentCoursePageSectionFragment$key } from "@/__generated__/studentCoursePageSectionFragment.graphql";
-import { studentCoursePageStageFragment$key } from "@/__generated__/studentCoursePageStageFragment.graphql";
-import { ChapterContent } from "@/components/ChapterContent";
-import { ChapterHeader } from "@/components/ChapterHeader";
-import { ContentLink } from "@/components/Content";
 import { FormErrors } from "@/components/FormErrors";
 import { PageError } from "@/components/PageError";
 import { RewardScores } from "@/components/RewardScores";
-import { Section, SectionContent, SectionHeader } from "@/components/Section";
-import { Stage, StageBarrier } from "@/components/Stage";
 import { Suggestion } from "@/components/Suggestion";
 import { Info } from "@mui/icons-material";
 import ExitToAppIcon from "@mui/icons-material/ExitToApp";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
-import dayjs from "dayjs";
 import Link from "next/link";
-import { Fragment, useState } from "react";
+import { useState } from "react";
+import { StudentChapter } from "@/components/StudentChapter";
+import { LightTooltip } from "@/components/LightTooltip";
 
 interface Data {
   name: string;
@@ -98,7 +77,7 @@ export default function StudentCoursePage() {
             elements {
               id
               number
-              ...studentCoursePageChapterFragment
+              ...StudentChapterFragment
               contents {
                 ...ContentLinkFragment
 
@@ -265,167 +244,3 @@ export default function StudentCoursePage() {
     </main>
   );
 }
-
-function StudentChapter({
-  _chapter,
-}: {
-  _chapter: studentCoursePageChapterFragment$key;
-}) {
-  const { courseId } = useParams();
-  const chapter = useFragment(
-    graphql`
-      fragment studentCoursePageChapterFragment on Chapter {
-        id
-        title
-        number
-        suggestedStartDate
-        suggestedEndDate
-        ...ChapterHeaderFragment
-        sections {
-          id
-          ...studentCoursePageSectionFragment
-        }
-      }
-    `,
-    _chapter
-  );
-  const [expanded, setExpanded] = useState(
-    dayjs().isBetween(chapter.suggestedStartDate, chapter.suggestedEndDate)
-  );
-
-  return (
-    <section>
-      <ChapterHeader
-        courseId={courseId}
-        _chapter={chapter}
-        expanded={expanded}
-        onExpandClick={() => setExpanded((curr) => !curr)}
-      />
-      <Collapse in={expanded}>
-        <div className="mb-6">
-          <ChapterContent>
-            {chapter.sections.map((section) => (
-              <StudentSection key={section.id} _section={section} />
-            ))}
-          </ChapterContent>{" "}
-        </div>
-      </Collapse>
-    </section>
-  );
-}
-
-function StudentSection({
-  _section,
-}: {
-  _section: studentCoursePageSectionFragment$key;
-}) {
-  const section = useFragment(
-    graphql`
-      fragment studentCoursePageSectionFragment on Section {
-        id
-        name
-        stages {
-          id
-          position
-          requiredContentsProgress
-          ...studentCoursePageStageFragment
-        }
-      }
-    `,
-    _section
-  );
-
-  const stages = orderBy(section.stages, (stage) => stage.position);
-
-  // Workaround until the backend calculates the progress
-  const stageComplete = stages.map(
-    (stage) => stage.requiredContentsProgress === 100
-  );
-  const stageDisabled = stages.map((_, i) =>
-    some(stages.slice(0, i), (_, idx) => !stageComplete[idx])
-  );
-  const sectionComplete = every(stages, (_, idx) => stageComplete[idx]);
-
-  return (
-    <Section done={sectionComplete}>
-      <SectionHeader>{section.name}</SectionHeader>
-      <SectionContent>
-        {stages.map((stage, i) => (
-          <Fragment key={stage.id}>
-            {/* Show barrier if this is the first non-complete stage */}
-            {(i == 0
-              ? false
-              : !stageComplete[i - 1] && !stageDisabled[i - 1]) && (
-              <StageBarrier />
-            )}
-            <StudentStage _stage={stage} disabled={stageDisabled[i]} />
-          </Fragment>
-        ))}
-      </SectionContent>
-    </Section>
-  );
-}
-
-function StudentStage({
-  disabled = false,
-  _stage,
-}: {
-  disabled?: boolean;
-  _stage: studentCoursePageStageFragment$key;
-}) {
-  const { courseId } = useParams();
-  const stage = useFragment(
-    graphql`
-      fragment studentCoursePageStageFragment on Stage {
-        requiredContentsProgress
-        requiredContents {
-          ...ContentLinkFragment
-          id
-        }
-        optionalContents {
-          ...ContentLinkFragment
-          id
-        }
-      }
-    `,
-    _stage
-  );
-
-  return (
-    <Stage progress={disabled ? 0 : stage.requiredContentsProgress}>
-      {stage.requiredContents.map((content) => (
-        <ContentLink
-          courseId={courseId}
-          key={content.id}
-          _content={content}
-          disabled={disabled}
-        />
-      ))}
-      {stage.optionalContents.map((content) => (
-        <ContentLink
-          courseId={courseId}
-          key={content.id}
-          _content={content}
-          optional
-          disabled={disabled}
-        />
-      ))}
-    </Stage>
-  );
-}
-
-const LightTooltip = styled(({ className, ...props }: TooltipProps) => (
-  <Tooltip {...props} classes={{ popper: className }} />
-))(({ theme }) => ({
-  [`& .${tooltipClasses.tooltip}`]: {
-    backgroundColor: theme.palette.common.white,
-    color: "rgba(0, 0, 0, 0.87)",
-    boxShadow: theme.shadows[1],
-    fontSize: 14,
-    paddingLeft: 18,
-    paddingRight: 18,
-    paddingTop: 10,
-    paddingBottom: 10,
-    fontWeight: "normal",
-  },
-}));

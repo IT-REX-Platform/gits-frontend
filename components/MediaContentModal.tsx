@@ -125,7 +125,7 @@ export function MediaContentModal({
             __typename
           }
         }
-        linkMediaRecordsWithContent(
+        setLinkedMediaRecordsForContent(
           contentId: $contentId
           mediaRecordIds: $records
         ) {

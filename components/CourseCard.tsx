@@ -12,6 +12,7 @@ import {
 import dayjs from "dayjs";
 import { graphql, useFragment } from "react-relay";
 import { Suggestion } from "./Suggestion";
+import { PageView, usePageView } from "@/src/currentView";
 
 export const yearDivisionToString: Record<YearDivision, string> = {
   FIRST_SEMESTER: "Winter semester",
@@ -42,6 +43,7 @@ export const yearDivisionToStringShort: Record<YearDivision, string> = {
 };
 
 export function CourseCard({ _course }: { _course: CourseCardFragment$key }) {
+  const [pageView, _] = usePageView();
   const course = useFragment(
     graphql`
       fragment CourseCardFragment on Course {
@@ -51,6 +53,9 @@ export function CourseCard({ _course }: { _course: CourseCardFragment$key }) {
         yearDivision
         suggestions(amount: 3) {
           ...SuggestionFragment
+        }
+        userProgress {
+          progress
         }
       }
     `,
@@ -72,7 +77,9 @@ export function CourseCard({ _course }: { _course: CourseCardFragment$key }) {
             />
             <CircularProgress
               variant="determinate"
-              value={45}
+              value={
+                pageView === PageView.Student ? course.userProgress.progress : 0
+              }
               color="success"
               className="col-start-1 row-start-1"
             />
@@ -90,7 +97,9 @@ export function CourseCard({ _course }: { _course: CourseCardFragment$key }) {
           <Chip
             label={
               course.yearDivision
-                ? yearDivisionToStringShort[course.yearDivision]
+                ? yearDivisionToStringShort[course.yearDivision] +
+                  " " +
+                  dayjs(course.startDate).year()
                 : dayjs(course.startDate).year()
             }
           ></Chip>

@@ -23,29 +23,21 @@ export function ChapterHeader({
   const chapter = useFragment(
     graphql`
       fragment ChapterHeaderFragment on Chapter {
+        userProgress {
+          progress
+        }
         title
         suggestedStartDate
         suggestedEndDate
-        description
-        contents {
-          userProgressData {
-            lastLearnDate
-          }
+        userProgress {
+          progress
         }
+        description
         ...SkillLevelsFragment
       }
     `,
     _chapter
   );
-
-  const chapterProgress =
-    chapter.contents.length > 0
-      ? (100 *
-          chapter.contents.filter(
-            (content) => content.userProgressData.lastLearnDate != null
-          ).length) /
-        chapter.contents.length
-      : 0;
 
   return (
     <div
@@ -58,7 +50,7 @@ export function ChapterHeader({
         </IconButton>
       )}
       <div className="mr-8">
-        <ChapterProgress progress={chapterProgress} />
+        <ChapterProgress progress={chapter.userProgress.progress} />
       </div>
       <div className="flex justify-between items-center flex-grow">
         <div className="pr-8 flex flex-col items-start">
@@ -81,7 +73,7 @@ export function ChapterHeader({
             {chapter.description}
           </Typography>
         </div>
-        <div onClick={(e) => e.stopPropagation()}>
+        <div className="self-stretch" onClick={(e) => e.stopPropagation()}>
           <SkillLevels courseId={courseId} _chapter={chapter} />
         </div>
       </div>

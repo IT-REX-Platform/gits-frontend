@@ -47,44 +47,70 @@ export function SkillLevels({
   );
   return (
     <div
-      className={`grid grid-flow-col auto-cols-fr gap-4 items-center ${className}`}
+      className={`grid grid-flow-col auto-cols-fr gap-4 h-full ${className}`}
     >
       {achievableSkillTypes.includes("REMEMBER") && (
-        <SkillLevel
-          courseId={courseId}
-          label="Remember"
-          value={skillLevels.remember.value}
-          chapterId={chapterId}
-          skillType="REMEMBER"
-        />
+        <SkillLevelLabel label="Remember" color={colors.purple[500]}>
+          <SkillLevel
+            courseId={courseId}
+            value={skillLevels.remember.value}
+            chapterId={chapterId}
+            skillType="REMEMBER"
+          />
+        </SkillLevelLabel>
       )}
       {achievableSkillTypes.includes("UNDERSTAND") && (
-        <SkillLevel
-          courseId={courseId}
-          label="Understand"
-          value={skillLevels.understand.value}
-          chapterId={chapterId}
-          skillType="UNDERSTAND"
-        />
+        <SkillLevelLabel label="Understand" color={colors.cyan[500]}>
+          <SkillLevel
+            courseId={courseId}
+            value={skillLevels.understand.value}
+            chapterId={chapterId}
+            skillType="UNDERSTAND"
+          />
+        </SkillLevelLabel>
       )}
       {achievableSkillTypes.includes("APPLY") && (
-        <SkillLevel
-          courseId={courseId}
-          label="Apply"
-          value={skillLevels.apply.value}
-          chapterId={chapterId}
-          skillType="APPLY"
-        />
+        <SkillLevelLabel label="Apply" color={colors.green[500]}>
+          <SkillLevel
+            courseId={courseId}
+            value={skillLevels.apply.value}
+            chapterId={chapterId}
+            skillType="APPLY"
+          />
+        </SkillLevelLabel>
       )}
       {achievableSkillTypes.includes("ANALYSE") && (
-        <SkillLevel
-          courseId={courseId}
-          label="Analyse"
-          value={skillLevels.analyze.value}
-          chapterId={chapterId}
-          skillType="ANALYSE"
-        />
+        <SkillLevelLabel label="Analyse" color={colors.yellow[500]}>
+          <SkillLevel
+            courseId={courseId}
+            value={skillLevels.analyze.value}
+            chapterId={chapterId}
+            skillType="ANALYSE"
+          />
+        </SkillLevelLabel>
       )}
+    </div>
+  );
+}
+
+function SkillLevelLabel({
+  children,
+  label,
+  color,
+}: {
+  children: ReactNode;
+  label: string;
+  color: string;
+}) {
+  return (
+    <div className="relative flex flex-col justify-center items-center gap-1">
+      <div
+        className="text-gray-800 border-b-2 text-center font-semibold text-[0.62rem]"
+        style={{ borderColor: color }}
+      >
+        {label}
+      </div>
+      {children}
     </div>
   );
 }
@@ -93,13 +119,11 @@ export function SkillLevel({
   chapterId,
   skillType,
   value,
-  label,
   courseId,
 }: {
   chapterId: string;
   skillType: SkillType;
   value: number;
-  label: string;
   courseId: string;
 }) {
   const level = Math.floor(value); // integer part is level
@@ -119,9 +143,8 @@ export function SkillLevel({
             textColor={colors.gray[600]}
           />
         }
-        label={label}
         level="Basic"
-        color={colors.gray[100]}
+        color={colors.gray[400]}
         chapterId={chapterId}
         skillType={skillType}
       />
@@ -131,7 +154,6 @@ export function SkillLevel({
       <SkillLevelBase
         courseId={courseId}
         badge={<SkillBadge color="#c0c0c0" level={level} progress={progress} />}
-        label={label}
         level="Iron"
         color="#c0c0c0"
         chapterId={chapterId}
@@ -143,7 +165,6 @@ export function SkillLevel({
       <SkillLevelBase
         courseId={courseId}
         badge={<SkillBadge color="#bf8970" level={level} progress={progress} />}
-        label={label}
         level="Bronze"
         color="#bf8970"
         chapterId={chapterId}
@@ -155,7 +176,6 @@ export function SkillLevel({
       <SkillLevelBase
         courseId={courseId}
         badge={<SkillBadge color="#d4af37" level={level} progress={progress} />}
-        label={label}
         level="Gold"
         color="#d4af37"
         chapterId={chapterId}
@@ -172,7 +192,6 @@ export function SkillLevel({
             progress={level >= 10 ? 100 : progress}
           />
         }
-        label={label}
         level="Emerald"
         color={colors.emerald[600]}
         chapterId={chapterId}
@@ -185,7 +204,6 @@ export function SkillLevel({
 
 export function SkillLevelBase({
   badge,
-  label,
   level,
   color,
   chapterId,
@@ -193,15 +211,12 @@ export function SkillLevelBase({
   courseId,
 }: {
   badge: ReactNode;
-  label: string;
   level: string;
   color: string;
   chapterId: string;
   skillType: SkillType;
   courseId: string;
 }) {
-  const [tooltipsOpen, setTooltipsOpen] = useState(0);
-  const [hasSuggestions, setHasSuggestions] = useState<boolean>(true);
   const popperRef = useRef<any>();
 
   const suggestions = (
@@ -210,9 +225,10 @@ export function SkillLevelBase({
         courseId={courseId}
         chapterId={chapterId}
         skillType={skillType}
+        color={color}
+        level={level}
         onLoad={(num) => {
           if (popperRef.current) popperRef.current.update();
-          setHasSuggestions(num > 0);
         }}
       />
     </Suspense>
@@ -220,17 +236,8 @@ export function SkillLevelBase({
 
   return (
     <Tooltip
-      title={
-        <div className="text-center px-1">
-          <div
-            className="-mt-1 h-1 w-8 rounded-b-sm mx-auto"
-            style={{ backgroundColor: color }}
-          ></div>
-          <div className="mt-1 font-bold">{label}</div>
-          <div className="text-[80%]">({level})</div>
-        </div>
-      }
-      placement="top"
+      title={suggestions}
+      placement="bottom"
       slotProps={{
         popper: {
           modifiers: [
@@ -239,36 +246,13 @@ export function SkillLevelBase({
           ],
         },
       }}
+      PopperProps={{ popperRef }}
       classes={{
         tooltip: "!bg-white border !text-gray-800 border-gray-200",
       }}
-      open={tooltipsOpen > (hasSuggestions ? 0 : 1)}
-      onClose={() => setTooltipsOpen((x) => x - 1)}
       arrow
     >
-      <Box>
-        <Tooltip
-          title={suggestions}
-          placement="bottom"
-          slotProps={{
-            popper: {
-              modifiers: [
-                { name: "offset", options: { offset: [0, -5] } },
-                { name: "flip", enabled: false },
-              ],
-            },
-          }}
-          PopperProps={{ popperRef }}
-          classes={{
-            tooltip: "!bg-white border !text-gray-800 border-gray-200",
-          }}
-          open={tooltipsOpen > 0 && hasSuggestions}
-          onClose={() => setTooltipsOpen((x) => x - 1)}
-          arrow
-        >
-          <Box onMouseEnter={() => setTooltipsOpen(2)}>{badge}</Box>
-        </Tooltip>
-      </Box>
+      <Box>{badge}</Box>
     </Tooltip>
   );
 }
@@ -278,11 +262,15 @@ function SkillLevelSuggestions({
   skillType,
   onLoad,
   courseId,
+  color,
+  level,
 }: {
   chapterId: string;
   skillType: SkillType;
   onLoad: (num: number) => void;
   courseId: string;
+  color: string;
+  level: string;
 }) {
   const { suggestionsByChapterIds } =
     useLazyLoadQuery<SkillLevelsSuggestionsQuery>(
@@ -310,25 +298,32 @@ function SkillLevelSuggestions({
     () => onLoad(suggestionsByChapterIds.length),
     [onLoad, suggestionsByChapterIds]
   );
-  if (suggestionsByChapterIds.length === 0) {
-    return <div></div>;
-  }
 
   return (
-    <div className="font-normal px-1 pb-1">
-      <div className="mb-2 text-center font-medium">
-        Suggestions for improving your score
+    <div className="font-normal px-1 py-2">
+      <div className="text-xs text-gray-800 text-center">
+        Level: <span style={{ color }}>{level}</span>
       </div>
-      <div className="flex flex-col gap-2 items-start">
-        {suggestionsByChapterIds.map((suggestion) => (
-          <Suggestion
-            courseId={courseId}
-            key={suggestion.content.id}
-            _suggestion={suggestion}
-            small
-          />
-        ))}
-      </div>
+      <div className="my-2 border-t border-gray-200"></div>
+      {suggestionsByChapterIds.length > 0 ? (
+        <>
+          <div className="text-center font-medium w-full mb-2">
+            Suggestions for improving your score
+          </div>
+          <div className="flex flex-col gap-2 items-start">
+            {suggestionsByChapterIds.map((suggestion) => (
+              <Suggestion
+                courseId={courseId}
+                key={suggestion.content.id}
+                _suggestion={suggestion}
+                small
+              />
+            ))}
+          </div>
+        </>
+      ) : (
+        <div className="text-center">You are all set.</div>
+      )}
     </div>
   );
 }

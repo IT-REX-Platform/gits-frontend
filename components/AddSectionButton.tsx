@@ -15,7 +15,7 @@ export function AddSectionButton({ chapterId }: { chapterId: string }) {
     mutation AddSectionButtonMutation($input: CreateSectionInput!) {
       createSection(input: $input) {
         id
-        ...studentCoursePageSectionFragment
+        ...StudentSectionFragment
         ...lecturerSectionFragment
       }
     }

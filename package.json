@@ -25,6 +25,7 @@
     "@mui/lab": "5.0.0-alpha.141",
     "@mui/material": "^5.12.3",
     "@mui/x-date-pickers": "^6.4.0",
+    "@react-hook/resize-observer": "^1.2.6",
     "@types/is-hotkey": "^0.1.7",
     "@types/lodash": "^4.14.195",
     "@types/node": "18.15.12",

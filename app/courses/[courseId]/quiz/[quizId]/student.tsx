@@ -24,8 +24,9 @@ import {
   DialogTitle,
   Typography,
 } from "@mui/material";
+import useResizeObserver from "@react-hook/resize-observer";
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { createRef, useEffect, useState } from "react";
 import Confetti from "react-confetti";
 import {
   graphql,
@@ -37,7 +38,6 @@ import {
 export default function StudentQuiz() {
   // Get course id from url
   const { quizId, courseId } = useParams();
-  const router = useRouter();
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [checkAnswers, setCheckAnswers] = useState(false);
@@ -268,11 +268,21 @@ function Feedback({
   courseId: string;
 }) {
   const router = useRouter();
+  const [[width, height], setDimensions] = useState([0, 0]);
+  const [divRef, setDivRef] = useState<HTMLDivElement | null>(null);
   const color = success ? "green" : "red";
+
+  useResizeObserver(divRef, ({ contentRect: r }) => {
+    if (width !== r.width || height !== r.height) {
+      setDimensions([r.width, r.height]);
+    }
+  });
 
   return (
     <Dialog open>
-      {success && <Confetti />}
+      <div ref={setDivRef} className="absolute inset-0">
+        {success && <Confetti width={width} height={height} />}
+      </div>
       <DialogTitle style={{ color }}>
         {success ? "Congratulations!" : "Better luck next time!"}
       </DialogTitle>

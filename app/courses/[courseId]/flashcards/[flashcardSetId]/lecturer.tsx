@@ -28,13 +28,14 @@ import {
   DialogContent,
   DialogTitle,
   FormControlLabel,
+  FormGroup,
   IconButton,
   TextField,
   Tooltip,
   Typography,
 } from "@mui/material";
 import { useParams, useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   graphql,
   useFragment,
@@ -540,9 +541,32 @@ function EditSideModal({
   const [text, setText] = useState(side?.text ?? "");
   const [isQuestion, setIsQuestion] = useState(side?.isQuestion ?? false);
   const [isAnswer, setIsAnswer] = useState(side?.isAnswer ?? false);
+  const [labelOverride, setLabelOverride] = useState(false);
 
   const valid =
     label.trim() != "" && text.trim() != "" && (isQuestion || isAnswer);
+
+  useEffect(() => {
+    // Do not change the label once it has been manually edited, reset when label empty
+    if (labelOverride && label === "") {
+      setLabelOverride(false);
+    } else if (labelOverride) {
+      return;
+    }
+    if (!["", "Question", "Answer"].includes(label)) {
+      setLabelOverride(true);
+      return;
+    }
+
+    // Auto-populate label
+    if (isQuestion && !isAnswer && label !== "Question") {
+      setLabel("Question");
+    } else if (!isQuestion && isAnswer && label !== "Answer") {
+      setLabel("Answer");
+    } else if (isQuestion === isAnswer) {
+      setLabel("");
+    }
+  }, [isQuestion, isAnswer, label, labelOverride]);
 
   return (
     <Dialog maxWidth="md" open onClose={onClose}>
@@ -550,6 +574,26 @@ function EditSideModal({
       <DialogContent>
         <Form>
           <FormSection title="General">
+            <FormGroup row>
+              <FormControlLabel
+                label="Question"
+                control={
+                  <Checkbox
+                    checked={isQuestion}
+                    onChange={(e) => setIsQuestion(e.target.checked)}
+                  />
+                }
+              />
+              <FormControlLabel
+                label="Answer"
+                control={
+                  <Checkbox
+                    checked={isAnswer}
+                    onChange={(e) => setIsAnswer(e.target.checked)}
+                  />
+                }
+              />
+            </FormGroup>
             <TextField
               className="w-96"
               label="Label"
@@ -568,24 +612,6 @@ function EditSideModal({
               onChange={(e) => setText(e.target.value)}
               multiline
               required
-            />
-            <FormControlLabel
-              label="Question"
-              control={
-                <Checkbox
-                  checked={isQuestion}
-                  onChange={(e) => setIsQuestion(e.target.checked)}
-                />
-              }
-            />
-            <FormControlLabel
-              label="Answer"
-              control={
-                <Checkbox
-                  checked={isAnswer}
-                  onChange={(e) => setIsAnswer(e.target.checked)}
-                />
-              }
             />
           </FormSection>
         </Form>
@@ -613,8 +639,8 @@ function LocalFlashcard({
   const [sides, setSides] = useState<FlashcardSideData[]>([]);
   const [addSideOpen, setAddSideOpen] = useState(false);
 
-  const numQuestions = sides.filter((s) => s.isQuestion === true).length;
-  const numAnswers = sides.filter((s) => s.isAnswer === true).length;
+  const numQuestions = sides.filter((s) => s.isQuestion).length;
+  const numAnswers = sides.filter((s) => s.isAnswer).length;
   const valid = numQuestions >= 1 && numAnswers >= 1;
 
   function handleEditFlashcardSide(idx: number, data: FlashcardSideData) {

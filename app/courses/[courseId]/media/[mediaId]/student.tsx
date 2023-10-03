@@ -187,7 +187,7 @@ export default function StudentMediaPage() {
             />
             <div className="w-full flex justify-center mt-10">
               <Button
-                disabled={progress < 0.5 || workedOnToday}
+                disabled={workedOnToday}
                 onClick={() =>
                   mediaRecordWorkedOn({
                     variables: { id: mainRecord.id },
@@ -196,11 +196,7 @@ export default function StudentMediaPage() {
                 }
               >
                 {workedOnToday && <Check className="mr-2" />}
-                {workedOnToday
-                  ? "Understood"
-                  : progress >= 0.5
-                  ? "Mark content as understood"
-                  : "Complete more than 50% to mark as understood"}
+                {workedOnToday ? "Understood" : "Mark content as understood"}
               </Button>
             </div>
           </div>

@@ -76,18 +76,18 @@ export function MultipleChoiceQuestion({
           {shuffled.map((answer, index) => (
             <FormControlLabel
               key={index}
+              sx={{
+                backgroundColor: feedbackMode
+                  ? answer.correct
+                    ? "rgba(0, 255, 0, 0.3)"
+                    : "rgba(255, 0, 0, 0.3)"
+                  : "transparent",
+                borderRadius: "7px",
+                paddingRight: "5px",
+              }}
               control={
                 <Checkbox
                   disabled={feedbackMode}
-                  style={{
-                    color: feedbackMode
-                      ? answer.correct
-                        ? "green"
-                        : "red"
-                      : selectedAnswers.includes(index)
-                      ? "blue"
-                      : "grey",
-                  }}
                   onChange={() => handleAnswerChange(index)}
                   checked={selectedAnswers.includes(index)}
                 />

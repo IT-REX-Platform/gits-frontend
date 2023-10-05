@@ -7,6 +7,7 @@ import { RenderRichText } from "../RichTextEditor";
 import { QuestionDivider } from "./QuestionDivider";
 import colors from "tailwindcss/colors";
 import { CorrectnessIndicator } from "./CorrectnessIndicator";
+import clsx from "clsx";
 
 export function MultipleChoiceQuestion({
   _question,
@@ -39,6 +40,8 @@ export function MultipleChoiceQuestion({
   );
 
   const [selectedAnswers, setSelectedAnswers] = useState<number[]>([]);
+  const shuffled = useMemo(() => shuffle(question.answers), [question]);
+
   function handleAnswerChange(index: number) {
     setSelectedAnswers((answers) =>
       answers.includes(index)
@@ -50,18 +53,16 @@ export function MultipleChoiceQuestion({
   useEffect(() => {
     // Notify parent about correctness of answer
     onChange(
-      question.answers.every(
+      shuffled.every(
         (answer, i) => answer.correct === selectedAnswers.includes(i)
       )
     );
-  }, [selectedAnswers, onChange, question]);
+  }, [selectedAnswers, shuffled, onChange]);
 
   useEffect(() => {
     // Clear selection when question changes
     setSelectedAnswers([]);
   }, [question]);
-
-  const shuffled = useMemo(() => shuffle(question.answers), [question.answers]);
 
   return (
     <div>
@@ -73,19 +74,32 @@ export function MultipleChoiceQuestion({
       <QuestionDivider _question={question} onHint={onHint} />
 
       {/* Answer options */}
-      <div className="flex justify-center gap-4">
-        <FormGroup>
+      <div className="flex justify-center">
+        <div
+          className={clsx({
+            "grid items-center gap-y-2": true,
+            "grid-cols-[auto_auto_auto]": feedbackMode,
+            "grid-cols-[auto_auto]": !feedbackMode,
+          })}
+        >
           {shuffled.map((answer, index) => (
             <Option
               key={index}
               checked={selectedAnswers.includes(index)}
-              correct={answer.correct === selectedAnswers.includes(index)}
+              correct={answer.correct}
               feedbackMode={feedbackMode}
               label={answer.answerText}
               onChange={() => handleAnswerChange(index)}
             />
           ))}
-        </FormGroup>
+          {feedbackMode && (
+            <>
+              <div></div>
+              <div className="text-sm text-gray-500">Solution</div>
+              <div></div>
+            </>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -104,29 +118,29 @@ function Option({
   label: string;
   onChange: () => void;
 }) {
-  const color = correct ? colors.green[400] : colors.red[400];
+  const color = correct === checked ? colors.green[400] : colors.red[400];
   return (
-    <div className="flex items-center">
-      <FormControlLabel
-        label={<RenderRichText value={label} />}
+    <>
+      <Checkbox
+        disabled={feedbackMode}
+        onChange={onChange}
+        checked={checked}
         sx={{
-          marginRight: 1,
-          "& .MuiFormControlLabel-label.Mui-disabled": {
-            color,
-          },
+          padding: 0,
+          "&.Mui-disabled": { color },
         }}
-        control={
-          <Checkbox
-            disabled={feedbackMode}
-            onChange={onChange}
-            checked={checked}
-            sx={{
-              "&.Mui-disabled": { color },
-            }}
-          />
-        }
       />
-      {feedbackMode && <CorrectnessIndicator correct={correct} />}
-    </div>
+      {feedbackMode && (
+        <Checkbox disabled checked={correct} sx={{ padding: 0 }} />
+      )}
+      <div
+        className={clsx({
+          "ml-2": !feedbackMode,
+          "ml-1 text-gray-500": feedbackMode,
+        })}
+      >
+        <RenderRichText value={label} />
+      </div>
+    </>
   );
 }

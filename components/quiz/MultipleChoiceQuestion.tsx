@@ -51,7 +51,7 @@ export function MultipleChoiceQuestion({
     // Notify parent about correctness of answer
     onChange(
       question.answers.every(
-        (answer, i) => answer.correct || !selectedAnswers.includes(i)
+        (answer, i) => answer.correct === selectedAnswers.includes(i)
       )
     );
   }, [selectedAnswers, onChange, question]);

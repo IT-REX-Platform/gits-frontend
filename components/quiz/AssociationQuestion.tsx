@@ -3,8 +3,8 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { graphql, useFragment } from "react-relay";
 import { RenderRichText } from "../RichTextEditor";
 import { QuestionDivider } from "./QuestionDivider";
-import { Check, Clear } from "@mui/icons-material";
 import { FeedbackTooltip } from "./FeedbackTooltip";
+import { CorrectnessIndicator } from "./CorrectnessIndicator";
 
 export function AssociationQuestion({
   _question,
@@ -228,16 +228,7 @@ function Association({
         <RenderRichText value={right} />
       </div>
       {feedbackMode && (
-        <div className="absolute left-full inset-y-0 ml-2 flex items-center">
-          {correct ? (
-            <Check fontSize="small" className="!text-green-400" />
-          ) : (
-            <Clear
-              fontSize="small"
-              className={remaining ? "!text-gray-400" : "!text-red-400"}
-            />
-          )}
-        </div>
+        <CorrectnessIndicator correct={correct} disabled={remaining} absolute />
       )}
     </div>
   );

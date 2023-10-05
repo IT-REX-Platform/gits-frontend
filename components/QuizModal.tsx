@@ -162,7 +162,12 @@ export function QuizModal({
 
   const [error, setError] = useState<any>(null);
 
-  const valid = metadata && assessmentMetadata;
+  const valid =
+    metadata &&
+    assessmentMetadata &&
+    input.requiredCorrectAnswers > 0 &&
+    (input.questionPoolingMode !== "RANDOM" ||
+      (input.numberOfRandomlySelectedQuestions ?? 0) > 0);
 
   function onClose() {
     setInput(
@@ -195,7 +200,7 @@ export function QuizModal({
           },
           contentId: assessment!.id!,
           numberOfRandomlySelectedQuestions:
-            input.numberOfRandomlySelectedQuestions!,
+            input.numberOfRandomlySelectedQuestions ?? 1,
           questionPoolingMode: input.questionPoolingMode!,
           requiredCorrectAnswers: input.requiredCorrectAnswers!,
         },
@@ -275,6 +280,12 @@ export function QuizModal({
                   requiredCorrectAnswers: Number(e.target.value),
                 })
               }
+              error={input.requiredCorrectAnswers <= 0}
+              helperText={
+                input.requiredCorrectAnswers <= 0
+                  ? "Must be greater than 0"
+                  : undefined
+              }
               className="w-96"
               label="Required correct answers"
               variant="outlined"
@@ -310,6 +321,12 @@ export function QuizModal({
                 className="w-96"
                 label="Number of randomly selected questions"
                 variant="outlined"
+                error={(input.numberOfRandomlySelectedQuestions ?? 0) <= 0}
+                helperText={
+                  input.requiredCorrectAnswers <= 0
+                    ? "Must be greater than 0"
+                    : undefined
+                }
                 required
                 type="number"
               />

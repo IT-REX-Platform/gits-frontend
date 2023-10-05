@@ -426,6 +426,7 @@ type Course {
   yearDivision: YearDivision
 
   # Chapters of the course. Can be filtered and sorted.
+  # 🔒 User needs to be enrolled in the course to access this field.
   chapters(
     filter: ChapterFilter
 
@@ -902,7 +903,7 @@ type FlashcardSetAssessment implements Assessment & Content {
   progressDataForUser(userId: UUID!): UserProgressData!
 
   # The FlashcardSet of the assessment.
-  flashcardSet: FlashcardSet!
+  flashcardSet: FlashcardSet
 }
 
 type FlashcardSetMutation {
@@ -1114,35 +1115,14 @@ type MultipleChoiceQuestion implements Question {
 # Mutations for the flashcard service. Provides mutations for creating, updating, and deleting flashcard as well as
 # creating and deleting flashcard sets. To update a flashcard set, update, delete, and create flashcards individually.
 type Mutation {
-  # Creates a new course with the given input and returns the created course.
-  createCourse(input: CreateCourseInput!): Course!
-
-  # Creates a new chapter with the given input and returns the created chapter.
-  # The course id must be a course id of an existing course.
-  createChapter(input: CreateChapterInput!): Chapter!
-
-  # Updates an existing course with the given input and returns the updated course.
-  # The course id must be a course id of an existing course.
-  updateCourse(input: UpdateCourseInput!): Course!
-
-  # Updates an existing chapter with the given input and returns the updated chapter.
-  # The chapter id must be a chapter id of an existing chapter.
-  updateChapter(input: UpdateChapterInput!): Chapter!
-
-  # Deletes an existing course, throws an error if no course with the given id exists.
-  deleteCourse(id: UUID!): UUID!
-
-  # Deletes an existing chapter, throws an error if no chapter with the given id exists.
-  deleteChapter(id: UUID!): UUID!
-
-  # registers a user to a course with a role
-  createMembership(input: CourseMembershipInput!): CourseMembership!
-
-  # updates the role of a user in a course
-  updateMembership(input: CourseMembershipInput!): CourseMembership!
-
-  # deletes user course link
-  deleteMembership(input: CourseMembershipInput!): CourseMembership!
+  # ONLY FOR TESTING PURPOSES. DO NOT USE IN FRONTEND. WILL BE REMOVED.
+  #
+  # Triggers the recalculation of the skill level of the user.
+  # This is done automatically at some time in the night.
+  #
+  # The purpose of this mutation is to allow testing of the skill level score and demonstrate the functionality.
+  recalculateLevels(chapterId: UUID!, userId: UUID!): SkillLevels!
+    @deprecated(reason: "Only for testing purposes. Will be removed.")
 
   # Creates a new media record
   createMediaRecord(input: CreateMediaRecordInput!): MediaRecord!
@@ -1174,7 +1154,16 @@ type Mutation {
     mediaRecordIds: [UUID!]!
   ): [MediaRecord!]!
 
+  # Modify Content
+  # 🔒 The user must have admin access to the course containing the section to perform this action.
+  mutateContent(contentId: UUID!): ContentMutation!
+
+  # Modify the section with the given id.
+  # 🔒 The user must have admin access to the course containing the section to perform this action.
+  mutateSection(sectionId: UUID!): SectionMutation!
+
   # Modify a quiz.
+  # 🔒 The user must be an admin the course the quiz is in to perform this action.
   mutateQuiz(assessmentId: UUID!): QuizMutation!
 
   # Delete a quiz.
@@ -1184,16 +1173,8 @@ type Mutation {
     )
 
   # Log that a multiple choice quiz is completed.
+  # 🔒 The user must be enrolled in the course the quiz is in to perform this action.
   logQuizCompleted(input: QuizCompletedInput!): QuizCompletionFeedback!
-
-  # Modify Content
-  mutateContent(contentId: UUID!): ContentMutation!
-
-  # Create new Section
-  createSection(input: CreateSectionInput!): Section!
-
-  # Modify Sections
-  mutateSection(sectionId: UUID!): SectionMutation!
 
   # ONLY FOR TESTING PURPOSES. DO NOT USE IN FRONTEND. WILL BE REMOVED.
   #
@@ -1204,14 +1185,43 @@ type Mutation {
   recalculateScores(courseId: UUID!, userId: UUID!): RewardScores!
     @deprecated(reason: "Only for testing purposes. Will be removed.")
 
-  # ONLY FOR TESTING PURPOSES. DO NOT USE IN FRONTEND. WILL BE REMOVED.
-  #
-  # Triggers the recalculation of the skill level of the user.
-  # This is done automatically at some time in the night.
-  #
-  # The purpose of this mutation is to allow testing of the skill level score and demonstrate the functionality.
-  recalculateLevels(chapterId: UUID!, userId: UUID!): SkillLevels!
-    @deprecated(reason: "Only for testing purposes. Will be removed.")
+  # Creates a new course with the given input and returns the created course.
+  createCourse(input: CreateCourseInput!): Course!
+
+  # Creates a new chapter with the given input and returns the created chapter.
+  # The course id must be a course id of an existing course.
+  # 🔒 The user must be an admin in this course to perform this action.
+  createChapter(input: CreateChapterInput!): Chapter!
+
+  # Updates an existing course with the given input and returns the updated course.
+  # The course id must be a course id of an existing course.
+  # 🔒 The user must be an admin in this course to perform this action.
+  updateCourse(input: UpdateCourseInput!): Course!
+
+  # Updates an existing chapter with the given input and returns the updated chapter.
+  # The chapter id must be a chapter id of an existing chapter.
+  # 🔒 The user must be an admin in this course to perform this action.
+  updateChapter(input: UpdateChapterInput!): Chapter!
+
+  # Deletes an existing course, throws an error if no course with the given id exists.
+  # 🔒 The user must be an admin in this course to perform this action.
+  deleteCourse(id: UUID!): UUID!
+
+  # Deletes an existing chapter, throws an error if no chapter with the given id exists.
+  # 🔒 The user must be an admin in this course to perform this action.
+  deleteChapter(id: UUID!): UUID!
+
+  # Adds the specified user to the specified course with the specified role.
+  # 🔒 The calling user must be an admin in this course to perform this action.
+  createMembership(input: CourseMembershipInput!): CourseMembership!
+
+  # Updates a user's membership in a course with the given input.
+  # 🔒 The calling user must be an admin in this course to perform this action.
+  updateMembership(input: CourseMembershipInput!): CourseMembership!
+
+  # Removes the specified user's access to the specified course.
+  # 🔒 The calling user must be an admin in this course to perform this action.
+  deleteMembership(input: CourseMembershipInput!): CourseMembership!
 
   # Deletes a flashcard set. Throws an error if the flashcard set does not exist.
   # The contained flashcards are deleted as well.
@@ -1221,9 +1231,11 @@ type Mutation {
     )
 
   # Modify a flashcard set.
+  # 🔒 The user must be an admin the course the flashcard set is in to perform this action.
   mutateFlashcardSet(assessmentId: UUID!): FlashcardSetMutation!
 
   # Logs that a user has learned a flashcard.
+  # 🔒 The user must be enrolled in the course the flashcard set is in to perform this action.
   logFlashcardLearned(
     input: LogFlashcardLearnedInput!
   ): FlashcardLearnedFeedback!
@@ -1245,6 +1257,9 @@ type Mutation {
     assessmentInput: CreateAssessmentInput!
     flashcardSetInput: CreateFlashcardSetInput!
   ): FlashcardSetAssessment
+
+  # Creates a new section in a chapter.
+  createSection(input: CreateSectionInput!): Section!
 }
 
 type NumericQuestion implements Question {
@@ -1329,53 +1344,6 @@ type PublicUserInfo {
 }
 
 type Query {
-  # Get a list of courses. Can be filtered, sorted and paginated.
-  courses(
-    filter: CourseFilter
-
-    # The fields to sort by.
-    # Throws an error if no field with the given name exists.
-    sortBy: [String!]
-
-    # The sort direction for each field. If not specified, defaults to ASC.
-    sortDirection: [SortDirection!]! = [ASC]
-    pagination: Pagination
-  ): CoursePayload!
-
-  # Returns the courses with the given ids.
-  coursesByIds(ids: [UUID!]!): [Course!]!
-
-  # Returns the chapters with the given ids.
-  chaptersByIds(ids: [UUID!]!): [Chapter!]!
-
-  # Returns a set of Resource Objects for the given resource ids, containing a
-  # list of all course IDs for a resource and its availability in the course.
-  courseResourceAssociationsByIds(ids: [UUID!]!): [CourseResourceAssociation!]!
-
-  # Returns a set of Resource Objects for the given resource ids, containing a
-  # list of all course IDs for a resource and its availability in the course.
-  resourceById(ids: [UUID!]!): [CourseResourceAssociation!]!
-    @deprecated(reason: "Use courseResourceAssociationsByIds instead.")
-
-  # Get the list of chapters for a course. Can be filtered, sorted and paginated.
-  # Throws an error if the course does not exist.
-  # The default sort order is by chapter number.
-  chapters(
-    courseId: UUID!
-    filter: ChapterFilter
-
-    # The fields to sort by. The default sort order is by chapter number.
-    # Throws an error if no field with the given name exists.
-    sortBy: [String!]! = []
-
-    # The sort direction for each field. If not specified, defaults to ASC.
-    sortDirection: [SortDirection!]! = [ASC]
-    pagination: Pagination
-  ): ChapterPayload!
-
-  # Returns the list of courseMemberships for the specified User.
-  courseMembershipsByUserIds(userIds: [UUID!]!): [[CourseMembership!]!]!
-
   # Gets the publicly available information for a list of users with the specified IDs.
   # If a user does not exist, null is returned for that user.
   findPublicUserInfos(ids: [UUID!]!): [PublicUserInfo]!
@@ -1387,6 +1355,15 @@ type Query {
   # Only available to privileged users.
   # If a user does not exist, null is returned for that user.
   findUserInfos(ids: [UUID!]!): [UserInfo]!
+
+  # Get the skill levels of the current user for all skill types for a list of chapter ids.
+  userSkillLevelsByChapterIds(chapterIds: [UUID!]!): [SkillLevels!]!
+
+  # Get the skill levels of the specified user for all skill types for a list of chapter ids.
+  skillLevelsForUserByChapterIds(
+    chapterIds: [UUID!]!
+    userId: UUID!
+  ): [SkillLevels!]!
 
   # Returns the media records with the given IDs. Throws an error if a MediaRecord corresponding to a given ID
   # cannot be found.
@@ -1412,36 +1389,31 @@ type Query {
   # Returns all media records for the given CourseIds
   mediaRecordsForCourses(courseIds: [UUID!]!): [[MediaRecord!]!]!
 
-  # Get quiz by assessment ID.
-  # If any of the assessment IDs are not found, the corresponding quiz will be null.
-  findQuizzesByAssessmentIds(assessmentIds: [UUID!]!): [Quiz]!
-
-  # Retrieves all existing contents.
-  contents: ContentPayload!
-    @deprecated(
-      reason: "Querying all contents will not be supported in the future. Use contentsByIds instead"
-    )
-
   # Retrieves all existing contents for a given course.
+  # 🔒 The user must have access to the courses with the given ids to access their contents, otherwise an error is thrown.
   contentsByCourseIds(courseIds: [UUID!]!): [[Content!]!]
 
   # Get contents by ids. Throws an error if any of the ids are not found.
+  # 🔒 The user must have access to the courses containing the contents with the given ids to access their contents,
+  # otherwise an error is thrown.
   contentsByIds(ids: [UUID!]!): [Content!]!
 
   # Get contents by ids. If any of the given ids are not found, the corresponding element in the result list will be null.
+  # 🔒 The user must have access to the courses containing the contents with the given ids, otherwise null is returned
+  # for the respective contents.
   findContentsByIds(ids: [UUID!]!): [Content]!
 
   # Get contents by chapter ids. Returns a list containing sublists, where each sublist contains all contents
   # associated with that chapter
+  # 🔒 The user must have access to the courses containing the chapters with the given ids, otherwise an error is thrown.
   contentsByChapterIds(chapterIds: [UUID!]!): [[Content!]!]!
-
-  # Retrieves all existing sections for multiple chapters.
-  sectionsByChapterIds(chapterIds: [UUID!]!): [[Section!]!]!
 
   # Generates user specific suggestions for multiple chapters.
   #
   # Only content that the user can access will be considered.
   # The contents will be ranked by suggested date, with the most overdue or most urgent content first.
+  #
+  # 🔒 The user must have access to the courses containing the chapters with the given ids, otherwise an error is thrown.
   suggestionsByChapterIds(
     # The ids of the chapters for which suggestions should be generated.
     chapterIds: [UUID!]!
@@ -1455,6 +1427,12 @@ type Query {
     skillTypes: [SkillType!]! = []
   ): [Suggestion!]!
 
+  # Get quiz by assessment ID.
+  # If any of the assessment IDs are not found, the corresponding quiz will be null.
+  # 🔒 The user must be enrolled in the course the quizzes belong to to access them. Otherwise null is returned for
+  # an quiz if the user has no access to it.
+  findQuizzesByAssessmentIds(assessmentIds: [UUID!]!): [Quiz]!
+
   # Get the reward score of the current user for the specified course.
   userCourseRewardScores(courseId: UUID!): RewardScores!
 
@@ -1464,21 +1442,41 @@ type Query {
   # Gets the power scores for each user in the course, ordered by power score descending.
   scoreboard(courseId: UUID!): [ScoreboardItem!]!
 
-  # Get the skill levels of the current user for all skill types for a list of chapter ids.
-  userSkillLevelsByChapterIds(chapterIds: [UUID!]!): [SkillLevels!]!
+  # Get a list of courses. Can be filtered, sorted and paginated.
+  # Courses and their basic data can be queried by any user, even if they are not enrolled in the course.
+  courses(
+    filter: CourseFilter
 
-  # Get the skill levels of the specified user for all skill types for a list of chapter ids.
-  skillLevelsForUserByChapterIds(
-    chapterIds: [UUID!]!
-    userId: UUID!
-  ): [SkillLevels!]!
+    # The fields to sort by.
+    # Throws an error if no field with the given name exists.
+    sortBy: [String!]
 
-  # Get flashcards by their ids
+    # The sort direction for each field. If not specified, defaults to ASC.
+    sortDirection: [SortDirection!]! = [ASC]
+    pagination: Pagination
+  ): CoursePayload!
+
+  # Returns the courses with the given ids.
+  # Courses and their basic data can be queried by any user, even if they are not enrolled in the course.
+  coursesByIds(ids: [UUID!]!): [Course!]!
+
+  # Returns a set of Resource Objects for the given resource ids, containing a list of all course IDs for a resource
+  # and its availability in the course.
+  courseResourceAssociationsByIds(ids: [UUID!]!): [CourseResourceAssociation!]!
+
+  # Returns a set of Resource Objects for the given resource ids, containing a
+  # list of all course IDs for a resource and its availability in the course.
+  resourceById(ids: [UUID!]!): [CourseResourceAssociation!]!
+    @deprecated(reason: "Use courseResourceAssociationsByIds instead.")
+
+  # Get flashcards by their ids.
+  # 🔒 The user must be enrolled in the course the flashcards belong to. Otherwise an error is thrown.
   flashcardsByIds(ids: [UUID!]!): [Flashcard!]!
 
   # Get flashcard sets by their assessment ids.
   # Returns a list of flashcard sets in the same order as the provided ids.
   # Each element is null if the corresponding id is not found.
+  # 🔒 The user must be enrolled in the course the flashcard sets belong to. Otherwise for that element null is returned.
   findFlashcardSetsByAssessmentIds(assessmentIds: [UUID!]!): [FlashcardSet]!
 }
 
@@ -1558,6 +1556,9 @@ type Quiz {
   # This will be different each time it is queried if questionPoolingMode is RANDOM.
   selectedQuestions: [Question!]!
 
+  # Id of the course this quiz belongs to.
+  courseId: UUID!
+
   # The content this quiz belongs to.
   content: Content
 }
@@ -1581,7 +1582,7 @@ type QuizAssessment implements Assessment & Content {
 
   # The quiz of the assessment.
   # If this is null the system is in an inconsistent state and the assessment should be deleted.
-  quiz: Quiz!
+  quiz: Quiz
 }
 
 input QuizCompletedInput {
@@ -1759,6 +1760,9 @@ type ScoreboardItem {
 type Section {
   # Unique identifier of the Section Object
   id: UUID!
+
+  # Id of the Course the Section is located in.
+  courseId: UUID!
 
   # Name of the Section
   name: String!
@@ -2047,6 +2051,12 @@ input UpdateCourseInput {
 
   # The new published status of the course.
   published: Boolean!
+
+  # The year in which the term starts.
+  startYear: Int
+
+  # The division of the academic calendar in which the term takes place.
+  yearDivision: YearDivision
 }
 
 input UpdateExactAnswerQuestionInput {

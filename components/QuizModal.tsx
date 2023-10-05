@@ -162,7 +162,12 @@ export function QuizModal({
 
   const [error, setError] = useState<any>(null);
 
-  const valid = metadata && assessmentMetadata;
+  const valid =
+    metadata &&
+    assessmentMetadata &&
+    input.requiredCorrectAnswers > 0 &&
+    (input.questionPoolingMode !== "RANDOM" ||
+      (input.numberOfRandomlySelectedQuestions ?? 0) > 0);
 
   function onClose() {
     setInput(
@@ -195,7 +200,7 @@ export function QuizModal({
           },
           contentId: assessment!.id!,
           numberOfRandomlySelectedQuestions:
-            input.numberOfRandomlySelectedQuestions!,
+            input.numberOfRandomlySelectedQuestions ?? 1,
           questionPoolingMode: input.questionPoolingMode!,
           requiredCorrectAnswers: input.requiredCorrectAnswers!,
         },
@@ -269,16 +274,18 @@ export function QuizModal({
           <FormSection title="Scoring">
             <TextField
               value={input.requiredCorrectAnswers}
-              onChange={(e) => {
-                const val = Number(e.target.value);
-                if (val >= 1) {
-                  setInput({
-                    ...input,
-                    requiredCorrectAnswers: val,
-                  });
-                }
-              }}
-              error={(input.requiredCorrectAnswers ?? 0) < 0}
+              onChange={(e) =>
+                setInput({
+                  ...input,
+                  requiredCorrectAnswers: Number(e.target.value),
+                })
+              }
+              error={input.requiredCorrectAnswers <= 0}
+              helperText={
+                input.requiredCorrectAnswers <= 0
+                  ? "Must be greater than 0"
+                  : undefined
+              }
               className="w-96"
               label="Required correct answers"
               variant="outlined"
@@ -305,19 +312,21 @@ export function QuizModal({
             {input.questionPoolingMode === "RANDOM" && (
               <TextField
                 value={input.numberOfRandomlySelectedQuestions}
-                onChange={(e) => {
-                  const val = Number(e.target.value);
-                  if (val >= 1) {
-                    setInput({
-                      ...input,
-                      numberOfRandomlySelectedQuestions: val,
-                    });
-                  }
-                }}
+                onChange={(e) =>
+                  setInput({
+                    ...input,
+                    numberOfRandomlySelectedQuestions: Number(e.target.value),
+                  })
+                }
                 className="w-96"
                 label="Number of randomly selected questions"
                 variant="outlined"
-                error={Number(input.numberOfRandomlySelectedQuestions ?? 0) < 0}
+                error={(input.numberOfRandomlySelectedQuestions ?? 0) <= 0}
+                helperText={
+                  input.requiredCorrectAnswers <= 0
+                    ? "Must be greater than 0"
+                    : undefined
+                }
                 required
                 type="number"
               />

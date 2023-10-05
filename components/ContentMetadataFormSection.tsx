@@ -1,4 +1,10 @@
-import { Autocomplete, Chip, Slider, TextField } from "@mui/material";
+import {
+  Autocomplete,
+  Chip,
+  Slider,
+  TextField,
+  Typography,
+} from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers";
 import dayjs from "dayjs";
 import { useEffect, useState } from "react";
@@ -69,6 +75,11 @@ export function ContentMetadataFormSection({
           },
         }}
       />
+
+      <Typography variant="caption" sx={{ marginTop: 1 }}>
+        Reward Points
+      </Typography>
+
       <Slider
         sx={{ marginX: 1 }}
         step={5}
@@ -83,6 +94,7 @@ export function ContentMetadataFormSection({
         value={rewardPoints}
         onChange={(e, a) => setRewardPoints(a as number)}
       />
+
       <Autocomplete
         multiple
         options={[]}

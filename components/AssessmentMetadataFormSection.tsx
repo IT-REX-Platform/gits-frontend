@@ -95,7 +95,7 @@ export function AssessmentMetadataFormSection({
         </Select>
       </FormControl>
 
-      <Typography variant="caption" sx={{ marginTop: 2 }}>
+      <Typography variant="caption" sx={{ marginTop: 1 }}>
         Skill Points
       </Typography>
 

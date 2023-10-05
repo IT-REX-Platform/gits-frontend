@@ -269,12 +269,16 @@ export function QuizModal({
           <FormSection title="Scoring">
             <TextField
               value={input.requiredCorrectAnswers}
-              onChange={(e) =>
-                setInput({
-                  ...input,
-                  requiredCorrectAnswers: Number(e.target.value),
-                })
-              }
+              onChange={(e) => {
+                const val = Number(e.target.value);
+                if (val >= 1) {
+                  setInput({
+                    ...input,
+                    requiredCorrectAnswers: Number(e.target.value),
+                  });
+                }
+              }}
+              error={(input.requiredCorrectAnswers ?? 0) < 0}
               className="w-96"
               label="Required correct answers"
               variant="outlined"
@@ -301,15 +305,19 @@ export function QuizModal({
             {input.questionPoolingMode === "RANDOM" && (
               <TextField
                 value={input.numberOfRandomlySelectedQuestions}
-                onChange={(e) =>
-                  setInput({
-                    ...input,
-                    numberOfRandomlySelectedQuestions: Number(e.target.value),
-                  })
-                }
+                onChange={(e) => {
+                  const val = Number(e.target.value);
+                  if (val >= 1) {
+                    setInput({
+                      ...input,
+                      numberOfRandomlySelectedQuestions: val,
+                    });
+                  }
+                }}
                 className="w-96"
                 label="Number of randomly selected questions"
                 variant="outlined"
+                error={Number(input.numberOfRandomlySelectedQuestions ?? 0) < 0}
                 required
                 type="number"
               />

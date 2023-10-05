@@ -5,6 +5,8 @@ import { useEffect, useMemo, useState } from "react";
 import { graphql, useFragment } from "react-relay";
 import { RenderRichText } from "../RichTextEditor";
 import { QuestionDivider } from "./QuestionDivider";
+import colors from "tailwindcss/colors";
+import { CorrectnessIndicator } from "./CorrectnessIndicator";
 
 export function MultipleChoiceQuestion({
   _question,
@@ -74,29 +76,57 @@ export function MultipleChoiceQuestion({
       <div className="flex justify-center gap-4">
         <FormGroup>
           {shuffled.map((answer, index) => (
-            <FormControlLabel
+            <Option
               key={index}
-              sx={{
-                backgroundColor: feedbackMode
-                  ? answer.correct
-                    ? "rgba(0, 255, 0, 0.3)"
-                    : "rgba(255, 0, 0, 0.3)"
-                  : "transparent",
-                borderRadius: "7px",
-                paddingRight: "5px",
-              }}
-              control={
-                <Checkbox
-                  disabled={feedbackMode}
-                  onChange={() => handleAnswerChange(index)}
-                  checked={selectedAnswers.includes(index)}
-                />
-              }
-              label={<RenderRichText value={answer.answerText} />}
+              checked={selectedAnswers.includes(index)}
+              correct={answer.correct === selectedAnswers.includes(index)}
+              feedbackMode={feedbackMode}
+              label={answer.answerText}
+              onChange={() => handleAnswerChange(index)}
             />
           ))}
         </FormGroup>
       </div>
+    </div>
+  );
+}
+
+function Option({
+  checked,
+  correct,
+  feedbackMode,
+  label,
+  onChange,
+}: {
+  checked: boolean;
+  correct: boolean;
+  feedbackMode: boolean;
+  label: string;
+  onChange: () => void;
+}) {
+  const color = correct ? colors.green[400] : colors.red[400];
+  return (
+    <div className="flex items-center">
+      <FormControlLabel
+        label={<RenderRichText value={label} />}
+        sx={{
+          marginRight: 1,
+          "& .MuiFormControlLabel-label.Mui-disabled": {
+            color,
+          },
+        }}
+        control={
+          <Checkbox
+            disabled={feedbackMode}
+            onChange={onChange}
+            checked={checked}
+            sx={{
+              "&.Mui-disabled": { color },
+            }}
+          />
+        }
+      />
+      {feedbackMode && <CorrectnessIndicator correct={correct} />}
     </div>
   );
 }

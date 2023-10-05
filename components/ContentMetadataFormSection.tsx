@@ -1,4 +1,4 @@
-import { Autocomplete, Chip, TextField } from "@mui/material";
+import { Autocomplete, Chip, Slider, TextField } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers";
 import dayjs from "dayjs";
 import { useEffect, useState } from "react";
@@ -22,18 +22,14 @@ export function ContentMetadataFormSection({
   const [suggestedDate, setSuggestedDate] = useState(
     metadata ? dayjs(metadata.suggestedDate) : null
   );
-  const [rewardPointsStr, setRewardPointsStr] = useState(
-    metadata?.rewardPoints.toString() ?? "0"
-  );
   const [tags, setTags] = useState<string[]>([...(metadata?.tagNames ?? [])]);
 
-  const rewardPoints = parseInt(rewardPointsStr);
+  const [rewardPoints, setRewardPoints] = useState(metadata?.rewardPoints ?? 0);
 
   const valid =
     name.trim() != "" &&
     suggestedDate != null &&
     suggestedDate.isValid() &&
-    rewardPoints.toString() === rewardPointsStr &&
     rewardPoints >= 0;
 
   useEffect(() => {
@@ -47,15 +43,7 @@ export function ContentMetadataFormSection({
           }
         : null
     );
-  }, [
-    name,
-    suggestedDate,
-    rewardPointsStr,
-    tags,
-    rewardPoints,
-    valid,
-    onChange,
-  ]);
+  }, [name, suggestedDate, tags, rewardPoints, valid, onChange]);
 
   return (
     <FormSection title="Content details">
@@ -81,25 +69,20 @@ export function ContentMetadataFormSection({
           },
         }}
       />
-      <TextField
-        className="w-96"
-        label="Reward Points"
-        variant="outlined"
-        type="number"
-        value={rewardPointsStr}
-        error={
-          (!(metadata == null && rewardPointsStr.trim() == "") &&
-            rewardPoints.toString() !== rewardPointsStr) ||
-          (rewardPoints ?? 0) < 0
-        }
-        helperText={
-          (rewardPoints ?? 0) < 0 ? "Please enter a positive value" : undefined
-        }
-        onChange={(e) => setRewardPointsStr(e.target.value)}
-        multiline
-        required
+      <Slider
+        sx={{ marginX: 1 }}
+        step={5}
+        marks={[
+          { value: 10, label: "Low" },
+          { value: 50, label: "Medium" },
+          { value: 90, label: "High" },
+        ]}
+        min={0}
+        max={100}
+        valueLabelDisplay="auto"
+        value={rewardPoints}
+        onChange={(e, a) => setRewardPoints(a as number)}
       />
-
       <Autocomplete
         multiple
         options={[]}

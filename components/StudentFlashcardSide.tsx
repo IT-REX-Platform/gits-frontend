@@ -30,6 +30,12 @@ export function StudentFlashcardSide({
     onChange(knew);
   }, [knew]);
 
+  useEffect(() => {
+    // Reset when side changes
+    setTurned(false);
+    setKnew(false);
+  }, [side]);
+
   return (
     <motion.div
       initial={false}

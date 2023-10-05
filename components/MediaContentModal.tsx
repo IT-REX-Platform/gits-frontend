@@ -53,6 +53,7 @@ export function MediaContentModal({
           rewardPoints
           suggestedDate
           chapterId
+          tagNames
         }
         mediaRecords {
           id
@@ -68,8 +69,9 @@ export function MediaContentModal({
     _existingMediaContent ?? null
   );
 
-  const [metadata, setMetadata] = useState<ContentMetadataPayload | null>(null);
-
+  const [metadata, setMetadata] = useState<ContentMetadataPayload | null>(
+    existingContent?.metadata ?? null
+  );
   const [selectedRecords, setSelectedRecords] = useState(
     existingContent?.mediaRecords ?? []
   );
@@ -96,6 +98,7 @@ export function MediaContentModal({
             name
             rewardPoints
             suggestedDate
+            tagNames
           }
           mediaRecords {
             id
@@ -121,6 +124,13 @@ export function MediaContentModal({
             ...ContentVideoFragment
             userProgressData {
               nextLearnDate
+            }
+            metadata {
+              chapterId
+              name
+              rewardPoints
+              suggestedDate
+              tagNames
             }
             __typename
           }

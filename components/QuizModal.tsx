@@ -274,7 +274,7 @@ export function QuizModal({
                 if (val >= 1) {
                   setInput({
                     ...input,
-                    requiredCorrectAnswers: Number(e.target.value),
+                    requiredCorrectAnswers: val,
                   });
                 }
               }}

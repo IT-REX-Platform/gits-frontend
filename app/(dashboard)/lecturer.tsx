@@ -48,7 +48,7 @@ export default function LecturerPage() {
   );
 
   const courses = currentUserInfo.courseMemberships
-    .filter((x) => x.role === "ADMINISTRATOR")
+    .filter((x) => ["ADMINISTRATOR", "TUTOR"].includes(x.role))
     .map((x) => x.course);
 
   const { push } = useRouter();

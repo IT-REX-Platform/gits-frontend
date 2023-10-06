@@ -26,7 +26,8 @@ function NavbarBase({ children }: { children: React.ReactElement }) {
   return (
     <div className="shrink-0 bg-slate-200 h-full px-8 flex flex-col gap-6 w-72 xl:w-96 overflow-auto thin-scrollbar">
       <div className="text-center my-16 text-3xl font-medium tracking-wider sticky">
-        <img src={logo.src} className="w-24 m-auto" />
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={logo.src} alt="GITS logo" className="w-24 m-auto" />
       </div>
       <NavbarSection>
         <NavbarLink title="Dashboard" icon={<Dashboard />} href="/" exact />
@@ -172,7 +173,9 @@ export function Navbar() {
   );
 
   const filtered = currentUserInfo.courseMemberships
-    .filter((x) => x.role === "ADMINISTRATOR" || pageView === PageView.Student)
+    .filter(
+      (x) => ["ADMINISTRATOR", "TUTOR"].includes(x.role) || PageView.Student
+    )
     .filter((x) => x.course.published || pageView === PageView.Lecturer)
     .filter(
       (x) =>

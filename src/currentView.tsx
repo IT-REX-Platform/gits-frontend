@@ -3,8 +3,8 @@
 import React, { useContext, useEffect, useState } from "react";
 
 export enum PageView {
-  Student = "student",
-  Lecturer = "ADMINISTRATOR",
+  Student = "Student",
+  Lecturer = "Lecturer",
 }
 
 const PageViewContext = React.createContext<{
@@ -18,7 +18,7 @@ export function PageViewProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (typeof window !== "undefined" && !pageView) {
       setPageView(
-        window.localStorage.getItem("current_pageview") === "ADMINISTRATOR"
+        window.localStorage.getItem("current_pageview") === PageView.Lecturer
           ? PageView.Lecturer
           : PageView.Student
       );

@@ -1,7 +1,7 @@
 import { useParams } from "next/navigation";
 import { graphql, useFragment } from "react-relay";
 import { Stage } from "./Stage";
-import { ContentLink } from "./Content";
+import { ContentLink } from "./content-link/ContentLink";
 import { StudentStageFragment$key } from "@/__generated__/StudentStageFragment.graphql";
 
 export function StudentStage({

@@ -122,7 +122,6 @@ export function QuizModal({
       ) {
         id
         ...ContentLinkFragment
-        ...ContentQuizFragment
       }
     }
   `);
@@ -138,7 +137,6 @@ export function QuizModal({
     ) {
       mutateContent(contentId: $contentId) {
         updateAssessment(input: $assessmentInput) {
-          ...ContentQuizFragment
           ...ContentLinkFragment
         }
       }

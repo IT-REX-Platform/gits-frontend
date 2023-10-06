@@ -19,7 +19,8 @@ import dayjs from "dayjs";
 import lodash from "lodash";
 import { useCallback, useState } from "react";
 import { graphql, useFragment } from "react-relay";
-import { ContentLink, DeletedContent } from "./Content";
+import { ContentLink } from "./content-link/ContentLink";
+import { DeletedContentLink } from "./content-link/DeletedContentLink";
 import { FitnessIcon, GrowthIcon, HealthIcon, PowerIcon } from "./RewardScores";
 
 const reasons: { [k in RewardChangeReason]?: string } = {
@@ -168,7 +169,7 @@ export function RewardScoreHistoryTable({
                         {content ? (
                           <ContentLink courseId={courseId} _content={content} />
                         ) : (
-                          <DeletedContent />
+                          <DeletedContentLink />
                         )}
                       </div>
                     ))}

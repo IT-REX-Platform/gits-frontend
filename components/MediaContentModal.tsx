@@ -89,7 +89,7 @@ export function MediaContentModal({
           mediaRecordIds: $records
         ) {
           id
-          ...ContentVideoFragment
+          ...ContentLinkFragment
           userProgressData {
             nextLearnDate
           }
@@ -121,7 +121,7 @@ export function MediaContentModal({
         mutateContent(contentId: $contentId) {
           updateMediaContent(input: $input) {
             id
-            ...ContentVideoFragment
+            ...ContentLinkFragment
             userProgressData {
               nextLearnDate
             }

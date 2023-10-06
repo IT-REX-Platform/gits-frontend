@@ -2,7 +2,7 @@
 
 import { lecturerDeleteMediaContentMutation } from "@/__generated__/lecturerDeleteMediaContentMutation.graphql";
 import { lecturerMediaQuery } from "@/__generated__/lecturerMediaQuery.graphql";
-import { MediaContent } from "@/components/Content";
+import { MediaContentLink } from "@/components/content-link/MediaContentLink";
 import { ContentTags } from "@/components/ContentTags";
 import { Heading } from "@/components/Heading";
 import { MediaContentModal } from "@/components/MediaContentModal";
@@ -38,7 +38,7 @@ export default function LecturerMediaPage() {
             }
           }
 
-          ...ContentMediaFragment
+          ...MediaContentLinkFragment
           ...MediaContentModal
         }
         ...MediaRecordSelector
@@ -162,7 +162,7 @@ export default function LecturerMediaPage() {
           <Typography variant="h2">Related media</Typography>
           <div className="mt-4 flex flex-col gap-2">
             {relatedRecords.map((record) => (
-              <MediaContent
+              <MediaContentLink
                 courseId={courseId}
                 key={record.id}
                 _media={content}

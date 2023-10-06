@@ -2,7 +2,7 @@
 
 import { Typography } from "@mui/material";
 import { graphql, useFragment } from "react-relay";
-import { ContentLink } from "./Content";
+import { ContentLink } from "./content-link/ContentLink";
 import { OtherContentFragment$key } from "@/__generated__/OtherContentFragment.graphql";
 
 export function OtherContent({

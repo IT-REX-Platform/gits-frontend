@@ -10,7 +10,7 @@ import { AddSectionButton } from "@/components/AddSectionButton";
 import { AddStageButton } from "@/components/AddStageButton";
 import { ChapterContent } from "@/components/ChapterContent";
 import { ChapterHeader } from "@/components/ChapterHeader";
-import { ContentLink } from "@/components/Content";
+import { ContentLink } from "@/components/content-link/ContentLink";
 import { DeleteStageButton } from "@/components/DeleteStageButton";
 import EditChapterButton from "@/components/EditChapterButton";
 import { EditCourseModal } from "@/components/EditCourseModal";

@@ -4,7 +4,7 @@ import { studentContentDownloadButtonFragment$key } from "@/__generated__/studen
 import { studentContentMediaDisplayFragment$key } from "@/__generated__/studentContentMediaDisplayFragment.graphql";
 import { studentMediaLogProgressMutation } from "@/__generated__/studentMediaLogProgressMutation.graphql";
 import { studentMediaQuery } from "@/__generated__/studentMediaQuery.graphql";
-import { MediaContent } from "@/components/Content";
+import { MediaContentLink } from "@/components/content-link/MediaContentLink";
 import { ContentTags } from "@/components/ContentTags";
 import { Heading } from "@/components/Heading";
 import { DisplayError, PageError } from "@/components/PageError";
@@ -55,7 +55,7 @@ export default function StudentMediaPage() {
             }
           }
 
-          ...ContentMediaFragment
+          ...MediaContentLinkFragment
         }
       }
     `,
@@ -209,7 +209,7 @@ export default function StudentMediaPage() {
           <Typography variant="h2">Related media</Typography>
           <div className="mt-4 flex flex-col gap-2">
             {relatedRecords.map((record) => (
-              <MediaContent
+              <MediaContentLink
                 courseId={courseId}
                 key={record.id}
                 _media={content}

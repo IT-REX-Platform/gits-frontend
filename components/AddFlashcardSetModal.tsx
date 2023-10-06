@@ -62,7 +62,7 @@ export function AddFlashcardSetModal({
           __id
           __typename
 
-          ...ContentFlashcardFragment
+          ...ContentLinkFragment
 
           id
           userProgressData {

@@ -1,7 +1,7 @@
 import { graphql, useFragment } from "react-relay";
 
 import { SuggestionFragment$key } from "@/__generated__/SuggestionFragment.graphql";
-import { ContentLink } from "./Content";
+import { ContentLink } from "./content-link/ContentLink";
 
 export function Suggestion({
   _suggestion,

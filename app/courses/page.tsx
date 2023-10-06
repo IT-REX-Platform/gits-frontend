@@ -91,8 +91,8 @@ export default function StudentCourseList() {
     .map((course) => course.id);
 
   const [join] = useMutation<pageCourseJoinMutation>(graphql`
-    mutation pageCourseJoinMutation($input: CourseMembershipInput!) {
-      createMembership(input: $input) {
+    mutation pageCourseJoinMutation($courseId: UUID!) {
+      joinCourse(courseId: $courseId) {
         courseId
         role
         course {
@@ -194,42 +194,68 @@ export default function StudentCourseList() {
                     variant="text"
                     endIcon={<ArrowForward />}
                     onClick={() => {
-                      (courseIdsAlreadyJoined.includes(course.id)
-                        ? updateMembership
-                        : join)({
-                        variables: {
-                          input: {
-                            courseId: course.id,
-                            role:
-                              pageView === PageView.Lecturer
-                                ? "ADMINISTRATOR"
-                                : "STUDENT",
-                            userId,
-                          },
-                        },
-                        onCompleted() {
-                          router.push(`/courses/${course.id}`);
-                        },
-                        onError: setError,
-                        updater(store) {
-                          const newRecord = store.getRootField(
-                            courseIdsAlreadyJoined.includes(course.id)
-                              ? "updateMembership"
-                              : "createMembership"
-                          )!;
-                          const userRecord = store.get(userId)!;
-                          const records = userRecord
-                            .getLinkedRecords("courseMemberships")!
-                            .filter(
-                              (x) => x.getValue("courseId") !== course.id
-                            );
+                      courseIdsAlreadyJoined.includes(course.id)
+                        ? updateMembership({
+                            variables: {
+                              input: {
+                                courseId: course.id,
+                                role:
+                                  pageView === PageView.Lecturer
+                                    ? "ADMINISTRATOR"
+                                    : "STUDENT",
+                                userId,
+                              },
+                            },
+                            onCompleted() {
+                              router.push(`/courses/${course.id}`);
+                            },
+                            onError: setError,
+                            updater(store) {
+                              const newRecord = store.getRootField(
+                                courseIdsAlreadyJoined.includes(course.id)
+                                  ? "updateMembership"
+                                  : "joinCourse"
+                              )!;
+                              const userRecord = store.get(userId)!;
+                              const records = userRecord
+                                .getLinkedRecords("courseMemberships")!
+                                .filter(
+                                  (x) => x.getValue("courseId") !== course.id
+                                );
 
-                          userRecord.setLinkedRecords(
-                            [...records, newRecord],
-                            "courseMemberships"
-                          );
-                        },
-                      });
+                              userRecord.setLinkedRecords(
+                                [...records, newRecord],
+                                "courseMemberships"
+                              );
+                            },
+                          })
+                        : join({
+                            variables: {
+                              courseId: course.id,
+                            },
+                            onCompleted() {
+                              router.push(`/courses/${course.id}`);
+                            },
+                            onError: setError,
+                            updater(store) {
+                              const newRecord = store.getRootField(
+                                courseIdsAlreadyJoined.includes(course.id)
+                                  ? "updateMembership"
+                                  : "joinCourse"
+                              )!;
+                              const userRecord = store.get(userId)!;
+                              const records = userRecord
+                                .getLinkedRecords("courseMemberships")!
+                                .filter(
+                                  (x) => x.getValue("courseId") !== course.id
+                                );
+
+                              userRecord.setLinkedRecords(
+                                [...records, newRecord],
+                                "courseMemberships"
+                              );
+                            },
+                          });
                     }}
                   >
                     {/* todo this is just for testing purposes and shouldn't work in the real system */}

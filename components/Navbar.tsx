@@ -172,7 +172,7 @@ export function Navbar() {
   );
 
   const filtered = currentUserInfo.courseMemberships
-    .filter((x) => x.role === "TUTOR" || pageView === PageView.Student)
+    .filter((x) => x.role === "ADMINISTRATOR" || pageView === PageView.Student)
     .filter((x) => x.course.published || pageView === PageView.Lecturer)
     .filter(
       (x) =>
@@ -186,7 +186,7 @@ export function Navbar() {
         <NavbarSection
           title={
             pageView === PageView.Lecturer
-              ? "Courses I'm tutoring"
+              ? "Courses I'm teaching this semester"
               : "Courses I'm attending this semester"
           }
         >

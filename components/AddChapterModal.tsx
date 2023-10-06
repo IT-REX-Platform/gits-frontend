@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { graphql, useFragment, useMutation } from "react-relay";
 
 import { AddChapterModalFragment$key } from "@/__generated__/AddChapterModalFragment.graphql";
@@ -25,6 +25,7 @@ export function AddChapterModal({
     graphql`
       fragment AddChapterModalFragment on Course {
         id
+        startDate
         endDate
         chapters {
           elements {
@@ -58,9 +59,9 @@ export function AddChapterModal({
         chapter: {
           courseId: course.id,
           title: values.title,
-          description: values.title,
+          description: values.description,
           startDate: values.startDate!.toISOString(),
-          endDate: values.endDate!.toISOString(),
+          endDate: course.endDate,
           suggestedEndDate: values.suggestedEndDate!.toISOString(),
           suggestedStartDate: values.suggestedStartDate!.toISOString(),
           number: nextCourseNumber,
@@ -76,24 +77,28 @@ export function AddChapterModal({
   }
 
   const [error, setError] = useState<any>(null);
-  const predecessorStart = lodash.max(
-    course.chapters.elements.map((x) => x.startDate)
+  const sections = useMemo(
+    () => dialogSections(dayjs(course.startDate), dayjs(course.endDate)),
+    [course]
+  );
+  const schema = useMemo(
+    () => validationSchema(course.startDate, course.endDate),
+    [course]
   );
 
   return (
     <DialogBase
       open={open}
       title="Add a chapter"
-      sections={dialogSections}
+      sections={sections}
       initialValues={{
         title: "",
         description: "",
         startDate: null,
-        endDate: dayjs(course.endDate),
         suggestedStartDate: null,
-        suggestedEndDate: dayjs(course.endDate),
+        suggestedEndDate: null,
       }}
-      validationSchema={validationSchema(predecessorStart)}
+      validationSchema={schema}
       onClose={onClose}
       onSubmit={handleSubmit}
       clearError={() => setError(null)}

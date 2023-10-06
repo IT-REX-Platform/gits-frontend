@@ -81,6 +81,7 @@ graphql`
         id
         title
         number
+        startDate
         sections {
           ...lecturerSectionFragment @relay(mask: false)
         }
@@ -160,7 +161,10 @@ export default function LecturerCoursePage() {
         {course.description}
       </Typography>
 
-      {orderBy(course.chapters.elements, (x) => x.number).map((chapter) => (
+      {orderBy(course.chapters.elements, [
+        (x) => new Date(x.startDate).getTime(),
+        "number",
+      ]).map((chapter) => (
         <section key={chapter.id} className="mb-6">
           <ChapterHeader
             courseId={id}

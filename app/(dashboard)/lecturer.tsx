@@ -4,27 +4,8 @@ import {
   YearDivision,
   lecturerLecturerDashboardQuery,
 } from "@/__generated__/lecturerLecturerDashboardQuery.graphql";
-import {
-  Add,
-  ArrowForwardIos,
-  Check,
-  Refresh,
-  Visibility,
-} from "@mui/icons-material";
-import {
-  Button,
-  Card,
-  CardActions,
-  CardContent,
-  Chip,
-  CircularProgress,
-  Divider,
-  List,
-  ListItemButton,
-  ListItemIcon,
-  ListItemText,
-  Typography,
-} from "@mui/material";
+import { Add } from "@mui/icons-material";
+import { Button, Card, CardContent, Chip, Typography } from "@mui/material";
 import dayjs from "dayjs";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -67,7 +48,7 @@ export default function LecturerPage() {
   );
 
   const courses = currentUserInfo.courseMemberships
-    .filter((x) => x.role === "TUTOR")
+    .filter((x) => ["ADMINISTRATOR", "TUTOR"].includes(x.role))
     .map((x) => x.course);
 
   const { push } = useRouter();

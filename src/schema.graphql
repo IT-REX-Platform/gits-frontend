@@ -438,6 +438,11 @@ type Course {
     sortDirection: [SortDirection!]! = [ASC]
     pagination: Pagination
   ): ChapterPayload!
+
+  # Course Memberships of this course. Contains information about which users are members of the course and what
+  # role they have in it.
+  # 🔒 User needs to be at least an admin of the course to access this field.
+  memberships: [CourseMembership!]!
   rewardScores: RewardScores!
   scoreboard: [ScoreboardItem!]!
 
@@ -1112,17 +1117,55 @@ type MultipleChoiceQuestion implements Question {
   hint: JSON
 }
 
-# Mutations for the flashcard service. Provides mutations for creating, updating, and deleting flashcard as well as
-# creating and deleting flashcard sets. To update a flashcard set, update, delete, and create flashcards individually.
 type Mutation {
-  # ONLY FOR TESTING PURPOSES. DO NOT USE IN FRONTEND. WILL BE REMOVED.
-  #
-  # Triggers the recalculation of the skill level of the user.
-  # This is done automatically at some time in the night.
-  #
-  # The purpose of this mutation is to allow testing of the skill level score and demonstrate the functionality.
-  recalculateLevels(chapterId: UUID!, userId: UUID!): SkillLevels!
-    @deprecated(reason: "Only for testing purposes. Will be removed.")
+  # Modify Content
+  # 🔒 The user must have admin access to the course containing the section to perform this action.
+  mutateContent(contentId: UUID!): ContentMutation!
+
+  # Modify the section with the given id.
+  # 🔒 The user must have admin access to the course containing the section to perform this action.
+  mutateSection(sectionId: UUID!): SectionMutation!
+
+  # Creates a new course with the given input and returns the created course.
+  createCourse(input: CreateCourseInput!): Course!
+
+  # Creates a new chapter with the given input and returns the created chapter.
+  # The course id must be a course id of an existing course.
+  # 🔒 The user must be an admin in this course to perform this action.
+  createChapter(input: CreateChapterInput!): Chapter!
+
+  # Updates an existing course with the given input and returns the updated course.
+  # The course id must be a course id of an existing course.
+  # 🔒 The user must be an admin in this course to perform this action.
+  updateCourse(input: UpdateCourseInput!): Course!
+
+  # Updates an existing chapter with the given input and returns the updated chapter.
+  # The chapter id must be a chapter id of an existing chapter.
+  # 🔒 The user must be an admin in this course to perform this action.
+  updateChapter(input: UpdateChapterInput!): Chapter!
+
+  # Deletes an existing course, throws an error if no course with the given id exists.
+  # 🔒 The user must be an admin in this course to perform this action.
+  deleteCourse(id: UUID!): UUID!
+
+  # Deletes an existing chapter, throws an error if no chapter with the given id exists.
+  # 🔒 The user must be an admin in this course to perform this action.
+  deleteChapter(id: UUID!): UUID!
+
+  # Lets the current user join a course as a student.
+  joinCourse(courseId: UUID!): CourseMembership!
+
+  # Adds the specified user to the specified course with the specified role.
+  # 🔒 The calling user must be an admin in this course to perform this action.
+  createMembership(input: CourseMembershipInput!): CourseMembership!
+
+  # Updates a user's membership in a course with the given input.
+  # 🔒 The calling user must be an admin in this course to perform this action.
+  updateMembership(input: CourseMembershipInput!): CourseMembership!
+
+  # Removes the specified user's access to the specified course.
+  # 🔒 The calling user must be an admin in this course to perform this action.
+  deleteMembership(input: CourseMembershipInput!): CourseMembership!
 
   # Creates a new media record
   createMediaRecord(input: CreateMediaRecordInput!): MediaRecord!
@@ -1154,74 +1197,15 @@ type Mutation {
     mediaRecordIds: [UUID!]!
   ): [MediaRecord!]!
 
-  # Modify Content
-  # 🔒 The user must have admin access to the course containing the section to perform this action.
-  mutateContent(contentId: UUID!): ContentMutation!
-
-  # Modify the section with the given id.
-  # 🔒 The user must have admin access to the course containing the section to perform this action.
-  mutateSection(sectionId: UUID!): SectionMutation!
-
-  # Modify a quiz.
-  # 🔒 The user must be an admin the course the quiz is in to perform this action.
-  mutateQuiz(assessmentId: UUID!): QuizMutation!
-
-  # Delete a quiz.
-  deleteQuiz(assessmentId: UUID!): UUID!
-    @deprecated(
-      reason: "Only use if you specifically only want to delete the quiz and not the whole assessment. Otherwise, use deleteAssessment in contents service instead."
-    )
-
-  # Log that a multiple choice quiz is completed.
-  # 🔒 The user must be enrolled in the course the quiz is in to perform this action.
-  logQuizCompleted(input: QuizCompletedInput!): QuizCompletionFeedback!
-
   # ONLY FOR TESTING PURPOSES. DO NOT USE IN FRONTEND. WILL BE REMOVED.
   #
   # Triggers the recalculation of the reward score of the user.
   # This is done automatically at some time in the night.
   #
   # The purpose of this mutation is to allow testing of the reward score and demonstrate the functionality.
+  # 🔒 The user be an admin in the course with the given courseId to perform this action.
   recalculateScores(courseId: UUID!, userId: UUID!): RewardScores!
     @deprecated(reason: "Only for testing purposes. Will be removed.")
-
-  # Creates a new course with the given input and returns the created course.
-  createCourse(input: CreateCourseInput!): Course!
-
-  # Creates a new chapter with the given input and returns the created chapter.
-  # The course id must be a course id of an existing course.
-  # 🔒 The user must be an admin in this course to perform this action.
-  createChapter(input: CreateChapterInput!): Chapter!
-
-  # Updates an existing course with the given input and returns the updated course.
-  # The course id must be a course id of an existing course.
-  # 🔒 The user must be an admin in this course to perform this action.
-  updateCourse(input: UpdateCourseInput!): Course!
-
-  # Updates an existing chapter with the given input and returns the updated chapter.
-  # The chapter id must be a chapter id of an existing chapter.
-  # 🔒 The user must be an admin in this course to perform this action.
-  updateChapter(input: UpdateChapterInput!): Chapter!
-
-  # Deletes an existing course, throws an error if no course with the given id exists.
-  # 🔒 The user must be an admin in this course to perform this action.
-  deleteCourse(id: UUID!): UUID!
-
-  # Deletes an existing chapter, throws an error if no chapter with the given id exists.
-  # 🔒 The user must be an admin in this course to perform this action.
-  deleteChapter(id: UUID!): UUID!
-
-  # Adds the specified user to the specified course with the specified role.
-  # 🔒 The calling user must be an admin in this course to perform this action.
-  createMembership(input: CourseMembershipInput!): CourseMembership!
-
-  # Updates a user's membership in a course with the given input.
-  # 🔒 The calling user must be an admin in this course to perform this action.
-  updateMembership(input: CourseMembershipInput!): CourseMembership!
-
-  # Removes the specified user's access to the specified course.
-  # 🔒 The calling user must be an admin in this course to perform this action.
-  deleteMembership(input: CourseMembershipInput!): CourseMembership!
 
   # Deletes a flashcard set. Throws an error if the flashcard set does not exist.
   # The contained flashcards are deleted as well.
@@ -1239,6 +1223,29 @@ type Mutation {
   logFlashcardLearned(
     input: LogFlashcardLearnedInput!
   ): FlashcardLearnedFeedback!
+
+  # Modify a quiz.
+  # 🔒 The user must be an admin the course the quiz is in to perform this action.
+  mutateQuiz(assessmentId: UUID!): QuizMutation!
+
+  # Delete a quiz.
+  deleteQuiz(assessmentId: UUID!): UUID!
+    @deprecated(
+      reason: "Only use if you specifically only want to delete the quiz and not the whole assessment. Otherwise, use deleteAssessment in contents service instead."
+    )
+
+  # Log that a multiple choice quiz is completed.
+  # 🔒 The user must be enrolled in the course the quiz is in to perform this action.
+  logQuizCompleted(input: QuizCompletedInput!): QuizCompletionFeedback!
+
+  # ONLY FOR TESTING PURPOSES. DO NOT USE IN FRONTEND. WILL BE REMOVED.
+  #
+  # Triggers the recalculation of the skill level of the user.
+  # This is done automatically at some time in the night.
+  #
+  # The purpose of this mutation is to allow testing of the skill level score and demonstrate the functionality.
+  recalculateLevels(chapterId: UUID!, userId: UUID!): SkillLevels!
+    @deprecated(reason: "Only for testing purposes. Will be removed.")
 
   # Creates a new media content and links the given media records to it.
   createMediaContentAndLinkRecords(
@@ -1344,51 +1351,6 @@ type PublicUserInfo {
 }
 
 type Query {
-  # Gets the publicly available information for a list of users with the specified IDs.
-  # If a user does not exist, null is returned for that user.
-  findPublicUserInfos(ids: [UUID!]!): [PublicUserInfo]!
-
-  # Gets the user information of the currently authorized user.
-  currentUserInfo: UserInfo!
-
-  # Gets all of the users' information for a list of users with the specified IDs.
-  # Only available to privileged users.
-  # If a user does not exist, null is returned for that user.
-  findUserInfos(ids: [UUID!]!): [UserInfo]!
-
-  # Get the skill levels of the current user for all skill types for a list of chapter ids.
-  userSkillLevelsByChapterIds(chapterIds: [UUID!]!): [SkillLevels!]!
-
-  # Get the skill levels of the specified user for all skill types for a list of chapter ids.
-  skillLevelsForUserByChapterIds(
-    chapterIds: [UUID!]!
-    userId: UUID!
-  ): [SkillLevels!]!
-
-  # Returns the media records with the given IDs. Throws an error if a MediaRecord corresponding to a given ID
-  # cannot be found.
-  mediaRecordsByIds(ids: [UUID!]!): [MediaRecord!]!
-
-  # Like mediaRecordsByIds() returns the media records with the given IDs, but instead of throwing an error if an ID
-  # cannot be found, it instead returns NULL for that media record.
-  findMediaRecordsByIds(ids: [UUID!]!): [MediaRecord]!
-
-  # Returns all media records of the system.
-  mediaRecords: [MediaRecord!]!
-    @deprecated(
-      reason: "In production there should probably be no way to get all media records of the system."
-    )
-
-  # Returns all media records which the current user created.
-  userMediaRecords: [MediaRecord!]!
-
-  # Returns the media records associated the given content IDs as a list of lists where each sublist contains
-  # the media records associated with the content ID at the same index in the input list
-  mediaRecordsByContentIds(contentIds: [UUID!]!): [[MediaRecord!]!]!
-
-  # Returns all media records for the given CourseIds
-  mediaRecordsForCourses(courseIds: [UUID!]!): [[MediaRecord!]!]!
-
   # Retrieves all existing contents for a given course.
   # 🔒 The user must have access to the courses with the given ids to access their contents, otherwise an error is thrown.
   contentsByCourseIds(courseIds: [UUID!]!): [[Content!]!]
@@ -1427,21 +1389,6 @@ type Query {
     skillTypes: [SkillType!]! = []
   ): [Suggestion!]!
 
-  # Get quiz by assessment ID.
-  # If any of the assessment IDs are not found, the corresponding quiz will be null.
-  # 🔒 The user must be enrolled in the course the quizzes belong to to access them. Otherwise null is returned for
-  # an quiz if the user has no access to it.
-  findQuizzesByAssessmentIds(assessmentIds: [UUID!]!): [Quiz]!
-
-  # Get the reward score of the current user for the specified course.
-  userCourseRewardScores(courseId: UUID!): RewardScores!
-
-  # Get the reward score of the specified user for the specified course.
-  courseRewardScoresForUser(courseId: UUID!, userId: UUID!): RewardScores!
-
-  # Gets the power scores for each user in the course, ordered by power score descending.
-  scoreboard(courseId: UUID!): [ScoreboardItem!]!
-
   # Get a list of courses. Can be filtered, sorted and paginated.
   # Courses and their basic data can be queried by any user, even if they are not enrolled in the course.
   courses(
@@ -1469,6 +1416,42 @@ type Query {
   resourceById(ids: [UUID!]!): [CourseResourceAssociation!]!
     @deprecated(reason: "Use courseResourceAssociationsByIds instead.")
 
+  # Returns the media records with the given IDs. Throws an error if a MediaRecord corresponding to a given ID
+  # cannot be found.
+  mediaRecordsByIds(ids: [UUID!]!): [MediaRecord!]!
+
+  # Like mediaRecordsByIds() returns the media records with the given IDs, but instead of throwing an error if an ID
+  # cannot be found, it instead returns NULL for that media record.
+  findMediaRecordsByIds(ids: [UUID!]!): [MediaRecord]!
+
+  # Returns all media records of the system.
+  mediaRecords: [MediaRecord!]!
+    @deprecated(
+      reason: "In production there should probably be no way to get all media records of the system."
+    )
+
+  # Returns all media records which the current user created.
+  userMediaRecords: [MediaRecord!]!
+
+  # Returns the media records associated the given content IDs as a list of lists where each sublist contains
+  # the media records associated with the content ID at the same index in the input list
+  mediaRecordsByContentIds(contentIds: [UUID!]!): [[MediaRecord!]!]!
+
+  # Returns all media records for the given CourseIds
+  mediaRecordsForCourses(courseIds: [UUID!]!): [[MediaRecord!]!]!
+
+  # Get the reward score of the current user for the specified course.
+  # 🔒 The user must have access to the course with the given id to access their scores, otherwise an error is thrown.
+  userCourseRewardScores(courseId: UUID!): RewardScores!
+
+  # Get the reward score of the specified user for the specified course.
+  # 🔒 The user be an admin in the course with the given courseId to perform this action.
+  courseRewardScoresForUser(courseId: UUID!, userId: UUID!): RewardScores!
+
+  # Gets the power scores for each user in the course, ordered by power score descending.
+  # 🔒 The user must have access to the course with the given id to access the scoreboard, otherwise an error is thrown.
+  scoreboard(courseId: UUID!): [ScoreboardItem!]!
+
   # Get flashcards by their ids.
   # 🔒 The user must be enrolled in the course the flashcards belong to. Otherwise an error is thrown.
   flashcardsByIds(ids: [UUID!]!): [Flashcard!]!
@@ -1478,6 +1461,33 @@ type Query {
   # Each element is null if the corresponding id is not found.
   # 🔒 The user must be enrolled in the course the flashcard sets belong to. Otherwise for that element null is returned.
   findFlashcardSetsByAssessmentIds(assessmentIds: [UUID!]!): [FlashcardSet]!
+
+  # Get quiz by assessment ID.
+  # If any of the assessment IDs are not found, the corresponding quiz will be null.
+  # 🔒 The user must be enrolled in the course the quizzes belong to to access them. Otherwise null is returned for
+  # an quiz if the user has no access to it.
+  findQuizzesByAssessmentIds(assessmentIds: [UUID!]!): [Quiz]!
+
+  # Get the skill levels of the current user for all skill types for a list of chapter ids.
+  userSkillLevelsByChapterIds(chapterIds: [UUID!]!): [SkillLevels!]!
+
+  # Get the skill levels of the specified user for all skill types for a list of chapter ids.
+  skillLevelsForUserByChapterIds(
+    chapterIds: [UUID!]!
+    userId: UUID!
+  ): [SkillLevels!]!
+
+  # Gets the publicly available information for a list of users with the specified IDs.
+  # If a user does not exist, null is returned for that user.
+  findPublicUserInfos(ids: [UUID!]!): [PublicUserInfo]!
+
+  # Gets the user information of the currently authorized user.
+  currentUserInfo: UserInfo!
+
+  # Gets all of the users' information for a list of users with the specified IDs.
+  # Only available to privileged users.
+  # If a user does not exist, null is returned for that user.
+  findUserInfos(ids: [UUID!]!): [UserInfo]!
 }
 
 # Generic question interface.
@@ -2173,6 +2183,7 @@ type UserInfo {
   userName: String!
   firstName: String!
   lastName: String!
+  realmRoles: [String!]!
 
   # The course memberships of the user.
   courseMemberships: [CourseMembership!]!

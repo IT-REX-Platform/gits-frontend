@@ -782,7 +782,7 @@ export function Content({
   return (
     <button
       disabled={disabled}
-      className={`group flex items-center text-left ${gap} pr-3 hover:disabled:bg-gray-50 ${cursor} ${rounding} ${className}`}
+      className={`group flex items-center text-left ${gap} pr-3 bg-transparent hover:disabled:bg-gray-50 ${cursor} ${rounding} ${className}`}
       onClick={onClick}
     >
       <div

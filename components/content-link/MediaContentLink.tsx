@@ -9,6 +9,7 @@ import { PresentationContentLink } from "./PresentationContentLink";
 import { InvalidContentLink } from "./InvalidContentLink";
 import { VideoContentLink } from "./VideoContentLink";
 import { UnknownMediaContentLink } from "./UnknownMediaContentLink";
+import { ImageContentLink } from "./ImageContentLink";
 
 export function MediaContentLink({
   recordId,
@@ -34,6 +35,7 @@ export function MediaContentLink({
         ...PresentationContentLinkFragment
         ...DocumentContentLinkFragment
         ...UnknownMediaContentLinkFragment
+        ...ImageContentLinkFragment
         mediaRecords {
           id
           type
@@ -98,6 +100,14 @@ export function MediaContentLink({
     case "DOCUMENT":
       return (
         <DocumentContentLink
+          title={record.name}
+          onClick={onClick}
+          _media={media}
+        />
+      );
+    case "IMAGE":
+      return (
+        <ImageContentLink
           title={record.name}
           onClick={onClick}
           _media={media}

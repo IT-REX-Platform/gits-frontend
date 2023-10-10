@@ -271,7 +271,13 @@ export function ContentMediaDisplay({
       );
     case "IMAGE":
       // eslint-disable-next-line @next/next/no-img-element
-      return <img alt={mediaRecord.name} src={mediaRecord.downloadUrl}></img>;
+      return (
+        <img
+          alt={mediaRecord.name}
+          src={mediaRecord.downloadUrl}
+          className="max-w-md flex justify-center mx-auto"
+        ></img>
+      );
     default:
       return <>Unsupported media type</>;
   }

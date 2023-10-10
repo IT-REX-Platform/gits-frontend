@@ -47,12 +47,16 @@ export function PdfViewer({
   return (
     <div>
       <Document
-        className="mx-auto w-full flex justify-center"
+        className="flex justify-center"
         file={url}
         onLoadSuccess={onDocumentLoadSuccess}
         loading={<CircularProgress />}
       >
-        <Page loading={<CircularProgress />} pageNumber={pageNumber} />
+        <Page
+          loading={<CircularProgress />}
+          pageNumber={pageNumber}
+          width={1000}
+        />
       </Document>
       <div className="flex justify-center items-center gap-2 mt-6">
         <Pagination

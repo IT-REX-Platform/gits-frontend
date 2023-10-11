@@ -275,7 +275,7 @@ export function ContentMediaDisplay({
         <img
           alt={mediaRecord.name}
           src={mediaRecord.downloadUrl}
-          className="max-w-md flex justify-center mx-auto"
+          className="max-h-md flex justify-center mx-auto"
         ></img>
       );
     default:

@@ -55,7 +55,7 @@ export function PdfViewer({
         <Page
           loading={<CircularProgress />}
           pageNumber={pageNumber}
-          width={1000}
+          height={600}
         />
       </Document>
       <div className="flex justify-center items-center gap-2 mt-6">

@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { ClozeQuestionData, ClozeQuestionModal } from "./ClozeQuestionModal";
 import { MediaRecordSelector$key } from "@/__generated__/MediaRecordSelector.graphql";
 import { graphql, useMutation } from "react-relay";
 import { AddMultipleChoiceQuestionModalMutation } from "@/__generated__/AddMultipleChoiceQuestionModalMutation.graphql";

@@ -1,6 +1,9 @@
 "use client";
 
+import { currentViewQuery } from "@/__generated__/currentViewQuery.graphql";
 import React, { useContext, useEffect, useState } from "react";
+import { useLazyLoadQuery } from "react-relay";
+import { graphql } from "relay-runtime";
 
 export enum PageView {
   Student = "Student",
@@ -13,14 +16,35 @@ const PageViewContext = React.createContext<{
 } | null>(null);
 
 export function PageViewProvider({ children }: { children: React.ReactNode }) {
+  const { currentUserInfo } = useLazyLoadQuery<currentViewQuery>(
+    graphql`
+      query currentViewQuery {
+        currentUserInfo {
+          id
+          realmRoles
+        }
+      }
+    `,
+    {}
+  );
+
   const [pageView, setPageView] = useState<PageView>();
 
   useEffect(() => {
     if (typeof window !== "undefined" && !pageView) {
-      setPageView(
-        window.localStorage.getItem("current_pageview") === PageView.Lecturer
+      const defaultRole =
+        currentUserInfo.realmRoles.includes("super-user") ||
+        currentUserInfo.realmRoles.includes("course-creator")
           ? PageView.Lecturer
-          : PageView.Student
+          : PageView.Student;
+
+      setPageView(
+        window.localStorage.getItem("current_pageview")
+          ? window.localStorage.getItem("current_pageview") ===
+            PageView.Lecturer
+            ? PageView.Lecturer
+            : PageView.Student
+          : defaultRole
       );
     } else if (pageView) {
       window.localStorage.setItem(

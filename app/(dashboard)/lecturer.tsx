@@ -31,6 +31,7 @@ export default function LecturerPage() {
     graphql`
       query lecturerLecturerDashboardQuery {
         currentUserInfo {
+          id
           courseMemberships {
             role
             course {

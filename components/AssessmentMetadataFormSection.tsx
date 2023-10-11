@@ -1,3 +1,4 @@
+import { SkillType } from "@/__generated__/AddFlashcardSetModalMutation.graphql";
 import {
   Checkbox,
   FormControl,
@@ -13,7 +14,6 @@ import {
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import { FormSection } from "./Form";
-import { SkillType } from "@/__generated__/AddFlashcardSetModalMutation.graphql";
 
 export type AssessmentMetadataPayload = {
   skillTypes: readonly SkillType[];
@@ -139,6 +139,7 @@ export function AssessmentMetadataFormSection({
             (interval ?? 0) < 0 ? "Please enter a positive value" : undefined
           }
           onChange={(e) => setInterval(parseInt(e.target.value))}
+          required
         />
       )}
     </FormSection>

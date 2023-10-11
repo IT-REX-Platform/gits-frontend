@@ -1,12 +1,12 @@
-import { graphql, useFragment } from "react-relay";
-import { RenderRichText } from "../RichTextEditor";
-import { useEffect, useRef, useState } from "react";
-import { QuestionDivider } from "./QuestionDivider";
 import { ClozeQuestionFragment$key } from "@/__generated__/ClozeQuestionFragment.graphql";
-import { useDrag, useDrop } from "react-dnd";
 import { TextField, colors } from "@mui/material";
+import { useEffect, useRef, useState } from "react";
+import { useDrag, useDrop } from "react-dnd";
+import { graphql, useFragment } from "react-relay";
 import { AutosizeByText } from "../AutosizeByText";
+import { RenderRichText } from "../RichTextEditor";
 import { FeedbackTooltip } from "./FeedbackTooltip";
+import { QuestionDivider } from "./QuestionDivider";
 
 export function ClozeQuestion({
   _question,

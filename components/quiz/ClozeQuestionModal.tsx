@@ -1,3 +1,6 @@
+import { MediaRecordSelector$key } from "@/__generated__/MediaRecordSelector.graphql";
+import { Add, Clear, Feedback } from "@mui/icons-material";
+import { LoadingButton } from "@mui/lab";
 import {
   Button,
   Checkbox,
@@ -10,13 +13,10 @@ import {
   IconButton,
   TextField,
 } from "@mui/material";
-import { FormErrors } from "../FormErrors";
-import { Form, FormSection } from "../Form";
-import { MediaRecordSelector$key } from "@/__generated__/MediaRecordSelector.graphql";
-import { RichTextEditor } from "../RichTextEditor";
 import { useEffect, useMemo, useState } from "react";
-import { Add, Clear, Feedback } from "@mui/icons-material";
-import { LoadingButton } from "@mui/lab";
+import { Form, FormSection } from "../Form";
+import { FormErrors } from "../FormErrors";
+import { RichTextEditor } from "../RichTextEditor";
 import { EditRichTextButton } from "./EditRichTextButton";
 import { HintFormSection } from "./HintFormSection";
 
@@ -139,6 +139,7 @@ export function ClozeQuestionModal({
                     _allRecords={_allRecords}
                     label="Text"
                     initialValue={elem.text}
+                    required
                     onChange={(text) =>
                       updateElement(i, { type: "text", text })
                     }
@@ -157,6 +158,7 @@ export function ClozeQuestionModal({
                     variant="outlined"
                     label="Blank"
                     value={elem.correctAnswer}
+                    required
                     onChange={(e) =>
                       updateElement(i, {
                         type: "blank",

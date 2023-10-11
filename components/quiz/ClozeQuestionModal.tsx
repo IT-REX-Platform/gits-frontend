@@ -1,3 +1,6 @@
+import { MediaRecordSelector$key } from "@/__generated__/MediaRecordSelector.graphql";
+import { Add, Clear, Feedback } from "@mui/icons-material";
+import { LoadingButton } from "@mui/lab";
 import {
   Button,
   Checkbox,
@@ -10,13 +13,10 @@ import {
   IconButton,
   TextField,
 } from "@mui/material";
-import { FormErrors } from "../FormErrors";
-import { Form, FormSection } from "../Form";
-import { MediaRecordSelector$key } from "@/__generated__/MediaRecordSelector.graphql";
-import { RichTextEditor } from "../RichTextEditor";
 import { useEffect, useMemo, useState } from "react";
-import { Add, Clear, Feedback } from "@mui/icons-material";
-import { LoadingButton } from "@mui/lab";
+import { Form, FormSection } from "../Form";
+import { FormErrors } from "../FormErrors";
+import { RichTextEditor, serializeToText } from "../RichTextEditor";
 import { EditRichTextButton } from "./EditRichTextButton";
 import { HintFormSection } from "./HintFormSection";
 
@@ -109,14 +109,22 @@ export function ClozeQuestionModal({
   };
 
   const atLeastOneTextElement = useMemo(
-    () => data.clozeElements.filter((e) => e.type === "text").length > 0,
+    () =>
+      data.clozeElements.filter(
+        (e) => e.type === "text" && serializeToText(e.text)
+      ).length > 0,
     [data]
   );
   const atLeastOneBlankElement = useMemo(
     () => data.clozeElements.filter((e) => e.type === "blank").length > 0,
     [data]
   );
-  const valid = atLeastOneTextElement && atLeastOneBlankElement;
+
+  const allElementsFilled = data.clozeElements.every((x) =>
+    x.type == "blank" ? x.correctAnswer : serializeToText(x.text)
+  );
+  const valid =
+    atLeastOneTextElement && atLeastOneBlankElement && allElementsFilled;
 
   useEffect(() => {
     if (!open) {
@@ -139,6 +147,7 @@ export function ClozeQuestionModal({
                     _allRecords={_allRecords}
                     label="Text"
                     initialValue={elem.text}
+                    required
                     onChange={(text) =>
                       updateElement(i, { type: "text", text })
                     }
@@ -155,6 +164,7 @@ export function ClozeQuestionModal({
                   <TextField
                     className="!mr-4"
                     variant="outlined"
+                    required
                     label="Blank"
                     value={elem.correctAnswer}
                     onChange={(e) =>
@@ -253,6 +263,9 @@ export function ClozeQuestionModal({
         <div className="text-red-600 text-xs mr-3">
           {!atLeastOneTextElement && <div>Add at least one text element</div>}
           {!atLeastOneBlankElement && <div>Add at least one blank element</div>}
+          {atLeastOneTextElement && !allElementsFilled && (
+            <div>All elements have to be filled</div>
+          )}
         </div>
         <Button disabled={isLoading} onClick={onClose}>
           Cancel

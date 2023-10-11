@@ -1,4 +1,6 @@
 import { MediaRecordSelector$key } from "@/__generated__/MediaRecordSelector.graphql";
+import { Add, Clear, Feedback } from "@mui/icons-material";
+import { LoadingButton } from "@mui/lab";
 import {
   Button,
   Dialog,
@@ -8,13 +10,11 @@ import {
   IconButton,
 } from "@mui/material";
 import { useEffect, useMemo, useState } from "react";
-import { FormErrors } from "../FormErrors";
 import { Form, FormSection } from "../Form";
-import { RichTextEditor } from "../RichTextEditor";
-import { Add, Clear, Feedback } from "@mui/icons-material";
+import { FormErrors } from "../FormErrors";
+import { RichTextEditor, serializeToText } from "../RichTextEditor";
 import { EditRichTextButton } from "./EditRichTextButton";
 import { HintFormSection } from "./HintFormSection";
-import { LoadingButton } from "@mui/lab";
 
 export type AssociationQuestionData = {
   hint: string | null;
@@ -80,6 +80,14 @@ export function AssociationQuestionModal({
     () => data.correctAssociations.length >= 2,
     [data.correctAssociations]
   );
+
+  const hasTitle = !!serializeToText(data.text);
+
+  const allItemsFilled = data.correctAssociations.every(
+    (x) => serializeToText(x.left) && serializeToText(x.right)
+  );
+
+  const valid = hasTitle && atLeastTwoItems && allItemsFilled;
 
   useEffect(() => {
     if (!open) {
@@ -187,12 +195,16 @@ export function AssociationQuestionModal({
       <DialogActions>
         <div className="text-red-600 text-xs mr-3">
           {!atLeastTwoItems && <div>Add at least two items</div>}
+          {atLeastTwoItems && !allItemsFilled && (
+            <div>All items need a text</div>
+          )}
+          {!hasTitle && <div>A title is required</div>}
         </div>
         <Button disabled={isLoading} onClick={onClose}>
           Cancel
         </Button>
         <LoadingButton
-          disabled={!atLeastTwoItems}
+          disabled={!valid}
           loading={isLoading}
           onClick={() => onSave(data)}
         >

@@ -46,6 +46,8 @@ export default function StudentCourseList() {
             title
             description
             startYear
+            startDate
+            endDate
             ...pageCourseListItemFragment
           }
         }
@@ -180,95 +182,116 @@ export default function StudentCourseList() {
       <List>
         {filteredCourses
           .filter((course) => !myCourseIds.includes(course.id))
-          .map((course) => (
-            <CourseListItem
-              key={course.id}
-              _course={course}
-              lecturer={courseIdsAlreadyJoinedAsLecturer.includes(course.id)}
-              action={
-                ((pageView === PageView.Lecturer &&
-                  !courseIdsAlreadyJoinedAsLecturer.includes(course.id)) ||
-                  !courseIdsAlreadyJoined.includes(course.id)) && (
-                  <Button
-                    color="primary"
-                    variant="text"
-                    endIcon={<ArrowForward />}
-                    onClick={() => {
-                      courseIdsAlreadyJoined.includes(course.id)
-                        ? updateMembership({
-                            variables: {
-                              input: {
-                                courseId: course.id,
-                                role:
-                                  pageView === PageView.Lecturer
-                                    ? "ADMINISTRATOR"
-                                    : "STUDENT",
-                                userId,
-                              },
-                            },
-                            onCompleted() {
-                              router.push(`/courses/${course.id}`);
-                            },
-                            onError: setError,
-                            updater(store) {
-                              const newRecord = store.getRootField(
-                                courseIdsAlreadyJoined.includes(course.id)
-                                  ? "updateMembership"
-                                  : "joinCourse"
-                              )!;
-                              const userRecord = store.get(userId)!;
-                              const records = userRecord
-                                .getLinkedRecords("courseMemberships")!
-                                .filter(
-                                  (x) => x.getValue("courseId") !== course.id
-                                );
+          .map((course) => {
+            const notAlreadyJoined =
+              (pageView === PageView.Lecturer &&
+                !courseIdsAlreadyJoinedAsLecturer.includes(course.id)) ||
+              !courseIdsAlreadyJoined.includes(course.id);
 
-                              userRecord.setLinkedRecords(
-                                [...records, newRecord],
-                                "courseMemberships"
-                              );
-                            },
-                          })
-                        : join({
-                            variables: {
-                              courseId: course.id,
-                            },
-                            onCompleted() {
-                              router.push(`/courses/${course.id}`);
-                            },
-                            onError: setError,
-                            updater(store) {
-                              const newRecord = store.getRootField(
-                                courseIdsAlreadyJoined.includes(course.id)
-                                  ? "updateMembership"
-                                  : "joinCourse"
-                              )!;
-                              const userRecord = store.get(userId)!;
-                              const records = userRecord
-                                .getLinkedRecords("courseMemberships")!
-                                .filter(
-                                  (x) => x.getValue("courseId") !== course.id
-                                );
+            const hasStarted = dayjs().isAfter(course.startDate);
+            const hasEnded = dayjs().isAfter(course.endDate);
 
-                              userRecord.setLinkedRecords(
-                                [...records, newRecord],
-                                "courseMemberships"
-                              );
-                            },
-                          });
-                    }}
-                  >
-                    {/* todo this is just for testing purposes and shouldn't work in the real system */}
-                    {pageView === PageView.Lecturer
-                      ? !courseIdsAlreadyJoined.includes(course.id)
-                        ? "Join as lecturer"
-                        : "Promote to lecturer"
-                      : "Join course"}
-                  </Button>
-                )
-              }
-            />
-          ))}
+            const joinButton = (
+              <Button
+                color="primary"
+                variant="text"
+                endIcon={<ArrowForward />}
+                onClick={() => {
+                  courseIdsAlreadyJoined.includes(course.id)
+                    ? updateMembership({
+                        variables: {
+                          input: {
+                            courseId: course.id,
+                            role:
+                              pageView === PageView.Lecturer
+                                ? "ADMINISTRATOR"
+                                : "STUDENT",
+                            userId,
+                          },
+                        },
+                        onCompleted() {
+                          router.push(`/courses/${course.id}`);
+                        },
+                        onError: setError,
+                        updater(store) {
+                          const newRecord = store.getRootField(
+                            courseIdsAlreadyJoined.includes(course.id)
+                              ? "updateMembership"
+                              : "joinCourse"
+                          )!;
+                          const userRecord = store.get(userId)!;
+                          const records = userRecord
+                            .getLinkedRecords("courseMemberships")!
+                            .filter(
+                              (x) => x.getValue("courseId") !== course.id
+                            );
+
+                          userRecord.setLinkedRecords(
+                            [...records, newRecord],
+                            "courseMemberships"
+                          );
+                        },
+                      })
+                    : join({
+                        variables: {
+                          courseId: course.id,
+                        },
+                        onCompleted() {
+                          router.push(`/courses/${course.id}`);
+                        },
+                        onError: setError,
+                        updater(store) {
+                          const newRecord = store.getRootField(
+                            courseIdsAlreadyJoined.includes(course.id)
+                              ? "updateMembership"
+                              : "joinCourse"
+                          )!;
+                          const userRecord = store.get(userId)!;
+                          const records = userRecord
+                            .getLinkedRecords("courseMemberships")!
+                            .filter(
+                              (x) => x.getValue("courseId") !== course.id
+                            );
+
+                          userRecord.setLinkedRecords(
+                            [...records, newRecord],
+                            "courseMemberships"
+                          );
+                        },
+                      });
+                }}
+              >
+                {/* todo this is just for testing purposes and shouldn't work in the real system */}
+                {pageView === PageView.Lecturer
+                  ? !courseIdsAlreadyJoined.includes(course.id)
+                    ? "Join as lecturer"
+                    : "Promote to lecturer"
+                  : "Join course"}
+              </Button>
+            );
+
+            return (
+              <CourseListItem
+                key={course.id}
+                _course={course}
+                lecturer={courseIdsAlreadyJoinedAsLecturer.includes(course.id)}
+                action={
+                  notAlreadyJoined &&
+                  (!hasStarted ? (
+                    <div className="text-gray-400">
+                      Course has not started yet
+                    </div>
+                  ) : hasEnded ? (
+                    <div className="text-gray-400">
+                      Course has already ended
+                    </div>
+                  ) : (
+                    joinButton
+                  ))
+                }
+              />
+            );
+          })}
       </List>
     </main>
   );

@@ -11,6 +11,7 @@ export function ClozeQuestionPreview({
   const question = useFragment(
     graphql`
       fragment ClozeQuestionPreviewFragment on ClozeQuestion {
+        id
         clozeElements {
           __typename
           ... on ClozeTextElement {

@@ -11,7 +11,7 @@ import {
 import { FormErrors } from "../FormErrors";
 import { Form, FormSection } from "../Form";
 import { LoadingButton } from "@mui/lab";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { MediaRecordSelector$key } from "@/__generated__/MediaRecordSelector.graphql";
 import { RichTextEditor } from "../RichTextEditor";
 import { Add, Delete } from "@mui/icons-material";
@@ -69,6 +69,12 @@ export function MultipleChoiceQuestionModal({
     [data.answers]
   );
   const valid = oneAnswerCorrect && atLeastTwoAnswers;
+
+  useEffect(() => {
+    if (!open) {
+      setData(initialValue);
+    }
+  }, [open, initialValue]);
 
   return (
     <Dialog open={open} maxWidth="lg" onClose={onClose}>

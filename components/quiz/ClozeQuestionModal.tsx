@@ -1,4 +1,5 @@
 import {
+  Autocomplete,
   Button,
   Checkbox,
   Chip,
@@ -59,7 +60,6 @@ export function ClozeQuestionModal({
   clearError: () => void;
 }) {
   const [data, setData] = useState(initialValue);
-  const [wrongAnswer, setWrongAnswer] = useState("");
   const updateElement = (index: number, value: ClozeElementData) => {
     setData((oldValue) => ({
       ...oldValue,
@@ -82,28 +82,6 @@ export function ClozeQuestionModal({
       clozeElements: [
         ...oldValue.clozeElements.slice(0, index),
         ...oldValue.clozeElements.slice(index + 1),
-      ],
-    }));
-  };
-  const addWrongAnswer = () => {
-    setData((oldValue) => {
-      const value = {
-        ...oldValue,
-        additionalWrongAnswers: [
-          ...oldValue.additionalWrongAnswers,
-          wrongAnswer,
-        ],
-      };
-      setWrongAnswer("");
-      return value;
-    });
-  };
-  const deleteWrongAnswer = (index: number) => {
-    setData((oldValue) => ({
-      ...oldValue,
-      additionalWrongAnswers: [
-        ...oldValue.additionalWrongAnswers.slice(0, index),
-        ...oldValue.additionalWrongAnswers.slice(index + 1),
       ],
     }));
   };
@@ -226,25 +204,38 @@ export function ClozeQuestionModal({
           </FormSection>
           {data.showBlanksList && (
             <FormSection title="Additional wrong answers">
-              <div className="flex gap-2 items-center flex-wrap max-w-md mt-2">
-                {data.additionalWrongAnswers.map((value, i) => (
-                  <Chip
-                    key={i}
-                    label={value}
-                    onDelete={() => deleteWrongAnswer(i)}
+              <Autocomplete
+                multiple
+                options={[]}
+                defaultValue={[]}
+                freeSolo
+                value={data.additionalWrongAnswers}
+                className="w-96"
+                onChange={(_, newValue: string[]) => {
+                  setData((oldValue) => ({
+                    ...oldValue,
+                    additionalWrongAnswers: newValue,
+                  }));
+                }}
+                renderTags={(value: readonly string[], getTagProps) =>
+                  value.map((option: string, index: number) => (
+                    // the key gets set by "getTagProps"
+                    // eslint-disable-next-line react/jsx-key
+                    <Chip
+                      variant="outlined"
+                      label={option}
+                      {...getTagProps({ index })}
+                    />
+                  ))
+                }
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label="Wrong answers"
+                    helperText="Press enter to add"
                   />
-                ))}
-              </div>
-              <div className="mt-2">
-                <TextField
-                  variant="outlined"
-                  size="small"
-                  label="Add wrong answer"
-                  value={wrongAnswer}
-                  onChange={(e) => setWrongAnswer(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && addWrongAnswer()}
-                />
-              </div>
+                )}
+              />
             </FormSection>
           )}
         </Form>

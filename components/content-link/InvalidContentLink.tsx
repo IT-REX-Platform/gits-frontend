@@ -4,12 +4,11 @@ import { InvalidContentLinkDeleteMutation } from "@/__generated__/InvalidContent
 import { PageView, usePageView } from "@/src/currentView";
 import { Delete, QuestionMark } from "@mui/icons-material";
 import { IconButton } from "@mui/material";
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import { graphql, useMutation } from "react-relay";
 import colors from "tailwindcss/colors";
-import { ContentBase } from "./ContentBase";
+import { ContentBase, ContentLinkProps } from "./ContentBase";
 import { StaticFrame } from "./StaticFrame";
-import { ContentLinkProps } from "./ContentBase";
 
 export function InvalidContentLink({
   type,
@@ -31,8 +30,15 @@ export function InvalidContentLink({
     }
   `);
 
+  // this workaround is required because we are deleting the record without actually navigating, so "invalidateRecord" won't trigger re-evaluation of the query
+  const [deleted, setDeleted] = useState(false);
+
   const [pageView] = usePageView();
   if (pageView === PageView.Student) {
+    return null;
+  }
+
+  if (deleted) {
     return null;
   }
 
@@ -53,6 +59,9 @@ export function InvalidContentLink({
                   variables: { id },
                   updater(store) {
                     store.get(id)?.invalidateRecord();
+                  },
+                  onCompleted() {
+                    setDeleted(true);
                   },
                 });
               }

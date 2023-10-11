@@ -26,7 +26,7 @@ import {
 } from "@mui/material";
 import useResizeObserver from "@react-hook/resize-observer";
 import { useParams, useRouter } from "next/navigation";
-import { createRef, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Confetti from "react-confetti";
 import {
   graphql,
@@ -86,6 +86,7 @@ export default function StudentQuiz() {
           }
           ... on QuizAssessment {
             quiz {
+              assessmentId
               selectedQuestions {
                 id
                 ...studentQuestionFragment

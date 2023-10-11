@@ -31,6 +31,7 @@ import { clsx } from "clsx";
 import isHotkey from "is-hotkey";
 import { debounce } from "lodash";
 import { useCallback, useMemo, useState } from "react";
+import { ErrorBoundary } from "react-error-boundary";
 import { graphql, useLazyLoadQuery } from "react-relay";
 import {
   BaseEditor,
@@ -55,7 +56,6 @@ import {
   withReact,
 } from "slate-react";
 import { MediaRecordSelector } from "./MediaRecordSelector";
-import { ErrorBoundary } from "react-error-boundary";
 
 const HOTKEYS: Record<string, string> = {
   "mod+b": "bold",

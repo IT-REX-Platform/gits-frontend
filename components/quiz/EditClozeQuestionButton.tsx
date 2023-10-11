@@ -1,15 +1,15 @@
+import { EditClozeQuestionButtonFragment$key } from "@/__generated__/EditClozeQuestionButtonFragment.graphql";
+import { EditClozeQuestionButtonMutation } from "@/__generated__/EditClozeQuestionButtonMutation.graphql";
+import { MediaRecordSelector$key } from "@/__generated__/MediaRecordSelector.graphql";
 import { Edit } from "@mui/icons-material";
 import { IconButton } from "@mui/material";
 import { useMemo, useState } from "react";
+import { graphql, useFragment, useMutation } from "react-relay";
 import {
   ClozeElementData,
   ClozeQuestionData,
   ClozeQuestionModal,
 } from "./ClozeQuestionModal";
-import { MediaRecordSelector$key } from "@/__generated__/MediaRecordSelector.graphql";
-import { graphql, useFragment, useMutation } from "react-relay";
-import { EditClozeQuestionButtonFragment$key } from "@/__generated__/EditClozeQuestionButtonFragment.graphql";
-import { EditClozeQuestionButtonMutation } from "@/__generated__/EditClozeQuestionButtonMutation.graphql";
 
 export function EditClozeQuestionButton({
   _allRecords,
@@ -82,6 +82,7 @@ export function EditClozeQuestionButton({
           ),
         },
       },
+      updater: (store) => store.invalidateStore(),
       onCompleted: () => setOpen(false),
       onError: setError,
     });

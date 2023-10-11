@@ -1,11 +1,11 @@
+import { AddAssociationQuestionModalMutation } from "@/__generated__/AddAssociationQuestionModalMutation.graphql";
 import { MediaRecordSelector$key } from "@/__generated__/MediaRecordSelector.graphql";
+import { useState } from "react";
+import { graphql, useMutation } from "react-relay";
 import {
   AssociationQuestionData,
   AssociationQuestionModal,
 } from "./AssociationQuestionModal";
-import { useState } from "react";
-import { graphql, useMutation } from "react-relay";
-import { AddAssociationQuestionModalMutation } from "@/__generated__/AddAssociationQuestionModalMutation.graphql";
 
 export function AddAssociationQuestionModal({
   _allRecords,
@@ -60,6 +60,8 @@ export function AddAssociationQuestionModal({
           },
         }
       ) {
+        store.invalidateStore();
+
         const content = store.get(assessmentId);
         const quiz = content?.getLinkedRecord("quiz");
         const allQuestions = questionPool.flatMap((x) => {

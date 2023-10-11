@@ -77,6 +77,7 @@ export default function StudentCoursePage() {
             elements {
               id
               number
+              startDate
               ...StudentChapterFragment
               contents {
                 ...ContentLinkFragment
@@ -238,7 +239,10 @@ export default function StudentCoursePage() {
         </div>
       </section>
 
-      {orderBy(course.chapters.elements, (x) => x.number).map((chapter) => (
+      {orderBy(course.chapters.elements, [
+        (x) => new Date(x.startDate).getTime(),
+        "number",
+      ]).map((chapter) => (
         <StudentChapter key={chapter.id} _chapter={chapter} />
       ))}
     </main>

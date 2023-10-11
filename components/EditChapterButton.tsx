@@ -1,8 +1,7 @@
 import { Edit } from "@mui/icons-material";
 import { IconButton } from "@mui/material";
 import dayjs from "dayjs";
-import lodash from "lodash";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useFragment, useMutation } from "react-relay";
 import { graphql } from "relay-runtime";
 
@@ -27,18 +26,12 @@ export default function EditChapterButton({
         title
         description
         startDate
-        endDate
         suggestedStartDate
         suggestedEndDate
         course {
           id
-          chapters(sortBy: [], sortDirection: []) {
-            elements {
-              id
-              number
-              startDate
-            }
-          }
+          startDate
+          endDate
         }
         number
       }
@@ -62,10 +55,17 @@ export default function EditChapterButton({
   );
 
   const [error, setError] = useState<any>(null);
-  const predecessorStart = lodash.max(
-    chapter.course.chapters.elements
-      .filter((x) => x.number < chapter.number)
-      .map((x) => x.startDate)
+  const sections = useMemo(
+    () =>
+      dialogSections(
+        dayjs(chapter.course.startDate),
+        dayjs(chapter.course.endDate)
+      ),
+    [chapter.course]
+  );
+  const schema = useMemo(
+    () => validationSchema(chapter.course.startDate, chapter.course.endDate),
+    [chapter.course]
   );
 
   return (
@@ -76,7 +76,7 @@ export default function EditChapterButton({
       <DialogBase
         open={open}
         title="Edit chapter"
-        sections={dialogSections}
+        sections={sections}
         onSubmit={(data) =>
           editSection({
             variables: {
@@ -85,7 +85,7 @@ export default function EditChapterButton({
                 title: data.title,
                 description: data.description,
                 startDate: data.startDate!.toISOString(),
-                endDate: data.endDate!.toISOString(),
+                endDate: chapter.course.endDate,
                 suggestedStartDate: data.suggestedStartDate!.toISOString(),
                 suggestedEndDate: data.suggestedEndDate!.toISOString(),
                 number: chapter.number,
@@ -117,11 +117,10 @@ export default function EditChapterButton({
         initialValues={{
           ...chapter,
           startDate: dayjs(chapter.startDate),
-          endDate: dayjs(chapter.endDate),
           suggestedStartDate: dayjs(chapter.suggestedStartDate),
           suggestedEndDate: dayjs(chapter.suggestedEndDate),
         }}
-        validationSchema={validationSchema(predecessorStart)}
+        validationSchema={schema}
         onClose={() => setOpen(false)}
         error={error}
       />

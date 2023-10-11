@@ -156,14 +156,17 @@ function Field<T extends object>({
           label={field.label}
           value={formik.values[field.key]}
           minDate={
-            field.afterOther ? formik.values[field.afterOther] : field.minDate
+            field.afterOther
+              ? formik.values[field.afterOther] ?? field.minDate
+              : field.minDate
           }
           maxDate={
-            field.beforeOther ? formik.values[field.beforeOther] : field.maxDate
+            field.beforeOther
+              ? formik.values[field.beforeOther] ?? field.maxDate
+              : field.maxDate
           }
           defaultCalendarMonth={field.defaultMonthDate}
           onChange={(value) => formik.setFieldValue(field.key as string, value)}
-          onClose={() => formik.setFieldTouched(field.key as string, true)}
           slotProps={{
             textField: {
               id: field.key as string,

@@ -1,15 +1,13 @@
 "use client";
 
 import { studentStudentQuery } from "@/__generated__/studentStudentQuery.graphql";
-import { CourseCard } from "@/components/CourseCard";
+import { CourseCard, yearDivisionToStringShort } from "@/components/CourseCard";
 import {
   Box,
-  Button,
   FormControl,
   InputLabel,
   MenuItem,
   Select,
-  SelectChangeEvent,
   Typography,
 } from "@mui/material";
 import dayjs from "dayjs";
@@ -20,10 +18,6 @@ import { useLazyLoadQuery } from "react-relay";
 import { graphql } from "relay-runtime";
 
 export default function StudentPage() {
-  const [sortBy, setSortBy] = useState<String>("");
-  const currentYear = dayjs().year();
-  const [showAllCourses, setShowAllCourses] = useState(false);
-
   const { currentUserInfo } = useLazyLoadQuery<studentStudentQuery>(
     graphql`
       query studentStudentQuery {
@@ -48,43 +42,56 @@ export default function StudentPage() {
   const courses = currentUserInfo.courseMemberships.map(
     (course) => course.course
   );
-  const [filteredCourses, setFilteredCourses] = useState(courses);
-  const [notFocusesdcourses, setNotFocusesdcourses] = useState(courses);
 
-  const handleChange = (event: SelectChangeEvent<String>) => {
-    const selectedSort = event.target.value as String;
-    setSortBy(selectedSort);
-    setShowAllCourses(false);
+  const [sortby, setSortby] = useState<"yearDivision" | "title" | "startYear">(
+    "yearDivision"
+  );
 
-    // Update filteredCourses based on the selected sorting criteria
-    if (selectedSort === "title") {
-      // Sort courses alphabetically by title
-      setFilteredCourses(
-        [...courses].sort((a, b) => a.title.localeCompare(b.title))
+  const courseSections = chain(courses)
+    .groupBy((x) => {
+      if (sortby === "startYear") {
+        return x.startYear;
+      } else if (sortby === "title") {
+        return x.title[0];
+      } else {
+        return x.yearDivision
+          ? yearDivisionToStringShort[x.yearDivision] +
+              " " +
+              dayjs(x.startDate).year()
+          : dayjs(x.startDate).year();
+      }
+    })
+    .entries()
+    .orderBy(
+      sortby === "yearDivision"
+        ? [
+            ([key, courses]) => courses[0].startYear,
+            ([key, courses]) => courses[0].yearDivision,
+          ]
+        : ([key, _]) => key,
+
+      sortby === "title" ? "asc" : "desc"
+    )
+    .map(([key, courses]) => {
+      return (
+        <>
+          <Typography variant="h6" gutterBottom>
+            {key}
+          </Typography>
+          <div className="grid grid-cols-2 lg:grid-cols-3 gap-8 mt-8 mb-10">
+            {courses.map((course) => (
+              <CourseCard key={course.id} _course={course} />
+            ))}
+          </div>
+        </>
       );
-    } else if (selectedSort === "startYear") {
-      // Filter courses that match the currentYear
-      const filtered = chain(courses)
-        .filter((course) => dayjs(course.startDate).year() === currentYear)
-        .orderBy((x) => x.startDate)
-        .value();
-      setFilteredCourses(filtered);
-      const notFocused = chain(courses)
-        .filter((course) => dayjs(course.startDate).year() !== currentYear)
-        .orderBy((x) => x.startDate)
-        .value();
+    })
 
-      setNotFocusesdcourses(notFocused);
-    }
-  };
-
-  const handleButton = () => {
-    setShowAllCourses(!showAllCourses);
-  };
+    .value();
 
   return (
     <main>
-      <div className="flex flex-wrap justify-between">
+      <div className="flex flex-wrap justify-between mb-10">
         <Typography variant="h1" gutterBottom>
           Dashboard
         </Typography>
@@ -92,32 +99,22 @@ export default function StudentPage() {
         <Box sx={{ minWidth: 120, maxWidth: 150 }}>
           <FormControl fullWidth>
             <InputLabel>Sort by</InputLabel>
-            <Select value={sortBy} onChange={handleChange} label={"Sort By"}>
+            <Select
+              value={sortby}
+              onChange={(e) => setSortby(e.target.value as any)}
+              label={"Sort By"}
+            >
+              <MenuItem value={"yearDivision"}>Semester</MenuItem>
               <MenuItem value={"title"}>Alphabetically</MenuItem>
               <MenuItem value={"startYear"}>Year</MenuItem>
             </Select>
           </FormControl>
         </Box>
       </div>
-      <Typography variant="h2" gutterBottom>
-        My Courses
-      </Typography>
 
-      {sortBy === "startYear" && (
-        <Typography variant="h6" gutterBottom>
-          Current Year: {currentYear}
-        </Typography>
-      )}
+      {courseSections}
 
-      {filteredCourses.length === 0 && sortBy === "startYear" ? (
-        <div className="text-center text-2xl text-slate-400 my-80">
-          You have not joined any courses this year. Visit the{" "}
-          <Link href="/courses" className="italic hover:text-sky-500">
-            Course Catalog
-          </Link>{" "}
-          to join courses.
-        </div>
-      ) : filteredCourses.length === 0 ? (
+      {courses.length === 0 && (
         <div className="text-center text-2xl text-slate-400 my-80">
           You have not joined any courses yet. Visit the{" "}
           <Link href="/courses" className="italic hover:text-sky-500">
@@ -125,36 +122,7 @@ export default function StudentPage() {
           </Link>{" "}
           to join courses.
         </div>
-      ) : (
-        <div className="grid grid-cols-2 lg:grid-cols-3 gap-8 mt-8">
-          {filteredCourses.map((course) => (
-            <CourseCard key={course.id} _course={course} />
-          ))}
-        </div>
       )}
-      {!showAllCourses &&
-        notFocusesdcourses.length > 0 &&
-        sortBy !== "" &&
-        sortBy !== "title" && (
-          <div className="flex flex-col items-center">
-            <Button onClick={handleButton}>Show All Courses</Button>
-          </div>
-        )}
-      {showAllCourses &&
-        notFocusesdcourses.length > 0 &&
-        sortBy !== "" &&
-        sortBy !== "title" && (
-          <>
-            <div className="flex flex-col items-center">
-              <Button onClick={handleButton}>Hide All Courses</Button>
-            </div>
-            <div className="grid grid-cols-2 lg:grid-cols-3 gap-8 mt-8">
-              {notFocusesdcourses.map((course) => (
-                <CourseCard key={course.id} _course={course} />
-              ))}
-            </div>
-          </>
-        )}
     </main>
   );
 }

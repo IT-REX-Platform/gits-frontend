@@ -165,7 +165,7 @@ export default function NewCourse() {
             type="number"
             value={chapterCount}
             onChange={(e) => setChapterCount(Number(e.target.value) ?? 1)}
-            multiline
+            required
           />
         </>
       ),
@@ -180,6 +180,7 @@ export default function NewCourse() {
             value={startDate}
             maxDate={endDate ?? undefined}
             onChange={setStartDate}
+            slotProps={{ textField: { required: true } }}
           />
           <DatePicker
             label="End date"
@@ -187,6 +188,7 @@ export default function NewCourse() {
             minDate={startDate ?? undefined}
             defaultCalendarMonth={startDate ?? undefined}
             onChange={setEndDate}
+            slotProps={{ textField: { required: true } }}
           />
           <Box sx={{ minWidth: 120, maxWidth: 200 }}>
             <FormControl fullWidth>

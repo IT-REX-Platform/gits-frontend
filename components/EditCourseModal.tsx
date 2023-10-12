@@ -12,13 +12,13 @@ import {
 } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers";
 import dayjs, { Dayjs } from "dayjs";
-import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { graphql, useFragment, useMutation } from "react-relay";
 
-import { EditCourseModalMutation } from "@/__generated__/EditCourseModalMutation.graphql";
-import { EditCourseModalFragment$key } from "@/__generated__/EditCourseModalFragment.graphql";
 import { EditCourseModalDeleteMutation } from "@/__generated__/EditCourseModalDeleteMutation.graphql";
+import { EditCourseModalFragment$key } from "@/__generated__/EditCourseModalFragment.graphql";
+import { EditCourseModalMutation } from "@/__generated__/EditCourseModalMutation.graphql";
 import { Form, FormSection } from "./Form";
 
 export function EditCourseModal({

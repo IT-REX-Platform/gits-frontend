@@ -155,16 +155,17 @@ function Field<T extends object>({
         <DatePicker
           label={field.label}
           value={formik.values[field.key]}
+          // @ts-ignore
           minDate={
-            field.afterOther
-              ? formik.values[field.afterOther] ?? field.minDate
-              : field.minDate
+            (field.afterOther ? formik.values[field.afterOther] : null) ??
+            field.minDate
           }
+          // @ts-ignore
           maxDate={
-            field.beforeOther
-              ? formik.values[field.beforeOther] ?? field.maxDate
-              : field.maxDate
+            (field.beforeOther ? formik.values[field.beforeOther] : null) ??
+            field.maxDate
           }
+          // @ts-ignore
           defaultCalendarMonth={field.defaultMonthDate}
           onChange={(value) => formik.setFieldValue(field.key as string, value)}
           slotProps={{

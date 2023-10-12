@@ -25,7 +25,7 @@ export function RewardScoresHelpButton() {
               <Label className="text-blue-500">Fitness</Label> represents how
               well you repeat old content. It is calculated similarly to the
               health score but only considers content that is due for
-              repitition. It also takes into account the correctness score of
+              repetition. It also takes into account the correctness score of
               each element.
             </Description>
 

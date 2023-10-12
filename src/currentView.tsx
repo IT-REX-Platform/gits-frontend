@@ -38,13 +38,16 @@ export function PageViewProvider({ children }: { children: React.ReactNode }) {
           ? PageView.Lecturer
           : PageView.Student;
 
+      const storedRoleRaw = window.localStorage.getItem("current_pageview");
+      const storedRole =
+        storedRoleRaw === PageView.Lecturer
+          ? PageView.Lecturer
+          : storedRoleRaw === PageView.Student
+          ? PageView.Student
+          : defaultRole;
+
       setPageView(
-        window.localStorage.getItem("current_pageview")
-          ? window.localStorage.getItem("current_pageview") ===
-            PageView.Lecturer
-            ? PageView.Lecturer
-            : PageView.Student
-          : defaultRole
+        defaultRole !== PageView.Student ? storedRole : PageView.Student
       );
     } else if (pageView) {
       window.localStorage.setItem(

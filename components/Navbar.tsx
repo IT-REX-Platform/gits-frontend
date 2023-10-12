@@ -219,8 +219,9 @@ export function Navbar() {
     .filter((x) => x.course.published || pageView === PageView.Lecturer)
     .filter(
       (x) =>
-        dayjs(x.course.endDate) >= dayjs() &&
-        dayjs(x.course.startDate) <= dayjs()
+        (dayjs(x.course.endDate) >= dayjs() &&
+          dayjs(x.course.startDate) <= dayjs()) ||
+        pageView === PageView.Lecturer
     );
   return (
     <NavbarBase _isTutor={currentUserInfo}>

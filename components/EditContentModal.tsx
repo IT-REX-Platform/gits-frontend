@@ -59,6 +59,7 @@ export function EditContentModal({
       fragment EditContentModalFragment on Chapter {
         ...AddFlashcardSetModalFragment
         sections {
+          id
           stages {
             id
             optionalContents {

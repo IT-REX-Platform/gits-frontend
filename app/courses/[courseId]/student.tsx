@@ -102,8 +102,8 @@ export default function StudentCoursePage() {
   );
 
   const [leave] = useMutation<studentCourseLeaveMutation>(graphql`
-    mutation studentCourseLeaveMutation($input: CourseMembershipInput!) {
-      deleteMembership(input: $input) {
+    mutation studentCourseLeaveMutation($courseId: UUID!) {
+      leaveCourse(courseId: $courseId) {
         courseId
         role
       }
@@ -158,7 +158,7 @@ export default function StudentCoursePage() {
             ) {
               leave({
                 variables: {
-                  input: { courseId: id, role: "STUDENT", userId },
+                  courseId: id,
                 },
                 onError: setError,
 

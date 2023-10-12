@@ -211,9 +211,7 @@ export function Navbar() {
   );
 
   const filtered = currentUserInfo.courseMemberships
-    .filter(
-      (x) => ["ADMINISTRATOR", "TUTOR"].includes(x.role) || PageView.Student
-    )
+    .filter((x) => ["ADMINISTRATOR", "TUTOR"].includes(x.role))
     .filter((x) => x.course.published || pageView === PageView.Lecturer)
     .filter(
       (x) =>

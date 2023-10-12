@@ -65,8 +65,9 @@ export function MultipleChoiceQuestionModal({
     [data.answers]
   );
   const atLeastTwoAnswers = data.answers.length >= 2;
-  const allAnswersFilled = data.answers.every(
-    (x) => !!serializeToText(x.answerText)
+  const allAnswersFilled = useMemo(
+    () => data.answers.every((x) => !!serializeToText(x.answerText)),
+    [data.answers]
   );
 
   const valid =

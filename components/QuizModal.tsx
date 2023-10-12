@@ -138,6 +138,12 @@ export function QuizModal({
       mutateContent(contentId: $contentId) {
         updateAssessment(input: $assessmentInput) {
           ...ContentLinkFragment
+          metadata {
+            name
+            rewardPoints
+            suggestedDate
+            tagNames
+          }
         }
       }
       mutateQuiz(assessmentId: $assessmentId) {

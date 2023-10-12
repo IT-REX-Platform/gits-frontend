@@ -109,19 +109,20 @@ export function ClozeQuestionModal({
   };
 
   const atLeastOneTextElement = useMemo(
-    () =>
-      data.clozeElements.filter(
-        (e) => e.type === "text" && serializeToText(e.text)
-      ).length > 0,
-    [data]
+    () => data.clozeElements.filter((e) => e.type === "text").length > 0,
+    [data.clozeElements]
   );
   const atLeastOneBlankElement = useMemo(
     () => data.clozeElements.filter((e) => e.type === "blank").length > 0,
-    [data]
+    [data.clozeElements]
   );
 
-  const allElementsFilled = data.clozeElements.every((x) =>
-    x.type == "blank" ? x.correctAnswer : serializeToText(x.text)
+  const allElementsFilled = useMemo(
+    () =>
+      data.clozeElements.every((x) =>
+        x.type == "blank" ? x.correctAnswer : serializeToText(x.text)
+      ),
+    [data.clozeElements]
   );
   const valid =
     atLeastOneTextElement && atLeastOneBlankElement && allElementsFilled;

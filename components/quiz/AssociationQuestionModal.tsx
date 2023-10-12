@@ -83,8 +83,12 @@ export function AssociationQuestionModal({
 
   const hasTitle = !!serializeToText(data.text);
 
-  const allItemsFilled = data.correctAssociations.every(
-    (x) => serializeToText(x.left) && serializeToText(x.right)
+  const allItemsFilled = useMemo(
+    () =>
+      data.correctAssociations.every(
+        (x) => serializeToText(x.left) && serializeToText(x.right)
+      ),
+    [data.correctAssociations]
   );
 
   const valid = hasTitle && atLeastTwoItems && allItemsFilled;

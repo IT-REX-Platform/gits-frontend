@@ -1,47 +1,28 @@
 import { lecturerAddFlashcardMutation } from "@/__generated__/lecturerAddFlashcardMutation.graphql";
 import { lecturerDeleteFlashcardContentMutation } from "@/__generated__/lecturerDeleteFlashcardContentMutation.graphql";
 import { lecturerDeleteFlashcardMutation } from "@/__generated__/lecturerDeleteFlashcardMutation.graphql";
-import { lecturerEditFlashcardFragment$key } from "@/__generated__/lecturerEditFlashcardFragment.graphql";
-import { lecturerEditFlashcardMutation } from "@/__generated__/lecturerEditFlashcardMutation.graphql";
 import { lecturerEditFlashcardSetMutation } from "@/__generated__/lecturerEditFlashcardSetMutation.graphql";
 import { lecturerEditFlashcardsQuery } from "@/__generated__/lecturerEditFlashcardsQuery.graphql";
 import { AssessmentMetadataPayload } from "@/components/AssessmentMetadataFormSection";
 import { ContentMetadataPayload } from "@/components/ContentMetadataFormSection";
 import { ContentTags } from "@/components/ContentTags";
 import { EditFlashcardSetModal } from "@/components/EditFlashcardSetModal";
-import { Form, FormSection } from "@/components/Form";
 import { Heading } from "@/components/Heading";
 import { PageError } from "@/components/PageError";
-import { Add, Delete, Edit, Help, QuestionAnswer } from "@mui/icons-material";
-import ClearIcon from "@mui/icons-material/Clear";
-import {
-  Alert,
-  Backdrop,
-  Button,
-  Card,
-  CardContent,
-  CardHeader,
-  Checkbox,
-  CircularProgress,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  FormControlLabel,
-  FormGroup,
-  IconButton,
-  TextField,
-  Tooltip,
-  Typography,
-} from "@mui/material";
+import { Flashcard } from "@/components/flashcard/LecturerEditFlashcard";
+import { LocalFlashcard } from "@/components/flashcard/LocalFlashcard";
+import { Add, Delete, Edit } from "@mui/icons-material";
+import { Alert, Backdrop, Button, CircularProgress } from "@mui/material";
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import {
-  graphql,
-  useFragment,
-  useLazyLoadQuery,
-  useMutation,
-} from "react-relay";
+import { useState } from "react";
+import { graphql, useLazyLoadQuery, useMutation } from "react-relay";
+
+type FlashcardSideData = {
+  label: string;
+  text: string;
+  isQuestion: boolean;
+  isAnswer: boolean;
+};
 
 export default function LecturerFlashcards() {
   const { flashcardSetId, courseId } = useParams();
@@ -72,7 +53,7 @@ export default function LecturerFlashcards() {
               __id
               flashcards {
                 id
-                ...lecturerEditFlashcardFragment
+                ...LecturerEditFlashcardFragment
               }
             }
           }
@@ -97,7 +78,7 @@ export default function LecturerFlashcards() {
           createFlashcard(input: $flashcard) {
             __id
             id
-            ...lecturerEditFlashcardFragment
+            ...LecturerEditFlashcardFragment
           }
         }
       }
@@ -332,379 +313,5 @@ export default function LecturerFlashcards() {
         />
       )}
     </main>
-  );
-}
-
-function Flashcard({
-  title,
-  onError,
-  _flashcard,
-  _assessmentId,
-}: {
-  title: string;
-  onError: (error: any) => void;
-  _flashcard: lecturerEditFlashcardFragment$key;
-  _assessmentId: string;
-}) {
-  const flashcard = useFragment(
-    graphql`
-      fragment lecturerEditFlashcardFragment on Flashcard {
-        id
-        sides {
-          label
-          text
-          isQuestion
-          isAnswer
-        }
-      }
-    `,
-    _flashcard
-  );
-
-  const [addSideOpen, setAddSideOpen] = useState(false);
-  const [updateFlashcard, isUpdating] =
-    useMutation<lecturerEditFlashcardMutation>(graphql`
-      mutation lecturerEditFlashcardMutation(
-        $flashcard: UpdateFlashcardInput!
-        $assessmentId: UUID!
-      ) {
-        mutateFlashcardSet(assessmentId: $assessmentId) {
-          updateFlashcard(input: $flashcard) {
-            ...lecturerEditFlashcardFragment
-          }
-        }
-      }
-    `);
-
-  function handleEditFlashcardSide(idx: number, editedSide: FlashcardSideData) {
-    const newFlashcard = {
-      id: flashcard.id,
-      sides: flashcard.sides.map((side, i) => {
-        const { label, text, isQuestion, isAnswer } =
-          i == idx ? editedSide : side;
-        return { label, text, isQuestion, isAnswer };
-      }),
-    };
-
-    updateFlashcard({
-      variables: { assessmentId: _assessmentId, flashcard: newFlashcard },
-      onError,
-    });
-  }
-
-  function handleDeleteFlashcardSide(idx: number) {
-    const newFlashcard = {
-      id: flashcard.id,
-      sides: flashcard.sides.filter((_, i) => i != idx),
-    };
-
-    updateFlashcard({
-      variables: { assessmentId: _assessmentId, flashcard: newFlashcard },
-      onError,
-    });
-  }
-
-  function handleAddSideSubmit(newSide: FlashcardSideData) {
-    const newFlashcard = {
-      id: flashcard.id,
-      sides: [
-        ...flashcard.sides.map(({ label, text, isQuestion, isAnswer }) => ({
-          label,
-          text,
-          isQuestion,
-          isAnswer,
-        })),
-        newSide,
-      ],
-    };
-
-    updateFlashcard({
-      variables: { assessmentId: _assessmentId, flashcard: newFlashcard },
-      onError,
-      onCompleted() {
-        setAddSideOpen(false);
-      },
-    });
-  }
-
-  return (
-    <>
-      <div>
-        <Typography variant="overline" color="textSecondary">
-          {title}
-        </Typography>
-        <div className="flex flex-wrap gap-2">
-          {flashcard.sides.map((side, i) => (
-            <div key={i} className="flex items-center">
-              <FlashcardSide
-                key={`${flashcard.id}-${i}`}
-                side={side}
-                onChange={(data) => handleEditFlashcardSide(i, data)}
-              />
-              <IconButton onClick={() => handleDeleteFlashcardSide(i)}>
-                <ClearIcon />
-              </IconButton>
-            </div>
-          ))}
-        </div>
-        <Button
-          sx={{ marginTop: 1 }}
-          startIcon={<Add />}
-          onClick={() => setAddSideOpen(true)}
-        >
-          Add side
-        </Button>
-      </div>
-      <Backdrop open={isUpdating} sx={{ zIndex: "modal" }}>
-        <CircularProgress />
-      </Backdrop>
-      {addSideOpen && (
-        <EditSideModal
-          onClose={() => setAddSideOpen(false)}
-          onSubmit={handleAddSideSubmit}
-        />
-      )}
-    </>
-  );
-}
-
-function FlashcardSide({
-  side,
-  onChange,
-}: {
-  onChange: (side: FlashcardSideData) => void;
-  side: FlashcardSideData;
-}) {
-  const [edit, setEdit] = useState(false);
-
-  function handleEditSubmit(data: FlashcardSideData) {
-    setEdit(false);
-    onChange(data);
-  }
-
-  return (
-    <>
-      <Card variant="outlined" className="min-w-[20rem] max-w-[30%]">
-        <CardHeader
-          title={side.label}
-          avatar={
-            side.isQuestion ? (
-              <Help fontSize="large" sx={{ color: "grey.400" }} />
-            ) : (
-              <QuestionAnswer fontSize="large" sx={{ color: "grey.400" }} />
-            )
-          }
-          action={
-            <IconButton onClick={() => setEdit(true)}>
-              <Edit fontSize="small" />
-            </IconButton>
-          }
-          classes={{
-            action: "!my-0",
-          }}
-        />
-        <CardContent>
-          <Typography variant="body2" color="textSecondary">
-            {side.text}
-          </Typography>
-        </CardContent>
-      </Card>
-      {edit && (
-        <EditSideModal
-          onClose={() => setEdit(false)}
-          onSubmit={handleEditSubmit}
-          side={side}
-        />
-      )}
-    </>
-  );
-}
-
-type FlashcardSideData = {
-  label: string;
-  text: string;
-  isQuestion: boolean;
-  isAnswer: boolean;
-};
-
-function EditSideModal({
-  onClose,
-  onSubmit,
-  side,
-}: {
-  onClose: () => void;
-  onSubmit: (side: FlashcardSideData) => void;
-  side?: FlashcardSideData;
-}) {
-  const [label, setLabel] = useState(side?.label ?? "");
-  // Initialize the text state with an empty object of type FlashcardSideDataMarkdown
-  const [text, setText] = useState(side?.text ?? "");
-  const [isQuestion, setIsQuestion] = useState(side?.isQuestion ?? false);
-  const [isAnswer, setIsAnswer] = useState(side?.isAnswer ?? false);
-  const [labelOverride, setLabelOverride] = useState(false);
-
-  const valid =
-    label.trim() != "" && text.trim() != "" && (isQuestion || isAnswer);
-
-  useEffect(() => {
-    // Do not change the label once it has been manually edited, reset when label empty
-    if (labelOverride && label === "") {
-      setLabelOverride(false);
-    } else if (labelOverride) {
-      return;
-    }
-    if (!["", "Question", "Answer"].includes(label)) {
-      setLabelOverride(true);
-      return;
-    }
-
-    // Auto-populate label
-    if (isQuestion && !isAnswer && label !== "Question") {
-      setLabel("Question");
-    } else if (!isQuestion && isAnswer && label !== "Answer") {
-      setLabel("Answer");
-    } else if (isQuestion === isAnswer) {
-      setLabel("");
-    }
-  }, [isQuestion, isAnswer, label, labelOverride]);
-
-  return (
-    <Dialog maxWidth="md" open onClose={onClose}>
-      <DialogTitle>{side ? "Edit" : "Add"} flashcard side</DialogTitle>
-      <DialogContent>
-        <Form>
-          <FormSection title="General">
-            <FormGroup row>
-              <FormControlLabel
-                label="Question"
-                control={
-                  <Checkbox
-                    checked={isQuestion}
-                    onChange={(e) => setIsQuestion(e.target.checked)}
-                  />
-                }
-              />
-              <FormControlLabel
-                label="Answer"
-                control={
-                  <Checkbox
-                    checked={isAnswer}
-                    onChange={(e) => setIsAnswer(e.target.checked)}
-                  />
-                }
-              />
-            </FormGroup>
-            <TextField
-              className="w-96"
-              label="Label"
-              variant="outlined"
-              value={label}
-              error={side && label.trim() == ""}
-              onChange={(e) => setLabel(e.target.value)}
-              required
-            />
-            <TextField
-              className="w-96"
-              label="Text"
-              variant="outlined"
-              value={text} // Access the 'text' property of the 'text' state
-              error={side && text.trim() == ""}
-              onChange={(e) => setText(e.target.value)}
-              multiline
-              required
-            />
-          </FormSection>
-        </Form>
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={onClose}>Cancel</Button>
-        <Button
-          disabled={!valid}
-          onClick={() => onSubmit({ label, text, isQuestion, isAnswer })}
-        >
-          Save
-        </Button>
-      </DialogActions>
-    </Dialog>
-  );
-}
-
-function LocalFlashcard({
-  onClose,
-  onSubmit,
-}: {
-  onClose: () => void;
-  onSubmit: (sides: FlashcardSideData[]) => void;
-}) {
-  const [sides, setSides] = useState<FlashcardSideData[]>([]);
-  const [addSideOpen, setAddSideOpen] = useState(false);
-
-  const numQuestions = sides.filter((s) => s.isQuestion).length;
-  const numAnswers = sides.filter((s) => s.isAnswer).length;
-  const valid = numQuestions >= 1 && numAnswers >= 1;
-
-  function handleEditFlashcardSide(idx: number, data: FlashcardSideData) {
-    setSides((sides) => sides.map((side, i) => (i == idx ? data : side)));
-  }
-
-  function handleAddSideSubmit(data: FlashcardSideData) {
-    setSides((sides) => [...sides, data]);
-    setAddSideOpen(false);
-  }
-
-  const saveButton = (
-    <span>
-      <Button
-        variant="contained"
-        disabled={!valid}
-        onClick={() => onSubmit(sides)}
-      >
-        Save
-      </Button>
-    </span>
-  );
-
-  return (
-    <div className="pt-4 pb-6 -mx-8 px-8 bg-gray-50">
-      <Typography variant="overline" color="textSecondary">
-        New flashcard (not saved)
-      </Typography>
-      <div className="flex flex-wrap gap-2">
-        {sides.map((side, i) => (
-          <FlashcardSide
-            key={`add-flashcard-${i}`}
-            side={side}
-            onChange={(data) => handleEditFlashcardSide(i, data)}
-          />
-        ))}
-      </div>
-      <Button
-        startIcon={<Add />}
-        sx={{ marginTop: 1 }}
-        onClick={() => setAddSideOpen(true)}
-      >
-        Add side
-      </Button>
-      <div className="mt-4 flex gap-2">
-        {numQuestions < 1 ? (
-          <Tooltip title="At least one question side is required to save">
-            {saveButton}
-          </Tooltip>
-        ) : numAnswers < 1 ? (
-          <Tooltip title="At least one answer side is required to save">
-            {saveButton}
-          </Tooltip>
-        ) : (
-          saveButton
-        )}
-        <Button onClick={onClose}>Cancel</Button>
-      </div>
-      {addSideOpen && (
-        <EditSideModal
-          onClose={() => setAddSideOpen(false)}
-          onSubmit={handleAddSideSubmit}
-        />
-      )}
-    </div>
   );
 }

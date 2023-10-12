@@ -76,6 +76,12 @@ export function MultipleChoiceQuestionModal({
     !!serializeToText(data.text) &&
     allAnswersFilled;
 
+  useEffect(() => {
+    if (!open) {
+      setData(initialValue);
+    }
+  }, [open, initialValue]);
+
   return (
     <Dialog open={open} maxWidth="lg" onClose={onClose}>
       <DialogTitle>{title}</DialogTitle>
@@ -212,4 +218,10 @@ export function MultipleChoiceQuestionModal({
       </DialogActions>
     </Dialog>
   );
+}
+function useEffect(
+  arg0: () => void,
+  arg1: (boolean | MultipleChoiceQuestionData)[]
+) {
+  throw new Error("Function not implemented.");
 }

@@ -6,12 +6,14 @@ export type ChapterData = {
   title: string;
   description: string;
   startDate: Dayjs | null;
-  endDate: Dayjs | null;
   suggestedStartDate: Dayjs | null;
   suggestedEndDate: Dayjs | null;
 };
 
-export const dialogSections: SectionOptions<ChapterData>[] = [
+export const dialogSections: (
+  courseStart: Dayjs,
+  courseEnd: Dayjs
+) => SectionOptions<ChapterData>[] = (courseStart, courseEnd) => [
   {
     label: "General",
     fields: [
@@ -31,22 +33,17 @@ export const dialogSections: SectionOptions<ChapterData>[] = [
     ],
   },
   {
-    label: "Start and end",
-    subtitle: "The chapter will be hidden before and after this date",
+    label: "Visible after",
+    subtitle: "The chapter will be hidden before this date",
     fields: [
       {
         key: "startDate",
         label: "Start date",
         type: "date",
         required: true,
-        beforeOther: "endDate",
-      },
-      {
-        key: "endDate",
-        label: "End date",
-        type: "date",
-        required: true,
-        afterOther: "startDate",
+        minDate: courseStart,
+        maxDate: courseEnd,
+        defaultMonthDate: courseStart,
       },
     ],
   },
@@ -63,6 +60,9 @@ export const dialogSections: SectionOptions<ChapterData>[] = [
         required: true,
         beforeOther: "suggestedEndDate",
         afterOther: "startDate",
+        minDate: courseStart,
+        maxDate: courseEnd,
+        defaultMonthDate: courseStart,
       },
       {
         key: "suggestedEndDate",
@@ -70,30 +70,38 @@ export const dialogSections: SectionOptions<ChapterData>[] = [
         type: "date",
         required: true,
         afterOther: "suggestedStartDate",
-        beforeOther: "endDate",
+        minDate: courseStart,
+        maxDate: courseEnd,
+        defaultMonthDate: courseStart,
       },
     ],
   },
 ];
 
 export const validationSchema: (
-  predecessorStart?: string
-) => yup.ObjectSchema<ChapterData> = (predecessorStart) =>
+  courseStart: string,
+  courseEnd: string
+) => yup.ObjectSchema<ChapterData> = (courseStart, courseEnd) =>
   // @ts-ignore
   yup.object({
     title: yup.string().required("Required"),
-    description: yup.string().required("Required"),
-    startDate:
-      predecessorStart != null
-        ? yup
-            .date()
-            .required("Required")
-            .min(
-              predecessorStart,
-              "Chapter can't start before it's predecessor"
-            )
-        : yup.date().required("Required"),
-    endDate: yup.date().required("Required"),
-    suggestedStartDate: yup.date().required("Required"),
-    suggestedEndDate: yup.date().required("Required"),
+    description: yup.string().optional(),
+    startDate: yup
+      .date()
+      .required("Required")
+      .min(courseStart, "Must be after the course start date")
+      .max(courseEnd, "Must be before the course end date"),
+    suggestedStartDate: yup
+      .date()
+      .required("Required")
+      .min(yup.ref("startDate"), "Must be after the start date")
+      .max(courseEnd, "Must be before the end date"),
+    suggestedEndDate: yup
+      .date()
+      .required("Required")
+      .min(
+        yup.ref("suggestedStartDate"),
+        "Must be after the suggested start date"
+      )
+      .max(courseEnd, "Must be before the chapter end date"),
   });

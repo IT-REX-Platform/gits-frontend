@@ -33,8 +33,8 @@ export function PageViewProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (typeof window !== "undefined" && !pageView) {
       const defaultRole =
-        currentUserInfo.realmRoles.includes("super-user") ||
-        currentUserInfo.realmRoles.includes("course-creator")
+        currentUserInfo.realmRoles.includes("SUPER_USER") ||
+        currentUserInfo.realmRoles.includes("COURSE_CREATOR")
           ? PageView.Lecturer
           : PageView.Student;
 

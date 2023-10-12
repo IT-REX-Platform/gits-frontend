@@ -22,7 +22,7 @@ import { Stage } from "@/components/Stage";
 import { Add, Settings } from "@mui/icons-material";
 import { orderBy } from "lodash";
 import { useState } from "react";
-import { AddContentModal } from "../../../components/AddContentModal";
+import { EditContentModal } from "@/components/EditContentModal";
 import { OtherContent } from "@/components/OtherContent";
 
 graphql`
@@ -75,7 +75,7 @@ graphql`
         __id
         ...EditChapterButtonFragment
         ...AddFlashcardSetModalFragment
-        ...AddContentModalFragment
+        ...EditContentModalFragment
         ...ChapterHeaderFragment
         ...OtherContentFragment
         id
@@ -204,7 +204,7 @@ export default function LecturerCoursePage() {
                           />
                         ))}
                         <div className="mt-4 flex flex-col items-start">
-                          <AddContentModal
+                          <EditContentModal
                             sectionId={section.id}
                             courseId={course.id}
                             stageId={stage.id}

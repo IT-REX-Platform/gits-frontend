@@ -13,10 +13,12 @@ export type FlashcardData = {
 
 export function StudentFlashcardSet({
   flashcards,
+  emptyMessage,
   onError = () => {},
   onComplete = () => {},
 }: {
   flashcards: FlashcardData[];
+  emptyMessage: string;
   onError?: (error: any) => void;
   onComplete?: () => void;
 }) {
@@ -35,7 +37,7 @@ export function StudentFlashcardSet({
     `);
 
   if (flashcards.length === 0) {
-    return <DisplayError message="Empty flashcard set." />;
+    return <DisplayError message={emptyMessage} />;
   }
 
   const currentFlashcard = flashcards[currentIndex];

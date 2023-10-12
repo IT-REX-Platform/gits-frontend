@@ -111,6 +111,7 @@ export default function LecturerCoursePage() {
           ...MediaRecordSelector
 
           currentUserInfo {
+            realmRoles
             courseMemberships {
               role
               course {

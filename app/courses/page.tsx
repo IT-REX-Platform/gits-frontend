@@ -277,11 +277,11 @@ export default function StudentCourseList() {
                 lecturer={courseIdsAlreadyJoinedAsLecturer.includes(course.id)}
                 action={
                   notAlreadyJoined &&
-                  (!hasStarted ? (
+                  (!hasStarted && pageView === PageView.Student ? (
                     <div className="text-gray-400">
                       Course has not started yet
                     </div>
-                  ) : hasEnded ? (
+                  ) : hasEnded && pageView === PageView.Student ? (
                     <div className="text-gray-400">
                       Course has already ended
                     </div>

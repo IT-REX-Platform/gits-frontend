@@ -16,7 +16,7 @@ export function AddSectionButton({ chapterId }: { chapterId: string }) {
       createSection(input: $input) {
         id
         ...StudentSectionFragment
-        ...lecturerSectionFragment
+        ...LecturerSectionFragment
       }
     }
   `);

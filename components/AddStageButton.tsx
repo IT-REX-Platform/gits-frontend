@@ -11,7 +11,7 @@ export function AddStageButton({ sectionId }: { sectionId: string }) {
         createStage(input: { requiredContents: [], optionalContents: [] }) {
           id
           ...StudentStageFragment
-          ...lecturerStageFragment
+          ...LecturerSectionStageFragment
         }
       }
     }

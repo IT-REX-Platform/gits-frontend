@@ -7,6 +7,8 @@
     "build": "relay-compiler && next build",
     "start": "next start",
     "lint": "next lint && tsc --noEmit",
+    "lint:eslint": "next lint",
+    "lint:ts": "tsc --noEmit",
     "relay": "relay-compiler",
     "format": "prettier --write .",
     "check-format": "prettier --check .",

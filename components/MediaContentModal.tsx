@@ -72,9 +72,9 @@ export function MediaContentModal({
   const [metadata, setMetadata] = useState<ContentMetadataPayload | null>(
     existingContent?.metadata ?? null
   );
-  const [selectedRecords, setSelectedRecords] = useState(
-    existingContent?.mediaRecords ?? []
-  );
+  const [selectedRecords, setSelectedRecords] = useState([
+    ...(existingContent?.mediaRecords ?? []),
+  ]);
 
   const [error, setError] = useState<any>(null);
 
@@ -225,7 +225,7 @@ export function MediaContentModal({
               onClose={() => setRecordSelectorOpen(false)}
               mode="multiple"
               _mediaRecords={_mediaRecords}
-              selectedRecords={selectedRecords}
+              selectedRecords={[...selectedRecords]}
               setSelectedRecords={setSelectedRecords}
             />
 

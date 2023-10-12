@@ -5,94 +5,37 @@ directive @specifiedBy(
 ) on SCALAR
 
 #  see also https://github.com/graphql-java/graphql-java-extended-validation/blob/master/README.md
-directive @DecimalMax(
-  value: String!
-  inclusive: Boolean! = true
-  message: String = "graphql.validation.DecimalMax.message"
-) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+directive @DecimalMax(value: String!, inclusive: Boolean! = true, message: String = "graphql.validation.DecimalMax.message") on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
 
-directive @DecimalMin(
-  value: String!
-  inclusive: Boolean! = true
-  message: String = "graphql.validation.DecimalMin.message"
-) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+directive @DecimalMin(value: String!, inclusive: Boolean! = true, message: String = "graphql.validation.DecimalMin.message") on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
 
-directive @Max(
-  value: Int! = 2147483647
-  message: String = "graphql.validation.Max.message"
-) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+directive @Max(value: Int! = 2147483647, message: String = "graphql.validation.Max.message") on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
 
-directive @Min(
-  value: Int! = 0
-  message: String = "graphql.validation.Min.message"
-) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+directive @Min(value: Int! = 0, message: String = "graphql.validation.Min.message") on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
 
-directive @Negative(
-  message: String = "graphql.validation.Negative.message"
-) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+directive @Negative(message: String = "graphql.validation.Negative.message") on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
 
-directive @NegativeOrZero(
-  message: String = "graphql.validation.NegativeOrZero.message"
-) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+directive @NegativeOrZero(message: String = "graphql.validation.NegativeOrZero.message") on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
 
-directive @NotBlank(
-  message: String = "graphql.validation.NotBlank.message"
-) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+directive @NotBlank(message: String = "graphql.validation.NotBlank.message") on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
 
-directive @NotEmpty(
-  message: String = "graphql.validation.NotEmpty.message"
-) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+directive @NotEmpty(message: String = "graphql.validation.NotEmpty.message") on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
 
-directive @ContainerNotEmpty(
-  message: String = "graphql.validation.ContainerNotEmpty.message"
-) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+directive @ContainerNotEmpty(message: String = "graphql.validation.ContainerNotEmpty.message") on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
 
-directive @Pattern(
-  regexp: String! = ".*"
-  message: String = "graphql.validation.Pattern.message"
-) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+directive @Pattern(regexp: String! = ".*", message: String = "graphql.validation.Pattern.message") on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
 
-directive @Positive(
-  message: String = "graphql.validation.Positive.message"
-) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+directive @Positive(message: String = "graphql.validation.Positive.message") on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
 
-directive @PositiveOrZero(
-  message: String = "graphql.validation.PositiveOrZero.message"
-) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+directive @PositiveOrZero(message: String = "graphql.validation.PositiveOrZero.message") on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
 
-directive @Range(
-  min: Int = 0
-  max: Int = 2147483647
-  message: String = "graphql.validation.Range.message"
-) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+directive @Range(min: Int = 0, max: Int = 2147483647, message: String = "graphql.validation.Range.message") on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
 
-directive @Size(
-  min: Int = 0
-  max: Int = 2147483647
-  message: String = "graphql.validation.Size.message"
-) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+directive @Size(min: Int = 0, max: Int = 2147483647, message: String = "graphql.validation.Size.message") on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
 
-directive @ContainerSize(
-  min: Int = 0
-  max: Int = 2147483647
-  message: String = "graphql.validation.ContainerSize.message"
-) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+directive @ContainerSize(min: Int = 0, max: Int = 2147483647, message: String = "graphql.validation.ContainerSize.message") on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
 
-directive @resolveTo(
-  requiredSelectionSet: String
-  sourceName: String!
-  sourceTypeName: String!
-  sourceFieldName: String!
-  sourceSelectionSet: String
-  sourceArgs: ResolveToSourceArgs
-  keyField: String
-  keysArg: String
-  pubsubTopic: String
-  filterBy: String
-  additionalArgs: ResolveToSourceArgs
-  result: String
-  resultType: String
-) on FIELD_DEFINITION
+directive @resolveTo(requiredSelectionSet: String, sourceName: String!, sourceTypeName: String!, sourceFieldName: String!, sourceSelectionSet: String, sourceArgs: ResolveToSourceArgs, keyField: String, keysArg: String, pubsubTopic: String, filterBy: String, additionalArgs: ResolveToSourceArgs, result: String, resultType: String) on FIELD_DEFINITION
 
 interface Assessment {
   # Assessment metadata
@@ -1128,8 +1071,7 @@ type Mutation {
   #
   # The purpose of this mutation is to allow testing of the reward score and demonstrate the functionality.
   # 🔒 The user be an admin in the course with the given courseId to perform this action.
-  recalculateScores(courseId: UUID!, userId: UUID!): RewardScores!
-    @deprecated(reason: "Only for testing purposes. Will be removed.")
+  recalculateScores(courseId: UUID!, userId: UUID!): RewardScores! @deprecated(reason: "Only for testing purposes. Will be removed.")
 
   # ONLY FOR TESTING PURPOSES. DO NOT USE IN FRONTEND. WILL BE REMOVED.
   #
@@ -1138,16 +1080,7 @@ type Mutation {
   #
   # The purpose of this mutation is to allow testing of the skill level score and demonstrate the functionality.
   # 🔒 The user must be a super-user, otherwise an exception is thrown.
-  recalculateLevels(chapterId: UUID!, userId: UUID!): SkillLevels!
-    @deprecated(reason: "Only for testing purposes. Will be removed.")
-
-  # Modify Content
-  # 🔒 The user must have admin access to the course containing the section to perform this action.
-  mutateContent(contentId: UUID!): ContentMutation!
-
-  # Modify the section with the given id.
-  # 🔒 The user must have admin access to the course containing the section to perform this action.
-  mutateSection(sectionId: UUID!): SectionMutation!
+  recalculateLevels(chapterId: UUID!, userId: UUID!): SkillLevels! @deprecated(reason: "Only for testing purposes. Will be removed.")
 
   # Creates a new media record
   # 🔒 The user must have the "course-creator" role to perform this action.
@@ -1165,10 +1098,7 @@ type Mutation {
   # For a given MediaContent, sets the linked media records of it to the ones with the given UUIDs.
   # This means that for the content, all already linked media records are removed and replaced by the given ones.
   # 🔒 If the mediaRecord is associated with courses the user must be an administrator of at least one of the courses.
-  setLinkedMediaRecordsForContent(
-    contentId: UUID!
-    mediaRecordIds: [UUID!]!
-  ): [MediaRecord!]!
+  setLinkedMediaRecordsForContent(contentId: UUID!, mediaRecordIds: [UUID!]!): [MediaRecord!]!
 
   # Logs that a media has been worked on by the current user.
   # See https://gits-enpro.readthedocs.io/en/latest/dev-manuals/gamification/userProgress.html
@@ -1181,10 +1111,7 @@ type Mutation {
 
   # Add the MediaRecords with the given UUIDS to the Course with the given UUID.
   # 🔒 If the mediaRecord is associated with courses the user must be an administrator of at least one of the courses.
-  setMediaRecordsForCourse(
-    courseId: UUID!
-    mediaRecordIds: [UUID!]!
-  ): [MediaRecord!]!
+  setMediaRecordsForCourse(courseId: UUID!, mediaRecordIds: [UUID!]!): [MediaRecord!]!
 
   # Creates a new course with the given input and returns the created course.
   createCourse(input: CreateCourseInput!): Course!
@@ -1227,12 +1154,17 @@ type Mutation {
   # 🔒 The calling user must be an admin in this course to perform this action.
   deleteMembership(input: CourseMembershipInput!): CourseMembership!
 
+  # Modify Content
+  # 🔒 The user must have admin access to the course containing the section to perform this action.
+  mutateContent(contentId: UUID!): ContentMutation!
+
+  # Modify the section with the given id.
+  # 🔒 The user must have admin access to the course containing the section to perform this action.
+  mutateSection(sectionId: UUID!): SectionMutation!
+
   # Deletes a flashcard set. Throws an error if the flashcard set does not exist.
   # The contained flashcards are deleted as well.
-  deleteFlashcardSet(input: UUID!): UUID!
-    @deprecated(
-      reason: "Only for development, will be removed in production. Use deleteAssessment in contents service instead."
-    )
+  deleteFlashcardSet(input: UUID!): UUID! @deprecated(reason: "Only for development, will be removed in production. Use deleteAssessment in contents service instead.")
 
   # Modify a flashcard set.
   # 🔒 The user must be an admin the course the flashcard set is in to perform this action.
@@ -1240,41 +1172,27 @@ type Mutation {
 
   # Logs that a user has learned a flashcard.
   # 🔒 The user must be enrolled in the course the flashcard set is in to perform this action.
-  logFlashcardLearned(
-    input: LogFlashcardLearnedInput!
-  ): FlashcardLearnedFeedback!
+  logFlashcardLearned(input: LogFlashcardLearnedInput!): FlashcardLearnedFeedback!
 
   # Modify a quiz.
   # 🔒 The user must be an admin the course the quiz is in to perform this action.
   mutateQuiz(assessmentId: UUID!): QuizMutation!
 
   # Delete a quiz.
-  deleteQuiz(assessmentId: UUID!): UUID!
-    @deprecated(
-      reason: "Only use if you specifically only want to delete the quiz and not the whole assessment. Otherwise, use deleteAssessment in contents service instead."
-    )
+  deleteQuiz(assessmentId: UUID!): UUID! @deprecated(reason: "Only use if you specifically only want to delete the quiz and not the whole assessment. Otherwise, use deleteAssessment in contents service instead.")
 
   # Log that a multiple choice quiz is completed.
   # 🔒 The user must be enrolled in the course the quiz is in to perform this action.
   logQuizCompleted(input: QuizCompletedInput!): QuizCompletionFeedback!
 
   # Creates a new media content and links the given media records to it.
-  createMediaContentAndLinkRecords(
-    contentInput: CreateMediaContentInput!
-    mediaRecordIds: [UUID!]!
-  ): MediaContent!
+  createMediaContentAndLinkRecords(contentInput: CreateMediaContentInput!, mediaRecordIds: [UUID!]!): MediaContent!
 
   # Creates a new quiz assessment and a new, linked quiz with the given properties.
-  createQuizAssessment(
-    assessmentInput: CreateAssessmentInput!
-    quizInput: CreateQuizInput!
-  ): QuizAssessment!
+  createQuizAssessment(assessmentInput: CreateAssessmentInput!, quizInput: CreateQuizInput!): QuizAssessment!
 
   # Creates a new flashcard set assessment and a new, linked flashcard set with the given properties.
-  createFlashcardSetAssessment(
-    assessmentInput: CreateAssessmentInput!
-    flashcardSetInput: CreateFlashcardSetInput!
-  ): FlashcardSetAssessment
+  createFlashcardSetAssessment(assessmentInput: CreateAssessmentInput!, flashcardSetInput: CreateFlashcardSetInput!): FlashcardSetAssessment
 
   # Creates a new section in a chapter.
   createSection(input: CreateSectionInput!): Section!
@@ -1386,6 +1304,54 @@ type Query {
   # If a user does not exist, null is returned for that user.
   findUserInfos(ids: [UUID!]!): [UserInfo]!
 
+  # Returns the media records with the given IDs. Throws an error if a MediaRecord corresponding to a given ID
+  # cannot be found.
+  # 🔒 If the mediaRecord is associated with coursed the user must be a member of at least one of the courses.
+  mediaRecordsByIds(ids: [UUID!]!): [MediaRecord!]!
+
+  # Like mediaRecordsByIds() returns the media records with the given IDs, but instead of throwing an error if an ID
+  # cannot be found, it instead returns NULL for that media record.
+  # 🔒 If the mediaRecord is associated with coursed the user must be a member of at least one of the courses.
+  findMediaRecordsByIds(ids: [UUID!]!): [MediaRecord]!
+
+  # Returns all media records of the system.
+  # 🔒 The user must be a super-user, otherwise an exception is thrown.
+  mediaRecords: [MediaRecord!]! @deprecated(reason: "In production there should probably be no way to get all media records of the system.")
+
+  # Returns all media records which the current user created.
+  # 🔒 If the mediaRecord is associated with coursed the user must be a member of at least one of the courses.
+  userMediaRecords: [MediaRecord!]!
+
+  # Returns the media records associated the given content IDs as a list of lists where each sublist contains
+  # the media records associated with the content ID at the same index in the input list
+  # 🔒 If the mediaRecord is associated with coursed the user must be a member of at least one of the courses.
+  mediaRecordsByContentIds(contentIds: [UUID!]!): [[MediaRecord!]!]!
+
+  # Returns all media records for the given CourseIds
+  # 🔒 If the mediaRecord is associated with coursed the user must be a member of at least one of the courses.
+  mediaRecordsForCourses(courseIds: [UUID!]!): [[MediaRecord!]!]!
+
+  # Returns all media records which were created by the users.
+  mediaRecordsForUsers(userIds: [UUID!]!): [[MediaRecord!]!]!
+
+  # Get a list of courses. Can be filtered, sorted and paginated.
+  # Courses and their basic data can be queried by any user, even if they are not enrolled in the course.
+  courses(
+    filter: CourseFilter
+
+    # The fields to sort by.
+    # Throws an error if no field with the given name exists.
+    sortBy: [String!]
+
+    # The sort direction for each field. If not specified, defaults to ASC.
+    sortDirection: [SortDirection!]! = [ASC]
+    pagination: Pagination
+  ): CoursePayload!
+
+  # Returns the courses with the given ids.
+  # Courses and their basic data can be queried by any user, even if they are not enrolled in the course.
+  coursesByIds(ids: [UUID!]!): [Course!]!
+
   # Retrieves all existing contents for a given course.
   # 🔒 The user must have access to the courses with the given ids to access their contents, otherwise an error is thrown.
   contentsByCourseIds(courseIds: [UUID!]!): [[Content!]!]
@@ -1423,57 +1389,6 @@ type Query {
     # also containing suggestions for media content (which do not have a skill type).
     skillTypes: [SkillType!]! = []
   ): [Suggestion!]!
-
-  # Returns the media records with the given IDs. Throws an error if a MediaRecord corresponding to a given ID
-  # cannot be found.
-  # 🔒 If the mediaRecord is associated with coursed the user must be a member of at least one of the courses.
-  mediaRecordsByIds(ids: [UUID!]!): [MediaRecord!]!
-
-  # Like mediaRecordsByIds() returns the media records with the given IDs, but instead of throwing an error if an ID
-  # cannot be found, it instead returns NULL for that media record.
-  # 🔒 If the mediaRecord is associated with coursed the user must be a member of at least one of the courses.
-  findMediaRecordsByIds(ids: [UUID!]!): [MediaRecord]!
-
-  # Returns all media records of the system.
-  # 🔒 The user must be a super-user, otherwise an exception is thrown.
-  mediaRecords: [MediaRecord!]!
-    @deprecated(
-      reason: "In production there should probably be no way to get all media records of the system."
-    )
-
-  # Returns all media records which the current user created.
-  # 🔒 If the mediaRecord is associated with coursed the user must be a member of at least one of the courses.
-  userMediaRecords: [MediaRecord!]!
-
-  # Returns the media records associated the given content IDs as a list of lists where each sublist contains
-  # the media records associated with the content ID at the same index in the input list
-  # 🔒 If the mediaRecord is associated with coursed the user must be a member of at least one of the courses.
-  mediaRecordsByContentIds(contentIds: [UUID!]!): [[MediaRecord!]!]!
-
-  # Returns all media records for the given CourseIds
-  # 🔒 If the mediaRecord is associated with coursed the user must be a member of at least one of the courses.
-  mediaRecordsForCourses(courseIds: [UUID!]!): [[MediaRecord!]!]!
-
-  # Returns all media records which were created by the users.
-  mediaRecordsForUsers(userIds: [UUID!]!): [[MediaRecord!]!]!
-
-  # Get a list of courses. Can be filtered, sorted and paginated.
-  # Courses and their basic data can be queried by any user, even if they are not enrolled in the course.
-  courses(
-    filter: CourseFilter
-
-    # The fields to sort by.
-    # Throws an error if no field with the given name exists.
-    sortBy: [String!]
-
-    # The sort direction for each field. If not specified, defaults to ASC.
-    sortDirection: [SortDirection!]! = [ASC]
-    pagination: Pagination
-  ): CoursePayload!
-
-  # Returns the courses with the given ids.
-  # Courses and their basic data can be queried by any user, even if they are not enrolled in the course.
-  coursesByIds(ids: [UUID!]!): [Course!]!
 
   # Get flashcards by their ids.
   # 🔒 The user must be enrolled in the course the flashcards belong to. Otherwise an error is thrown.
@@ -1676,9 +1591,7 @@ type QuizMutation {
 
   # Set the number of questions that are randomly selected from the list of questions.
   # Will only be considered if questionPoolingMode is RANDOM.
-  setNumberOfRandomlySelectedQuestions(
-    numberOfRandomlySelectedQuestions: Int!
-  ): Quiz!
+  setNumberOfRandomlySelectedQuestions(numberOfRandomlySelectedQuestions: Int!): Quiz!
 }
 
 scalar ResolveToSourceArgs

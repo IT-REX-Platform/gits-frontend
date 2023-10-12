@@ -118,38 +118,7 @@ export function EditCourseModal({
       },
       updater(store) {
         try {
-          // update "query.currentUserInfo.courseMemberships"
-          const currentUserInfo = store
-            .getRoot()
-            .getLinkedRecord("currentUserInfo");
-
-          const courseMemberships =
-            currentUserInfo?.getLinkedRecords("courseMemberships");
-
-          console.log("courseMemberships", courseMemberships);
-
-          if (!currentUserInfo || !courseMemberships) return;
-
-          currentUserInfo.setLinkedRecords(
-            courseMemberships.filter(
-              (x) => x.getLinkedRecord("course")?.getDataID() !== course.id
-            ),
-            "courseMemberships"
-          );
-
-          // update "query.courses"
-
-          const courseQuery = store.getRoot().getLinkedRecord("courses");
-          const courses = courseQuery?.getLinkedRecords("elements");
-
-          console.log("courses", courses);
-
-          if (!courseQuery || !courses) return;
-
-          courseQuery.setLinkedRecords(
-            courses.filter((x) => x.getDataID() !== course.id),
-            "elements"
-          );
+          store.get(course.id)?.invalidateRecord();
         } catch (err) {
           console.error(err);
         }

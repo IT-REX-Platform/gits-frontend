@@ -1,8 +1,7 @@
 import { LecturerEditFlashcardFragment$key } from "@/__generated__/LecturerEditFlashcardFragment.graphql";
 import { LecturerEditFlashcardMutation } from "@/__generated__/LecturerEditFlashcardMutation.graphql";
-import { useState } from "react";
-import { graphql, useFragment, useMutation } from "react-relay";
-import { EditSideModal } from "./EditSideModal";
+import { Add } from "@mui/icons-material";
+import ClearIcon from "@mui/icons-material/Clear";
 import {
   Backdrop,
   Button,
@@ -10,9 +9,10 @@ import {
   IconButton,
   Typography,
 } from "@mui/material";
+import { useState } from "react";
+import { graphql, useFragment, useMutation } from "react-relay";
+import { EditSideModal } from "./EditSideModal";
 import { FlashcardSide, FlashcardSideData } from "./FlashcardSide";
-import { Add } from "@mui/icons-material";
-import ClearIcon from "@mui/icons-material/Clear";
 
 export function Flashcard({
   title,

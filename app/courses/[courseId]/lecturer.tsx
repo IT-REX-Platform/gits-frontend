@@ -10,20 +10,20 @@ import { AddSectionButton } from "@/components/AddSectionButton";
 import { AddStageButton } from "@/components/AddStageButton";
 import { ChapterContent } from "@/components/ChapterContent";
 import { ChapterHeader } from "@/components/ChapterHeader";
-import { ContentLink } from "@/components/content-link/ContentLink";
 import { DeleteStageButton } from "@/components/DeleteStageButton";
 import EditChapterButton from "@/components/EditChapterButton";
+import { EditContentModal } from "@/components/EditContentModal";
 import { EditCourseModal } from "@/components/EditCourseModal";
 import EditSectionButton from "@/components/EditSectionButton";
 import { Heading } from "@/components/Heading";
+import { OtherContent } from "@/components/OtherContent";
 import { PageError } from "@/components/PageError";
 import { Section, SectionContent, SectionHeader } from "@/components/Section";
 import { Stage } from "@/components/Stage";
+import { ContentLink } from "@/components/content-link/ContentLink";
 import { Add, Settings } from "@mui/icons-material";
 import { orderBy } from "lodash";
 import { useState } from "react";
-import { EditContentModal } from "@/components/EditContentModal";
-import { OtherContent } from "@/components/OtherContent";
 
 graphql`
   fragment lecturerSectionFragment on Section {
@@ -106,15 +106,15 @@ export default function LecturerCoursePage() {
   const { coursesByIds, ...query } =
     useLazyLoadQuery<lecturerLecturerCourseIdQuery>(
       graphql`
-        query lecturerLecturerCourseIdQuery($id: [UUID!]!) {
+        query lecturerLecturerCourseIdQuery($courseId: UUID!) {
           ...MediaRecordSelector
 
-          coursesByIds(ids: $id) {
+          coursesByIds(ids: [$courseId]) {
             ...lecturerCourseFragment @relay(mask: false)
           }
         }
       `,
-      { id: [id] }
+      { courseId: id }
     );
 
   const [openModal, setOpenModal] = useState(false);

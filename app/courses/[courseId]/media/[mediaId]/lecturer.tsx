@@ -2,11 +2,11 @@
 
 import { lecturerDeleteMediaContentMutation } from "@/__generated__/lecturerDeleteMediaContentMutation.graphql";
 import { lecturerMediaQuery } from "@/__generated__/lecturerMediaQuery.graphql";
-import { MediaContentLink } from "@/components/content-link/MediaContentLink";
 import { ContentTags } from "@/components/ContentTags";
 import { Heading } from "@/components/Heading";
 import { MediaContentModal } from "@/components/MediaContentModal";
 import { PageError } from "@/components/PageError";
+import { MediaContentLink } from "@/components/content-link/MediaContentLink";
 import { Delete, Edit } from "@mui/icons-material";
 import { Alert, Button, CircularProgress, Typography } from "@mui/material";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
@@ -20,7 +20,7 @@ export default function LecturerMediaPage() {
   const searchParams = useSearchParams();
   const media = useLazyLoadQuery<lecturerMediaQuery>(
     graphql`
-      query lecturerMediaQuery($mediaId: UUID!) {
+      query lecturerMediaQuery($mediaId: UUID!, $courseId: UUID!) {
         contentsByIds(ids: [$mediaId]) {
           id
           metadata {
@@ -44,7 +44,7 @@ export default function LecturerMediaPage() {
         ...MediaRecordSelector
       }
     `,
-    { mediaId }
+    { mediaId, courseId }
   );
 
   const [del, deleting] =

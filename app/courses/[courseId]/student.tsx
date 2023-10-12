@@ -26,7 +26,6 @@ import { useState } from "react";
 import { StudentChapter } from "@/components/StudentChapter";
 import { LightTooltip } from "@/components/LightTooltip";
 import { RewardScoresHelpButton } from "@/components/RewardScoresHelpButton";
-import { DueFlashcardsLink } from "@/components/DueFlashcardsLink";
 
 interface Data {
   name: string;

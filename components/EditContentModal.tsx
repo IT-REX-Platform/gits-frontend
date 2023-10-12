@@ -84,6 +84,9 @@ export function EditContentModal({
             __typename
           }
         }
+        contentsWithNoSection {
+          id
+        }
       }
     `,
     _chapter
@@ -132,6 +135,25 @@ export function EditContentModal({
       onError: setError,
       onCompleted() {
         setOpenModal(false);
+      },
+      updater(store) {
+        const root = store.get(chapterId);
+        if (!root) return;
+
+        const prevOther = chapter.contentsWithNoSection.map((x) => x.id);
+        const prevSelected = [..._optionalRecords, ..._requiredRecords];
+        const newSelected = [...optionalRecords, ...requiredRecords];
+
+        const toAdd = prevSelected.filter((x) => !newSelected.includes(x));
+        const toRemove = prevOther.filter((x) => newSelected.includes(x));
+
+        const contents = root?.getLinkedRecords("contentsWithNoSection") ?? [];
+        const newContents = [
+          ...contents.filter((x) => !toRemove.includes(x.getDataID())),
+          ...toAdd.map((x) => store.get(x)!),
+        ];
+
+        root.setLinkedRecords(newContents, "contentsWithNoSection");
       },
     });
   };

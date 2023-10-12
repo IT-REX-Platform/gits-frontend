@@ -84,6 +84,7 @@ export function EditClozeQuestionButton({
           ),
         },
       },
+      updater: (store) => store.invalidateStore(),
       onCompleted: () => setOpen(false),
       onError: setError,
     });

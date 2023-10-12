@@ -18,7 +18,7 @@ import { FormErrors } from "@/components/FormErrors";
 import { PageError } from "@/components/PageError";
 import { RewardScores } from "@/components/RewardScores";
 import { Suggestion } from "@/components/Suggestion";
-import { Info } from "@mui/icons-material";
+import { Info, Repeat } from "@mui/icons-material";
 import ExitToAppIcon from "@mui/icons-material/ExitToApp";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import Link from "next/link";
@@ -26,6 +26,7 @@ import { useState } from "react";
 import { StudentChapter } from "@/components/StudentChapter";
 import { LightTooltip } from "@/components/LightTooltip";
 import { RewardScoresHelpButton } from "@/components/RewardScoresHelpButton";
+import { DueFlashcardsLink } from "@/components/DueFlashcardsLink";
 
 interface Data {
   name: string;
@@ -230,7 +231,15 @@ export default function StudentCoursePage() {
       </div>
 
       <section className="mt-8 mb-20">
-        <Typography variant="h2">Up next</Typography>
+        <div className="flex justify-between items-center">
+          <Typography variant="h2">Up next</Typography>
+          <Button
+            startIcon={<Repeat />}
+            onClick={() => router.push(`/courses/${id}/flashcards/due`)}
+          >
+            Repeat learned flashcards
+          </Button>
+        </div>
         <div className="mt-8 gap-8 flex flex-wrap">
           {course.suggestions.map((x) => (
             <Suggestion

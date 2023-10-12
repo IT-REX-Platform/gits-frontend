@@ -1,3 +1,6 @@
+import { MediaRecordSelector$key } from "@/__generated__/MediaRecordSelector.graphql";
+import { Add, Delete } from "@mui/icons-material";
+import { LoadingButton } from "@mui/lab";
 import {
   Button,
   Checkbox,
@@ -8,13 +11,10 @@ import {
   FormControlLabel,
   IconButton,
 } from "@mui/material";
-import { FormErrors } from "../FormErrors";
+import { useMemo, useState } from "react";
 import { Form, FormSection } from "../Form";
-import { LoadingButton } from "@mui/lab";
-import { useEffect, useMemo, useState } from "react";
-import { MediaRecordSelector$key } from "@/__generated__/MediaRecordSelector.graphql";
-import { RichTextEditor } from "../RichTextEditor";
-import { Add, Delete } from "@mui/icons-material";
+import { FormErrors } from "../FormErrors";
+import { RichTextEditor, serializeToText } from "../RichTextEditor";
 
 export type MultipleChoiceQuestionData = {
   text: string;
@@ -64,11 +64,17 @@ export function MultipleChoiceQuestionModal({
     () => data.answers.some((x) => x.correct === true),
     [data.answers]
   );
-  const atLeastTwoAnswers = useMemo(
-    () => data.answers.length >= 2,
+  const atLeastTwoAnswers = data.answers.length >= 2;
+  const allAnswersFilled = useMemo(
+    () => data.answers.every((x) => !!serializeToText(x.answerText)),
     [data.answers]
   );
-  const valid = oneAnswerCorrect && atLeastTwoAnswers;
+
+  const valid =
+    oneAnswerCorrect &&
+    atLeastTwoAnswers &&
+    !!serializeToText(data.text) &&
+    allAnswersFilled;
 
   useEffect(() => {
     if (!open) {
@@ -191,6 +197,13 @@ export function MultipleChoiceQuestionModal({
             <div>At least one answer has to be correct</div>
           )}
           {!atLeastTwoAnswers && <div>At least two answers are required</div>}
+
+          {atLeastTwoAnswers && !allAnswersFilled && (
+            <div>All answers need a text</div>
+          )}
+          {!serializeToText(data.text) && (
+            <div>A Question title is required</div>
+          )}
         </div>
         <Button disabled={isLoading} onClick={onClose}>
           Cancel
@@ -205,4 +218,10 @@ export function MultipleChoiceQuestionModal({
       </DialogActions>
     </Dialog>
   );
+}
+function useEffect(
+  arg0: () => void,
+  arg1: (boolean | MultipleChoiceQuestionData)[]
+) {
+  throw new Error("Function not implemented.");
 }

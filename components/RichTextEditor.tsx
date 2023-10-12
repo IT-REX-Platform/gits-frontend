@@ -31,12 +31,14 @@ import { clsx } from "clsx";
 import isHotkey from "is-hotkey";
 import { debounce } from "lodash";
 import { useCallback, useMemo, useState } from "react";
+import { ErrorBoundary } from "react-error-boundary";
 import { graphql, useLazyLoadQuery } from "react-relay";
 import {
   BaseEditor,
   Descendant,
   Editor,
   Element as SlateElement,
+  Node as SlateNode,
   Text as SlateText,
   Transforms,
   createEditor,
@@ -55,7 +57,6 @@ import {
   withReact,
 } from "slate-react";
 import { MediaRecordSelector } from "./MediaRecordSelector";
-import { ErrorBoundary } from "react-error-boundary";
 
 const HOTKEYS: Record<string, string> = {
   "mod+b": "bold",
@@ -63,6 +64,14 @@ const HOTKEYS: Record<string, string> = {
   "mod+u": "underline",
   "mod+`": "code",
 };
+
+export function serializeToText(text: string) {
+  const elements = parseFromString(text);
+
+  return elements
+    .flatMap((n) => Array.from(SlateNode.texts(n)).map(([x]) => x.text))
+    .join("\n");
+}
 
 type CustomElement =
   | {

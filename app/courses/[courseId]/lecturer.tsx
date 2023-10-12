@@ -2,7 +2,7 @@
 
 import { lecturerLecturerCourseIdQuery } from "@/__generated__/lecturerLecturerCourseIdQuery.graphql";
 import { Button, IconButton, Typography } from "@mui/material";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { graphql, useLazyLoadQuery } from "react-relay";
 
 import { AddChapterModal } from "@/components/AddChapterModal";
@@ -19,7 +19,7 @@ import { Heading } from "@/components/Heading";
 import { PageError } from "@/components/PageError";
 import { Section, SectionContent, SectionHeader } from "@/components/Section";
 import { Stage } from "@/components/Stage";
-import { Add, Settings } from "@mui/icons-material";
+import { Add, People, Settings } from "@mui/icons-material";
 import { orderBy } from "lodash";
 import { useState } from "react";
 import { EditContentModal } from "@/components/EditContentModal";
@@ -98,16 +98,26 @@ export default function LecturerCoursePage() {
   // Get course id from url
   const params = useParams();
   const id = params.courseId;
+  const router = useRouter();
 
   // Info dialog
   const [infoDialogOpen, setInfoDialogOpen] = useState(false);
 
   // Fetch course data
-  const { coursesByIds, ...query } =
+  const { coursesByIds, currentUserInfo, ...query } =
     useLazyLoadQuery<lecturerLecturerCourseIdQuery>(
       graphql`
         query lecturerLecturerCourseIdQuery($id: [UUID!]!) {
           ...MediaRecordSelector
+
+          currentUserInfo {
+            courseMemberships {
+              role
+              course {
+                id
+              }
+            }
+          }
 
           coursesByIds(ids: $id) {
             ...lecturerCourseFragment @relay(mask: false)
@@ -126,6 +136,9 @@ export default function LecturerCoursePage() {
 
   // Extract course
   const course = coursesByIds[0];
+  const role = currentUserInfo.courseMemberships.find(
+    (x) => x.course.id === id
+  )!.role;
 
   const handleCloseModal = () => {
     setOpenModal(false);
@@ -144,6 +157,14 @@ export default function LecturerCoursePage() {
             <Button startIcon={<Add />} onClick={() => setOpenModal(true)}>
               Add chapter
             </Button>
+            {role === "ADMINISTRATOR" && (
+              <Button
+                startIcon={<People />}
+                onClick={() => router.push(`/courses/${id}/members`)}
+              >
+                Members
+              </Button>
+            )}
             <IconButton onClick={() => setInfoDialogOpen(true)}>
               <Settings />
             </IconButton>

@@ -9,6 +9,13 @@ import { EditSideModal } from "./EditSideModal";
 import { Edit, Help, QuestionAnswer } from "@mui/icons-material";
 import { useState } from "react";
 
+export type FlashcardSideData = {
+  label: string;
+  text: string;
+  isQuestion: boolean;
+  isAnswer: boolean;
+};
+
 export function FlashcardSide({
   side,
   onChange,
@@ -60,10 +67,3 @@ export function FlashcardSide({
     </>
   );
 }
-
-type FlashcardSideData = {
-  label: string;
-  text: string;
-  isQuestion: boolean;
-  isAnswer: boolean;
-};

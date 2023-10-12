@@ -1,7 +1,7 @@
 import { Button, Tooltip, Typography } from "@mui/material";
 import { EditSideModal } from "./EditSideModal";
 import { useState } from "react";
-import { FlashcardSide } from "./FlashcardSide";
+import { FlashcardSide, FlashcardSideData } from "./FlashcardSide";
 import { Add } from "@mui/icons-material";
 
 export function LocalFlashcard({
@@ -83,10 +83,3 @@ export function LocalFlashcard({
     </div>
   );
 }
-
-type FlashcardSideData = {
-  label: string;
-  text: string;
-  isQuestion: boolean;
-  isAnswer: boolean;
-};

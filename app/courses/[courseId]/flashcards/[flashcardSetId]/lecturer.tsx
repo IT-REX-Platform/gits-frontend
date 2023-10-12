@@ -9,6 +9,7 @@ import { ContentTags } from "@/components/ContentTags";
 import { EditFlashcardSetModal } from "@/components/EditFlashcardSetModal";
 import { Heading } from "@/components/Heading";
 import { PageError } from "@/components/PageError";
+import { FlashcardSideData } from "@/components/flashcard/FlashcardSide";
 import { Flashcard } from "@/components/flashcard/LecturerEditFlashcard";
 import { LocalFlashcard } from "@/components/flashcard/LocalFlashcard";
 import { Add, Delete, Edit } from "@mui/icons-material";
@@ -16,13 +17,6 @@ import { Alert, Backdrop, Button, CircularProgress } from "@mui/material";
 import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
 import { graphql, useLazyLoadQuery, useMutation } from "react-relay";
-
-type FlashcardSideData = {
-  label: string;
-  text: string;
-  isQuestion: boolean;
-  isAnswer: boolean;
-};
 
 export default function LecturerFlashcards() {
   const { flashcardSetId, courseId } = useParams();

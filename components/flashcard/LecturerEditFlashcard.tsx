@@ -10,7 +10,7 @@ import {
   IconButton,
   Typography,
 } from "@mui/material";
-import { FlashcardSide } from "./FlashcardSide";
+import { FlashcardSide, FlashcardSideData } from "./FlashcardSide";
 import { Add } from "@mui/icons-material";
 import ClearIcon from "@mui/icons-material/Clear";
 
@@ -146,10 +146,3 @@ export function Flashcard({
     </>
   );
 }
-
-type FlashcardSideData = {
-  label: string;
-  text: string;
-  isQuestion: boolean;
-  isAnswer: boolean;
-};

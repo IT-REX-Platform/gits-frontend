@@ -11,6 +11,7 @@ import {
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import { Form, FormSection } from "@/components/Form";
+import { FlashcardSideData } from "./FlashcardSide";
 
 export function EditSideModal({
   onClose,
@@ -113,10 +114,3 @@ export function EditSideModal({
     </Dialog>
   );
 }
-
-type FlashcardSideData = {
-  label: string;
-  text: string;
-  isQuestion: boolean;
-  isAnswer: boolean;
-};

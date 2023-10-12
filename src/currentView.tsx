@@ -22,6 +22,9 @@ export function PageViewProvider({ children }: { children: React.ReactNode }) {
         currentUserInfo {
           id
           realmRoles
+          courseMemberships {
+            role
+          }
         }
       }
     `,
@@ -38,16 +41,13 @@ export function PageViewProvider({ children }: { children: React.ReactNode }) {
           ? PageView.Lecturer
           : PageView.Student;
 
-      const storedRoleRaw = window.localStorage.getItem("current_pageview");
-      const storedRole =
-        storedRoleRaw === PageView.Lecturer
-          ? PageView.Lecturer
-          : storedRoleRaw === PageView.Student
-          ? PageView.Student
-          : defaultRole;
-
       setPageView(
-        defaultRole !== PageView.Student ? storedRole : PageView.Student
+        window.localStorage.getItem("current_pageview")
+          ? window.localStorage.getItem("current_pageview") ===
+            PageView.Lecturer
+            ? PageView.Lecturer
+            : PageView.Student
+          : defaultRole
       );
     } else if (pageView) {
       window.localStorage.setItem(
@@ -56,6 +56,19 @@ export function PageViewProvider({ children }: { children: React.ReactNode }) {
       );
     }
   }, [pageView]);
+
+  useEffect(() => {
+    const isTutor =
+      currentUserInfo.realmRoles.includes("SUPER_USER") ||
+      currentUserInfo.realmRoles.includes("COURSE_CREATOR") ||
+      currentUserInfo.courseMemberships.some(
+        (x) => x.role === "TUTOR" || x.role === "ADMINISTRATOR"
+      );
+
+    if (!isTutor && pageView === PageView.Lecturer) {
+      setPageView(PageView.Student);
+    }
+  }, [pageView, currentUserInfo]);
 
   return (
     <PageViewContext.Provider

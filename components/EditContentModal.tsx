@@ -104,7 +104,7 @@ export function EditContentModal({
         mutateSection(sectionId: $sectionId) {
           updateStage(input: $stage) {
             id
-            ...lecturerStageFragment
+            ...LecturerSectionStageFragment
           }
         }
       }

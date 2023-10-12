@@ -1,7 +1,7 @@
-import { useState } from "react";
-import { MediaRecordSelector$key } from "@/__generated__/MediaRecordSelector.graphql";
-import { graphql, useMutation } from "react-relay";
 import { AddMultipleChoiceQuestionModalMutation } from "@/__generated__/AddMultipleChoiceQuestionModalMutation.graphql";
+import { MediaRecordSelector$key } from "@/__generated__/MediaRecordSelector.graphql";
+import { useState } from "react";
+import { graphql, useMutation } from "react-relay";
 import {
   MultipleChoiceQuestionData,
   MultipleChoiceQuestionModal,
@@ -64,6 +64,8 @@ export function AddMultipleChoiceQuestionModal({
           },
         }
       ) {
+        store.invalidateStore();
+
         const content = store.get(assessmentId);
         const quiz = content?.getLinkedRecord("quiz");
         const allQuestions = questionPool.flatMap((x) => {

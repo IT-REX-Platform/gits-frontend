@@ -1,4 +1,5 @@
 "use client";
+import { NavbarIsTutor$key } from "@/__generated__/NavbarIsTutor.graphql";
 import { NavbarStudentQuery } from "@/__generated__/NavbarStudentQuery.graphql";
 import logo from "@/assets/logo.svg";
 import { PageView, usePageView } from "@/src/currentView";
@@ -20,9 +21,37 @@ import dayjs from "dayjs";
 import { usePathname, useRouter } from "next/navigation";
 import { ReactElement } from "react";
 import { useAuth } from "react-oidc-context";
-import { graphql, useLazyLoadQuery } from "react-relay";
+import { graphql, useFragment, useLazyLoadQuery } from "react-relay";
 
-function NavbarBase({ children }: { children: React.ReactElement }) {
+function useIsTutor(_frag: NavbarIsTutor$key) {
+  const { realmRoles, courseMemberships } = useFragment(
+    graphql`
+      fragment NavbarIsTutor on UserInfo {
+        realmRoles
+        courseMemberships {
+          role
+        }
+      }
+    `,
+    _frag
+  );
+
+  return (
+    realmRoles.includes("super-user") ||
+    realmRoles.includes("course-creator") ||
+    courseMemberships.some(
+      (x) => x.role === "TUTOR" || x.role === "ADMINISTRATOR"
+    )
+  );
+}
+
+function NavbarBase({
+  children,
+  _isTutor,
+}: {
+  children: React.ReactElement;
+  _isTutor: NavbarIsTutor$key;
+}) {
   return (
     <div className="shrink-0 bg-slate-200 h-full px-8 flex flex-col gap-6 w-72 xl:w-96 overflow-auto thin-scrollbar">
       <div className="text-center my-16 text-3xl font-medium tracking-wider sticky">
@@ -39,7 +68,7 @@ function NavbarBase({ children }: { children: React.ReactElement }) {
         />
       </NavbarSection>
       {children}
-      <UserInfo />
+      <UserInfo _isTutor={_isTutor} />
     </div>
   );
 }
@@ -92,26 +121,29 @@ function NavbarLink({
   );
 }
 
-function UserInfo() {
-  const auth = useAuth();
+function SwitchPageViewButton() {
   const [pageView, setPageView] = usePageView();
 
-  function SwitchPageViewButton() {
-    switch (pageView) {
-      case PageView.Student:
-        return (
-          <ListItemButton onClick={() => setPageView(PageView.Lecturer)}>
-            <ListItemText primary="Switch to lecturer view" />
-          </ListItemButton>
-        );
-      case PageView.Lecturer:
-        return (
-          <ListItemButton onClick={() => setPageView(PageView.Student)}>
-            <ListItemText primary="Switch to student view" />
-          </ListItemButton>
-        );
-    }
+  switch (pageView) {
+    case PageView.Student:
+      return (
+        <ListItemButton onClick={() => setPageView(PageView.Lecturer)}>
+          <ListItemText primary="Switch to lecturer view" />
+        </ListItemButton>
+      );
+    case PageView.Lecturer:
+      return (
+        <ListItemButton onClick={() => setPageView(PageView.Student)}>
+          <ListItemText primary="Switch to student view" />
+        </ListItemButton>
+      );
   }
+}
+
+function UserInfo({ _isTutor }: { _isTutor: NavbarIsTutor$key }) {
+  const auth = useAuth();
+
+  const tutor = useIsTutor(_isTutor);
 
   return (
     <div className="sticky bottom-0 py-6 -mt-6 bg-gradient-to-t from-slate-200 from-75% to-transparent">
@@ -141,8 +173,12 @@ function UserInfo() {
           <ListItemText primary={auth.user?.profile?.name} />
         </ListItem>
 
-        <Divider></Divider>
-        <SwitchPageViewButton />
+        {tutor && (
+          <>
+            <Divider />
+            <SwitchPageViewButton />
+          </>
+        )}
       </NavbarSection>
     </div>
   );
@@ -155,7 +191,9 @@ export function Navbar() {
     graphql`
       query NavbarStudentQuery {
         currentUserInfo {
+          ...NavbarIsTutor
           id
+          realmRoles
           courseMemberships {
             role
             course {
@@ -182,9 +220,8 @@ export function Navbar() {
         dayjs(x.course.endDate) >= dayjs() &&
         dayjs(x.course.startDate) <= dayjs()
     );
-
   return (
-    <NavbarBase>
+    <NavbarBase _isTutor={currentUserInfo}>
       {filtered.length > 0 ? (
         <NavbarSection
           title={

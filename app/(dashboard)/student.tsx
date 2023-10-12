@@ -28,6 +28,7 @@ export default function StudentPage() {
     graphql`
       query studentStudentQuery {
         currentUserInfo {
+          id
           courseMemberships {
             role
             course {

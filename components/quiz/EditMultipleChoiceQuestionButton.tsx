@@ -1,10 +1,10 @@
+import { EditMultipleChoiceQuestionButtonFragment$key } from "@/__generated__/EditMultipleChoiceQuestionButtonFragment.graphql";
+import { EditMultipleChoiceQuestionButtonMutation } from "@/__generated__/EditMultipleChoiceQuestionButtonMutation.graphql";
+import { MediaRecordSelector$key } from "@/__generated__/MediaRecordSelector.graphql";
 import { Edit } from "@mui/icons-material";
 import { IconButton } from "@mui/material";
 import { useMemo, useState } from "react";
-import { MediaRecordSelector$key } from "@/__generated__/MediaRecordSelector.graphql";
 import { graphql, useFragment, useMutation } from "react-relay";
-import { EditMultipleChoiceQuestionButtonFragment$key } from "@/__generated__/EditMultipleChoiceQuestionButtonFragment.graphql";
-import { EditMultipleChoiceQuestionButtonMutation } from "@/__generated__/EditMultipleChoiceQuestionButtonMutation.graphql";
 import {
   MultipleChoiceQuestionData,
   MultipleChoiceQuestionModal,
@@ -72,6 +72,7 @@ export function EditMultipleChoiceQuestionButton({
       },
       onCompleted: () => setOpen(false),
       onError: setError,
+      updater: (store) => store.invalidateStore(),
     });
   };
 

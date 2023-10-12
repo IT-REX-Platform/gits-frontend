@@ -1,15 +1,22 @@
 "use client";
 
 import "@/styles/globals.css";
-import React, { Suspense, useEffect, useMemo } from "react";
+import React, { useEffect, useMemo } from "react";
 
+import { PageLayout } from "@/components/PageLayout";
 import { initRelayEnvironment } from "@/src/RelayEnvironment";
+import { PageViewProvider } from "@/src/currentView";
 import "@fontsource/roboto/300.css";
 import "@fontsource/roboto/400.css";
 import "@fontsource/roboto/500.css";
 import "@fontsource/roboto/700.css";
+import { ThemeProvider, colors, createTheme } from "@mui/material";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import dayjs from "dayjs";
+import isBetween from "dayjs/plugin/isBetween";
+import { DndProvider } from "react-dnd";
+import { HTML5Backend } from "react-dnd-html5-backend";
 import {
   AuthProvider,
   AuthProviderProps,
@@ -17,13 +24,6 @@ import {
   useAuth,
 } from "react-oidc-context";
 import { RelayEnvironmentProvider } from "react-relay";
-import dayjs from "dayjs";
-import isBetween from "dayjs/plugin/isBetween";
-import { ThemeProvider, colors, createTheme } from "@mui/material";
-import { PageViewProvider } from "@/src/currentView";
-import { PageLayout } from "@/components/PageLayout";
-import { DndProvider } from "react-dnd";
-import { HTML5Backend } from "react-dnd-html5-backend";
 import PageLoading from "./loading";
 
 dayjs.extend(isBetween);
@@ -63,13 +63,13 @@ export default function App({ children }: { children: React.ReactNode }) {
       <body className="h-full">
         <AuthProvider {...oidcConfig}>
           <LocalizationProvider dateAdapter={AdapterDayjs}>
-            <PageViewProvider>
-              <DndProvider backend={HTML5Backend}>
-                <SigninContent>
+            <DndProvider backend={HTML5Backend}>
+              <SigninContent>
+                <PageViewProvider>
                   <PageLayout>{children}</PageLayout>
-                </SigninContent>
-              </DndProvider>
-            </PageViewProvider>
+                </PageViewProvider>
+              </SigninContent>
+            </DndProvider>
           </LocalizationProvider>
         </AuthProvider>
       </body>

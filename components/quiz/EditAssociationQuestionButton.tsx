@@ -1,14 +1,14 @@
 import { EditAssociationQuestionButtonFragment$key } from "@/__generated__/EditAssociationQuestionButtonFragment.graphql";
+import { EditAssociationQuestionButtonMutation } from "@/__generated__/EditAssociationQuestionButtonMutation.graphql";
 import { MediaRecordSelector$key } from "@/__generated__/MediaRecordSelector.graphql";
+import { Edit } from "@mui/icons-material";
+import { IconButton } from "@mui/material";
 import { useMemo, useState } from "react";
 import { graphql, useFragment, useMutation } from "react-relay";
 import {
   AssociationQuestionData,
   AssociationQuestionModal,
 } from "./AssociationQuestionModal";
-import { EditAssociationQuestionButtonMutation } from "@/__generated__/EditAssociationQuestionButtonMutation.graphql";
-import { IconButton } from "@mui/material";
-import { Edit } from "@mui/icons-material";
 
 export function EditAssociationQuestionButton({
   _allRecords,
@@ -66,6 +66,7 @@ export function EditAssociationQuestionButton({
           correctAssociations: data.correctAssociations,
         },
       },
+      updater: (store) => store.invalidateStore(),
       onCompleted: () => setOpen(false),
       onError: setError,
     });

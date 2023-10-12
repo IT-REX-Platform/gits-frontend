@@ -25,6 +25,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { StudentChapter } from "@/components/StudentChapter";
 import { LightTooltip } from "@/components/LightTooltip";
+import { RewardScoresHelpButton } from "@/components/RewardScoresHelpButton";
 
 interface Data {
   name: string;
@@ -77,6 +78,7 @@ export default function StudentCoursePage() {
             elements {
               id
               number
+              startDate
               ...StudentChapterFragment
               contents {
                 ...ContentLinkFragment
@@ -185,13 +187,15 @@ export default function StudentCoursePage() {
           <div className="pl-8 pr-10 py-6 border-4 border-slate-200 rounded-3xl">
             <RewardScores _scores={course.rewardScores} courseId={course.id} />
           </div>
-          <Button
-            className="!mt-2 !ml-8"
-            endIcon={<NavigateNextIcon />}
-            onClick={() => router.push(`/courses/${id}/statistics`)}
-          >
-            Full history
-          </Button>
+          <div className="mt-2 mx-4 flex items-center gap-8">
+            <RewardScoresHelpButton />
+            <Button
+              endIcon={<NavigateNextIcon />}
+              onClick={() => router.push(`/courses/${id}/statistics`)}
+            >
+              Full history
+            </Button>
+          </div>
         </div>
         <div className="mx-5">
           <TableContainer component={Paper} className="mt-12 mb-2">
@@ -238,7 +242,10 @@ export default function StudentCoursePage() {
         </div>
       </section>
 
-      {orderBy(course.chapters.elements, (x) => x.number).map((chapter) => (
+      {orderBy(course.chapters.elements, [
+        (x) => new Date(x.startDate).getTime(),
+        "number",
+      ]).map((chapter) => (
         <StudentChapter key={chapter.id} _chapter={chapter} />
       ))}
     </main>

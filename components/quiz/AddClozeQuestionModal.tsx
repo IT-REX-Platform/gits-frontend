@@ -1,8 +1,8 @@
-import { useState } from "react";
-import { ClozeQuestionData, ClozeQuestionModal } from "./ClozeQuestionModal";
-import { MediaRecordSelector$key } from "@/__generated__/MediaRecordSelector.graphql";
-import { graphql, useMutation } from "react-relay";
 import { AddClozeQuestionModalMutation } from "@/__generated__/AddClozeQuestionModalMutation.graphql";
+import { MediaRecordSelector$key } from "@/__generated__/MediaRecordSelector.graphql";
+import { useState } from "react";
+import { graphql, useMutation } from "react-relay";
+import { ClozeQuestionData, ClozeQuestionModal } from "./ClozeQuestionModal";
 
 export function AddClozeQuestionModal({
   _allRecords,
@@ -66,6 +66,8 @@ export function AddClozeQuestionModal({
           },
         }
       ) {
+        store.invalidateStore();
+
         const content = store.get(assessmentId);
         const quiz = content?.getLinkedRecord("quiz");
         const allQuestions = questionPool.flatMap((x) => {

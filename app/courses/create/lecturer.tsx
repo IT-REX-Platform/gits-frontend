@@ -109,7 +109,7 @@ export default function NewCourse() {
       },
       onError: setError,
       onCompleted(response) {
-        function _addChapter(num: number, dateStart: Dayjs) {
+        function _addChapter(num: number) {
           addChapter({
             variables: {
               chapter: {
@@ -117,14 +117,14 @@ export default function NewCourse() {
                 description: "",
                 number: num + 1,
                 title: `Chapter ${num + 1}`,
-                startDate: dateStart.toISOString(),
-                endDate: dateStart.add(6, "day").toISOString(),
+                startDate: startDate!.toISOString(),
+                endDate: endDate!.toISOString(),
               },
             },
             onError: setError,
             onCompleted() {
               if (num < chapterCount - 1) {
-                _addChapter(num + 1, dateStart.add(7, "day"));
+                _addChapter(num + 1);
               } else {
                 router.push(`/courses/${response.createCourse.id}`);
               }
@@ -132,7 +132,7 @@ export default function NewCourse() {
           });
         }
 
-        _addChapter(0, startDate!);
+        _addChapter(0);
       },
     });
   }

@@ -1,9 +1,9 @@
 "use client";
-import { AddContentModalFragment$key } from "@/__generated__/AddContentModalFragment.graphql";
-import { AddContentModalUpdateStageMutation } from "@/__generated__/AddContentModalUpdateStageMutation.graphql";
+import { EditContentModalFragment$key } from "@/__generated__/EditContentModalFragment.graphql";
+import { EditContentModalUpdateStageMutation } from "@/__generated__/EditContentModalUpdateStageMutation.graphql";
 import { MediaRecordSelector$key } from "@/__generated__/MediaRecordSelector.graphql";
 import { AddFlashcardSetModal } from "@/components/AddFlashcardSetModal";
-import { Add, Edit } from "@mui/icons-material";
+import { Add, Edit, EditNote } from "@mui/icons-material";
 import { LoadingButton } from "@mui/lab";
 import {
   Alert,
@@ -28,7 +28,7 @@ import { graphql, useFragment, useMutation } from "react-relay";
 import { MediaContentModal } from "./MediaContentModal";
 import { QuizModal } from "./QuizModal";
 
-export function AddContentModal({
+export function EditContentModal({
   chapterId,
   stageId,
   sectionId,
@@ -42,7 +42,7 @@ export function AddContentModal({
   sectionId: string;
   stageId: string;
   _mediaRecords: MediaRecordSelector$key;
-  _chapter: AddContentModalFragment$key;
+  _chapter: EditContentModalFragment$key;
 
   optionalRecords: string[];
   requiredRecords: string[];
@@ -56,7 +56,7 @@ export function AddContentModal({
 
   const chapter = useFragment(
     graphql`
-      fragment AddContentModalFragment on Chapter {
+      fragment EditContentModalFragment on Chapter {
         ...AddFlashcardSetModalFragment
         sections {
           stages {
@@ -84,6 +84,9 @@ export function AddContentModal({
             __typename
           }
         }
+        contentsWithNoSection {
+          id
+        }
       }
     `,
     _chapter
@@ -93,8 +96,8 @@ export function AddContentModal({
   const [requiredRecords, setRequiredRecords] = useState(_requiredRecords);
 
   const [updateStage, loading] =
-    useMutation<AddContentModalUpdateStageMutation>(graphql`
-      mutation AddContentModalUpdateStageMutation(
+    useMutation<EditContentModalUpdateStageMutation>(graphql`
+      mutation EditContentModalUpdateStageMutation(
         $stage: UpdateStageInput!
         $sectionId: UUID!
       ) {
@@ -133,13 +136,32 @@ export function AddContentModal({
       onCompleted() {
         setOpenModal(false);
       },
+      updater(store) {
+        const root = store.get(chapterId);
+        if (!root) return;
+
+        const prevOther = chapter.contentsWithNoSection.map((x) => x.id);
+        const prevSelected = [..._optionalRecords, ..._requiredRecords];
+        const newSelected = [...optionalRecords, ...requiredRecords];
+
+        const toAdd = prevSelected.filter((x) => !newSelected.includes(x));
+        const toRemove = prevOther.filter((x) => newSelected.includes(x));
+
+        const contents = root?.getLinkedRecords("contentsWithNoSection") ?? [];
+        const newContents = [
+          ...contents.filter((x) => !toRemove.includes(x.getDataID())),
+          ...toAdd.map((x) => store.get(x)!),
+        ];
+
+        root.setLinkedRecords(newContents, "contentsWithNoSection");
+      },
     });
   };
 
   return (
     <>
-      <Button startIcon={<Add />} onClick={() => setOpenModal(true)}>
-        Add content
+      <Button startIcon={<EditNote />} onClick={() => setOpenModal(true)}>
+        Edit content
       </Button>
 
       <Dialog
@@ -241,7 +263,11 @@ export function AddContentModal({
                   }
                   disablePadding
                 >
-                  <ListItemButton onClick={toggle} disabled={partOfOtherStage}>
+                  <ListItemButton
+                    onClick={toggle}
+                    disabled={partOfOtherStage}
+                    className="!pl-6"
+                  >
                     <ListItemIcon>
                       <Checkbox
                         edge="start"

@@ -2,6 +2,7 @@ import { MediaRecordSelector$key } from "@/__generated__/MediaRecordSelector.gra
 import { Add, Clear, Feedback } from "@mui/icons-material";
 import { LoadingButton } from "@mui/lab";
 import {
+  Autocomplete,
   Button,
   Checkbox,
   Chip,
@@ -16,7 +17,7 @@ import {
 import { useEffect, useMemo, useState } from "react";
 import { Form, FormSection } from "../Form";
 import { FormErrors } from "../FormErrors";
-import { RichTextEditor } from "../RichTextEditor";
+import { RichTextEditor, serializeToText } from "../RichTextEditor";
 import { EditRichTextButton } from "./EditRichTextButton";
 import { HintFormSection } from "./HintFormSection";
 
@@ -59,7 +60,6 @@ export function ClozeQuestionModal({
   clearError: () => void;
 }) {
   const [data, setData] = useState(initialValue);
-  const [wrongAnswer, setWrongAnswer] = useState("");
   const updateElement = (index: number, value: ClozeElementData) => {
     setData((oldValue) => ({
       ...oldValue,
@@ -85,38 +85,25 @@ export function ClozeQuestionModal({
       ],
     }));
   };
-  const addWrongAnswer = () => {
-    setData((oldValue) => {
-      const value = {
-        ...oldValue,
-        additionalWrongAnswers: [
-          ...oldValue.additionalWrongAnswers,
-          wrongAnswer,
-        ],
-      };
-      setWrongAnswer("");
-      return value;
-    });
-  };
-  const deleteWrongAnswer = (index: number) => {
-    setData((oldValue) => ({
-      ...oldValue,
-      additionalWrongAnswers: [
-        ...oldValue.additionalWrongAnswers.slice(0, index),
-        ...oldValue.additionalWrongAnswers.slice(index + 1),
-      ],
-    }));
-  };
 
   const atLeastOneTextElement = useMemo(
     () => data.clozeElements.filter((e) => e.type === "text").length > 0,
-    [data]
+    [data.clozeElements]
   );
   const atLeastOneBlankElement = useMemo(
     () => data.clozeElements.filter((e) => e.type === "blank").length > 0,
-    [data]
+    [data.clozeElements]
   );
-  const valid = atLeastOneTextElement && atLeastOneBlankElement;
+
+  const allElementsFilled = useMemo(
+    () =>
+      data.clozeElements.every((x) =>
+        x.type == "blank" ? x.correctAnswer : serializeToText(x.text)
+      ),
+    [data.clozeElements]
+  );
+  const valid =
+    atLeastOneTextElement && atLeastOneBlankElement && allElementsFilled;
 
   useEffect(() => {
     if (!open) {
@@ -156,9 +143,9 @@ export function ClozeQuestionModal({
                   <TextField
                     className="!mr-4"
                     variant="outlined"
+                    required
                     label="Blank"
                     value={elem.correctAnswer}
-                    required
                     onChange={(e) =>
                       updateElement(i, {
                         type: "blank",
@@ -228,25 +215,38 @@ export function ClozeQuestionModal({
           </FormSection>
           {data.showBlanksList && (
             <FormSection title="Additional wrong answers">
-              <div className="flex gap-2 items-center flex-wrap max-w-md mt-2">
-                {data.additionalWrongAnswers.map((value, i) => (
-                  <Chip
-                    key={i}
-                    label={value}
-                    onDelete={() => deleteWrongAnswer(i)}
+              <Autocomplete
+                multiple
+                options={[]}
+                defaultValue={[]}
+                freeSolo
+                value={data.additionalWrongAnswers}
+                className="w-96"
+                onChange={(_, newValue: string[]) => {
+                  setData((oldValue) => ({
+                    ...oldValue,
+                    additionalWrongAnswers: newValue,
+                  }));
+                }}
+                renderTags={(value: readonly string[], getTagProps) =>
+                  value.map((option: string, index: number) => (
+                    // the key gets set by "getTagProps"
+                    // eslint-disable-next-line react/jsx-key
+                    <Chip
+                      variant="outlined"
+                      label={option}
+                      {...getTagProps({ index })}
+                    />
+                  ))
+                }
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label="Wrong answers"
+                    helperText="Press enter to add"
                   />
-                ))}
-              </div>
-              <div className="mt-2">
-                <TextField
-                  variant="outlined"
-                  size="small"
-                  label="Add wrong answer"
-                  value={wrongAnswer}
-                  onChange={(e) => setWrongAnswer(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && addWrongAnswer()}
-                />
-              </div>
+                )}
+              />
             </FormSection>
           )}
         </Form>
@@ -255,6 +255,9 @@ export function ClozeQuestionModal({
         <div className="text-red-600 text-xs mr-3">
           {!atLeastOneTextElement && <div>Add at least one text element</div>}
           {!atLeastOneBlankElement && <div>Add at least one blank element</div>}
+          {atLeastOneTextElement && !allElementsFilled && (
+            <div>All elements have to be filled</div>
+          )}
         </div>
         <Button disabled={isLoading} onClick={onClose}>
           Cancel

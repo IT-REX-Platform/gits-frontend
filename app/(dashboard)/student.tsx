@@ -23,7 +23,24 @@ export default function StudentPage() {
       query studentStudentQuery {
         currentUserInfo {
           id
-          courseMemberships {
+          availableCourseMemberships {
+            role
+            course {
+              id
+              title
+              startDate
+              startYear
+              yearDivision
+              userProgress {
+                progress
+              }
+              suggestions(amount: 3) {
+                ...SuggestionFragment
+              }
+              ...CourseCardFragment
+            }
+          }
+          unavailableCourseMemberships {
             role
             course {
               id
@@ -40,9 +57,20 @@ export default function StudentPage() {
     {}
   );
 
-  const courses = currentUserInfo.courseMemberships.map(
-    (course) => course.course
-  );
+  const courses = [
+    ...currentUserInfo.availableCourseMemberships.map((m) => ({
+      course: m.course,
+      suggestions: m.course.suggestions,
+      progress: m.course.userProgress.progress,
+      available: true,
+    })),
+    ...currentUserInfo.unavailableCourseMemberships.map((m) => ({
+      course: m.course,
+      suggestions: [],
+      progress: 0,
+      available: false,
+    })),
+  ];
 
   const [sortby, setSortby] = useState<"yearDivision" | "title" | "startYear">(
     "yearDivision"
@@ -51,23 +79,23 @@ export default function StudentPage() {
   const courseSections = chain(courses)
     .groupBy((x) => {
       if (sortby === "startYear") {
-        return x.startYear;
+        return x.course.startYear;
       } else if (sortby === "title") {
-        return x.title[0];
+        return x.course.title[0];
       } else {
-        return x.yearDivision
-          ? yearDivisionToStringShort[x.yearDivision] +
+        return x.course.yearDivision
+          ? yearDivisionToStringShort[x.course.yearDivision] +
               " " +
-              dayjs(x.startDate).year()
-          : dayjs(x.startDate).year();
+              dayjs(x.course.startDate).year()
+          : dayjs(x.course.startDate).year();
       }
     })
     .entries()
     .orderBy(
       sortby === "yearDivision"
         ? [
-            ([key, courses]) => courses[0].startYear,
-            ([key, courses]) => courses[0].yearDivision,
+            ([key, courses]) => courses[0].course.startYear,
+            ([key, courses]) => courses[0].course.yearDivision,
           ]
         : ([key, _]) => key,
 
@@ -80,8 +108,14 @@ export default function StudentPage() {
             {key}
           </Typography>
           <div className="grid grid-cols-2 lg:grid-cols-3 gap-8 mt-8 mb-10">
-            {courses.map((course) => (
-              <CourseCard key={course.id} _course={course} />
+            {courses.map((c) => (
+              <CourseCard
+                key={c.course.id}
+                _course={c.course}
+                _suggestions={c.suggestions}
+                progress={c.progress}
+                available={c.available}
+              />
             ))}
           </div>
         </>

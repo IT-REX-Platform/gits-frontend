@@ -13,6 +13,7 @@ import dayjs from "dayjs";
 import { graphql, useFragment } from "react-relay";
 import { Suggestion } from "./Suggestion";
 import { PageView, usePageView } from "@/src/currentView";
+import { SuggestionFragment$key } from "@/__generated__/SuggestionFragment.graphql";
 
 export const yearDivisionToString: Record<YearDivision, string> = {
   FIRST_SEMESTER: "Winter semester",
@@ -42,7 +43,17 @@ export const yearDivisionToStringShort: Record<YearDivision, string> = {
   "%future added value": "Unknown",
 };
 
-export function CourseCard({ _course }: { _course: CourseCardFragment$key }) {
+export function CourseCard({
+  _course,
+  _suggestions = [],
+  progress = 0,
+  available = true,
+}: {
+  _course: CourseCardFragment$key;
+  _suggestions?: readonly SuggestionFragment$key[];
+  progress?: number;
+  available?: boolean;
+}) {
   const [pageView, _] = usePageView();
   const course = useFragment(
     graphql`
@@ -51,12 +62,6 @@ export function CourseCard({ _course }: { _course: CourseCardFragment$key }) {
         title
         startDate
         yearDivision
-        suggestions(amount: 3) {
-          ...SuggestionFragment
-        }
-        userProgress {
-          progress
-        }
       }
     `,
     _course
@@ -77,9 +82,7 @@ export function CourseCard({ _course }: { _course: CourseCardFragment$key }) {
             />
             <CircularProgress
               variant="determinate"
-              value={
-                pageView === PageView.Student ? course.userProgress.progress : 0
-              }
+              value={pageView === PageView.Student ? progress : 0}
               color="success"
               className="col-start-1 row-start-1"
             />
@@ -89,7 +92,11 @@ export function CourseCard({ _course }: { _course: CourseCardFragment$key }) {
             component="div"
             className="shrink overflow-hidden !ml-2"
           >
-            <Link href={`/courses/${course.id}`} underline="none" color="black">
+            <Link
+              href={available ? `/courses/${course.id}` : undefined}
+              underline="none"
+              color="black"
+            >
               {course.title}
             </Link>
           </Typography>
@@ -108,18 +115,23 @@ export function CourseCard({ _course }: { _course: CourseCardFragment$key }) {
 
       <Divider />
       <div className="flex flex-col m-4 gap-2 items-start grow min-h-[12rem]">
-        {course.suggestions.map((suggestion, i) => (
+        {_suggestions.map((suggestion, i) => (
           <Suggestion
             courseId={course.id}
             key={`${course.id}-suggestion-${i}`}
             _suggestion={suggestion}
           />
         ))}
-        {course.suggestions.length === 0 && (
+        {available && _suggestions.length === 0 && (
           <div className="w-full grow flex items-center text-center justify-center text-gray-600">
             You are all set.
             <br />
             No suggestions for this course
+          </div>
+        )}
+        {!available && (
+          <div className="w-full grow flex items-center text-center justify-center text-gray-600">
+            This course has not started yet or has already ended
           </div>
         )}
       </div>

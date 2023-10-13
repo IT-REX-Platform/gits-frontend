@@ -219,9 +219,3 @@ export function MultipleChoiceQuestionModal({
     </Dialog>
   );
 }
-/* function useEffect(
-  arg0: () => void,
-  arg1: (boolean | MultipleChoiceQuestionData)[]
-) {
-  throw new Error("Function not implemented.");
-} */

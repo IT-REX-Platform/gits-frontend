@@ -26,6 +26,7 @@ graphql`
       elements {
         id
         startDate
+        number
         ...LecturerChapter
       }
     }

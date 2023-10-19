@@ -22,6 +22,9 @@ export function PageViewProvider({ children }: { children: React.ReactNode }) {
         currentUserInfo {
           id
           realmRoles
+          courseMemberships {
+            role
+          }
         }
       }
     `,
@@ -53,6 +56,19 @@ export function PageViewProvider({ children }: { children: React.ReactNode }) {
       );
     }
   }, [pageView]);
+
+  useEffect(() => {
+    const isTutor =
+      currentUserInfo.realmRoles.includes("SUPER_USER") ||
+      currentUserInfo.realmRoles.includes("COURSE_CREATOR") ||
+      currentUserInfo.courseMemberships.some(
+        (x) => x.role === "TUTOR" || x.role === "ADMINISTRATOR"
+      );
+
+    if (!isTutor && pageView === PageView.Lecturer) {
+      setPageView(PageView.Student);
+    }
+  }, [pageView, currentUserInfo]);
 
   return (
     <PageViewContext.Provider

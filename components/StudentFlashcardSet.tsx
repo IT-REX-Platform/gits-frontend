@@ -1,10 +1,10 @@
-import { Button, CircularProgress } from "@mui/material";
-import { StudentFlashcard } from "./StudentFlashcard";
-import { graphql, useMutation } from "react-relay";
-import { useState } from "react";
-import { StudentFlashcardSetLogProgressMutation } from "@/__generated__/StudentFlashcardSetLogProgressMutation.graphql";
 import { StudentFlashcard$key } from "@/__generated__/StudentFlashcard.graphql";
+import { StudentFlashcardSetLogProgressMutation } from "@/__generated__/StudentFlashcardSetLogProgressMutation.graphql";
+import { Button, CircularProgress } from "@mui/material";
+import { useState } from "react";
+import { graphql, useMutation } from "react-relay";
 import { DisplayError } from "./PageError";
+import { StudentFlashcard } from "./StudentFlashcard";
 
 export type FlashcardData = {
   id: string;
@@ -64,6 +64,7 @@ export function StudentFlashcardSet({
   return (
     <div>
       <StudentFlashcard
+        key={currentFlashcard.id}
         _flashcard={currentFlashcard._flashcard}
         label={`${currentIndex + 1}/${flashcards.length}`}
         onChange={(correctness) => setKnew(correctness === 1)}

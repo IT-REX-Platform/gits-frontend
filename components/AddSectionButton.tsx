@@ -17,6 +17,16 @@ export function AddSectionButton({ chapterId }: { chapterId: string }) {
         id
         ...StudentSectionFragment
         ...LecturerSectionFragment
+
+        stages {
+          id
+          optionalContents {
+            id
+          }
+          requiredContents {
+            id
+          }
+        }
       }
     }
   `);
@@ -61,16 +71,6 @@ export function AddSectionButton({ chapterId }: { chapterId: string }) {
             variables: { input: { chapterId, name: data.name } },
             onCompleted() {
               setOpen(false);
-            },
-            updater(store, data) {
-              const chapter = store.get(chapterId);
-              const sections = chapter?.getLinkedRecords("sections");
-              if (!chapter || !sections) return;
-
-              chapter.setLinkedRecords(
-                [...sections, store.get(data.createSection.id)!],
-                "sections"
-              );
             },
             onError: setError,
           })

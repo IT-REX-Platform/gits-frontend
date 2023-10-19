@@ -1158,7 +1158,7 @@ type Mutation {
 
   # ONLY FOR TESTING PURPOSES. DO NOT USE IN FRONTEND. WILL BE REMOVED.
   #
-  # Triggers the recalculation of the skill level of the user.
+  # Triggers the recalculation of the reward score of the user.
   # This is done automatically at some time in the night.
   #
   # The purpose of this mutation is to allow testing of the skill level score and demonstrate the functionality.
@@ -1184,9 +1184,9 @@ type Mutation {
   # Delete a quiz.
   deleteQuiz(assessmentId: UUID!): UUID! @deprecated(reason: "Only use if you specifically only want to delete the quiz and not the whole assessment. Otherwise, use deleteAssessment in contents service instead.")
 
-  # Log that a multiple choice quiz is completed.
-  # 🔒 The user must be enrolled in the course the quiz is in to perform this action.
-  logQuizCompleted(input: QuizCompletedInput!): QuizCompletionFeedback!
+  # Modify the section with the given id.
+  # 🔒 The user must have admin access to the course containing the section to perform this action.
+  mutateSection(sectionId: UUID!): SectionMutation!
 
   # Creates a new media content and links the given media records to it.
   createMediaContentAndLinkRecords(contentInput: CreateMediaContentInput!, mediaRecordIds: [UUID!]!): MediaContent!

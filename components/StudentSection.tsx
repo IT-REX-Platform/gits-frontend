@@ -1,9 +1,10 @@
+import { StudentSectionFragment$key } from "@/__generated__/StudentSectionFragment.graphql";
 import { every, orderBy, some } from "lodash";
+import { Fragment } from "react";
 import { graphql, useFragment } from "react-relay";
 import { Section, SectionContent, SectionHeader } from "./Section";
 import { StageBarrier } from "./Stage";
 import { StudentStage } from "./StudentStage";
-import { StudentSectionFragment$key } from "@/__generated__/StudentSectionFragment.graphql";
 
 export function StudentSection({
   _section,
@@ -42,7 +43,7 @@ export function StudentSection({
       <SectionHeader>{section.name}</SectionHeader>
       <SectionContent>
         {stages.map((stage, i) => (
-          <>
+          <Fragment key={stage.id}>
             {/* Show barrier if this is the first non-complete stage */}
             {(i == 0
               ? false
@@ -54,7 +55,7 @@ export function StudentSection({
               _stage={stage}
               disabled={stageDisabled[i]}
             />
-          </>
+          </Fragment>
         ))}
       </SectionContent>
     </Section>

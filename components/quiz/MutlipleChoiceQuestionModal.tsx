@@ -11,7 +11,7 @@ import {
   FormControlLabel,
   IconButton,
 } from "@mui/material";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Form, FormSection } from "../Form";
 import { FormErrors } from "../FormErrors";
 import { RichTextEditor, serializeToText } from "../RichTextEditor";
@@ -218,10 +218,4 @@ export function MultipleChoiceQuestionModal({
       </DialogActions>
     </Dialog>
   );
-}
-function useEffect(
-  arg0: () => void,
-  arg1: (boolean | MultipleChoiceQuestionData)[]
-) {
-  throw new Error("Function not implemented.");
 }

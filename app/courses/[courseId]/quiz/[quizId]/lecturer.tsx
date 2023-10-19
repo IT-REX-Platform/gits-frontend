@@ -26,7 +26,7 @@ export default function LecturerQuiz() {
 
   const { contentsByIds, ...query } = useLazyLoadQuery<lecturerEditQuizQuery>(
     graphql`
-      query lecturerEditQuizQuery($id: UUID!) {
+      query lecturerEditQuizQuery($id: UUID!, $courseId: UUID!) {
         ...MediaRecordSelector
         contentsByIds(ids: [$id]) {
           id
@@ -55,7 +55,7 @@ export default function LecturerQuiz() {
         }
       }
     `,
-    { id: quizId }
+    { id: quizId, courseId }
   );
   const [isEditSetOpen, setEditSetOpen] = useState(false);
 

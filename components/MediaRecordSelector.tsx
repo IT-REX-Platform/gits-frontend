@@ -4,12 +4,14 @@ import {
   MediaRecordSelector$data,
   MediaRecordSelector$key,
 } from "@/__generated__/MediaRecordSelector.graphql";
+import { MediaRecordSelectorAddToCourseMutation } from "@/__generated__/MediaRecordSelectorAddToCourseMutation.graphql";
 import {
   MediaRecordSelectorCreateMediaRecordMutation,
   MediaType,
 } from "@/__generated__/MediaRecordSelectorCreateMediaRecordMutation.graphql";
 import { MediaRecordSelectorDeleteMediaRecordMutation } from "@/__generated__/MediaRecordSelectorDeleteMediaRecordMutation.graphql";
 import {
+  Add,
   Delete,
   Download,
   Error,
@@ -30,6 +32,7 @@ import {
   ListItemButton,
   ListItemIcon,
   ListItemText,
+  ListSubheader,
   TextField,
 } from "@mui/material";
 import { useCallback, useState } from "react";
@@ -38,6 +41,9 @@ import { useFragment, useMutation } from "react-relay";
 import { graphql } from "relay-runtime";
 import { MediaRecordIcon } from "./MediaRecordIcon";
 import { MediaRecordTypeSelector } from "./MediaRecordTypeSelector";
+
+type MediaRecord =
+  MediaRecordSelector$data["currentUserInfo"]["mediaRecords"][0];
 
 export function MediaRecordSelector({
   _mediaRecords,
@@ -51,33 +57,48 @@ export function MediaRecordSelector({
 } & (
   | {
       mode: "multiple";
-      selectedRecords: MediaRecordSelector$data["userMediaRecords"];
+      selectedRecords: MediaRecord[];
       setSelectedRecords: (
-        val:
-          | MediaRecordSelector$data["userMediaRecords"]
-          | ((
-              val: MediaRecordSelector$data["userMediaRecords"]
-            ) => MediaRecordSelector$data["userMediaRecords"])
+        val: MediaRecord[] | ((val: MediaRecord[]) => MediaRecord[])
       ) => void;
     }
   | {
       mode: "single";
-      onSelect: (val: MediaRecordSelector$data["userMediaRecords"][0]) => void;
+      onSelect: (val: MediaRecord) => void;
     }
 )) {
   const [error, setError] = useState<any>(null);
 
-  const { userMediaRecords } = useFragment(
+  const {
+    currentUserInfo: { mediaRecords: userMediaRecords, id: userId },
+    coursesByIds,
+  } = useFragment(
     graphql`
       fragment MediaRecordSelector on Query {
-        userMediaRecords {
+        coursesByIds(ids: [$courseId]) {
           id
-          __id
-          uploadUrl
-          name
-          downloadUrl
-          contentIds
-          type
+          mediaRecords {
+            id
+            __id
+            uploadUrl
+            name
+            downloadUrl
+            contentIds
+            type
+          }
+        }
+
+        currentUserInfo {
+          id
+          mediaRecords {
+            id
+            __id
+            uploadUrl
+            name
+            downloadUrl
+            contentIds
+            type
+          }
         }
       }
     `,
@@ -108,6 +129,14 @@ export function MediaRecordSelector({
       }
     `);
 
+  const courseMediaRecords = coursesByIds[0].mediaRecords;
+
+  const courseMediaRecordIds = courseMediaRecords.map((x) => x.id);
+
+  const recordsNotInCourse = userMediaRecords.filter(
+    (x) => !courseMediaRecordIds.includes(x.id)
+  );
+
   const [fileUploadStates, setFileUploadStates] = useState<
     Record<string, "running" | "failed" | "done" | "loading">
   >({});
@@ -129,18 +158,43 @@ export function MediaRecordSelector({
             body: file,
           })
             .then(() => {
-              setFileUploadStates((x) => ({
-                ...x,
-                [record.createMediaRecord.id]: "done",
-              }));
-              if (props.mode === "multiple") {
-                props.setSelectedRecords((x) => [
-                  ...x,
-                  record.createMediaRecord,
-                ]);
-              } else {
-                props.onSelect(record.createMediaRecord);
-              }
+              setCourseRecords({
+                variables: {
+                  courseId: coursesByIds[0].id,
+                  mediaRecordIds: [
+                    ...courseMediaRecordIds,
+                    record.createMediaRecord.id,
+                  ],
+                },
+                updater(store, data) {
+                  const course = store.get(coursesByIds[0].id);
+                  const linkedRecords =
+                    course?.getLinkedRecords("mediaRecords");
+                  const newRecord = store.get(record.createMediaRecord.id);
+
+                  if (!course || !linkedRecords || !newRecord) return;
+
+                  course.setLinkedRecords(
+                    [...linkedRecords, newRecord],
+                    "mediaRecords"
+                  );
+                },
+                onError: setError,
+                onCompleted() {
+                  setFileUploadStates((x) => ({
+                    ...x,
+                    [record.createMediaRecord.id]: "done",
+                  }));
+                  if (props.mode === "multiple") {
+                    props.setSelectedRecords((x) => [
+                      ...x,
+                      record.createMediaRecord,
+                    ]);
+                  } else {
+                    props.onSelect(record.createMediaRecord);
+                  }
+                },
+              });
             })
             .catch(() =>
               setFileUploadStates((x) => ({
@@ -150,17 +204,20 @@ export function MediaRecordSelector({
             );
         },
         updater(store, data) {
-          const rootStore = store.getRoot();
-          const mediaRecords = rootStore.getLinkedRecords("userMediaRecords");
+          const user = store.get(userId);
+          const linkedRecords = user?.getLinkedRecords("mediaRecords");
           const newRecord = store.get(data.createMediaRecord.id);
-          rootStore.setLinkedRecords(
-            [...(mediaRecords ?? []), newRecord!],
-            "userMediaRecords"
+
+          if (!user || !linkedRecords || !newRecord) return;
+
+          user.setLinkedRecords(
+            [...(linkedRecords ?? []), newRecord!],
+            "mediaRecords"
           );
         },
       });
     },
-    [createMediaRecord]
+    [createMediaRecord, props]
   );
 
   const onDrop = useCallback(
@@ -207,9 +264,228 @@ export function MediaRecordSelector({
 
   const [search, setSearch] = useState("");
 
-  const filteredMedia = userMediaRecords.filter(
+  const filteredMedia: MediaRecord[] = courseMediaRecords.filter(
     (x) => !search || x.name.toLowerCase().includes(search.toLowerCase())
   );
+  const filteredMediaUser: MediaRecord[] = recordsNotInCourse.filter(
+    (x) => !search || x.name.toLowerCase().includes(search.toLowerCase())
+  );
+
+  const [setCourseRecords] =
+    useMutation<MediaRecordSelectorAddToCourseMutation>(graphql`
+      mutation MediaRecordSelectorAddToCourseMutation(
+        $courseId: UUID!
+        $mediaRecordIds: [UUID!]!
+      ) {
+        setMediaRecordsForCourse(
+          courseId: $courseId
+          mediaRecordIds: $mediaRecordIds
+        ) {
+          id
+          __id
+          uploadUrl
+          name
+          downloadUrl
+          contentIds
+          type
+        }
+      }
+    `);
+
+  function MediaRecord({ record }: { record: MediaRecord }) {
+    const checked =
+      props.mode === "multiple" &&
+      props.selectedRecords.find((x) => x.id === record.id);
+    const toggle = () =>
+      props.mode === "multiple"
+        ? props.setSelectedRecords(
+            checked
+              ? props.selectedRecords.filter((x) => x.id !== record.id)
+              : [...props.selectedRecords, record]
+          )
+        : props.onSelect(record);
+
+    return (
+      <ListItem
+        key={record.id}
+        secondaryAction={
+          <div className="mr-2">
+            {props.mode === "multiple" && (
+              <Checkbox size="small" checked={!!checked} onClick={toggle} />
+            )}
+            <IconButton
+              size="small"
+              onClick={() => {
+                setFileUploadStates((x) => ({
+                  ...x,
+                  [record.id]: "loading",
+                }));
+
+                deleteMediaRecord({
+                  variables: { id: record.id },
+                  updater(store, data) {
+                    const course = store.get(coursesByIds[0].id);
+                    const linkedRecords =
+                      course?.getLinkedRecords("mediaRecords");
+
+                    if (!course || !linkedRecords) return;
+
+                    course.setLinkedRecords(
+                      linkedRecords?.filter((x) => x.getDataID() !== record.id),
+                      "mediaRecords"
+                    );
+
+                    const user = store.get(userId);
+                    const linkedRecords2 =
+                      user?.getLinkedRecords("mediaRecords");
+
+                    if (!user || !linkedRecords2) return;
+
+                    user.setLinkedRecords(
+                      linkedRecords2?.filter(
+                        (x) => x.getDataID() !== record.id
+                      ),
+                      "mediaRecords"
+                    );
+                  },
+                  onError() {
+                    setFileUploadStates((x) => ({
+                      ...x,
+                      [record.id]: "failed",
+                    }));
+                  },
+                });
+              }}
+              edge="end"
+              aria-label="delete"
+            >
+              <Delete />
+            </IconButton>
+
+            {fileUploadStates[record.id] === "running" ? (
+              <CircularProgress size={18}></CircularProgress>
+            ) : fileUploadStates[record.id] === "failed" ? (
+              <Error color="error" />
+            ) : (
+              <IconButton
+                edge="end"
+                aria-label="comments"
+                href={record.downloadUrl}
+              >
+                <Download />
+              </IconButton>
+            )}
+          </div>
+        }
+        disablePadding
+      >
+        <ListItemButton onClick={toggle}>
+          <ListItemIcon>
+            <MediaRecordIcon type={record.type} />
+          </ListItemIcon>
+          <ListItemText primary={record.name} />
+        </ListItemButton>
+      </ListItem>
+    );
+  }
+
+  function MediaRecordAddToCourse({ record }: { record: MediaRecord }) {
+    return (
+      <ListItem
+        key={record.id}
+        secondaryAction={
+          <div className="mr-2">
+            <Button
+              onClick={() => {
+                setCourseRecords({
+                  variables: {
+                    courseId: coursesByIds[0].id,
+                    mediaRecordIds: [...courseMediaRecordIds, record.id],
+                  },
+                  updater(store, data) {
+                    const course = store.get(coursesByIds[0].id);
+                    const linkedRecords =
+                      course?.getLinkedRecords("mediaRecords");
+                    const newRecord = store.get(record.id);
+
+                    if (!course || !linkedRecords || !newRecord) return;
+
+                    course.setLinkedRecords(
+                      [...linkedRecords, newRecord],
+                      "mediaRecords"
+                    );
+                  },
+                  onError: setError,
+                });
+              }}
+              aria-label="delete"
+              startIcon={<Add></Add>}
+            >
+              Add to course
+            </Button>
+
+            <IconButton
+              size="small"
+              onClick={() => {
+                setFileUploadStates((x) => ({
+                  ...x,
+                  [record.id]: "loading",
+                }));
+
+                deleteMediaRecord({
+                  variables: { id: record.id },
+                  updater(store, data) {
+                    const user = store.get(userId);
+                    const linkedRecords =
+                      user?.getLinkedRecords("mediaRecords");
+
+                    if (!user || !linkedRecords) return;
+
+                    user.setLinkedRecords(
+                      linkedRecords?.filter((x) => x.getDataID() !== record.id),
+                      "mediaRecords"
+                    );
+                  },
+                  onError() {
+                    setFileUploadStates((x) => ({
+                      ...x,
+                      [record.id]: "failed",
+                    }));
+                  },
+                });
+              }}
+              edge="end"
+              aria-label="delete"
+            >
+              <Delete />
+            </IconButton>
+
+            {fileUploadStates[record.id] === "running" ? (
+              <CircularProgress size={18}></CircularProgress>
+            ) : fileUploadStates[record.id] === "failed" ? (
+              <Error color="error" />
+            ) : (
+              <IconButton
+                edge="end"
+                aria-label="comments"
+                href={record.downloadUrl}
+              >
+                <Download />
+              </IconButton>
+            )}
+          </div>
+        }
+        disablePadding
+      >
+        <ListItemButton>
+          <ListItemIcon>
+            <MediaRecordIcon type={record.type} />
+          </ListItemIcon>
+          <ListItemText primary={record.name} />
+        </ListItemButton>
+      </ListItem>
+    );
+  }
 
   return (
     <>
@@ -250,95 +526,19 @@ export function MediaRecordSelector({
         />
         <DialogContent sx={{ paddingX: 0 }}>
           <List>
-            {filteredMedia.map((record) => {
-              const checked =
-                props.mode === "multiple" &&
-                props.selectedRecords.find((x) => x.id === record.id);
-              const toggle = () =>
-                props.mode === "multiple"
-                  ? props.setSelectedRecords(
-                      checked
-                        ? props.selectedRecords.filter(
-                            (x) => x.id !== record.id
-                          )
-                        : [...props.selectedRecords, record]
-                    )
-                  : props.onSelect(record);
+            {filteredMedia.map((record) => (
+              <MediaRecord record={record} key={record.id}></MediaRecord>
+            ))}
 
-              return (
-                <ListItem
-                  key={record.id}
-                  secondaryAction={
-                    <div className="mr-2">
-                      {props.mode === "multiple" && (
-                        <Checkbox
-                          size="small"
-                          checked={!!checked}
-                          onClick={toggle}
-                        />
-                      )}
-                      <IconButton
-                        size="small"
-                        onClick={() => {
-                          setFileUploadStates((x) => ({
-                            ...x,
-                            [record.id]: "loading",
-                          }));
+            {filteredMediaUser.length > 0 && (
+              <>
+                <ListSubheader>Media from other courses</ListSubheader>
 
-                          deleteMediaRecord({
-                            variables: { id: record.id },
-                            updater(store, data) {
-                              const rootStore = store.getRoot();
-                              const mediaRecords =
-                                rootStore.getLinkedRecords("mediaRecords");
-
-                              rootStore.setLinkedRecords(
-                                mediaRecords?.filter(
-                                  (x) => x.getDataID() === record.id
-                                ),
-                                "mediaRecords"
-                              );
-                            },
-                            onError() {
-                              setFileUploadStates((x) => ({
-                                ...x,
-                                [record.id]: "failed",
-                              }));
-                            },
-                          });
-                        }}
-                        edge="end"
-                        aria-label="delete"
-                      >
-                        <Delete />
-                      </IconButton>
-
-                      {fileUploadStates[record.id] === "running" ? (
-                        <CircularProgress size={18}></CircularProgress>
-                      ) : fileUploadStates[record.id] === "failed" ? (
-                        <Error color="error" />
-                      ) : (
-                        <IconButton
-                          edge="end"
-                          aria-label="comments"
-                          href={record.downloadUrl}
-                        >
-                          <Download />
-                        </IconButton>
-                      )}
-                    </div>
-                  }
-                  disablePadding
-                >
-                  <ListItemButton onClick={toggle}>
-                    <ListItemIcon>
-                      <MediaRecordIcon type={record.type} />
-                    </ListItemIcon>
-                    <ListItemText primary={record.name} />
-                  </ListItemButton>
-                </ListItem>
-              );
-            })}
+                {filteredMediaUser.map((record) => (
+                  <MediaRecordAddToCourse record={record} key={record.id} />
+                ))}
+              </>
+            )}
           </List>
           {files.length > 0 && (
             <MediaRecordTypeSelector

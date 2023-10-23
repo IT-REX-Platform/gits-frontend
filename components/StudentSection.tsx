@@ -29,7 +29,6 @@ export function StudentSection({
 
   const stages = orderBy(section.stages, (stage) => stage.position);
 
-  // Workaround until the backend calculates the progress
   const stageComplete = stages.map(
     (stage) => stage.requiredContentsProgress === 100
   );
